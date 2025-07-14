@@ -1,4 +1,3 @@
-// src/layout/MainLayout.jsx
 import './main/css/main.css';
 import logo from './image/dp_logo.png';
 
@@ -99,11 +98,11 @@ function MainLayout() {
                                     {/* <!-- autocomplete - 이전에 검색했던 검색어 자동완성 속성 -->
                                     <!-- onkeypress - 사용자가 키를 눌렀을때 --> */}
                                     <label for="query" className="skip">검색어 입력</label>
-                                    <input type="text" name="query" id="query" onkeypress="" className="sch_input" placeholder="검색어를 입력해주세요." autocomplete="off" />
+                                    <input type="text" name="query" id="query" className="sch_input" placeholder="검색어를 입력해주세요." autocomplete="off" />
                                 </div>
                                 <div className="sch_btn_box">
                                     {/* <!-- 버튼 클릭시 통합검색 페이지 이동 --> */}
-                                    <a href="#" id="btn_search" onclick="">검색 버튼 클릭</a>
+                                    <a href="#" id="btn_search">검색 버튼 클릭</a>
                                 </div>
                             </div>
                         </fieldset>
