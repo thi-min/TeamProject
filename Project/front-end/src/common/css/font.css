@@ -2,12 +2,6 @@
 
 @font-face{
 	font-family: 'NotoKr';
-	font-weight: 200;
-	src: url("../font/SpoqaHanSans-Light.woff2") format('woff2'),
-	url("../font/SpoqaHanSans-Light.woff") format('woff');
-}
-@font-face{
-	font-family: 'NotoKr';
 	font-weight: 400;
 	src: url("../font/SpoqaHanSans-Regular.woff2") format('woff2'),
 	url("../font/SpoqaHanSans-Regular.woff") format('woff');
@@ -21,11 +15,11 @@
 
 @font-face {
     font-family:'CWD';
-    src:url(../font/ChangwonDangamAsac_Bold.woff2),
-    url(../font/ChangwonDangamAsac_Bold.woff);
+    src:url("../font/ChangwonDangamAsac_Bold.woff2"),
+    url("../font/ChangwonDangamAsac_Bold.woff");
 }
 @font-face {
     font-family:'Rikodeo';
-    src:url(../font/HakgyoansimRikodeoR.woff2) format('font-woff2'),
-    url(../font/HakgyoansimRikodeoR.woff) format('woff');
+    src:url("../font/HakgyoansimRikodeoR.woff2") format('font-woff2'),
+    url("../font/HakgyoansimRikodeoR.woff") format('woff');
 }
