@@ -1,6 +1,6 @@
 // src/layout/MainLayout.jsx
-import './css/main.css';
-import logo from '../../common/image/main/dp_logo.png';
+import './main/css/main.css';
+import logo from '../layout/image/main/dp_logo.png';
 
 function MainLayout() {
   return (
