@@ -1,22 +1,22 @@
 {
   "files": {
-    "main.css": "/font-end/static/css/main.5cf137f0.css",
-    "main.js": "/font-end/static/js/main.f384d087.js",
-    "static/media/dp_logo.png": "/font-end/static/media/dp_logo.009791e3119d9e2eb4dd.png",
-    "static/media/HakgyoansimRikodeoR.woff2": "/font-end/static/media/HakgyoansimRikodeoR.ef44c0589ae3647c8175.woff2",
-    "static/media/ChangwonDangamAsac_Bold.woff": "/font-end/static/media/ChangwonDangamAsac_Bold.07d9b43b5b7588d21650.woff",
-    "static/media/HakgyoansimRikodeoR.woff": "/font-end/static/media/HakgyoansimRikodeoR.0fa80ba65bc70a85d585.woff",
-    "static/media/ChangwonDangamAsac_Bold.woff2": "/font-end/static/media/ChangwonDangamAsac_Bold.25b48cba1742121695c6.woff2",
-    "static/media/SpoqaHanSans-Regular.woff": "/font-end/static/media/SpoqaHanSans-Regular.09520f38fdc1d23f26a3.woff",
-    "static/media/SpoqaHanSans-Bold.woff": "/font-end/static/media/SpoqaHanSans-Bold.bb140deffe52c93577da.woff",
-    "static/media/SpoqaHanSans-Regular.woff2": "/font-end/static/media/SpoqaHanSans-Regular.30af8f791847e1a2b5aa.woff2",
-    "static/media/SpoqaHanSans-Bold.woff2": "/font-end/static/media/SpoqaHanSans-Bold.fb625827bf4631bda52c.woff2",
-    "index.html": "/font-end/index.html",
-    "main.5cf137f0.css.map": "/font-end/static/css/main.5cf137f0.css.map",
-    "main.f384d087.js.map": "/font-end/static/js/main.f384d087.js.map"
+    "main.css": "/TeamProject/Project/front-end/static/css/main.5fd4377f.css",
+    "main.js": "/TeamProject/Project/front-end/static/js/main.9deef7b5.js",
+    "static/media/dp_logo.png": "/TeamProject/Project/front-end/static/media/dp_logo.009791e3119d9e2eb4dd.png",
+    "static/media/HakgyoansimRikodeoR.woff2": "/TeamProject/Project/front-end/static/media/HakgyoansimRikodeoR.ef44c0589ae3647c8175.woff2",
+    "static/media/ChangwonDangamAsac_Bold.woff": "/TeamProject/Project/front-end/static/media/ChangwonDangamAsac_Bold.07d9b43b5b7588d21650.woff",
+    "static/media/HakgyoansimRikodeoR.woff": "/TeamProject/Project/front-end/static/media/HakgyoansimRikodeoR.0fa80ba65bc70a85d585.woff",
+    "static/media/ChangwonDangamAsac_Bold.woff2": "/TeamProject/Project/front-end/static/media/ChangwonDangamAsac_Bold.25b48cba1742121695c6.woff2",
+    "static/media/SpoqaHanSans-Regular.woff": "/TeamProject/Project/front-end/static/media/SpoqaHanSans-Regular.09520f38fdc1d23f26a3.woff",
+    "static/media/SpoqaHanSans-Bold.woff": "/TeamProject/Project/front-end/static/media/SpoqaHanSans-Bold.bb140deffe52c93577da.woff",
+    "static/media/SpoqaHanSans-Regular.woff2": "/TeamProject/Project/front-end/static/media/SpoqaHanSans-Regular.30af8f791847e1a2b5aa.woff2",
+    "static/media/SpoqaHanSans-Bold.woff2": "/TeamProject/Project/front-end/static/media/SpoqaHanSans-Bold.fb625827bf4631bda52c.woff2",
+    "index.html": "/TeamProject/Project/front-end/index.html",
+    "main.5fd4377f.css.map": "/TeamProject/Project/front-end/static/css/main.5fd4377f.css.map",
+    "main.9deef7b5.js.map": "/TeamProject/Project/front-end/static/js/main.9deef7b5.js.map"
   },
   "entrypoints": [
-    "static/css/main.5cf137f0.css",
-    "static/js/main.f384d087.js"
+    "static/css/main.5fd4377f.css",
+    "static/js/main.9deef7b5.js"
   ]
 }
