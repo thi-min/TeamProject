@@ -1,0 +1,38 @@
+body{font-size:16px;line-height:28px;letter-spacing:0;font-weight:400;font-family:'NotoKr';}
+
+#header{display:block;position:relative;width:1400px;margin:0 auto;box-sizing:border-box;}
+.accessibility{display:none;}
+.header_top_box{display:block;position:relative;width:100%;box-sizing:border-box;}
+.header_top_box .top_link_list{display:flex;flex-direction:row-reverse;padding:14px 0;align-items:center;gap:30px;}
+.header_top_box .top_link_list .link_item{display:block;position:relative;box-sizing:border-box;}
+.header_top_box .top_link_list .link_item a{display:inline-flex;}
+
+.header_inner{display:flex;position:relative;width:100%;justify-content:space-between;box-sizing:border-box;}
+.header_inner .logo{display:block;position:relative;box-sizing:border-box;}
+.header_inner .logo a{display:flex;align-items:center;gap:16px;}
+.header_inner .logo .logo_image{width:140px;height:140px;font-size:0;line-height:0;}
+.header_inner .logo .logo_text{padding-top:6px;font-size:50px;line-height:56px;font-weight:600;font-family:'Rikodeo';}
+.header_inner .depth_area{display:flex;position:relative;box-sizing:border-box;}
+.header_inner .depth_area .depth_list{height:100%;display:flex;align-items:center;box-sizing:border-box;}
+.header_inner .depth_area .depth_list .depth1_item{display:block;margin:0 20px;}
+.header_inner .depth_area .depth_list .depth1_item a{padding:20px;width:100%;font-size:24px;line-height:30px;text-align:center;}
+.header_inner .depth_area .depth_list .depth1_item .depth2_list{display:none;}
+
+.search_wrap{display:flex;position:relative;justify-content:center;align-items:center;gap:30px;box-sizing:border-box;margin-top:30px;}
+.search_wrap .info_box{display:flex;width:15%;gap:6px;flex-direction:column;align-items:center;}
+.search_wrap .info_box .today_box .today{font-size:20px;line-height:24px;font-weight:400;color:#333;}
+.search_wrap .info_box .weather_box .weather_info{display:flex;gap:10px;font-size:20px;line-height:24px;font-weight:400;color:#333;}
+.search_wrap .info_box .weather_box .weather_info .icon{display:block;width:30px;height:30px;background-image:url(../common/image/main/w1.png);background-size:contain;}
+.search_wrap .info_box .weather_box .weather_info .temperature{}
+.search_wrap .info_box .weather_box .weather_info .temperature .ondo{height:100%;}
+.search_wrap .info_box .weather_box .weather_info .weather{}
+
+.search_wrap .search_box{display:block;width:40%;position:relative;box-sizing:border-box;}
+.search_wrap .search_box .search_item{display:flex;gap:20px;}
+.search_wrap .search_box .search_item .search_input{display:block;position:relative;box-sizing:border-box;width:100%;}
+.search_wrap .search_box .search_item .search_input input{width:100%;border:1px solid #333;padding:6px 8px;border-radius:12px;}
+.search_wrap .search_box .search_item .sch_btn_box{display:inline-flex;position:relative;width:42px;height:42px;box-sizing:border-box;}
+.search_wrap .search_box .search_item .sch_btn_box a{width:100%;height:100%;display:block;font-size:0;line-height:0;}
+.search_wrap .search_box .search_item .sch_btn_box a:before{width:100%;height:100%;display:block;position:absolute;top:calc(50% - 21px);left:calc(50% - 21px);background-image:url(../common/image/main/w1.png);background-size:contain;background-repeat:no-repeat;content:'';font-size:0;line-height:0;}
+
+#container{height:600px;}
