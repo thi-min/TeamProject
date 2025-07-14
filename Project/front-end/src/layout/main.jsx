@@ -4,7 +4,7 @@ import logo from './image/dp_logo.png';
 
 function MainLayout() {
   return (
-    <div id="wrapper" classNameName="page">
+    <div id="wrapper" className="page">
         <header id="header">
             <div className="header_top_box">
                 <div className="top_link_list">
@@ -112,10 +112,10 @@ function MainLayout() {
             </div>
         </header>
 
-      <div id="container" classNameName="main">
-        <section id="section1" classNameName="section"></section>
-        <section id="section2" classNameName="section"></section>
-        <section id="section3" classNameName="section"></section>
+      <div id="container" className="main">
+        <section id="section1" className="section"></section>
+        <section id="section2" className="section"></section>
+        <section id="section3" className="section"></section>
       </div>
     </div>
   );
