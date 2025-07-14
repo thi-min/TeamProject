@@ -1,6 +1,5 @@
 import '../common/css/default.css'
 import '../common/css/font.css'
-import '../layout/main/css/main.css';
 
 import logo from '../layouy/image/main/dp_logo.png';
 
