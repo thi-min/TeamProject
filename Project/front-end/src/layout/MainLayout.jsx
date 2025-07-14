@@ -1,4 +1,8 @@
+import '../../../template/css/default.css';
+import '../../../template/css/font.css';
+import '../../../common/common.css';
 import './main/css/main.css';
+
 import logo from './image/main/dp_logo.png';
 
 function MainLayout() {
