@@ -1,5 +1,5 @@
 import './main/css/main.css';
-import logo from './image/dp_logo.png';
+import logo from './image/main/dp_logo.png';
 
 function MainLayout() {
   return (
