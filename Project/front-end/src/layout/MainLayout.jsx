@@ -1,8 +1,8 @@
-import '../../../template/css/default.css';
-import '../../../template/css/font.css';
-import './main/css/main.css';
+import '../../public/template/css/default.css';
+import '../../public/template/css/font.css';
+import '../layout/main/css/main.css';
 
-import logo from './image/main/dp_logo.png';
+import logo from '../layouy/image/main/dp_logo.png';
 
 function MainLayout() {
   return (
