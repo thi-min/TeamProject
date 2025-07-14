@@ -1,5 +1,6 @@
-import logo from './logo.svg';
+import logo from './common/image/main/dp_logo.png';
 import './App.css';
+import './layout/main/css/main.css';
 
 function App() {
   return (
