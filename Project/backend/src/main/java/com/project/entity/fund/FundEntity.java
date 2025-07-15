@@ -29,7 +29,7 @@ public class FundEntity {
 	private Integer memberNum; // 회원번호
 	
 	@Column(name = "fund_money", length = 1, nullable=false)
-	private String fundMoney;	// 후원 금액
+	private String fundMoney;	// 후원 금액임
 	
 	@Column(name = "fund_time", length = 1, nullable=false)
 	private Date fundTime;	// 후원 일시
