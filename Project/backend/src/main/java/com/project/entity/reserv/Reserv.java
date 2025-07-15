@@ -1,8 +1,9 @@
-package com.project.entity;
+package com.project.entity.reserv;
 
 import jakarta.persistence.*;
 import lombok.*;
-
+import com.project.entity.member.Member;
+import com.project.entity.common.ReservState;
 import java.time.LocalDate;
 
 @Entity
@@ -12,7 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ReserveEntity {
+public class Reserv {
 
     @Id
     @Column(name = "reserv_code", nullable = false)
@@ -26,7 +27,7 @@ public class ReserveEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "reserv_state")
-    private ReservStateEntity reservState;
+    private ReservState reservState;
 
     @Column(name = "reserv_number")
     private Integer reservNumber;
@@ -37,6 +38,6 @@ public class ReserveEntity {
     // 회원번호 (외래키)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_num", nullable = false)
-    private MemberEntity member; // Member 엔티티와 연결
+    private Member member; // Member 엔티티와 연결
 
 }

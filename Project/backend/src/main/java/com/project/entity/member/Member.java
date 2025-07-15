@@ -1,5 +1,6 @@
-package com.project.entity;
+package com.project.entity.member;
 
+import com.project.entity.common.MemberState;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,9 +13,9 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class MemberEntity {
+public class Member {
 	
-	@Id
+	@Id //기본키
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_num")
     private Long memberNum;
@@ -48,7 +49,7 @@ public class MemberEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "member_state")
-    private MemberStateEntity memberState;
+    private MemberState memberState;
     
     @Column(name = "sns_yn")
     private boolean snsYn; 

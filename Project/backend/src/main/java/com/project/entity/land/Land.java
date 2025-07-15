@@ -1,4 +1,4 @@
-package com.project.entity;
+package com.project.entity.land;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,10 +10,10 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class LandEntity {
+public class Land {
 
     @Id
-    @Column(name = "reserve_code")
+    @Column(name = "reserve_code", nullable = false)
     private Long reserveCode;
 
     @Column(name = "animal_number") 
