@@ -23,19 +23,22 @@ public class MapDataEntity {
 
 	@Id	
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "mapdata_num", length = 1)
+	@Column(name = "mapdata_num", length = 1, nullable=false)
 	private Integer mapdataNum; // 지도 번호
 	
-	@Column(name = "place_name", length = 1)
+	@Column(name = "place_name", length = 1, nullable=false)
 	private String placeName; // 장소 이름
 	
+	@Column(nullable=false)
 	private String address; // 주소
 	
+	@Column(nullable=false)
 	private Double latitude;  // 위도
 	
+	@Column(nullable=false)
 	private Double longitude;  // 경도
 	
-	@Column(columnDefinition = "TEXT")  //텍스트 표시
+	@Column(columnDefinition = "TEXT",nullable=false)  //텍스트 표시
 	private String explaination; // 설명
 	
 //	private Integer current_loc;  //현위치 , 카카오 api 지정 후 변경 확인 사항

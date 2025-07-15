@@ -31,24 +31,22 @@ public class ChatEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Integer member_num; //회원번호
 	
-	private Integer manage_num;	//관리번호
-	
 	@ManyToOne
-    @JoinColumn(name = "member_num") // 참조할 테이블의 PK 컬럼명
+    @JoinColumn(name = "member_num", nullable=false) // 참조할 테이블의 PK 컬럼명
     private AdminEntity admin;
 	//관리자 아이디
 	
-	@Column(name = "chat_cont", length = 1)
+	@Column(name = "chat_cont", length = 1, nullable=false)
 	private String chatCont; // 대화 내용
 	
-	@Column(name = "send_time", length = 1)
+	@Column(name = "send_time", length = 1, nullable=false)
 	private Date sendTime; // 보낸 시간
 	
-	@Column(name = "take_time", length = 1)
+	@Column(name = "take_time", length = 1, nullable=false)
 	private Date takeTime; // 받은 시간
 
 	@Enumerated(EnumType.STRING)
-	@Column(name = "chat_check", length = 1)
+	@Column(name = "chat_check", length = 1, nullable=false)
 	private ChatCheck chatCheck;  //확인 상태
 	
 
