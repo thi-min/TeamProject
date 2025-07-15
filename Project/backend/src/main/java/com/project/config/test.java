@@ -2,7 +2,6 @@ package com.project.config;
 
 public class test {
 	
-//	config 보안관련
 }
 
 //설정관련 클래스 모아두는 폴더 - 설정센터
