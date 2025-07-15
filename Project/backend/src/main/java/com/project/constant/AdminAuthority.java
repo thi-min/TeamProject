@@ -1,4 +1,4 @@
-package com.project.config;
+package com.project.constant;
 
 //관리자 종류
 public enum AdminAuthority {

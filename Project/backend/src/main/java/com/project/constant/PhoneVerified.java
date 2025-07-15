@@ -1,4 +1,4 @@
-package com.project.config;
+package com.project.constant;
 
 //휴대폰 인증여부
 public enum PhoneVerified {
