@@ -25,3 +25,12 @@
 + 이재복
   + 서비스기능
     + 지도 + 1:1 채팅 + 후원
+
++ 추천 작업 순서
+  1. entity - DB 구조를 바탕으로 데이터 모델 정의
+  2. dto - 	요청/응답용 데이터 객체 정의
+  3. repository - DB 접근 계층 구현
+  4. service - 비즈니스 로직 처리
+  5. exception - 예외 처리 및 메시지 통일
+  6. controller - 외부 요청 응답 처리
+  7. config - 설정파일 (필요 시 WebMvc, Security 등)
