@@ -1,6 +1,7 @@
 package com.project.config;
 
 //휴대폰 인증여부
-public class PhoneVerified {
-	
+public enum PhoneVerified {
+	VERIFIED,     // 인증완료
+	FAILED      // 인증실패
 }
