@@ -1,0 +1,17 @@
+package com.project.dto.board;
+
+import lombok.*;
+
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class QandA {
+
+    private Long bulletinNum;  // 게시글 번호 (PK)
+
+    private String question;   // 질문
+
+    private String answer;     // 답변 (null 가능)
+}
