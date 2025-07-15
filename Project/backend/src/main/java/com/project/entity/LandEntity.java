@@ -13,13 +13,13 @@ import lombok.*;
 public class LandEntity {
 
     @Id
-    @Column(name = "reserve_code") // 놀이터 ID
+    @Column(name = "reserve_code")
     private Long reserveCode;
 
-    @Column(name = "animal_number", nullable = true) // 예: 마리수
+    @Column(name = "animal_number") 
     private int animalNumber;
 
-    @Column(name = "pay_number", nullable = true) // 예: 결제금액
+    @Column(name = "pay_number") 
     private int payNumber;
 
 }
