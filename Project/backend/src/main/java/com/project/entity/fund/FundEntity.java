@@ -2,6 +2,7 @@ package com.project.entity.fund;
 
 import java.sql.Date;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -24,13 +25,17 @@ public class FundEntity {
 	
 	@Id	
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer member_num; // 회원번호
+	@Column(name = "member_num", length = 1)
+	private Integer memberNum; // 회원번호
 	
-	private String fund_money;	// 후원 금액
+	@Column(name = "fund_money", length = 1)
+	private String fundMoney;	// 후원 금액
 	
-	private Date fund_time;	// 후원 일시
+	@Column(name = "fund_time", length = 1)
+	private Date fundTime;	// 후원 일시
 	
-	private String sum_money; //후원 총 금액
+	@Column(name = "sum_money", length = 1)
+	private String sumMoney; //후원 총 금액
 }
 
 //	CREATE TABLE chat (

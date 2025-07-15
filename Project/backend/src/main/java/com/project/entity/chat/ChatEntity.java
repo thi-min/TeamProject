@@ -9,6 +9,8 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,24 +29,27 @@ public class ChatEntity {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Integer member_num;
+	private Integer member_num; //회원번호
 	
-	private Integer manage_num;
+	private Integer manage_num;	//관리번호
 	
-//	@ManyToOne
-//    @JoinColumn(name = " ???? ") // 참조할 테이블의 PK 컬럼명
-//    private AdminEntity admin;
-	private String admin_id;
+	@ManyToOne
+    @JoinColumn(name = "member_num") // 참조할 테이블의 PK 컬럼명
+    private AdminEntity admin;
+	//관리자 아이디
 	
-	private String chat_cont;
+	@Column(name = "chat_cont", length = 1)
+	private String chatCont; // 대화 내용
 	
-	private Date send_time;
+	@Column(name = "send_time", length = 1)
+	private Date sendTime; // 보낸 시간
 	
-	private Date take_time;
+	@Column(name = "take_time", length = 1)
+	private Date takeTime; // 받은 시간
 
 	@Enumerated(EnumType.STRING)
 	@Column(name = "chat_check", length = 1)
-	private ChatCheck chatCheck;
+	private ChatCheck chatCheck;  //확인 상태
 	
 
 }
