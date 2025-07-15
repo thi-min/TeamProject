@@ -22,7 +22,7 @@ body{font-size:16px;line-height:28px;letter-spacing:0;font-weight:400;font-famil
 .search_wrap .info_box{display:flex;width:15%;gap:6px;flex-direction:column;align-items:center;}
 .search_wrap .info_box .today_box .today{font-size:20px;line-height:24px;font-weight:400;color:#333;}
 .search_wrap .info_box .weather_box .weather_info{display:flex;gap:10px;font-size:20px;line-height:24px;font-weight:400;color:#333;}
-.search_wrap .info_box .weather_box .weather_info .icon{display:block;width:30px;height:30px;background-image:url(../common/image/main/w1.png);background-size:contain;}
+.search_wrap .info_box .weather_box .weather_info .icon{display:block;width:30px;height:30px;background-image:url(../image/main/w1.png);background-size:contain;}
 .search_wrap .info_box .weather_box .weather_info .temperature{}
 .search_wrap .info_box .weather_box .weather_info .temperature .ondo{height:100%;}
 .search_wrap .info_box .weather_box .weather_info .weather{}
@@ -33,6 +33,6 @@ body{font-size:16px;line-height:28px;letter-spacing:0;font-weight:400;font-famil
 .search_wrap .search_box .search_item .search_input input{width:100%;border:1px solid #333;padding:6px 8px;border-radius:12px;}
 .search_wrap .search_box .search_item .sch_btn_box{display:inline-flex;position:relative;width:42px;height:42px;box-sizing:border-box;}
 .search_wrap .search_box .search_item .sch_btn_box a{width:100%;height:100%;display:block;font-size:0;line-height:0;}
-.search_wrap .search_box .search_item .sch_btn_box a:before{width:100%;height:100%;display:block;position:absolute;top:calc(50% - 21px);left:calc(50% - 21px);background-image:url(../common/image/main/w1.png);background-size:contain;background-repeat:no-repeat;content:'';font-size:0;line-height:0;}
+.search_wrap .search_box .search_item .sch_btn_box a:before{width:100%;height:100%;display:block;position:absolute;top:calc(50% - 21px);left:calc(50% - 21px);background-image:url(../image/main/w1.png);background-size:contain;background-repeat:no-repeat;content:'';font-size:0;line-height:0;}
 
 #container{height:600px;}
