@@ -15,7 +15,7 @@ import java.time.LocalDate;
 @Builder
 public class Member {
 	
-	@Id
+	@Id //기본키
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "member_num")
     private Long memberNum;

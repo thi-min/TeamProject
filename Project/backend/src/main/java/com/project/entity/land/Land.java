@@ -13,7 +13,7 @@ import lombok.*;
 public class Land {
 
     @Id
-    @Column(name = "reserve_code")
+    @Column(name = "reserve_code", nullable = false)
     private Long reserveCode;
 
     @Column(name = "animal_number") 
