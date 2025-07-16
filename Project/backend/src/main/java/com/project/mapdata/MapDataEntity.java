@@ -42,7 +42,7 @@ public class MapDataEntity {
 	private String explaination; // 설명
 	
 //	private Integer current_loc;  //현위치 , 카카오 api 지정 후 변경 확인 사항
-	
+	.
 }
 
 //CREATE TABLE map_data (
