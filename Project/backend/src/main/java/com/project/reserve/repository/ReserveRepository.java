@@ -15,7 +15,7 @@ public interface ReserveRepository extends JpaRepository<Reserve, Long> {
     List<Reserve> findByMember_MemberNum(Long memberNum);
 
     // 예약 상태로 검색
-    List<Reserve> findByReserveState(com.project.common.ReservState reserveState);
+    List<Reserve> findByReserveState(com.project.reserve.entity.ReserveState reserveState);
 
     // 예약 날짜로 검색
     List<Reserve> findByReserveDate(LocalDate reserveDate);

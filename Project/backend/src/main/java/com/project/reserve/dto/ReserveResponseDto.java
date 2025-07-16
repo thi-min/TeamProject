@@ -1,6 +1,6 @@
 package com.project.reserve.dto;
 
-import com.project.common.ReservState;
+import com.project.reserve.entity.ReserveState;
 import com.project.member.Member;
 import com.project.reserve.entity.Reserve;
 
@@ -19,7 +19,7 @@ public class ReserveResponseDto {
     private Long reserveCode;
     private LocalDate reserveDate;
     private int reserveType;
-    private ReservState reserveState;
+    private ReserveState reserveState;
     private int reserveNumber;
     private LocalDate closedDate;
     

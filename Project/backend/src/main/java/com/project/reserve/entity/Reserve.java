@@ -3,11 +3,11 @@ package com.project.reserve.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import com.project.member.Member;
-import com.project.common.ReservState;
+import com.project.reserve.entity.ReserveState;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "Reserv")
+@Table(name = "Reserve")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -27,7 +27,7 @@ public class Reserve {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "reserve_state")
-    private ReservState reserveState;
+    private ReserveState reserveState;
 
     @Column(name = "reserve_number")
     private Integer reserveNumber;

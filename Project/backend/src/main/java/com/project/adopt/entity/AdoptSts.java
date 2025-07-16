@@ -1,4 +1,4 @@
-package com.project.common;
+package com.project.adopt.entity;
 
 public enum AdoptSts {
     DONE,   // 입양 완료

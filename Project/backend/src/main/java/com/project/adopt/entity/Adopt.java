@@ -1,11 +1,11 @@
 package com.project.adopt.entity;
 
-import com.project.entity.member.Member;
-import com.project.entity.common.AdoptSts;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+
+import com.project.member.Member;
 
 @Entity
 @Table(name = "Adopt")
