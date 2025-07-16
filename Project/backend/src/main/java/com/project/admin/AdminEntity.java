@@ -1,6 +1,6 @@
 package com.project.admin;
 
-import com.project.entity.member.Member;//회원정보를 담은 엔티티
+import com.project.member.MemberEntity;//회원정보를 담은 엔티티
 
 import java.time.LocalDateTime;
 
@@ -31,7 +31,7 @@ public class AdminEntity {
 	@JoinColumn(name = "member_num", nullable = false)
 	//Member 상대 테이블 
 	//추후 작업된 MemberEntity 보고 작성
-	private Member member; //회원번호
+	private MemberEntity member; //회원번호
 	
 	@Column(name = "admin_email",nullable = false)
 	private String AdminEmail; //이메일

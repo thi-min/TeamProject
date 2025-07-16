@@ -38,6 +38,6 @@ public class Reserv {
     // 회원번호 (외래키)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_num", nullable = false)
-    private Member member; // Member 엔티티와 연결
+    private MemberEntity member; // Member 엔티티와 연결
 
 }

@@ -32,7 +32,7 @@ public class BbsEntity {
     // 회원번호 (FK) - Member 엔티티 필요
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member memberNum;
+    private MemberEntity memberNum;
      
     @Column(name = "bbs_title")
     private String bbstitle; // 제목

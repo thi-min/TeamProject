@@ -1,6 +1,8 @@
 package com.project.member;
 
-import com.project.entity.common.MemberState;
+import java.time.LocalDate;
+
+import com.project.common.MemberState;
 import lombok.*;
 
 @Getter
@@ -10,10 +12,10 @@ import lombok.*;
 @Builder
 public class MemberRequestDto {
 
-    private String memberId;
+    private Long memberId;
     private String memberPw;
     private String memberName;
-    private String memberBirth;
+    private LocalDate memberBirth;
     private Integer memberSex;
     private String memberPhone;
     private String memberAddress;

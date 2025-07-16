@@ -1,6 +1,6 @@
 package com.project.member;
 
-import com.project.entity.common.MemberState;
+import com.project.common.MemberState;
 import lombok.*;
 
 import java.time.LocalDate;

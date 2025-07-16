@@ -24,7 +24,7 @@ public class Adopt {
     // 외래키: 회원
     @ManyToOne(fetch = FetchType.LAZY) //다대일 관계
     @JoinColumn(name = "member_num", nullable = false)
-    private Member member;
+    private MemberEntity member;
 
     @Column(name = "animal_id")
     private Long animalId;

@@ -1,6 +1,6 @@
 package com.project.member;
 
-import com.project.entity.common.MemberState;
+import com.project.common.MemberState;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +13,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Member {
+public class MemberEntity {
 	
 	@Id //기본키
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
