@@ -32,7 +32,7 @@ public class Bbs {
 
     private LocalDateTime delDate;      // 삭제일
 
-    private Integer Viewers;    // 조회수
+    private Integer viewers;    // 조회수
 
     private BoardType bulletinType;  // 게시판 종류(enum)
 
