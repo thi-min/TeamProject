@@ -4,10 +4,11 @@ import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
 
-// 게시판 종류 enum
+// 게시판 테이블(Bbs)에서의 게시판 종류 enum
 public enum BoardType {
     POTO, FAQ, NORMAL
 }
+
 
 @Entity
 @Table(name = "bbs")
@@ -21,37 +22,37 @@ public class Bbs {
     @Id
     @Column(name = "bulletin_num", nullable = true)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long bulletin_num;  // 게시글 번호 (PK)
+    private Long bulletinnum;  // 게시글 번호 (PK)
 
     // 관리자 아이디 (FK) - Admin 엔티티 필요
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id", nullable = false)
-    private Admin admin_id;
+    private Admin adminId;
 
     // 회원번호 (FK) - Member 엔티티 필요
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member member_num;
+    private Member memberNum;
      
     @Column(name = "bbs_title")
-    private String bbs_title; // 제목
+    private String bbstitle; // 제목
 
-    @Column(columnDefinition = "TEXT", nullable = false)
-    private String bbs_content; // 내용
+    @Column(name = "bbs_content", columnDefinition = "TEXT", nullable = false)
+    private String bbscontent; // 내용
 
     @Column(name = "regist_date", nullable = false)
-    private LocalDateTime regist_date; // 등록일
+    private LocalDateTime registdate; // 등록일
 
     @Column(name = "revision_date")
-    private LocalDateTime revision_date; // 수정일
+    private LocalDateTime revisiondate; // 수정일
 
     @Column(name = "del_date")
-    private LocalDateTime del_date;  //삭제일
+    private LocalDateTime deldate;  //삭제일
 
     @Column(name = "viewers", nullable = false)
-    private Integer Viewers = 0; // 조회수
+    private Integer viewers = 0; // 조회수
 
     @Enumerated(EnumType.STRING)
     @Column(name = "bulletin_type", nullable = false, length = 10)
-    private BoardType bulletin_Type; // 게시판 종류 (enum)
+    private BoardType bulletinType; // 게시판 종류 (enum)
 }

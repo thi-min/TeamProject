@@ -15,14 +15,14 @@ public class FileUpLoad {
     @Id
     @Column(name = "file_num", nullable = true)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long file_num; // 파일 번호 (기본키)
+    private Long filenum; // 파일 번호 (기본키)
 
     // 게시글 번호 (외래키)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "bulletin_num", nullable = false)
+    @JoinColumn(name = "bulletinnum", nullable = false)
     private Bbs bbs;
 
-    @Column(name = "original_name", nullable = false)
+    @Column(name = "ori_file_name", nullable = false)
     private String originalName; // 원본 파일명
 
     @Column(name = "saved_name", nullable = false)
@@ -35,6 +35,6 @@ public class FileUpLoad {
     private Long size; // 파일 크기 
 
     @Column(name = "extension", nullable = false)
-    private String Extension; // 확장자
+    private String extension; // 확장자
 }
 
