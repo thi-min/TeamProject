@@ -1,4 +1,4 @@
-package com.project.land;
+package com.project.land.entity;
 
 import jakarta.persistence.*;
 import lombok.*;

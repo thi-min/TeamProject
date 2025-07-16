@@ -1,4 +1,4 @@
-package com.project.reserv;
+package com.project.reserve.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,24 +13,24 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Reserv {
+public class Reserve {
 
     @Id
-    @Column(name = "reserv_code", nullable = false)
-    private Long reservCode;
+    @Column(name = "reserve_code", nullable = false)
+    private Long reserveCode;
 
-    @Column(name = "reserv_date")
-    private LocalDate reservDate;
+    @Column(name = "reserve_date")
+    private LocalDate reserveDate;
 
-    @Column(name = "reserv_type")
-    private Integer reservType;
+    @Column(name = "reserve_type")
+    private Integer reserveType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "reserv_state")
-    private ReservState reservState;
+    @Column(name = "reserve_state")
+    private ReservState reserveState;
 
-    @Column(name = "reserv_number")
-    private Integer reservNumber;
+    @Column(name = "reserve_number")
+    private Integer reserveNumber;
 
     @Column(name = "closed_date")
     private LocalDate closedDate;

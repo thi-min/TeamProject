@@ -1,4 +1,4 @@
-package com.project.adopt;
+package com.project.adopt.entity;
 
 import com.project.entity.member.Member;
 import com.project.entity.common.AdoptSts;
