@@ -23,10 +23,10 @@ public class MapDataEntity {
 
 	@Id	
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	@Column(name = "mapdata_num", length = 1, nullable=false)
+	@Column(name = "mapdata_num", nullable=false)
 	private Integer mapdataNum; // 지도 번호
 	
-	@Column(name = "place_name", length = 1, nullable=false)
+	@Column(name = "place_name",  nullable=false)
 	private String placeName; // 장소 이름
 	
 	@Column(nullable=false)

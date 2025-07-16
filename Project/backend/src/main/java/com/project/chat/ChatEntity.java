@@ -34,17 +34,17 @@ public class ChatEntity {
 	private Integer member_num; //회원번호
 	
 	@ManyToOne
-    @JoinColumn(name = "member_num", nullable=false) // 참조할 테이블의 PK 컬럼명
-    private AdminEntity admin;
+    @JoinColumn(name = "admin_id", nullable=false) // 참조할 테이블의 PK 컬럼명
+    private AdminEntity adminId;
 	//관리자 아이디
 	
-	@Column(name = "chat_cont", length = 1, nullable=false)
+	@Column(name = "chat_cont", nullable=false)
 	private String chatCont; // 대화 내용
 	
-	@Column(name = "send_time", length = 1, nullable=false)
+	@Column(name = "send_time",nullable=false)
 	private Date sendTime; // 보낸 시간
 	
-	@Column(name = "take_time", length = 1, nullable=false)
+	@Column(name = "take_time", nullable=false)
 	private Date takeTime; // 받은 시간
 
 	@Enumerated(EnumType.STRING)

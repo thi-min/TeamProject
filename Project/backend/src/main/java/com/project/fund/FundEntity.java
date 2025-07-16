@@ -28,13 +28,13 @@ public class FundEntity {
 	@Column(name = "member_num", length = 1, nullable=false)
 	private Integer memberNum; // 회원번호
 	
-	@Column(name = "fund_money", length = 1, nullable=false)
+	@Column(name = "fund_money", nullable=false)
 	private String fundMoney;	// 후원 금액
 	
-	@Column(name = "fund_time", length = 1, nullable=false)
+	@Column(name = "fund_time", nullable=false)
 	private Date fundTime;	// 후원 일시
 	
-	@Column(name = "sum_money", length = 1, nullable=false)
+	@Column(name = "sum_money", nullable=false)
 	private String sumMoney; //후원 총 금액
 }
 
