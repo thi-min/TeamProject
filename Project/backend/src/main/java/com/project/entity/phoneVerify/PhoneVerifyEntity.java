@@ -1,4 +1,4 @@
-package com.project.entity.PhoneVerify;
+package com.project.entity.phoneVerify;
 
 import java.time.LocalDateTime;
 

@@ -1,8 +1,8 @@
 package com.project.entity.admin;
 
-import java.time.LocalDateTime;
+import com.project.entity.member.Member;//회원정보를 담은 엔티티
 
-import com.example.domain.Member; //회원정보를 담은 엔티티
+import java.time.LocalDateTime;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
