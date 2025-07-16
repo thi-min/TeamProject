@@ -1,6 +1,6 @@
 package com.project.reserv;
 
-import com.project.entity.common.ReservState;
+import com.project.common.ReservState;
 import lombok.*;
 
 import java.time.LocalDate;
