@@ -29,7 +29,7 @@ public class MemberEntity {
     private String memberName; //이름
 
     @Column(name = "member_birth", nullable = false, length = 25)
-    private String memberBirth; //생년월일
+    private LocalDate memberBirth; //생년월일
 
     @Column(name = "member_phone")
     private String memberPhone; //휴대폰 번호

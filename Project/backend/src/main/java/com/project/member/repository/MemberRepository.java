@@ -1,10 +1,31 @@
 package com.project.member.repository;
 
-public class MemberRepository {
-	
-	//로그인 시 사용할 아이디, 비밀번호로 조회
-	Optional<MemberEntity> findBytMemberIdAndMemberPw(String memberId, String memberPw);
-	
-	//아이디 중복 체크
-	boolean existsByMemberId(String memberId);
+import com.project.member.entity.MemberEntity;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import java.awt.print.Pageable;
+import java.util.Optional;
+
+public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
+    // 로그인 시 사용: 아이디 + 비밀번호로 조회
+    Optional<MemberEntity> findByMemberIdAndMemberPw(String memberId, String memberPw);
+
+    // 아이디 중복 체크
+    boolean existsByMemberId(String memberId);
+    
+    // 카카오 연동 회원 조회
+    Optional<MemberEntity> findByKakaoId(String kakaoId);
+
+    // 회원번호로 조회
+    Optional<MemberEntity> findByMemberNum(Long memberNum);
+
+    // 연락처로 회원 조회
+    Optional<MemberEntity> findByMemberPhone(String memberPhone);
+    
+    // 이름 검색 (관리자 전용)
+    Page<MemberEntity> findByMemberNameContaining(String name, Pageable pageable);
 }
+
+//Optional 데이터가 있을수도 없을수도있음.
