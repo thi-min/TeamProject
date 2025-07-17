@@ -1,6 +1,6 @@
-package com.project.admin;
+package com.project.member.dto;
 
-import com.project.member.MemberState;
+import com.project.member.entity.MemberState;
 
 import lombok.Data;
 

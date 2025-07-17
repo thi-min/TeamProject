@@ -1,4 +1,4 @@
-package com.project.member;
+package com.project.member.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
