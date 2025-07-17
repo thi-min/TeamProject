@@ -2,7 +2,7 @@ package com.project.reserve.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import com.project.member.Member;
+import com.project.member.entity.MemberEntity;
 import com.project.reserve.entity.ReserveState;
 import java.time.LocalDate;
 

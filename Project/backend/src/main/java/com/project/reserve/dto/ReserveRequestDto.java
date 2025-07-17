@@ -1,7 +1,7 @@
 package com.project.reserve.dto;
 
 import com.project.reserve.entity.ReserveState;
-import com.project.member.Member;
+import com.project.member.entity.MemberEntity;
 import com.project.reserve.entity.Reserve;
 
 import lombok.*;
