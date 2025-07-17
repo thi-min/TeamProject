@@ -1,9 +1,9 @@
-package com.project.admin;
+package com.project.member.dto;
 
 import java.time.LocalDate;
 
-import com.project.member.MemberSex;
-import com.project.member.MemberState;
+import com.project.member.entity.MemberSex;
+import com.project.member.entity.MemberState;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
@@ -25,6 +25,4 @@ public class MemberDetailResponseDto {
 	
     private MemberState memberState; //회원상태("ACTIVE","REST","OUT")
 	private MemberSex memberSex; //성별
-    
-
 }

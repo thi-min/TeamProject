@@ -1,4 +1,4 @@
-package com.project.member;
+package com.project.member.entity;
 
 //회원 상태
 public enum MemberState {

@@ -1,4 +1,4 @@
-package com.project.admin;
+package com.project.member.dto;
 
 import lombok.Data;
 
