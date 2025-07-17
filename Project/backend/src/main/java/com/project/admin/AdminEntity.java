@@ -40,13 +40,13 @@ public class AdminEntity {
 	@Column(name = "admin_name",nullable = false)
 	private String AdminName; //이름
 	
-	@Column(name = "authority")
-	@Enumerated(EnumType.STRING)  
-	private AdminAuthority Authority; //관리자 권한
-	
-	@Column(name = "admin_state")
-	@Enumerated(EnumType.STRING)  
-	private AdminState AdminState; //관리자 상태
+//	@Column(name = "authority")
+//	@Enumerated(EnumType.STRING)  
+//	private AdminAuthority Authority; //관리자 권한
+//	
+//	@Column(name = "admin_state")
+//	@Enumerated(EnumType.STRING)  
+//	private AdminState AdminState; //관리자 상태
 	
 	@Column(name = "regist_date", nullable = false)
 	private LocalDateTime RegistDate; //등록일시

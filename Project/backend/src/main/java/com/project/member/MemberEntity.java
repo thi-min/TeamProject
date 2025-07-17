@@ -31,9 +31,6 @@ public class MemberEntity {
     @Column(name = "member_birth", nullable = false, length = 25)
     private String memberBirth; //생년월일
 
-    @Column(name = "member_sex")
-    private Integer memberSex; //성별
-
     @Column(name = "member_phone")
     private String memberPhone; //휴대폰 번호
 
@@ -46,6 +43,10 @@ public class MemberEntity {
     @Column(name = "member_lock")
     private Boolean memberLock; //계정 잠금 여부
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "member_sex")
+    private MemberSex memberSex; //성별
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "member_state")
     private MemberState memberState; //회원상태
