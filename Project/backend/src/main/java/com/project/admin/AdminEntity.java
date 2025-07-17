@@ -1,6 +1,6 @@
 package com.project.admin;
 
-import com.project.entity.member.Member;//회원정보를 담은 엔티티
+import com.project.member.Member;//회원정보를 담은 엔티티
 
 import java.time.LocalDateTime;
 

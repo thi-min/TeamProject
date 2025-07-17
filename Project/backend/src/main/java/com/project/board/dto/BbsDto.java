@@ -1,6 +1,8 @@
-package com.project.board;
+package com.project.board.dto;
 
 import java.time.LocalDateTime;
+
+import com.project.board.BoardType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

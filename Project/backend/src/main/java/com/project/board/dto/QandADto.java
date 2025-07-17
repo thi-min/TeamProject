@@ -1,4 +1,4 @@
-package com.project.board;
+package com.project.board.dto;
 
 import lombok.*;
 

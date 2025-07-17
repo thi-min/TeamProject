@@ -1,13 +1,17 @@
-package com.project.board;
+package com.project.board.entity;
 
-import jakarta.persistence.*;
-import lombok.*;
 import java.time.LocalDateTime;
 
-// 게시판 테이블(Bbs)에서의 게시판 종류 enum
-public enum BoardType {
-    POTO, FAQ, NORMAL
-}
+import com.project.board.BoardType;
+import com.project.member.Member;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 
 
 @Entity
@@ -27,7 +31,7 @@ public class BbsEntity {
     // 관리자 아이디 (FK) - Admin 엔티티 필요
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id", nullable = false)
-    private Admin adminId;
+    private Long adminId;
 
     // 회원번호 (FK) - Member 엔티티 필요
     @ManyToOne(fetch = FetchType.LAZY)
