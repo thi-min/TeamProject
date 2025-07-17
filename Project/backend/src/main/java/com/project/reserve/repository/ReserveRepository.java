@@ -25,6 +25,6 @@ public interface ReserveRepository extends JpaRepository<Reserve, Long> {
 
     // 예약번호로 단건 조회 (상세 페이지)
     Optional<Reserve> findByReserveCode(Long reserveCode);
-
+///1541515
 }
 
