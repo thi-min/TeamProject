@@ -5,6 +5,7 @@ import lombok.*;
 import com.project.member.entity.MemberEntity;
 import com.project.reserve.entity.ReserveState;
 import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @Table(name = "Reserve")
@@ -20,7 +21,7 @@ public class Reserve {
     private Long reserveCode;
 
     @Column(name = "reserve_date")
-    private LocalDate reserveDate;
+    private Date reserveDate;
     
     @Column(name = "time_slot")
     private String timeSlot;

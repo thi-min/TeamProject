@@ -44,7 +44,7 @@ public class AdminReserveController {
     }
 
     //특정 회원의 예약 내역 확인 (필요한 경우만 사용)
-    @GetMapping("/member/{memberNum}")
+    @GetMapping("/member/{memberName}")
     public ResponseEntity<List<ReserveResponseDto>> getReservesByMember(@PathVariable Long memberNum) {
         List<ReserveResponseDto> list = reserveService.getReservesByMember(memberNum);
         return ResponseEntity.ok(list);

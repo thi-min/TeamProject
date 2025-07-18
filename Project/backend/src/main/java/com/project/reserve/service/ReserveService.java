@@ -4,7 +4,7 @@ import com.project.reserve.dto.ReserveRequestDto;
 import com.project.reserve.dto.ReserveResponseDto;
 import com.project.reserve.entity.ReserveState;
 
-import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 public interface ReserveService {
@@ -15,7 +15,7 @@ public interface ReserveService {
 
 	 ReserveResponseDto getReserveByCode(Long reserveCode);
 
-	 List<ReserveResponseDto> getReservesByDate(LocalDate date);
+	 List<ReserveResponseDto> getReservesByDate(Date date);
 
 	 List<ReserveResponseDto> getReservesByType(int type);
 

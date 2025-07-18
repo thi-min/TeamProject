@@ -19,7 +19,7 @@ public class LandDetailDto {
     private String dogType;        // 소형견,중형견 / 대형견
     private int dogCount;          // 반려견 수
     private int peopleCount;       // 사육자 수
-    private ReserveState resesrveState;
+    private ReserveState resesrveState; //예약상태
     private String reserveDate;    // 예약일자 (예: 2025/08/10 형식으로 출력)
     private String timeSlot;       // 예약 시간대 (ex: 11:00 ~ 13:00)
     private String note;		   //비고
