@@ -1,7 +1,7 @@
 package com.project.reserve.dto;
 
 import com.project.reserve.entity.ReserveState;
-import com.project.member.Member;
+import com.project.member.entity.MemberEntity;
 import com.project.reserve.entity.Reserve;
 
 import lombok.*;
@@ -25,7 +25,7 @@ public class ReserveResponseDto {
     
     //entity -> dto 변환 (서버가 응답한걸 사용자에게 넘기는 과정 ex)예약코드)
     public static ReserveResponseDto from(Reserve reserve) {
-        Member member = reserve.getMember();
+        MemberEntity member = reserve.getMember();
         return ReserveResponseDto.builder()
                 .reserveCode(reserve.getReserveCode())
                 .memberNum(member != null ? member.getMemberNum() : null)
