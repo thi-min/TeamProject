@@ -4,17 +4,22 @@ import com.project.reserve.dto.ReserveRequestDto;
 import com.project.reserve.dto.ReserveResponseDto;
 import com.project.reserve.entity.ReserveState;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ReserveService {
 
-    //Long createReserve(ReserveRequestDto requestDto);
+     Long createReserve(ReserveRequestDto requestDto);
 
-    ReserveResponseDto getReserveByCode(Long reserveCode);
+	 List<ReserveResponseDto> getReservesByMember(Long memberNum);
 
-    List<ReserveResponseDto> getReservesByMember(Long memberNum);
+	 ReserveResponseDto getReserveByCode(Long reserveCode);
 
-    void cancelReserve(Long reserveCode);
+	 List<ReserveResponseDto> getReservesByDate(LocalDate date);
 
-    void updateReserveState(Long reserveCode, ReserveState newState);
+	 List<ReserveResponseDto> getReservesByType(int type);
+
+	 void updateReserveState(Long reserveCode, ReserveState newState);
+
+	 void memberCancelReserve(Long reserveCode, Long memberNum);
 }

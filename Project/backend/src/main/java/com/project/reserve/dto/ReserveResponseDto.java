@@ -22,6 +22,7 @@ public class ReserveResponseDto {
     private ReserveState reserveState;
     private int reserveNumber;
     private LocalDate closedDate;
+    private String programName;
     
     //entity -> dto 변환 (서버가 응답한걸 사용자에게 넘기는 과정 ex)예약코드)
     public static ReserveResponseDto from(Reserve reserve) {

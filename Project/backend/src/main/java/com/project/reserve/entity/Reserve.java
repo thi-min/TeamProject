@@ -21,7 +21,10 @@ public class Reserve {
 
     @Column(name = "reserve_date")
     private LocalDate reserveDate;
-
+    
+    @Column(name = "time_slot")
+    private String timeSlot;
+    
     @Column(name = "reserve_type")
     private Integer reserveType;
 
