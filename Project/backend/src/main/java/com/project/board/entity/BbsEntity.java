@@ -3,7 +3,8 @@ package com.project.board.entity;
 import java.time.LocalDateTime;
 
 import com.project.board.BoardType;
-import com.project.member.Member;
+import com.project.member.entity.MemberEntity;
+import com.project.admin.AdminEntity; 
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -31,12 +32,12 @@ public class BbsEntity {
     // 관리자 아이디 (FK) - Admin 엔티티 필요
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id", nullable = false)
-    private Long adminId;
+    private AdminEntity adminId;
 
     // 회원번호 (FK) - Member 엔티티 필요
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
-    private Member memberNum;
+    private MemberEntity memberNum;
      
     @Column(name = "bbs_title")
     private String bbstitle; // 제목
