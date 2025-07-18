@@ -18,7 +18,7 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     // 카카오 연동 회원 조회
     Optional<MemberEntity> findByKakaoId(String kakaoId);
 
-    // 회원번호로 조회
+    // 회원번호로 조회(mypage)
     Optional<MemberEntity> findByMemberNum(Long memberNum);
 
     // 연락처로 회원 조회
@@ -26,6 +26,17 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     
     // 이름 검색 (관리자 전용)
     Page<MemberEntity> findByMemberNameContaining(String name, Pageable pageable);
+    
+    //아이디 찾기
+    Optional<MemberEntity> findByID(String MemberName, String memberPhone);
+    
+    //비밀번호 찾기
+    Optional<MemberEntity> findByPassword(String MemberId, String MemberName, String memberPhone);
+    
+    //비밀번호 변경
+    Optional<MemberEntity> changeByPassword(String MemberPw, String newPassword, String UpdatePassword);
+    
+    //
 }
 
 //Optional 데이터가 있을수도 없을수도있음.

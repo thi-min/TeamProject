@@ -2,6 +2,11 @@ package com.project.member.dto;
 
 import java.time.LocalDate;
 
+import com.project.member.entity.MemberSex;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 import lombok.Data;
 
@@ -43,4 +48,14 @@ public class MemberSignUpRequestDto {
 
     @NotBlank(message = "주소는 필수입니다.")
     private String memberAddress;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "member_sex")
+    private MemberSex memberSex; //성별
+    
+    @Column(name = "sns_yn")
+    private boolean snsYn; //문자 수신여부(동의/비동의)
+    
+    @Column(name = "kakao_id", length = 255)
+    private String kakaoId; //카카오아이디
 }

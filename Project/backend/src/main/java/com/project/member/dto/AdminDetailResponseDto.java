@@ -12,7 +12,7 @@ import lombok.Data;
 
 @Data
 //특정 회원 상세 정보
-public class MemberDetailResponseDto {
+public class AdminDetailResponseDto {
 	private Long memberNum; //회원 번호
 	private String memberId; //아이디
 	private String memberName; //이름
