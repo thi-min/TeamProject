@@ -1,12 +1,15 @@
 package com.project.reserve.dto;
 
 import com.project.reserve.entity.ReserveState;
+
+import java.time.LocalDate;
+import java.util.Date;
+
 import com.project.member.entity.MemberEntity;
 import com.project.reserve.entity.Reserve;
 
 import lombok.*;
 
-import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -19,7 +22,6 @@ public class ReserveRequestDto {
     private LocalDate reserveDate;
     private int reserveType;
     private int reserveNumber;
-    private LocalDate closedDate;
     
     //dto -> entity 변환 (사용자가 예약정보 작성한걸 넘기는 과정)
     public Reserve toEntity(MemberEntity member) {
@@ -28,7 +30,6 @@ public class ReserveRequestDto {
                 .reserveDate(reserveDate)
                 .reserveType(reserveType)
                 .reserveNumber(reserveNumber)
-                .closedDate(closedDate)
                 .build();
     }
 }

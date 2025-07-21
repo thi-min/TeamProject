@@ -1,5 +1,6 @@
 package com.project.reserve.service;
 
+import com.project.reserve.dto.AdminReservationListDto;
 import com.project.reserve.dto.ReserveRequestDto;
 import com.project.reserve.dto.ReserveResponseDto;
 import com.project.reserve.entity.Reserve;
@@ -35,6 +36,42 @@ public class ReserveServiceImpl implements ReserveService {
 
         return saved.getReserveCode();
     }
+    
+    //특정회원(membernum)이 신청한 예약 목록 조회
+    //마이페이지에 사용
+    @Override
+    @Transactional(readOnly = true)
+    public List<ReserveResponseDto> getReservesByMember(Long memberNum) {
+        return reserveRepository.findByMember_MemberNum(memberNum).stream()
+                .map(reserve -> {
+                    ReserveResponseDto dto = ReserveResponseDto.from(reserve);
+                    dto.setProgramName(convertReserveType(reserve.getReserveType())); 
+                    return dto;
+                }).collect(Collectors.toList());
+    }
+    
+    //관리자 전체 목록 조회
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdminReservationListDto> getAllReservationsForAdmin() {
+        return reserveRepository.findAllReservationsForAdmin(); // @Query 기반
+    }
+    
+    //예약 상세보기
+    @Override
+    @Transactional(readOnly = true)
+    public ReserveResponseDto getReserveByCode(Long reserveCode) {
+        Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
+                .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
+        ReserveResponseDto dto = ReserveResponseDto.from(reserve);
+        dto.setProgramName(convertReserveType(reserve.getReserveType()));
+        return dto;
+    }
+    
+    
+    
+    
+    
     //관리자가 특정 예약의 상태를 직접 변경
     @Override
     @Transactional
@@ -76,18 +113,7 @@ public class ReserveServiceImpl implements ReserveService {
                     return dto;
                 }).collect(Collectors.toList());
     }
-    //특정회원(membernum)이 신청한 예약 목록 조회
-    //마이페이지에 사용
-    @Override
-    @Transactional(readOnly = true)
-    public List<ReserveResponseDto> getReservesByMember(Long memberNum) {
-        return reserveRepository.findByMember_MemberNum(memberNum).stream()
-                .map(reserve -> {
-                    ReserveResponseDto dto = ReserveResponseDto.from(reserve);
-                    dto.setProgramName(convertReserveType(reserve.getReserveType())); 
-                    return dto;
-                }).collect(Collectors.toList());
-    }
+
     
     private String convertReserveType(int typeCode) {
         return switch (typeCode) {

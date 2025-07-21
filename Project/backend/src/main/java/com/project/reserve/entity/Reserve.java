@@ -6,6 +6,7 @@ import com.project.member.entity.MemberEntity;
 import com.project.reserve.entity.ReserveState;
 import java.time.LocalDate;
 import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Reserve")
@@ -21,7 +22,10 @@ public class Reserve {
     private Long reserveCode;
 
     @Column(name = "reserve_date")
-    private Date reserveDate;
+    private LocalDate reserveDate;
+    
+    @Column(name = "apply_date")
+    private LocalDateTime applyDate;
     
     @Column(name = "time_slot")
     private String timeSlot;
@@ -35,9 +39,6 @@ public class Reserve {
 
     @Column(name = "reserve_number")
     private Integer reserveNumber;
-
-    @Column(name = "closed_date")
-    private LocalDate closedDate;
 
     // 회원번호 (외래키)
     @ManyToOne(fetch = FetchType.LAZY)
