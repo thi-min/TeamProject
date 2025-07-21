@@ -1,6 +1,7 @@
 package com.project.reserve.service;
 
 import com.project.reserve.dto.AdminReservationListDto;
+import com.project.reserve.dto.ReserveDetailDto;
 import com.project.reserve.dto.ReserveRequestDto;
 import com.project.reserve.dto.ReserveResponseDto;
 import com.project.reserve.entity.Reserve;
@@ -57,29 +58,48 @@ public class ReserveServiceImpl implements ReserveService {
         return reserveRepository.findAllReservationsForAdmin(); // @Query 기반
     }
     
-    //예약 상세보기
+    //사용자용 예약 상세보기
     @Override
     @Transactional(readOnly = true)
-    public ReserveResponseDto getReserveByCode(Long reserveCode) {
+    public ReserveDetailDto getMemberReserveByCode(Long reserveCode, Long memberNum) {
         Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
+
+        if (!reserve.getMember().getMemberNum().equals(memberNum)) {
+            throw new SecurityException("본인의 예약만 조회할 수 있습니다.");
+        }
+
         ReserveResponseDto dto = ReserveResponseDto.from(reserve);
         dto.setProgramName(convertReserveType(reserve.getReserveType()));
         return dto;
     }
     
-    
-    
-    
-    
-    //관리자가 특정 예약의 상태를 직접 변경
+    //관리자용 예약 상세보기
     @Override
-    @Transactional
-    public void updateReserveState(Long reserveCode, ReserveState newState) {
+    @Transactional(readOnly = true)
+    public ReserveDetailDto getAdminReserveByCode(Long reserveCode) {
         Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
-        reserve.setReserveState(newState);
+
+        return ReserveDetailDto.builder()
+                .reserveCode(reserve.getReserveCode())
+                .memberName(reserve.getMember().getMemberName())
+                .phone(reserve.getMember().getMemberPhone())
+                .programName(convertReserveType(reserve.getReserveType()))
+                .dogCount(reserve.getReserveNumber())
+                .peopleCount(reserve.getPeopleCount())
+                .applyDate(reserve.getApplyDate())
+                .reserveDate(reserve.getReserveDate())
+                .reserveTime(reserve.getTimeSlot())
+                .note(reserve.getNote())
+                .basePrice(2000)
+                .extraPrice(1000 * (reserve.getPeopleCount() - 1))
+                .totalPrice(2000 + 1000 * (reserve.getPeopleCount() - 1))
+                .basePriceDetail("중, 소형견 x " + reserve.getReserveNumber() + "마리")
+                .extraPriceDetail("인원추가 x " + (reserve.getPeopleCount() - 1) + "명")
+                .build();
     }
+    
     //사용자가 자신의 예약을 취소할때 사용
     @Override
     @Transactional
@@ -91,18 +111,19 @@ public class ReserveServiceImpl implements ReserveService {
         }
         reserve.setReserveState(ReserveState.CANCEL);
     }
-    //특정 날짜에 등록된 예약목록 조회(추후 기간 조회로 바꿔야함)
+    
+    //관리자가 특정 예약의 상태를 직접 변경
     @Override
-    @Transactional(readOnly = true)
-    public List<ReserveResponseDto> getReservesByDate(LocalDate date) {
-        return reserveRepository.findByReserveDate(date).stream()
-                .map(reserve -> {
-                    ReserveResponseDto dto = ReserveResponseDto.from(reserve);
-                    dto.setProgramName(convertReserveType(reserve.getReserveType())); 
-                    return dto;
-                }).collect(Collectors.toList());
+    @Transactional
+    public void updateReserveState(Long reserveCode, ReserveState newState) {
+        Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
+                .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
+        reserve.setReserveState(newState);
     }
-    //예약 유형에 따라 조회 (관리자)
+    
+    
+   
+    //예약 유형에 따라 조회 (사용자)
     @Override
     @Transactional(readOnly = true)
     public List<ReserveResponseDto> getReservesByType(int type) {

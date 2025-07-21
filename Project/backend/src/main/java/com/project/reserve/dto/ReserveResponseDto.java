@@ -37,3 +37,4 @@ public class ReserveResponseDto {
                 .build();
     }
 }
+//사용자용 예약목록조회용 dto

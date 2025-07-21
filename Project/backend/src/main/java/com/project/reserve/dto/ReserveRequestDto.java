@@ -3,6 +3,7 @@ package com.project.reserve.dto;
 import com.project.reserve.entity.ReserveState;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 import com.project.member.entity.MemberEntity;
@@ -22,6 +23,8 @@ public class ReserveRequestDto {
     private LocalDate reserveDate;
     private int reserveType;
     private int reserveNumber;
+    private String timeSlot;  // 선택적
+    private String note;   
     
     //dto -> entity 변환 (사용자가 예약정보 작성한걸 넘기는 과정)
     public Reserve toEntity(MemberEntity member) {
@@ -30,6 +33,10 @@ public class ReserveRequestDto {
                 .reserveDate(reserveDate)
                 .reserveType(reserveType)
                 .reserveNumber(reserveNumber)
+                .timeSlot(timeSlot)
+                .applyDate(LocalDateTime.now())
                 .build();
     }
 }
+
+//사용자가 예약 신청할때 사용하는 입력 dto (예약신청페이지)
