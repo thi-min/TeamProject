@@ -32,13 +32,12 @@ public class PhoneAuthEntity {
 	private String phoneNum;	//휴대폰 번호
 	
 	@Column(name = "auth_code", nullable = false, length = 10)
-	private String authNum;	//인증번호
+	private String authCode;	//인증번호
 	
-	@Column(name = "verified", nullable = false)
 	//Boolean true/false
-	private Boolean verified;	//인증여부
+	private Boolean verified = false;	//인증여부
 	
 	@Column(name = "request_time", nullable = false)
 	//LocalDateTime 시간
-	private LocalDateTime requestTime;	//요청시간
+	private LocalDateTime requestTime = LocalDateTime.now();//요청시간
 }

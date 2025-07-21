@@ -32,7 +32,7 @@ public interface MemberService {
     MemberForcedDeleteDto memberOut(Long memberNum);
     
     // 회원 목록 조회 (관리자용)
-    List<MemberListResponseDto> getMemberList();
+    //List<MemberListResponseDto> getMemberList();
 
     // 비밀번호 변경
     void updatePw(MemberPasswordUpdateRequestDto dto);
