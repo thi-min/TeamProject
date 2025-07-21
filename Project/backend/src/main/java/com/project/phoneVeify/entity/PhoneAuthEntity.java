@@ -1,4 +1,4 @@
-package com.project.phoneVeify;
+package com.project.phoneVeify.entity;
 
 import java.time.LocalDateTime;
 
@@ -26,19 +26,19 @@ public class PhoneAuthEntity {
 	@Id
 	@Column(name = "phone_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long PhoneId; // 고유값으로 PK 따로 둠
+    private Long phoneId; // 고유값으로 PK 따로 둠
 	
 	@Column(name = "phone_num", nullable = false)
-	private Long PhoneNum;	//휴대폰 번호
+	private String phoneNum;	//휴대폰 번호
 	
-	@Column(name = "auth_num",nullable = false)
-	private String AuthNum;	//인증번호
+	@Column(name = "auth_code", nullable = false, length = 10)
+	private String authNum;	//인증번호
 	
 	@Column(name = "verified", nullable = false)
 	//Boolean true/false
-	private Boolean Verified;	//인증여부
+	private Boolean verified;	//인증여부
 	
 	@Column(name = "request_time", nullable = false)
 	//LocalDateTime 시간
-	private LocalDateTime RequestTime;	//요청시간
+	private LocalDateTime requestTime;	//요청시간
 }

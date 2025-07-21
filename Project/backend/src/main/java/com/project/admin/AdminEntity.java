@@ -27,7 +27,8 @@ public class AdminEntity {
 	//기본
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-	private Long admin_id; //관리자 아이디
+	@Column(name = "admin_id",nullable = false)
+	private Long adminId; //관리자 아이디
 	
 	//왜래키
 	@OneToMany(fetch = FetchType.LAZY) // 다대일 관계

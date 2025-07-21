@@ -1,4 +1,4 @@
-package com.project.phoneVeify;
+package com.project.phoneVeify.dto;
 
 import jakarta.validation.constraints.Pattern;
 

@@ -42,7 +42,5 @@ public interface MemberService {
     
     //비밀번호 찾기
     String findMemberPw(String memberId, String memberName, String memberPhone);
-    
-    //휴대폰 인증
-    String findMemberPhone(String memberPhone, String memberNum);
+
 }

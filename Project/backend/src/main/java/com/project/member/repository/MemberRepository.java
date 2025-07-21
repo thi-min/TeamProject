@@ -35,8 +35,7 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     
     //비밀번호 변경
     Optional<MemberEntity> changeByPassword(String MemberPw, String newPassword, String UpdatePassword);
-    
-    //
+
 }
 
 //Optional 데이터가 있을수도 없을수도있음.
