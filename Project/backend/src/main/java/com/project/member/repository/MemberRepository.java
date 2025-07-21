@@ -21,7 +21,7 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     // 회원번호로 조회(mypage)
     Optional<MemberEntity> findByMemberNum(Long memberNum);
 
-    // 연락처로 회원 조회
+    // 연락처로 회원 조회 or 핸드폰번호 기준으로 회원 존재여부 확인
     Optional<MemberEntity> findByMemberPhone(String memberPhone);
     
     // 이름 검색 (관리자 전용)
@@ -35,7 +35,7 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     
     //비밀번호 변경
     Optional<MemberEntity> changeByPassword(String MemberPw, String newPassword, String UpdatePassword);
-
+    
 }
 
 //Optional 데이터가 있을수도 없을수도있음.

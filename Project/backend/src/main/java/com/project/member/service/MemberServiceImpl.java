@@ -26,13 +26,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor //final로 선언된 memberRepository를 자동으로 생성자 주입 시켜줌
 public class MemberServiceImpl implements MemberService {
 
-    private final BbsController bbsController;
 	private final MemberRepository memberRepository;
-
-    MemberServiceImpl(BbsController bbsController) {
-        this.bbsController = bbsController;
-    }
-	
+	 
 	//회원가입
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
@@ -134,7 +129,6 @@ public class MemberServiceImpl implements MemberService {
 		return "본인 확인이 완료되었습니다. 비밀번호를 재설정 해주세요";
 	}
 	
-	
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
 	//비밀번호 변경
@@ -157,6 +151,19 @@ public class MemberServiceImpl implements MemberService {
 		
 		//변경된 값 저장하기
 		memberRepository.save(member); //저장
+	}
+
+	//휴대폰 번호로 회원 존재 여부 확인
+	public String checkPhoneNumber(String phoneNum) {
+		//memberPhone컬럼에 phoneNum와 같은 값이 존재하는지 조회
+		boolean exists = memberRepository.findByMemberPhone(phoneNum).isPresent();
+		
+		//동일한 값이 존재한다면 예외 발생
+		if(exists) {
+			throw new IllegalArgumentException("이미 가입된 휴대폰 번호입니다.");
+		}
+		//존재하지 않으면 인증가능
+		return "사용 가능한 번호입니다.";
 	}
 
 }
