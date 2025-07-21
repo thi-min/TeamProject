@@ -38,8 +38,8 @@ public class BbsService {
 	    private final FileUpLoadRepository fileUploadRepository;
 
 	    public BbsDto createBbs(BbsDto dto) {
-	    	AdminEntity admin = new AdminEntity();
-	    	admin.setadminid(dto.getAdminId());
+	    
+	    	
 	    	
 	        BbsEntity entity = BbsEntity.builder()
 	            .bulletinnum(dto.getBulletinNum())
@@ -127,113 +127,183 @@ public class BbsService {
 	            .delDate(e.getDeldate())
 	            .viewers(e.getViewers())
 	            .bulletinType(e.getBulletinType())
-	            .adminId(e.getAdmin().getAdminId())
-	            .memberNum(e.getMember().getMemberNum())
+	            .adminId(e.getAdminId().getAdminId())
+	            .memberNum(e.getMemberNum().getMemberNum())
 	            .build();
 	    }
 
 
-    // ---------------- QnA ----------------
-    public QandADto saveQna(Long bbsId, QandADto dto) {
-        BbsEntity bbs = bbsRepository.findById(bbsId)
-            .orElseThrow(() -> new BbsException("게시글 없음"));
+	 // ---------------- QnA ----------------
+	    public QandADto saveQna(Long bbsId, QandADto dto) {
+	        BbsEntity bbs = bbsRepository.findById(bbsId)
+	            .orElseThrow(() -> new BbsException("게시글 없음"));
 
-        QandAEntity entity = QandAEntity.builder()
-            .bbs(bbs)
-            .question(dto.getQuestion())
-            .answer(dto.getAnswer())
-            .build();
+	        QandAEntity entity = QandAEntity.builder()
+	            .bbs(bbs)
+	            .question(dto.getQuestion())
+	            .answer(dto.getAnswer())
+	            .build();
 
-        QandAEntity saved = qandARepository.save(entity);
-        
-        return QandADto.builder()
-            .bulletinNum(entity.getBbs().getBulletinnum())
-            .question(entity.getQuestion())
-            .answer(entity.getAnswer())
-            .build();
-    }
+	        QandAEntity saved = qandARepository.save(entity);
 
-    public QandADto getQna(Long bbsId) {
-        QandAEntity qna = qandARepository.findByBbs_BulletinNum(bbsId)
-            .orElseThrow(() -> new BbsException("QnA 없음"));
+	        return QandADto.builder()
+	            .bulletinNum(entity.getBbs().getBulletinnum())
+	            .question(entity.getQuestion())
+	            .answer(entity.getAnswer())
+	            .build();
+	    }
 
-        return QandADto.builder()
-            .bulletinNum(qna.getBbs().getBulletinnum())
-            .question(qna.getQuestion())
-            .answer(qna.getAnswer())
-            .build();
-    }
+	    public QandADto getQna(Long bbsId) {
+	        QandAEntity qna = qandARepository.findByBbs_BulletinNum(bbsId)
+	            .orElseThrow(() -> new BbsException("QnA 없음"));
 
-    // ---------------- Image ----------------
-    public List<ImageBbsDto> saveImageBbsList(Long bbsId, List<ImageBbsDto> dtos) {
-        BbsEntity bbs = bbsRepository.findById(bbsId)
-            .orElseThrow(() -> new BbsException("게시글 없음"));
+	        return QandADto.builder()
+	            .bulletinNum(qna.getBbs().getBulletinnum())
+	            .question(qna.getQuestion())
+	            .answer(qna.getAnswer())
+	            .build();
+	    }
 
-        List<ImageBbsEntity> entities = dtos.stream()
-            .map(dto -> ImageBbsEntity.builder()
-                .bbs(bbs)
-                .thumbnailPath(dto.getThumbnailPath())
-                .imagePath(dto.getImagePath())
-                .build())
-            .collect(Collectors.toList());
+	    public void deleteQna(Long qnaId) {
+	        if (!qandARepository.existsById(qnaId)) {
+	            throw new BbsException("QnA 없음");
+	        }
+	        qandARepository.deleteById(qnaId);
+	    }
 
-        return imageBbsRepository.saveAll(entities).stream()
-            .map(entity -> ImageBbsDto.builder()
-                .bulletinNum(entity.getBbs().getBulletinnum())
-                .thumbnailPath(entity.getThumbnailPath())
-                .imagePath(entity.getImagePath())
-                .build())
-            .collect(Collectors.toList());
-    }
+	    public QandADto updateQna(Long qnaId, QandADto dto) {
+	        QandAEntity qna = qandARepository.findById(qnaId)
+	            .orElseThrow(() -> new BbsException("QnA 없음"));
 
-    public List<ImageBbsDto> getImageBbsList(Long bbsId) {
-        return imageBbsRepository.findByBbs_BulletinNum(bbsId).stream()
-            .map(entity -> ImageBbsDto.builder()
-                .bulletinNum(entity.getBbs().getBulletinnum())
-                .thumbnailPath(entity.getThumbnailPath())
-                .imagePath(entity.getImagePath())
-                .build())
-            .collect(Collectors.toList());
-    }
+	        qna.setQuestion(dto.getQuestion());
+	        qna.setAnswer(dto.getAnswer());
 
-    // ---------------- File ----------------
-    public List<FileUpLoadDto> saveFileList(Long bbsId, List<FileUpLoadDto> dtos) {
-        BbsEntity bbs = bbsRepository.findById(bbsId)
-            .orElseThrow(() -> new BbsException("게시글 없음"));
+	        return QandADto.builder()
+	            .bulletinNum(qna.getBbs().getBulletinnum())
+	            .question(qna.getQuestion())
+	            .answer(qna.getAnswer())
+	            .build();
+	    }
 
-        List<FileUpLoadEntity> entities = dtos.stream()
-            .map(dto -> FileUpLoadEntity.builder()
-                .bbs(bbs)
-                .originalName(dto.getOriginalName())
-                .savedName(dto.getSavedName())
-                .path(dto.getPath())
-                .size(dto.getSize())
-                .extension(dto.getExtension())
-                .build())
-            .collect(Collectors.toList());
+	    // ---------------- Image ----------------
+	    public List<ImageBbsDto> saveImageBbsList(Long bbsId, List<ImageBbsDto> dtos) {
+	        BbsEntity bbs = bbsRepository.findById(bbsId)
+	            .orElseThrow(() -> new BbsException("게시글 없음"));
 
-        return fileUploadRepository.saveAll(entities).stream()
-            .map(entity -> FileUpLoadDto.builder()
-                .fileNum(entity.getFilenum())
-                .originalName(entity.getOriginalName())
-                .savedName(entity.getSavedName())
-                .path(entity.getPath())
-                .size(entity.getSize())
-                .extension(entity.getExtension())
-                .build())
-            .collect(Collectors.toList());
-    }
+	        List<ImageBbsEntity> entities = dtos.stream()
+	            .map(dto -> ImageBbsEntity.builder()
+	                .bbs(bbs)
+	                .thumbnailPath(dto.getThumbnailPath())
+	                .imagePath(dto.getImagePath())
+	                .build())
+	            .collect(Collectors.toList());
 
-    public List<FileUpLoadDto> getFilesByBbs(Long bbsId) {
-        return fileUploadRepository.findByBbs_BulletinNum(bbsId).stream()
-            .map(entity -> FileUpLoadDto.builder()
-                .fileNum(entity.getFilenum())
-                .originalName(entity.getOriginalName())
-                .savedName(entity.getSavedName())
-                .path(entity.getPath())
-                .size(entity.getSize())
-                .extension(entity.getExtension())
-                .build())
-            .collect(Collectors.toList());
-    }
+	        return imageBbsRepository.saveAll(entities).stream()
+	            .map(entity -> ImageBbsDto.builder()
+	                .bulletinNum(entity.getBbs().getBulletinnum())
+	                .thumbnailPath(entity.getThumbnailPath())
+	                .imagePath(entity.getImagePath())
+	                .build())
+	            .collect(Collectors.toList());
+	    }
+
+	    public List<ImageBbsDto> getImageBbsList(Long bbsId) {
+	        return imageBbsRepository.findByBbs_BulletinNum(bbsId).stream()
+	            .map(entity -> ImageBbsDto.builder()
+	                .bulletinNum(entity.getBbs().getBulletinnum())
+	                .thumbnailPath(entity.getThumbnailPath())
+	                .imagePath(entity.getImagePath())
+	                .build())
+	            .collect(Collectors.toList());
+	    }
+
+	    public void deleteImage(Long imageId) {
+	        if (!imageBbsRepository.existsById(imageId)) {
+	            throw new BbsException("이미지 없음");
+	        }
+	        imageBbsRepository.deleteById(imageId);
+	    }
+
+	    public ImageBbsDto updateImage(Long imageId, ImageBbsDto dto) {
+	        ImageBbsEntity image = imageBbsRepository.findById(imageId)
+	            .orElseThrow(() -> new BbsException("이미지 없음"));
+
+	        image.setThumbnailPath(dto.getThumbnailPath());
+	        image.setImagePath(dto.getImagePath());
+
+	        return ImageBbsDto.builder()
+	            .bulletinNum(image.getBbs().getBulletinnum())
+	            .thumbnailPath(image.getThumbnailPath())
+	            .imagePath(image.getImagePath())
+	            .build();
+	    }
+
+	    // ---------------- File ----------------
+	    public List<FileUpLoadDto> saveFileList(Long bbsId, List<FileUpLoadDto> dtos) {
+	        BbsEntity bbs = bbsRepository.findById(bbsId)
+	            .orElseThrow(() -> new BbsException("게시글 없음"));
+
+	        List<FileUpLoadEntity> entities = dtos.stream()
+	            .map(dto -> FileUpLoadEntity.builder()
+	                .bbs(bbs)
+	                .originalName(dto.getOriginalName())
+	                .savedName(dto.getSavedName())
+	                .path(dto.getPath())
+	                .size(dto.getSize())
+	                .extension(dto.getExtension())
+	                .build())
+	            .collect(Collectors.toList());
+
+	        return fileUploadRepository.saveAll(entities).stream()
+	            .map(entity -> FileUpLoadDto.builder()
+	                .fileNum(entity.getFilenum())
+	                .originalName(entity.getOriginalName())
+	                .savedName(entity.getSavedName())
+	                .path(entity.getPath())
+	                .size(entity.getSize())
+	                .extension(entity.getExtension())
+	                .build())
+	            .collect(Collectors.toList());
+	    }
+
+	    public List<FileUpLoadDto> getFilesByBbs(Long bbsId) {
+	        return fileUploadRepository.findByBbs_BulletinNum(bbsId).stream()
+	            .map(entity -> FileUpLoadDto.builder()
+	                .fileNum(entity.getFilenum())
+	                .originalName(entity.getOriginalName())
+	                .savedName(entity.getSavedName())
+	                .path(entity.getPath())
+	                .size(entity.getSize())
+	                .extension(entity.getExtension())
+	                .build())
+	            .collect(Collectors.toList());
+	    }
+
+	    public void deleteFile(Long fileId) {
+	        if (!fileUploadRepository.existsById(fileId)) {
+	            throw new BbsException("파일 없음");
+	        }
+	        fileUploadRepository.deleteById(fileId);
+	    }
+
+	    public FileUpLoadDto updateFile(Long fileId, FileUpLoadDto dto) {
+	        FileUpLoadEntity file = fileUploadRepository.findById(fileId)
+	            .orElseThrow(() -> new BbsException("파일 없음"));
+
+	        file.setOriginalName(dto.getOriginalName());
+	        file.setSavedName(dto.getSavedName());
+	        file.setPath(dto.getPath());
+	        file.setSize(dto.getSize());
+	        file.setExtension(dto.getExtension());
+
+	        return FileUpLoadDto.builder()
+	            .fileNum(file.getFilenum())
+	            .originalName(file.getOriginalName())
+	            .savedName(file.getSavedName())
+	            .path(file.getPath())
+	            .size(file.getSize())
+	            .extension(file.getExtension())
+	            .build();
+	    }
+
 }
