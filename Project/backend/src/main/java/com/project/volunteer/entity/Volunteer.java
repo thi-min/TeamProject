@@ -28,5 +28,5 @@ public class Volunteer {
     private LocalDate schedule; // 봉사 일정
 
     @Column(name = "vol_time")
-    private Integer volTime; // 봉사 시간
+    private String volTime; // 봉사 시간
 }

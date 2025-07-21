@@ -15,16 +15,17 @@ public class VolunteerDetailDto {
 
     // 신청자 정보
 	private String memberName;     // 신청자명
-    private String contact;        // 연락처
+    private String phone;        // 연락처
 
 
     // 예약 정보
     private ReserveState reserveState;   // 예약 상태 (ex: 신청중, 승인됨 등)
     private int peopleCount;       // 인원 수
-    private String reserveDate;    // 예약일자
-    private String timeSlot;       // 예약 시간
+    private String schedule;       // 실제 봉사 활동이 있는 날짜 (센터 지정)
+    private String volTime;       // 예약 시간
     private String note;           // 비고
-
+      // 실제 봉사 활동이 있는 날짜 (센터 지정)
+   	//봉사 시간
 
 
 }

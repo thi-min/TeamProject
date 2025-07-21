@@ -113,9 +113,8 @@ public class ReserveServiceImpl implements ReserveService {
     }
     
     //관리자가 특정 예약의 상태를 직접 변경
-    @Override
     @Transactional
-    public void updateReserveState(Long reserveCode, ReserveState newState) {
+    public void updateReserveStateByAdmin(Long reserveCode, ReserveState newState) {
         Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
         reserve.setReserveState(newState);
