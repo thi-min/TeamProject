@@ -21,7 +21,7 @@ public interface ReserveService {
 	 
 	 ReserveDetailDto getAdminReserveByCode(Long reserveCode); //관리자 상세보기
 	 
-	 void updateReserveState(Long reserveCode, ReserveState newState); //관리자
+	 void updateReserveStateByAdmin(Long reserveCode, ReserveState newState); //관리자
 
 	 void memberCancelReserve(Long reserveCode, Long memberNum); //사용자
 

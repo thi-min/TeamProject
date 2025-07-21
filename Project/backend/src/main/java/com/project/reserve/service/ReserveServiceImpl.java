@@ -113,6 +113,7 @@ public class ReserveServiceImpl implements ReserveService {
     }
     
     //관리자가 특정 예약의 상태를 직접 변경
+    @Override
     @Transactional
     public void updateReserveStateByAdmin(Long reserveCode, ReserveState newState) {
         Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
