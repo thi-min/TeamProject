@@ -2,9 +2,10 @@ package com.project.reserve.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import com.project.member.Member;
+import com.project.member.entity.MemberEntity;
 import com.project.reserve.entity.ReserveState;
 import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @Table(name = "Reserve")
@@ -20,8 +21,11 @@ public class Reserve {
     private Long reserveCode;
 
     @Column(name = "reserve_date")
-    private LocalDate reserveDate;
-
+    private Date reserveDate;
+    
+    @Column(name = "time_slot")
+    private String timeSlot;
+    
     @Column(name = "reserve_type")
     private Integer reserveType;
 
@@ -38,6 +42,6 @@ public class Reserve {
     // 회원번호 (외래키)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_num", nullable = false)
-    private Member member; // Member 엔티티와 연결
+    private MemberEntity member; // Member 엔티티와 연결
 
 }
