@@ -40,7 +40,7 @@ public class BbsService {
 	    public BbsDto createBbs(BbsDto dto) {
 	    
 	    	
-	    	
+	    	//entity수정
 	        BbsEntity entity = BbsEntity.builder()
 	            .bulletinnum(dto.getBulletinNum())
 	            .bbstitle(dto.getBbsTitle())
