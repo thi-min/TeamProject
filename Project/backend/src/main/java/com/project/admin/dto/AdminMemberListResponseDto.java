@@ -1,10 +1,12 @@
-package com.project.member.dto;
+package com.project.admin.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 //전체사용자 목록+필터링
-public class MemberListResponseDto {
+public class AdminMemberListResponseDto {
 	private Long memberNum; //회원 번호
 	private String memberId; //아이디
 	private String memberName; //이름

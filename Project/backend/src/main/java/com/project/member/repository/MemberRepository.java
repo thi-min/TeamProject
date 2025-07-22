@@ -34,7 +34,7 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     Optional<MemberEntity> findByPassword(String MemberId, String MemberName, String memberPhone);
     
     //비밀번호 변경
-    Optional<MemberEntity> changeByPassword(String MemberPw, String newPassword, String UpdatePassword);
+    Optional<MemberEntity> changeByPassword(String MemberId);
     
 }
 

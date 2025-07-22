@@ -1,8 +1,11 @@
 package com.project.admin.entity;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.project.member.entity.MemberEntity;
+import com.project.member.entity.MemberSex;
+import com.project.member.entity.MemberState;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,13 +18,19 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
 @Table(name = "Admin")
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class AdminEntity {
 	
 	//기본
@@ -44,6 +53,8 @@ public class AdminEntity {
 	private String adminPw; //비밀번호
 	@Column(name = "admin_name",nullable = false)
 	private String adminName; //이름
+	@Column(name = "admin_phone",nullable = false)
+	private String adminPhone; //휴대폰번호
 	
 //	@Column(name = "authority")
 //	@Enumerated(EnumType.STRING)  
@@ -54,8 +65,8 @@ public class AdminEntity {
 //	private AdminState AdminState; //관리자 상태
 	
 	@Column(name = "regist_date", nullable = false)
-	private LocalDateTime RegistDate; //등록일시
+	private LocalDateTime registDate; //등록일시
 	@Column(name = "connect_data", nullable = false)
-	private LocalDateTime ConnectData; //접속일시
+	private LocalDateTime connectData; //접속일시
 
 }

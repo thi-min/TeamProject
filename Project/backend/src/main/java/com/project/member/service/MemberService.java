@@ -1,13 +1,9 @@
 package com.project.member.service;
 
-import java.util.List;
-
 import com.project.member.dto.MemberForcedDeleteDto;
-import com.project.member.dto.MemberListResponseDto;
 import com.project.member.dto.MemberLoginRequestDto;
 import com.project.member.dto.MemberLoginResponseDto;
 import com.project.member.dto.MemberMyPageResponseDto;
-import com.project.member.dto.MemberMyPageUpdateRequestDto;
 import com.project.member.dto.MemberPasswordUpdateRequestDto;
 import com.project.member.dto.MemberSignUpRequestDto;
 import com.project.member.dto.MemberSignUpResponseDto;
@@ -30,9 +26,6 @@ public interface MemberService {
     
     //회원탈퇴
     MemberForcedDeleteDto memberOut(Long memberNum);
-    
-    // 회원 목록 조회 (관리자용)
-    //List<MemberListResponseDto> getMemberList();
 
     // 비밀번호 변경
     void updatePw(MemberPasswordUpdateRequestDto dto);

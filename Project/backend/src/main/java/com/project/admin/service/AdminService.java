@@ -6,8 +6,9 @@ import com.project.admin.dto.AdminForcedDeleteDto;
 import com.project.admin.dto.AdminLoginResponseDto;
 import com.project.admin.dto.AdminMemberDateUpdateRequestDto;
 import com.project.admin.dto.AdminMemberDetailResponseDto;
-import com.project.admin.dto.LoginRequestDto;
-import com.project.member.dto.MemberListResponseDto;
+import com.project.admin.dto.AdminMemberListResponseDto;
+import com.project.admin.dto.AdminPasswordUpdateRequestDto;
+import com.project.member.dto.LoginRequestDto;
 
 public interface AdminService {
     
@@ -17,11 +18,11 @@ public interface AdminService {
     AdminLoginResponseDto login(LoginRequestDto dto);
     
     //회원 강제 탈퇴
-    AdminForcedDeleteDto memberOut(Long memberNum);
+    AdminForcedDeleteDto adminMemberOut(Long memberNum);
     
     //회원 목록 조회 (관리자용) 
     //여러명의 회원(각각 기본키 보유)을 한번에 조회하기 떄문에 List사용
-    List<MemberListResponseDto> memberList();
+    List<AdminMemberListResponseDto> adminMemberList();
     
     //회원 정보 상세 조회(관리자용)
     AdminMemberDetailResponseDto adminMemberDetailView(Long memberNum);
@@ -29,4 +30,7 @@ public interface AdminService {
     //회원 정보 수정(관리자용)
     AdminMemberDateUpdateRequestDto adminMemberUpdateView(Long memberNum);
 
+    //관리자 비밀번호 변경
+    void updatePassword(Long adminId, AdminPasswordUpdateRequestDto dto);
+    
 }

@@ -1,17 +1,11 @@
 package com.project.member.service;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 
-import com.project.board.controller.BbsController;
 import com.project.member.dto.MemberForcedDeleteDto;
-import com.project.member.dto.MemberListResponseDto;
 import com.project.member.dto.MemberLoginRequestDto;
 import com.project.member.dto.MemberLoginResponseDto;
 import com.project.member.dto.MemberMyPageResponseDto;
-import com.project.member.dto.MemberMyPageUpdateRequestDto;
 import com.project.member.dto.MemberPasswordUpdateRequestDto;
 import com.project.member.dto.MemberSignUpRequestDto;
 import com.project.member.dto.MemberSignUpResponseDto;
@@ -142,8 +136,12 @@ public class MemberServiceImpl implements MemberService {
 			throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
 		}
 		//새 비밀번호와 비밀번호 확인 일치 여부
-		if(!dto.getNewPassword().equals(dto.getCurrentPassword())) {
+		if(!dto.getNewPassword().equals(dto.getNewPasswordCheck())) {
 			throw new IllegalArgumentException("변경할 비밀번호가 일치하지 않습니다.");
+		}
+		//이전 비밀번호와 같은지 확인
+		if(!dto.getCurrentPassword().equals(dto.getNewPassword())) {
+			throw new IllegalArgumentException("이전과 동일한 비밀번호는 사용할 수 없습니다.");
 		}
 		
 		//비밀번호 변경
