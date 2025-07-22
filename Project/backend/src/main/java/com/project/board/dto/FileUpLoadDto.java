@@ -7,7 +7,7 @@ import java.io.*;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(builderMethodName = "dtoBuilder")  // 기본 빌더는 dtoBuilder()로 변경
 public class FileUpLoadDto {
 
     private Long fileNum;       // 파일 번호 (기본키)
@@ -23,4 +23,20 @@ public class FileUpLoadDto {
     private Long size;           // 파일 크기
 
     private String extension;    // 확장자
+    
+    public static class FileUpLoadDtoBuilder {
+        public FileUpLoadDtoBuilder originalName(String originalName) {
+            this.originalName = originalName;
+
+            // 확장자 자동 추출 후 소문자로 세팅
+            if (originalName != null && originalName.contains(".")) {
+                int lastDotIndex = originalName.lastIndexOf('.');
+                this.extension = originalName.substring(lastDotIndex + 1).toLowerCase();
+            } else {
+                this.extension = null;
+            }
+
+            return this;
+        }
+    }
 }

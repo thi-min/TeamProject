@@ -13,7 +13,7 @@ import lombok.*;
 public class FileUpLoadEntity {
 
     @Id
-    @Column(name = "file_num", nullable = true)
+    @Column(name = "file_num", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long filenum; // 파일 번호 (기본키)
 

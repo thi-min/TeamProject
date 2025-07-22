@@ -24,11 +24,16 @@ public class BbsController {
 
     private final BbsService bbsService;
 
-    // 게시글 작성
+ // 게시글 작성 (관리자 or 회원 ID 필요)
     @PostMapping("/write")
-    public BbsDto write(@RequestBody BbsDto dto) {
-        return bbsService.createBbs(dto);
+    public BbsDto write(
+        @RequestBody BbsDto dto,
+        @RequestParam(required = false) Long memberNum,
+        @RequestParam(required = false) Long adminId
+    ) {
+        return bbsService.createBbs(dto, memberNum, adminId);
     }
+
 
     // 게시글 조회
     @GetMapping("/{id}")
@@ -44,8 +49,8 @@ public class BbsController {
 
     // QNA 저장
     @PostMapping("/{bbsId}/qna")
-    public QandADto saveQna(@PathVariable Long bbsId, @RequestBody QandADto dto) {
-        return bbsService.saveQna(bbsId, dto);
+    public QandADto saveQna(@PathVariable Long bbsId, @RequestBody QandADto dto,  @RequestParam Long requesterAdminId) {
+    	return bbsService.saveQna(bbsId, dto, requesterAdminId);
     }
 
     // QNA 조회

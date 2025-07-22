@@ -1,8 +1,6 @@
 package com.project.banner;
 
 import com.project.banner.dto.*;
-import com.project.banner.BannerEntity;
-import com.project.banner.BannerRepository;
 import com.project.admin.AdminEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -29,7 +27,9 @@ public class BannerService {
         String fileName = saveFile(file);
 
         AdminEntity admin = bannerRepository.findAdminByAdminId(dto.getAdminId());
-        if (admin == null) throw new RuntimeException("관리자 정보를 찾을 수 없습니다.");
+        if (admin == null) {
+            throw new RuntimeException("관리자 정보를 찾을 수 없습니다.");
+        }
 
         BannerEntity banner = BannerEntity.builder()
                 .title(dto.getTitle())
@@ -89,7 +89,31 @@ public class BannerService {
     }
 
     private String saveFile(MultipartFile file) throws IOException {
-        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+        String originalFileName = file.getOriginalFilename();
+        if (originalFileName == null) {
+            throw new RuntimeException("파일 이름이 유효하지 않습니다.");
+        }
+
+        // 1. 파일 크기 제한 (5MB = 5 * 1024 * 1024 바이트)
+        long maxFileSize = 5 * 1024 * 1024;
+        if (file.getSize() > maxFileSize) {
+            throw new RuntimeException("파일 크기는 5MB를 초과할 수 없습니다.");
+        }
+
+        // 2. 확장자 검사
+        String lowerFileName = originalFileName.toLowerCase();
+        if (!(lowerFileName.endsWith(".jpg") || lowerFileName.endsWith(".jpeg"))) {
+            throw new RuntimeException("jpg 또는 jpeg 형식의 파일만 업로드 가능합니다.");
+        }
+
+        // 3. MIME 타입 검사
+        String contentType = file.getContentType();
+        if (contentType == null || !contentType.equals("image/jpeg")) {
+            throw new RuntimeException("jpg/jpeg 형식의 이미지 파일만 허용됩니다.");
+        }
+
+        // 4. 파일 저장
+        String fileName = System.currentTimeMillis() + "_" + originalFileName;
         Path path = Paths.get(UPLOAD_PATH, fileName);
         Files.createDirectories(path.getParent());
         Files.write(path, file.getBytes(), StandardOpenOption.CREATE);

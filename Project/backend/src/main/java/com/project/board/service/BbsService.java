@@ -70,7 +70,7 @@ public class BbsService {
     }
 
     @Transactional
-    public BbsDto updateBbs(Long id, BbsDto dto, Long memberNum, String password) {
+    public BbsDto updateBbs(Long id, BbsDto dto, Long memberNum) {
         BbsEntity bbs = bbsRepository.findById(id)
             .orElseThrow(() -> new BbsException("게시글 없음: " + id));
 
@@ -78,7 +78,6 @@ public class BbsService {
             throw new BbsException("본인이 작성한 글만 수정할 수 있습니다.");
         }
 
-        // 비밀번호 검증 제거
 
         bbs.setBbstitle(dto.getBbsTitle());
         bbs.setBbscontent(dto.getBbsContent());
@@ -295,7 +294,15 @@ public class BbsService {
         BbsEntity bbs = bbsRepository.findById(bbsId)
             .orElseThrow(() -> new BbsException("게시글 없음"));
 
+        List<String> allowedExtensions = List.of("jpg", "jpeg");
+
+        // 확장자 검사 + 필터링
         List<FileUpLoadEntity> entities = dtos.stream()
+            .filter(dto -> {
+                String ext = dto.getExtension();
+                if (ext == null) return false;
+                return allowedExtensions.contains(ext.toLowerCase());
+            })
             .map(dto -> FileUpLoadEntity.builder()
                 .bbs(bbs)
                 .originalName(dto.getOriginalName())
@@ -306,8 +313,12 @@ public class BbsService {
                 .build())
             .collect(Collectors.toList());
 
+        if (entities.isEmpty()) {
+            throw new BbsException("허용된 이미지 파일(jpg, jpeg)만 첨부할 수 있습니다.");
+        }
+
         return fileUploadRepository.saveAll(entities).stream()
-            .map(entity -> FileUpLoadDto.builder()
+            .map(entity -> FileUpLoadDto.dtoBuilder()
                 .fileNum(entity.getFilenum())
                 .originalName(entity.getOriginalName())
                 .savedName(entity.getSavedName())
@@ -318,9 +329,10 @@ public class BbsService {
             .collect(Collectors.toList());
     }
 
+
     public List<FileUpLoadDto> getFilesByBbs(Long bbsId) {
         return fileUploadRepository.findByBbs_BulletinNum(bbsId).stream()
-            .map(entity -> FileUpLoadDto.builder()
+            .map(entity -> FileUpLoadDto.dtoBuilder()
                 .fileNum(entity.getFilenum())
                 .originalName(entity.getOriginalName())
                 .savedName(entity.getSavedName())
@@ -348,7 +360,7 @@ public class BbsService {
         file.setSize(dto.getSize());
         file.setExtension(dto.getExtension());
 
-        return FileUpLoadDto.builder()
+        return FileUpLoadDto.dtoBuilder()
             .fileNum(file.getFilenum())
             .originalName(file.getOriginalName())
             .savedName(file.getSavedName())
