@@ -19,9 +19,11 @@ public class BbsDto {
 
     private Long bulletinNum;  // 게시글 번호
 
-    private String adminId;    // 관리자 아이디 
+    private Long adminId;    // 관리자 아이디 
 
     private Long memberNum;    // 회원 번호 
+    
+    private String memberName; // 회원 이름 (필터링된 상태로 화면 출력용)
 
     private String bbsTitle;   // 제목
 
@@ -37,4 +39,7 @@ public class BbsDto {
 
     private BoardType bulletinType;  // 게시판 종류(enum)
 
+    private Long parentId;
+    
+    private String password;
 }

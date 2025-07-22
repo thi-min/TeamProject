@@ -21,7 +21,7 @@ public class Volunteer {
 
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId // reserve_code를 Reserve의 PK와 공유
-    @JoinColumn(name = "reserve_code")
+    @JoinColumn(name = "reserve_code") //외래키 컬럼명
     private Reserve reserve;
 
     @Column(name = "schedule")

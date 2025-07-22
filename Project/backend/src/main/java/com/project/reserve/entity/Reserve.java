@@ -2,10 +2,15 @@ package com.project.reserve.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import com.project.land.entity.Land;
 import com.project.member.entity.MemberEntity;
 import com.project.reserve.entity.ReserveState;
+import com.project.volunteer.entity.Volunteer;
+
 import java.time.LocalDate;
 import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "Reserve")
@@ -19,9 +24,18 @@ public class Reserve {
     @Id
     @Column(name = "reserve_code", nullable = false)
     private Long reserveCode;
+    
+    @OneToOne(mappedBy = "reserve", cascade = CascadeType.ALL) //land엔티티의 rserve필드가 외래키 관리
+    private Land landDetail;
+
+    @OneToOne(mappedBy = "reserve", cascade = CascadeType.ALL)
+    private Volunteer volunteerDetail;
 
     @Column(name = "reserve_date")
-    private Date reserveDate;
+    private LocalDate reserveDate;
+    
+    @Column(name = "apply_date")
+    private LocalDateTime applyDate;
     
     @Column(name = "time_slot")
     private String timeSlot;
@@ -30,14 +44,11 @@ public class Reserve {
     private Integer reserveType;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "reserve_state")
+    @Column(name = "reserve_state" )
     private ReserveState reserveState;
 
     @Column(name = "reserve_number")
     private Integer reserveNumber;
-
-    @Column(name = "closed_date")
-    private LocalDate closedDate;
 
     // 회원번호 (외래키)
     @ManyToOne(fetch = FetchType.LAZY)

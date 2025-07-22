@@ -15,3 +15,4 @@ public class AdminReservationUpdateDto {
     @NotNull
     private ReserveState reserveState;  // 변경할 상태 (예: "DONE", "REJ", "CANCEL")
 }
+//예약상태 변경하는 dto
