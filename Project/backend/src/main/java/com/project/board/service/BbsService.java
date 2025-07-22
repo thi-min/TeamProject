@@ -25,7 +25,7 @@ import com.project.board.repository.BbsRepository;
 import com.project.board.repository.FileUpLoadRepository;
 import com.project.board.repository.ImageBbsRepository;
 import com.project.board.repository.QandARepository;
-import com.project.member.Member;
+import com.project.member.entity.MemberEntity;
 
 import lombok.RequiredArgsConstructor;
 
