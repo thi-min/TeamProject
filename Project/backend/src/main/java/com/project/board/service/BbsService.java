@@ -1,4 +1,3 @@
-// 전체 구현된 BbsService.java
 package com.project.board.service;
 
 import java.util.List;
@@ -48,11 +47,6 @@ public class BbsService {
             throw new BbsException("해당 게시판은 회원만 작성할 수 있습니다.");
         }
 
-        if ((type == BoardType.FAQ || type == BoardType.POTO)
-                && (dto.getPassword() == null || dto.getPassword().length() != 4)) {
-            throw new BbsException("비밀번호 4자리를 입력해야 합니다.");
-        }
-
         if (type == BoardType.POTO) {
             List<ImageBbsEntity> images = imageBbsRepository.findByBbs_BulletinNum(dto.getBulletinNum());
             if (images == null || images.isEmpty()) {
@@ -70,7 +64,6 @@ public class BbsService {
             .viewers(dto.getViewers())
             .bulletinType(dto.getBulletinType())
             .memberNum(requesterMemberNum != null ? MemberEntity.builder().memberNum(requesterMemberNum).build() : null)
-            //.adminId(requesterAdminId != null ? AdminEntity.builder().adminId(requesterAdminId).build() : null)
             .build();
 
         return convertToDto(bbsRepository.save(entity));
@@ -85,10 +78,7 @@ public class BbsService {
             throw new BbsException("본인이 작성한 글만 수정할 수 있습니다.");
         }
 
-        if ((bbs.getBulletinType() == BoardType.FAQ || bbs.getBulletinType() == BoardType.POTO)
-                && (password == null || !password.equals(bbs.getPassword()))) {
-            throw new BbsException("비밀번호가 일치하지 않습니다.");
-        }
+        // 비밀번호 검증 제거
 
         bbs.setBbstitle(dto.getBbsTitle());
         bbs.setBbscontent(dto.getBbsContent());
@@ -180,7 +170,6 @@ public class BbsService {
                 .adminId(e.getAdminId() != null ? e.getAdminId().getAdminId() : null)
                 .memberNum(e.getMemberNum().getMemberNum())
                 .memberName(filteredName)
-                .password(null)
                 .build();
     }
 

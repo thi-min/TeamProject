@@ -39,7 +39,4 @@ public class BbsDto {
 
     private BoardType bulletinType;  // 게시판 종류(enum)
 
-    private Long parentId;
-    
-    private String password;
 }

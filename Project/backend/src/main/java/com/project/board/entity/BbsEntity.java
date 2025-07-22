@@ -61,9 +61,4 @@ public class BbsEntity {
     @Column(name = "bulletin_type", nullable = false, length = 10)
     private BoardType bulletinType; // 게시판 종류 (enum)
     
-    @Column(name = "parent_id")
-    private Long parentId;
-    
-    @Column(name = "Password")
-    private String password;
 }
