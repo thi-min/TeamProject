@@ -1,3 +1,4 @@
+// 전체 구현된 BbsService.java
 package com.project.board.service;
 
 import java.util.List;
@@ -37,10 +38,29 @@ public class BbsService {
     private final ImageBbsRepository imageBbsRepository;
     private final FileUpLoadRepository fileUploadRepository;
 
+    public BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId) {
+        BoardType type = dto.getBulletinType();
 
+        if (type == BoardType.NORMAL && requesterAdminId == null) {
+            throw new BbsException("공지사항은 관리자만 작성할 수 있습니다.");
+        }
 
-    // ---------------- BBS ----------------
-    public BbsDto createBbs(BbsDto dto) {
+        if ((type == BoardType.FAQ || type == BoardType.POTO) && requesterMemberNum == null) {
+            throw new BbsException("해당 게시판은 회원만 작성할 수 있습니다.");
+        }
+
+        if ((type == BoardType.FAQ || type == BoardType.POTO)
+                && (dto.getPassword() == null || dto.getPassword().length() != 4)) {
+            throw new BbsException("비밀번호 4자리를 입력해야 합니다.");
+        }
+
+        if (type == BoardType.POTO) {
+            List<ImageBbsEntity> images = imageBbsRepository.findByBbs_BulletinNum(dto.getBulletinNum());
+            if (images == null || images.isEmpty()) {
+                throw new BbsException("이미지 게시판은 최소 1장 이상의 사진을 등록해야 합니다.");
+            }
+        }
+
         BbsEntity entity = BbsEntity.builder()
             .bulletinnum(dto.getBulletinNum())
             .bbstitle(dto.getBbsTitle())
@@ -50,172 +70,137 @@ public class BbsService {
             .deldate(dto.getDelDate())
             .viewers(dto.getViewers())
             .bulletinType(dto.getBulletinType())
-            .admin(AdminEntity.builder().adminId(dto.getAdminId()).build())
-            .member(Member.builder().memberNum(dto.getMemberNum()).build())
+            .memberNum(requesterMemberNum != null ? MemberEntity.builder().memberNum(requesterMemberNum).build() : null)
+            //.adminId(requesterAdminId != null ? AdminEntity.builder().adminId(requesterAdminId).build() : null)
             .build();
 
-        BbsEntity saved = bbsRepository.save(entity);
-        return convertToDto(saved);
+        return convertToDto(bbsRepository.save(entity));
     }
-    
-    // 게시글 수정
+
     @Transactional
-    public BbsDto updateBbs(Long bbsId, BbsDto dto) {
-        BbsEntity bbs = bbsRepository.findById(bbsId)
-            .orElseThrow(() -> new BbsException("게시글을 찾을 수 없습니다: " + bbsId));
+    public BbsDto updateBbs(Long id, BbsDto dto, Long memberNum, String password) {
+        BbsEntity bbs = bbsRepository.findById(id)
+            .orElseThrow(() -> new BbsException("게시글 없음: " + id));
+
+        if (!bbs.getMemberNum().getMemberNum().equals(memberNum)) {
+            throw new BbsException("본인이 작성한 글만 수정할 수 있습니다.");
+        }
+
+        if ((bbs.getBulletinType() == BoardType.FAQ || bbs.getBulletinType() == BoardType.POTO)
+                && (password == null || !password.equals(bbs.getPassword()))) {
+            throw new BbsException("비밀번호가 일치하지 않습니다.");
+        }
 
         bbs.setBbstitle(dto.getBbsTitle());
         bbs.setBbscontent(dto.getBbsContent());
         bbs.setRevisiondate(dto.getRevisionDate());
 
-        BbsEntity updated = bbsRepository.save(bbs);
-        return convertToDto(updated);
+        return convertToDto(bbsRepository.save(bbs));
     }
-    
-    //게시글삭제기능
-    public void deleteBbsByIds(List<Long> ids) {
-        ids.forEach(id -> {
+
+    public void deleteBbs(Long id, Long requesterMemberNum, Long requesterAdminId) {
+        BbsEntity bbs = bbsRepository.findById(id)
+            .orElseThrow(() -> new BbsException("게시글 없음: " + id));
+
+        boolean isAdmin = requesterAdminId != null;
+        boolean isAuthor = requesterMemberNum != null && bbs.getMemberNum().getMemberNum().equals(requesterMemberNum);
+
+        if (isAdmin || isAuthor) {
             fileUploadRepository.deleteByBbs_BulletinNum(id);
             imageBbsRepository.deleteByBbs_BulletinNum(id);
             qandARepository.deleteByBbs_BulletinNum(id);
             bbsRepository.deleteById(id);
-        });
-    }
-    // 게시글 단건 조회
-    @Transactional(readOnly = true)
-    public BbsDto getBbs(Long id) {
-        BbsEntity bbs = bbsRepository.findById(id)
-            .orElseThrow(() -> new BbsException("게시글을 찾을 수 없습니다: " + id));
-        return convertToDto(bbs);
+        } else {
+            throw new BbsException("삭제 권한이 없습니다.");
+        }
     }
 
-    // 게시글 타입별 조회
-    @Transactional(readOnly = true)
+    public void deleteBbs(List<Long> ids, Long requesterAdminId, Long requesterMemberNum) {
+        for (Long id : ids) {
+            deleteBbs(id, requesterMemberNum, requesterAdminId);
+        }
+    }
+
+    public BbsDto getBbs(Long id) {
+        return bbsRepository.findById(id)
+            .map(this::convertToDto)
+            .orElseThrow(() -> new BbsException("게시글 없음: " + id));
+    }
+
     public List<BbsDto> getAllByType(BoardType type) {
         return bbsRepository.findByBulletinType(type).stream()
             .map(this::convertToDto)
             .collect(Collectors.toList());
     }
-    
-    
-    @Transactional(readOnly = true)
-    public Page<BbsDto> getPagedPosts(BoardType type, String sort, Pageable pageable) {
-        Pageable sortedPageable;
-        
-        if ("views".equalsIgnoreCase(sort)) {
-            sortedPageable = PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "viewers")
-            );
-        } else {
-            sortedPageable = PageRequest.of(
-                pageable.getPageNumber(),
-                pageable.getPageSize(),
-                Sort.by(Sort.Direction.DESC, "registDate")
-            );
-        }
 
-        Page<BbsEntity> page;
-        if (type != null) {
-            page = bbsRepository.findByBulletinType(type, sortedPageable);
-        } else {
-            page = bbsRepository.findAll(sortedPageable);
-        }
+    public Page<BbsDto> getPagedPosts(BoardType type, String sort, Pageable pageable) {
+        Sort sorted = "views".equals(sort) ? Sort.by("viewers").descending() : Sort.by("registdate").descending();
+        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sorted);
+
+        Page<BbsEntity> page = (type != null)
+            ? bbsRepository.findByBulletinType(type, sortedPageable)
+            : bbsRepository.findAll(sortedPageable);
+
         return page.map(this::convertToDto);
     }
 
-    @Transactional(readOnly = true)
     public Page<BbsDto> searchPosts(String searchType, String keyword, BoardType type, Pageable pageable) {
         Page<BbsEntity> result;
-
         if (type != null) {
-            switch (searchType.toLowerCase()) {
-                case "title":
-                    result = bbsRepository.findByBulletinTypeAndBbstitleContaining(type, keyword, pageable);
-                    break;
-                case "author":
-                    result = bbsRepository.findByBulletinTypeAndMember_MemberNameContaining(type, keyword, pageable);
-                    break;
-                case "content":
-                    result = bbsRepository.findByBulletinTypeAndBbscontentContaining(type, keyword, pageable);
-                    break;
-                case "title+content":
-                    // JPQL 커스텀 메서드 사용
-                    result = bbsRepository.findByBulletinTypeAndTitleOrContent(type, keyword, pageable);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid search type: " + searchType);
-            }
+            result = switch (searchType.toLowerCase()) {
+                case "title" -> bbsRepository.findByBulletinTypeAndBbstitleContaining(type, keyword, pageable);
+                case "author" -> bbsRepository.findByBulletinTypeAndMember_MemberNameContaining(type, keyword, pageable);
+                case "content" -> bbsRepository.findByBulletinTypeAndBbscontentContaining(type, keyword, pageable);
+                case "title+content" -> bbsRepository.findByBulletinTypeAndTitleOrContent(type, keyword, pageable);
+                default -> throw new IllegalArgumentException("Invalid search type: " + searchType);
+            };
         } else {
-            // 타입 필터 없을 때
-            switch (searchType.toLowerCase()) {
-                case "title":
-                    result = bbsRepository.findByBbstitleContaining(keyword, pageable);
-                    break;
-                case "author":
-                    result = bbsRepository.findByMember_MemberNameContaining(keyword, pageable);
-                    break;
-                case "content":
-                    result = bbsRepository.findByBbscontentContaining(keyword, pageable);
-                    break;
-                case "title+content":
-                    result = bbsRepository.findByBbstitleContainingOrBbscontentContaining(keyword, keyword, pageable);
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid search type: " + searchType);
-            }
+            result = switch (searchType.toLowerCase()) {
+                case "title" -> bbsRepository.findByBbstitleContaining(keyword, pageable);
+                case "author" -> bbsRepository.findByMember_MemberNameContaining(keyword, pageable);
+                case "content" -> bbsRepository.findByBbscontentContaining(keyword, pageable);
+                case "title+content" -> bbsRepository.findByBbstitleContainingOrBbscontentContaining(keyword, keyword, pageable);
+                default -> throw new IllegalArgumentException("Invalid search type: " + searchType);
+            };
         }
+        return result.map(this::convertToDto);
+    }
 
-        return result.map(this::convertToDto);
-    }
-    
-//    public Page<BbsDto> getAllWithPaging(Pageable pageable) {
-//        return bbsRepository.findAll(pageable)
-//                .map(this::convertToDto);
-//    }
-    
-    @Transactional(readOnly = true)
-    public Page<BbsDto> searchPosts(String type, String keyword, Pageable pageable) {
-        Page<BbsEntity> result;
-        switch (type.toLowerCase()) {
-            case "title":
-                result = bbsRepository.findByBbstitleContaining(keyword, pageable);
-                break;
-            case "author":
-                result = bbsRepository.findByMember_MemberNameContaining(keyword, pageable);
-                break;
-            case "content":
-                result = bbsRepository.findByBbscontentContaining(keyword, pageable);
-                break;
-            case "title+content":
-                result = bbsRepository.findByBbstitleContainingOrBbscontentContaining(keyword, keyword, pageable);
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid search type: " + type);
-        }
-        return result.map(this::convertToDto);
-    }
-    
-    
-    // Entity → DTO 변환 메서드
-    private BbsDto convertToDto(BbsEntity entity) {
+    private BbsDto convertToDto(BbsEntity e) {
+        String originalName = e.getMemberNum().getMemberName();
+        String filteredName = filterName(originalName);
         return BbsDto.builder()
-            .bulletinNum(entity.getBulletinnum())
-            .bbsTitle(entity.getBbstitle())
-            .bbsContent(entity.getBbscontent())
-            .registDate(entity.getRegistdate())
-            .revisionDate(entity.getRevisiondate())
-            .delDate(entity.getDeldate())
-            .viewers(entity.getViewers())
-            .bulletinType(entity.getBulletinType())
-            .adminId(entity.getAdminId())
-            .memberNum(entity.getMember().getMemberNum())
-            .build();
+                .bulletinNum(e.getBulletinnum())
+                .bbsTitle(e.getBbstitle())
+                .bbsContent(e.getBbscontent())
+                .registDate(e.getRegistdate())
+                .revisionDate(e.getRevisiondate())
+                .delDate(e.getDeldate())
+                .viewers(e.getViewers())
+                .bulletinType(e.getBulletinType())
+                .adminId(e.getAdminId() != null ? e.getAdminId().getAdminId() : null)
+                .memberNum(e.getMemberNum().getMemberNum())
+                .memberName(filteredName)
+                .password(null)
+                .build();
     }
 
-    // ---------------- QnA ----------------
-    public QandADto saveQna(Long bbsId, QandADto dto) {
+    private String filterName(String name) {
+        if (name == null || name.length() < 2) return name;
+        int len = name.length();
+        if (len == 2) return name.charAt(0) + "*";
+        StringBuilder sb = new StringBuilder();
+        sb.append(name.charAt(0));
+        for (int i = 1; i < len - 1; i++) sb.append("*");
+        sb.append(name.charAt(len - 1));
+        return sb.toString();
+    }
+
+    public QandADto saveQna(Long bbsId, QandADto dto, Long requesterAdminId) {
+        if (requesterAdminId == null) {
+            throw new BbsException("QnA 답변은 관리자만 작성할 수 있습니다.");
+        }
+
         BbsEntity bbs = bbsRepository.findById(bbsId)
             .orElseThrow(() -> new BbsException("게시글 없음"));
 
@@ -226,11 +211,11 @@ public class BbsService {
             .build();
 
         QandAEntity saved = qandARepository.save(entity);
-        
+
         return QandADto.builder()
-            .bulletinNum(entity.getBbs().getBulletinnum())
-            .question(entity.getQuestion())
-            .answer(entity.getAnswer())
+            .bulletinNum(saved.getBbs().getBulletinnum())
+            .question(saved.getQuestion())
+            .answer(saved.getAnswer())
             .build();
     }
 
@@ -245,7 +230,27 @@ public class BbsService {
             .build();
     }
 
-    // ---------------- Image ----------------
+    public void deleteQna(Long qnaId) {
+        if (!qandARepository.existsById(qnaId)) {
+            throw new BbsException("QnA 없음");
+        }
+        qandARepository.deleteById(qnaId);
+    }
+
+    public QandADto updateQna(Long qnaId, QandADto dto) {
+        QandAEntity qna = qandARepository.findById(qnaId)
+            .orElseThrow(() -> new BbsException("QnA 없음"));
+
+        qna.setQuestion(dto.getQuestion());
+        qna.setAnswer(dto.getAnswer());
+
+        return QandADto.builder()
+            .bulletinNum(qna.getBbs().getBulletinnum())
+            .question(qna.getQuestion())
+            .answer(qna.getAnswer())
+            .build();
+    }
+
     public List<ImageBbsDto> saveImageBbsList(Long bbsId, List<ImageBbsDto> dtos) {
         BbsEntity bbs = bbsRepository.findById(bbsId)
             .orElseThrow(() -> new BbsException("게시글 없음"));
@@ -277,7 +282,27 @@ public class BbsService {
             .collect(Collectors.toList());
     }
 
-    // ---------------- File ----------------
+    public void deleteImage(Long imageId) {
+        if (!imageBbsRepository.existsById(imageId)) {
+            throw new BbsException("이미지 없음");
+        }
+        imageBbsRepository.deleteById(imageId);
+    }
+
+    public ImageBbsDto updateImage(Long imageId, ImageBbsDto dto) {
+        ImageBbsEntity image = imageBbsRepository.findById(imageId)
+            .orElseThrow(() -> new BbsException("이미지 없음"));
+
+        image.setThumbnailPath(dto.getThumbnailPath());
+        image.setImagePath(dto.getImagePath());
+
+        return ImageBbsDto.builder()
+            .bulletinNum(image.getBbs().getBulletinnum())
+            .thumbnailPath(image.getThumbnailPath())
+            .imagePath(image.getImagePath())
+            .build();
+    }
+
     public List<FileUpLoadDto> saveFileList(Long bbsId, List<FileUpLoadDto> dtos) {
         BbsEntity bbs = bbsRepository.findById(bbsId)
             .orElseThrow(() -> new BbsException("게시글 없음"));
@@ -316,5 +341,31 @@ public class BbsService {
                 .extension(entity.getExtension())
                 .build())
             .collect(Collectors.toList());
+    }
+    public void deleteFile(Long fileId) {
+        if (!fileUploadRepository.existsById(fileId)) {
+            throw new BbsException("파일 없음");
+        }
+        fileUploadRepository.deleteById(fileId);
+    }
+
+    public FileUpLoadDto updateFile(Long fileId, FileUpLoadDto dto) {
+        FileUpLoadEntity file = fileUploadRepository.findById(fileId)
+            .orElseThrow(() -> new BbsException("파일 없음"));
+
+        file.setOriginalName(dto.getOriginalName());
+        file.setSavedName(dto.getSavedName());
+        file.setPath(dto.getPath());
+        file.setSize(dto.getSize());
+        file.setExtension(dto.getExtension());
+
+        return FileUpLoadDto.builder()
+            .fileNum(file.getFilenum())
+            .originalName(file.getOriginalName())
+            .savedName(file.getSavedName())
+            .path(file.getPath())
+            .size(file.getSize())
+            .extension(file.getExtension())
+            .build();
     }
 }
