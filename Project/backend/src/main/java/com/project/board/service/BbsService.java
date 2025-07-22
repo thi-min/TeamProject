@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.project.admin.entity.AdminEntity;
 import com.project.board.BoardType;
 import com.project.board.dto.BbsDto;
 import com.project.board.dto.FileUpLoadDto;
@@ -24,7 +25,6 @@ import com.project.board.repository.BbsRepository;
 import com.project.board.repository.FileUpLoadRepository;
 import com.project.board.repository.ImageBbsRepository;
 import com.project.board.repository.QandARepository;
-import com.project.admin.AdminEntity;
 import com.project.member.Member;
 
 import lombok.RequiredArgsConstructor;

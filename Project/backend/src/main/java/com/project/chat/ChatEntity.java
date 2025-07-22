@@ -2,7 +2,7 @@ package com.project.chat;
 
 import java.sql.Date;
 
-import com.project.admin.AdminEntity;
+import com.project.admin.entity.AdminEntity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

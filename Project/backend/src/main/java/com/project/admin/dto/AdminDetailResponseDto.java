@@ -1,4 +1,4 @@
-package com.project.member.dto;
+package com.project.admin.dto;
 
 import java.time.LocalDate;
 
