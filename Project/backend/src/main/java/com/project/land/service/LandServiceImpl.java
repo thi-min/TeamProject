@@ -61,6 +61,7 @@ public class LandServiceImpl implements LandService {
                 .build();
     }
     
+    //놀이터 예약 생성(기본 정보랑 놀이터 상세 정보 합친 예약)
     @Override
     public void createLand(Reserve reserve, LandRequestDto landDto) {
         Land land = Land.builder()

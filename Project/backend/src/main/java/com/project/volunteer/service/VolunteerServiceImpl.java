@@ -46,6 +46,7 @@ public class VolunteerServiceImpl implements VolunteerService {
                 .build();
     }
     
+    //봉사 예약 생성(기본 정보랑 봉사 상세 정보 합친 예약)
     @Override
     public void createVolunteer(Reserve reserve, VolunteerRequestDto volunteerDto) {
         Volunteer volunteer = Volunteer.builder()
