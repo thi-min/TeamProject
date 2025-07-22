@@ -8,7 +8,7 @@ import java.io.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FileUpLoadDto implements Serializable {
+public class FileUpLoadDto {
 
     private Long fileNum;       // 파일 번호 (기본키)
 

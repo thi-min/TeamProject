@@ -120,19 +120,27 @@ public class BbsController {
         return ResponseEntity.ok("파일 삭제 완료");
     }
 
-    // 게시글 삭제 (체크박스 선택된 게시글들 삭제)
+    // 게시글 삭제 (관리자 또는 회원 권한 체크 포함)
     @DeleteMapping("/delete")
-    public void deletePosts(@RequestBody List<Long> bbsIds) {
-        bbsService.deleteBbsByIds(bbsIds);
+    public ResponseEntity<?> deletePosts(
+        @RequestBody List<Long> bbsIds,
+        @RequestParam(required = false) Long adminId,
+        @RequestParam(required = false) Long memberNum
+    ) {
+        bbsService.deleteBbs(bbsIds, adminId, memberNum);
+        return ResponseEntity.ok("게시글 삭제 완료");
     }
-
-    // 게시글 수정 (본문, 첨부파일 수정 포함)
+    // 게시글 수정
     @PutMapping("/{bbsId}")
-    public BbsDto updatePost(@PathVariable Long bbsId, @RequestBody BbsDto dto) {
-        return bbsService.updateBbs(bbsId, dto);
+    public BbsDto updatePost(
+        @PathVariable Long bbsId,
+        @RequestBody BbsDto dto,
+        @RequestParam Long memberNum
+    ) {
+        return bbsService.updateBbs(bbsId, dto, memberNum);
     }
 
-    // 페이징 조회 (최신순, 조회순 정렬 지원)
+    // 페이징 조회
     @GetMapping("/list")
     public Page<BbsDto> getPagedPosts(
         @RequestParam(name = "type", required = false) BoardType type,
