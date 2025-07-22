@@ -20,21 +20,19 @@ import lombok.*;
 public class ReserveRequestDto {
 
     private Long memberNum;        // 회원 ID (외래키)
-    private LocalDate reserveDate;
     private int reserveType;
     private int reserveNumber;
-    private String timeSlot;  // 선택적
     private String note;   
     
     //dto -> entity 변환 (사용자가 예약정보 작성한걸 넘기는 과정)
     public Reserve toEntity(MemberEntity member) {
         return Reserve.builder()
                 .member(member)
-                .reserveDate(reserveDate)
                 .reserveType(reserveType)
                 .reserveNumber(reserveNumber)
-                .timeSlot(timeSlot)
+                .note(note)
                 .applyDate(LocalDateTime.now())
+                .reserveState(ReserveState.ING)
                 .build();
     }
 }

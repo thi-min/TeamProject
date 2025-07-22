@@ -30,25 +30,22 @@ public class Reserve {
 
     @OneToOne(mappedBy = "reserve", cascade = CascadeType.ALL)
     private Volunteer volunteerDetail;
-
-    @Column(name = "reserve_date")
-    private LocalDate reserveDate;
     
     @Column(name = "apply_date")
-    private LocalDateTime applyDate;
-    
-    @Column(name = "time_slot")
-    private String timeSlot;
+    private LocalDateTime applyDate;	//신청일
     
     @Column(name = "reserve_type")
-    private Integer reserveType;
+    private Integer reserveType;		//예약유형 (놀이터예약/봉사예약) 
 
     @Enumerated(EnumType.STRING)
     @Column(name = "reserve_state" )
-    private ReserveState reserveState;
+    private ReserveState reserveState;		//예약 상태 (enum)
 
     @Column(name = "reserve_number")
-    private Integer reserveNumber;
+    private Integer reserveNumber;		//인원수
+    
+    @Column(name = "note")
+    private String note;		//비고
 
     // 회원번호 (외래키)
     @ManyToOne(fetch = FetchType.LAZY)

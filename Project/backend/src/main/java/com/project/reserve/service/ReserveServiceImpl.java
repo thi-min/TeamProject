@@ -1,13 +1,20 @@
 package com.project.reserve.service;
 
 import com.project.reserve.dto.AdminReservationListDto;
-import com.project.reserve.dto.ReserveDetailDto;
+import com.project.reserve.dto.AdminReservationSearchDto;
+import com.project.reserve.dto.FullReserveRequestDto;
 import com.project.reserve.dto.ReserveRequestDto;
 import com.project.reserve.dto.ReserveResponseDto;
 import com.project.reserve.entity.Reserve;
 import com.project.reserve.entity.ReserveState;
 import com.project.reserve.repository.ReserveRepository;
+import com.project.volunteer.dto.VolunteerDetailDto;
+import com.project.volunteer.entity.Volunteer;
+import com.project.volunteer.service.VolunteerService;
 import com.project.member.repository.MemberRepository;
+import com.project.land.dto.LandDetailDto;
+import com.project.land.entity.Land;
+import com.project.land.service.LandService;
 import com.project.member.entity.MemberEntity;
 
 import lombok.RequiredArgsConstructor;
@@ -24,16 +31,42 @@ public class ReserveServiceImpl implements ReserveService {
 
     private final ReserveRepository reserveRepository;
     private final MemberRepository memberRepository;
+    private final LandService landService; 
+    private final VolunteerService volunteerService;
 
     // 사용자가 예약요청하면 예약상태 기본값으로 설정, DB에 저장
     @Override
     @Transactional
-    public Long createReserve(ReserveRequestDto requestDto) {
-        MemberEntity member = memberRepository.findById(requestDto.getMemberNum())
+    public Long createReserve(FullReserveRequestDto fullRequestDto) {
+    	
+    	//여러곳에서 참조해오기때문에 null값 나올수 있어서 추가 (예외처리)
+    	if (fullRequestDto == null || fullRequestDto.getReserveDto() == null) {
+            throw new IllegalArgumentException("예약 정보가 잘못되었습니다.");
+        }
+    	// 회원 정보 조회
+    	Long memberNum = fullRequestDto.getReserveDto().getMemberNum();
+        MemberEntity member = memberRepository.findById(memberNum)
                 .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
-
-        Reserve reserve = requestDto.toEntity(member);
+        
+        // Reserve 엔티티 생성 및 저장
+        Reserve reserve = fullRequestDto.getReserveDto().toEntity(member);
         Reserve saved = reserveRepository.save(reserve);
+        
+        //예약 유형에 따라 세부 정보 저장
+        int reserveType = fullRequestDto.getReserveDto().getReserveType();
+        
+        if (reserveType == 1) { // 놀이터 예약
+            if (fullRequestDto.getLandDto() == null) {
+                throw new IllegalArgumentException("놀이터 예약 세부 정보가 누락되었습니다.");
+            }
+            landService.createLand(saved, fullRequestDto.getLandDto());
+
+        } else if (reserveType == 2) { // 봉사 예약
+            if (fullRequestDto.getVolunteerDto() == null) {
+                throw new IllegalArgumentException("봉사 예약 세부 정보가 누락되었습니다.");
+            }
+            volunteerService.createVolunteer(saved, fullRequestDto.getVolunteerDto());
+        }
 
         return saved.getReserveCode();
     }
@@ -44,11 +77,8 @@ public class ReserveServiceImpl implements ReserveService {
     @Transactional(readOnly = true)
     public List<ReserveResponseDto> getReservesByMember(Long memberNum) {
         return reserveRepository.findByMember_MemberNum(memberNum).stream()
-                .map(reserve -> {
-                    ReserveResponseDto dto = ReserveResponseDto.from(reserve);
-                    dto.setProgramName(convertReserveType(reserve.getReserveType())); 
-                    return dto;
-                }).collect(Collectors.toList());
+                .map(ReserveResponseDto::from)
+                .collect(Collectors.toList());
     }
     
     //관리자 전체 목록 조회
@@ -58,10 +88,28 @@ public class ReserveServiceImpl implements ReserveService {
         return reserveRepository.findAllReservationsForAdmin(); // @Query 기반
     }
     
-    //사용자용 예약 상세보기
+    //관리자 놀이터 예약목록 조회
     @Override
     @Transactional(readOnly = true)
-    public ReserveDetailDto getMemberReserveByCode(Long reserveCode, Long memberNum) {
+    public List<AdminReservationListDto> getLandReservationsForAdmin() {
+        return reserveRepository.findLandReservationsForAdmin().stream()
+                .map(AdminReservationListDto::from)
+                .collect(Collectors.toList());
+    }
+    
+    //관리자 봉사 예약목록 조회
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdminReservationListDto> getVolunteerReservationsForAdmin() {
+        return reserveRepository.findVolunteerReservationsForAdmin().stream()
+                .map(AdminReservationListDto::from)
+                .collect(Collectors.toList());
+    }
+    
+    //사용자 놀이터예약 상세페이지
+    @Override
+    @Transactional(readOnly = true)
+    public LandDetailDto getMemberLandReserveDetail(Long reserveCode, Long memberNum) {
         Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
 
@@ -69,37 +117,74 @@ public class ReserveServiceImpl implements ReserveService {
             throw new SecurityException("본인의 예약만 조회할 수 있습니다.");
         }
 
-        ReserveResponseDto dto = ReserveResponseDto.from(reserve);
-        dto.setProgramName(convertReserveType(reserve.getReserveType()));
-        return dto;
+        return landService.getLandDetailByReserveCode(reserveCode);
     }
-    
-    //관리자용 예약 상세보기
+    // 사용자 - 봉사예약 상세페이지
     @Override
     @Transactional(readOnly = true)
-    public ReserveDetailDto getAdminReserveByCode(Long reserveCode) {
+    public VolunteerDetailDto getMemberVolunteerReserveDetail(Long reserveCode, Long memberNum) {
         Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
 
-        return ReserveDetailDto.builder()
+        if (!reserve.getMember().getMemberNum().equals(memberNum)) {
+            throw new SecurityException("본인의 예약만 조회할 수 있습니다.");
+        }
+
+        return volunteerService.getVolunteerDetailByReserveCode(reserveCode);
+    }
+    
+    //관리자용 놀이터 예약 상세보기
+    @Override
+    @Transactional(readOnly = true)
+    public LandDetailDto getAdminLandReserveDetail(Long reserveCode) {
+        Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
+                .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
+
+        MemberEntity member = reserve.getMember();
+        Land land = reserve.getLandDetail();
+
+        return LandDetailDto.builder()
                 .reserveCode(reserve.getReserveCode())
-                .memberName(reserve.getMember().getMemberName())
-                .phone(reserve.getMember().getMemberPhone())
-                .programName(convertReserveType(reserve.getReserveType()))
-                .dogCount(reserve.getReserveNumber())
-                .peopleCount(reserve.getPeopleCount())
+                .memberName(member.getMemberName())
+                .phone(member.getMemberPhone())
+                .reserveState(reserve.getReserveState())
+                .landDate(land.getLandDate())
+                .landTime(land.getLandTime())
                 .applyDate(reserve.getApplyDate())
-                .reserveDate(reserve.getReserveDate())
-                .reserveTime(reserve.getTimeSlot())
                 .note(reserve.getNote())
-                .basePrice(2000)
-                .extraPrice(1000 * (reserve.getPeopleCount() - 1))
-                .totalPrice(2000 + 1000 * (reserve.getPeopleCount() - 1))
-                .basePriceDetail("중, 소형견 x " + reserve.getReserveNumber() + "마리")
-                .extraPriceDetail("인원추가 x " + (reserve.getPeopleCount() - 1) + "명")
+                .landType(land.getLandType())
+                .animalNumber(land.getAnimalNumber())
+                .reserveNumber(reserve.getReserveNumber())
+                .basePrice(2000)			//기본가격
+                .additionalPrice(1000 * (reserve.getReserveNumber() - 1))	//추가요금
+                .totalPrice(2000 + 1000 * (reserve.getReserveNumber() - 1)) 	//총 결제금액
+                .basePriceDetail("중, 소형견 x " + land.getAnimalNumber() + "마리")
+                .extraPriceDetail(" 추가 인원 x" + reserve.getReserveNumber() + "명")
                 .build();
     }
     
+    //관리자용 봉사 예약 상세보기
+    @Override
+    @Transactional(readOnly = true)
+    public VolunteerDetailDto getAdminVolunteerReserveDetail(Long reserveCode) {
+        Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
+                .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
+
+        MemberEntity member = reserve.getMember();
+        Volunteer volunteer = reserve.getVolunteerDetail();
+
+        return VolunteerDetailDto.builder()
+                .reserveCode(reserve.getReserveCode())
+                .memberName(member.getMemberName())
+                .phone(member.getMemberPhone())
+                .memberBirth(member.getMemberBirth())
+                .reserveState(reserve.getReserveState())
+                .volDate(volunteer.getVolDate())
+                .volTime(volunteer.getVolTime())
+                .note(reserve.getNote())
+                .reserveNumber(reserve.getReserveNumber())
+                .build();
+    }
     //사용자가 자신의 예약을 취소할때 사용
     @Override
     @Transactional
@@ -112,35 +197,54 @@ public class ReserveServiceImpl implements ReserveService {
         reserve.setReserveState(ReserveState.CANCEL);
     }
     
+    // 관리자가 검색할때 검색필터링 (기간, 예약코드, 회원명, 예약상태)
+    //놀이터
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdminReservationListDto> searchLandReservationsForAdmin(AdminReservationSearchDto dto) {
+        return reserveRepository.searchLandReservations(
+                dto.getReserveCode(),
+                dto.getMemberName(),
+                dto.getStartDate(),
+                dto.getEndDate(),
+                dto.getReserveState()
+        ).stream()
+         .map(AdminReservationListDto::from)
+         .collect(Collectors.toList());
+    }
+    
+    //봉사
+    @Override
+    @Transactional(readOnly = true)
+    public List<AdminReservationListDto> searchVolunteerReservationsForAdmin(AdminReservationSearchDto dto) {
+        return reserveRepository.searchVolunteerReservations(
+                dto.getReserveCode(),
+                dto.getMemberName(),
+                dto.getStartDate(),
+                dto.getEndDate(),
+                dto.getReserveState()
+        ).stream()
+         .map(AdminReservationListDto::from)
+         .collect(Collectors.toList());
+    }
+    
     //관리자가 특정 예약의 상태를 직접 변경
     @Override
     @Transactional
-    public void updateReserveState(Long reserveCode, ReserveState newState) {
+    public void updateReserveStateByAdmin(Long reserveCode, ReserveState newState) {
         Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
         reserve.setReserveState(newState);
     }
     
-    
-   
-    //예약 유형에 따라 조회 (사용자)
+    //마이페이지에서 예약유형 별 탭 기능
     @Override
     @Transactional(readOnly = true)
-    public List<ReserveResponseDto> getReservesByType(int type) {
-        return reserveRepository.findByReserveType(type).stream()
-                .map(reserve -> {
-                    ReserveResponseDto dto = ReserveResponseDto.from(reserve);
-                    dto.setProgramName(convertReserveType(reserve.getReserveType())); 
-                    return dto;
-                }).collect(Collectors.toList());
+    public List<ReserveResponseDto> getReservesByMemberAndType(Long memberNum, int type) {
+        return reserveRepository.findByMember_MemberNumAndReserveType(memberNum, type).stream()
+                .map(ReserveResponseDto::from)
+                .collect(Collectors.toList());
     }
-
     
-    private String convertReserveType(int typeCode) {
-        return switch (typeCode) {
-            case 1 -> "놀이터 예약";
-            case 2 -> "봉사활동";
-            default -> "알 수 없는 예약 유형";
-        };
-    }
+  
 }

@@ -1,6 +1,7 @@
 package com.project.volunteer.service;
 
 import com.project.volunteer.dto.VolunteerDetailDto;
+import com.project.volunteer.dto.VolunteerRequestDto;
 import com.project.volunteer.entity.Volunteer;
 import com.project.volunteer.repository.VolunteerRepository;
 import com.project.reserve.entity.Reserve;
@@ -26,19 +27,34 @@ public class VolunteerServiceImpl implements VolunteerService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약에 대한 봉사 정보를 찾을 수 없습니다."));
 
         // 2. Reserve 조회
-        Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
-                .orElseThrow(() -> new IllegalArgumentException("해당 예약 정보를 찾을 수 없습니다."));
+        Reserve reserve = volunteer.getReserve();
 
         // 3. 회원 정보 조회
         MemberEntity member = reserve.getMember();
 
         // 4. DTO 생성 및 반환
         return VolunteerDetailDto.builder()
+                .reserveCode(reserve.getReserveCode())
                 .memberName(member.getMemberName())
-                .contact(member.getMemberPhone())
-                .reserveDate(reserve.getReserveDate())
-                .timeSlot(reserve.getTimeSlot())
-                .schedule(volunteer.getSchedule())
+                .phone(member.getMemberPhone())
+                .memberBirth(member.getMemberBirth())
+                .reserveState(reserve.getReserveState())
+                .volDate(volunteer.getVolDate())
+                .volTime(volunteer.getVolTime())
+                .note(reserve.getNote())
+                .reserveNumber(reserve.getReserveNumber())
                 .build();
+    }
+    
+    //봉사 예약 생성(기본 정보랑 봉사 상세 정보 합친 예약)
+    @Override
+    public void createVolunteer(Reserve reserve, VolunteerRequestDto volunteerDto) {
+        Volunteer volunteer = Volunteer.builder()
+                .reserve(reserve)
+                .volDate(volunteerDto.getVolDate())
+                .volTime(volunteerDto.getVolTime())
+                .build();
+
+        volunteerRepository.save(volunteer);
     }
 }
