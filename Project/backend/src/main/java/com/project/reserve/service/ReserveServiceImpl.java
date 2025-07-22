@@ -245,6 +245,5 @@ public class ReserveServiceImpl implements ReserveService {
                 .map(ReserveResponseDto::from)
                 .collect(Collectors.toList());
     }
-    
   
 }

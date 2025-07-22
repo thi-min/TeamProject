@@ -1,5 +1,6 @@
 package com.project.land.service;
 
+import com.project.land.dto.LandCountDto;
 import com.project.land.dto.LandDetailDto;
 import com.project.land.dto.LandRequestDto;
 import com.project.land.entity.Land;
@@ -8,6 +9,9 @@ import com.project.reserve.entity.Reserve;
 import com.project.reserve.repository.ReserveRepository;
 import com.project.member.entity.MemberEntity;
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDate;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,4 +79,23 @@ public class LandServiceImpl implements LandService {
 
         landRepository.save(land);
     }
+    
+    
+    @Override
+    @Transactional(readOnly = true)
+    public LandCountDto getLandCountInfo(LocalDate landDate, String landTime) {
+        Integer count = landRepository.countByDateAndTime(landDate, landTime);
+        
+        if (count == null) {
+            count = 0;
+        }
+        return LandCountDto.builder()
+                .landDate(landDate)
+                .landTime(landTime)
+                .reservedCount(count)
+                .capacity(15) // 고정된 정원 값 (필요 시 설정값으로 변경 가능)
+                .build();
+    }
+    
+    
 }

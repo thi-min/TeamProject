@@ -4,7 +4,10 @@ import com.project.land.entity.Land;
 import com.project.land.entity.LandType;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,4 +18,9 @@ public interface LandRepository extends JpaRepository<Land, Long> {
 
     // 필요시 놀이터 타입별 조회
     List<Land> findByLandType(LandType landType);
+    
+    //int형 예약 마리수를 반환
+    @Query("SELECT SUM(l.animalNumber) FROM Land l WHERE l.landDate = :landDate AND l.landTime = :landTime")
+    Integer countByDateAndTime(@Param("landDate") LocalDate landDate, 
+    					   @Param("landTime") String landTime);
 }
