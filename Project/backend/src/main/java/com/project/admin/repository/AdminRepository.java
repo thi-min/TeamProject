@@ -1,3 +1,16 @@
+package com.project.admin.repository;
+import java.util.Optional;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.project.admin.entity.AdminEntity;
+
+public interface AdminRepository extends JpaRepository<AdminEntity, Long>{
+	//관리자 로그인용 id + pw 조회
+	Optional<AdminEntity> findByAdminIdAndAdminPw(String adminId, String adminPw);
+}
+
+
 package com.project.admin.entity;
 
 import java.time.LocalDateTime;
@@ -42,8 +55,8 @@ public class AdminEntity {
 	private String adminEmail; //이메일
 	@Column(name = "admin_pw",nullable = false)
 	private String adminPw; //비밀번호
-	@Column(name = "admin_name",nullable = false)
-	private String adminName; //이름
+	@Column(name = "admin_phone",nullable = false)
+	private String AdminPhone; //핸드폰 번호
 	
 //	@Column(name = "authority")
 //	@Enumerated(EnumType.STRING)  
