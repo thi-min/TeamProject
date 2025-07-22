@@ -1,6 +1,7 @@
 package com.project.land.service;
 
 import com.project.land.dto.LandDetailDto;
+import com.project.land.dto.LandRequestDto;
 import com.project.land.entity.Land;
 import com.project.land.repository.LandRepository;
 import com.project.reserve.entity.Reserve;
@@ -25,18 +26,18 @@ public class LandServiceImpl implements LandService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 예약에 대한 놀이터 정보를 찾을 수 없습니다."));
 
         // 2. Reserve 조회
-        Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
-                .orElseThrow(() -> new IllegalArgumentException("해당 예약 정보를 찾을 수 없습니다."));
+        Reserve reserve = land.getReserve();
 
         // 3. Member 정보
         MemberEntity member = reserve.getMember();
 
         // 4. 결제 계산
         int basePrice = 2000; // 기준금액 (예: 반려견 1마리 기준)
-        int dogCount = land.getAnimalNumber();
-        int peopleCount = reserve.getReserveNumber();
-
-        int additionalPrice = (dogCount > 1 ? (dogCount - 1) * 1000 : 0) + peopleCount * 1000;
+        int AnimalNumber = land.getAnimalNumber();
+        int ReserveNumber = reserve.getReserveNumber();
+        
+        // 반려견 수가 2마리 이상이라면 추가 반려견 수 만큼 1000원씩 요금 부가 + 보호자 수 만큼 인당 1000원 부가
+        int additionalPrice = (AnimalNumber > 1 ? (AnimalNumber - 1) * 1000 : 0) + ReserveNumber * 1000;
         int totalPrice = basePrice + additionalPrice;
 
         // 5. DTO 구성
@@ -58,5 +59,19 @@ public class LandServiceImpl implements LandService {
                 .basePriceDetail("중, 소형견 x " + land.getAnimalNumber() + "마리")
                 .extraPriceDetail(" 추가 인원 x" + reserve.getReserveNumber() + "명")
                 .build();
+    }
+    
+    @Override
+    public void createLand(Reserve reserve, LandRequestDto landDto) {
+        Land land = Land.builder()
+                .reserve(reserve)
+                .landDate(landDto.getLandDate())
+                .landTime(landDto.getLandTime())
+                .landType(landDto.getLandType())
+                .animalNumber(landDto.getAnimalNumber())
+                .payNumber(landDto.getPayNumber())
+                .build();
+
+        landRepository.save(land);
     }
 }

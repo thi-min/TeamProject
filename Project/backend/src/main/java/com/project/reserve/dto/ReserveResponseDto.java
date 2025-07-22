@@ -21,7 +21,7 @@ public class ReserveResponseDto {
 	private Long memberNum;
 	
     private LocalDateTime applyDate;
-    private LocalDate reserveDate;       //놀이터 or 봉사 예약일
+    private LocalDate reserveDate;       //놀이터 or 봉사 예약일 Land.landDate, Volunteer.volDate
     private int reserveType;
     private String reserveTypeName;
     private ReserveState reserveState;

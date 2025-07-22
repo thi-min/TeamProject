@@ -12,9 +12,8 @@ public class AdminReservationListDto {
 	private Long reserveCode;       // 예약 코드 (고유 식별자)
     private String memberName;      // 회원 이름 (조인해서 가져올 것)
     private String programName;     // 예약된 프로그램 이름
-    private LocalDate reserveDate; // 예약일
     private String reserveState;   // 상태 (예: DONE, REJ, ING)
-    
+    private LocalDate reserveDate; //예약일
 
     public static AdminReservationListDto from(Reserve reserve) {
         AdminReservationListDto dto = new AdminReservationListDto();
