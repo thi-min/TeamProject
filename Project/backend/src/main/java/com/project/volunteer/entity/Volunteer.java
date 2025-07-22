@@ -24,9 +24,12 @@ public class Volunteer {
     @JoinColumn(name = "reserve_code") //외래키 컬럼명
     private Reserve reserve;
 
-    @Column(name = "schedule")
-    private LocalDate schedule; // 봉사 일정
+    @Column(name = "vol_date")
+    private LocalDate volDate; // 봉사 일정
 
     @Column(name = "vol_time")
-    private String volTime; // 봉사 시간
+    private String volTime; // 봉사 시간 (셀렉트박스 형식 선택지 3개)
+    
+    @Column(name ="sum_time")
+    private String sumTime; //봉사 누적 시간
 }

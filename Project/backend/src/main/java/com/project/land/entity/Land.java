@@ -1,5 +1,7 @@
 package com.project.land.entity;
 
+import java.time.LocalDate;
+
 import com.project.reserve.entity.Reserve;
 
 import jakarta.persistence.*;
@@ -23,6 +25,12 @@ public class Land {
     @JoinColumn(name = "reserve_code")
     private Reserve reserve;
     
+    @Column(name = "land_date")
+    private LocalDate landDate;	//예약일
+    
+    @Column(name = "land_time")
+    private String landTime; 	// 예약 시간
+    
     @Enumerated(EnumType.STRING)
     @Column(name = "land_type")
     private LandType landType;	//놀이터 타입(반려견 타입)
@@ -31,6 +39,6 @@ public class Land {
     private int animalNumber;	//반려견 수
 
     @Column(name = "pay_number") 
-    private int payNumber;
+    private int payNumber;		// 결제금액
 
 }
