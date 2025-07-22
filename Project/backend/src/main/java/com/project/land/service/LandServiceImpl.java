@@ -41,15 +41,22 @@ public class LandServiceImpl implements LandService {
 
         // 5. DTO 구성
         return LandDetailDto.builder()
+        		.reserveCode(reserve.getReserveCode())
                 .memberName(member.getMemberName())
-                .contact(member.getMemberPhone())
-                .dogType(land.getLandType().name()) // LARGE / SMALL
-                .dogCount(dogCount)
-                .peopleCount(peopleCount)
-                .timeSlot(reserve.getTimeSlot())
-                .basePrice(basePrice)
-                .additionalPrice(additionalPrice)
-                .totalPrice(totalPrice)
+                .phone(member.getMemberPhone())
+                .reserveState(reserve.getReserveState())
+                .landDate(land.getLandDate())
+                .landTime(land.getLandTime())
+                .applyDate(reserve.getApplyDate())
+                .note(reserve.getNote())
+                .landType(land.getLandType())
+                .animalNumber(land.getAnimalNumber())
+                .reserveNumber(reserve.getReserveNumber())
+                .basePrice(2000)
+                .additionalPrice(1000 * (reserve.getReserveNumber() - 1))
+                .totalPrice(2000 + 1000 * (reserve.getReserveNumber() - 1))
+                .basePriceDetail("중, 소형견 x " + land.getAnimalNumber() + "마리")
+                .extraPriceDetail(" 추가 인원 x" + reserve.getReserveNumber() + "명")
                 .build();
     }
 }

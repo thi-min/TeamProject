@@ -11,6 +11,6 @@ public class LandRequestDto {
     private LocalDate reserveDate;
     private String reserveTime;
     private LandType landType;
-    private int animalNumber;
-    private int payNumber;
+    private int animalNumber;	//반려견 수
+    private int payNumber;		//결제 금액 
 }

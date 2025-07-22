@@ -52,7 +52,7 @@ public class ReserveResponseDto {
                 .reserveState(reserve.getReserveState())
                 .build();
     }
-    public static String getReserveTypeName(int type) {
+    public static String getReserveTypeName(int type) {  //public: 모든클래스에서 접근가능 private:같은 클래스내에서만 접근가능
         return switch (type) {
             case 1 -> "놀이터 예약";
             case 2 -> "봉사 예약";
