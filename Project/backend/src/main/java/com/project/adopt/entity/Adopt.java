@@ -36,6 +36,6 @@ public class Adopt {
     private LocalDate visitDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "adopt_sts")
-    private AdoptSts adoptSts;
+    @Column(name = "adopt_state")
+    private AdoptState adoptState;
 }
