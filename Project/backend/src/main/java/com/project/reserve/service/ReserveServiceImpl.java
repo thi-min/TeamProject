@@ -67,6 +67,10 @@ public class ReserveServiceImpl implements ReserveService {
             }
             volunteerService.createVolunteer(saved, fullRequestDto.getVolunteerDto());
         }
+        else {
+            //잘못된 예약유형에 대해 예외 발생
+            throw new IllegalArgumentException("예약 유형이 유효하지 않습니다. (1: 놀이터, 2: 봉사)");
+        }
 
         return saved.getReserveCode();
     }
@@ -76,6 +80,10 @@ public class ReserveServiceImpl implements ReserveService {
     @Override
     @Transactional(readOnly = true)
     public List<ReserveResponseDto> getReservesByMember(Long memberNum) {
+    	//존재하지않는 회원인 경우 예외 처리
+    	if (!memberRepository.existsById(memberNum)) {
+            throw new IllegalArgumentException("존재하지 않는 회원 번호입니다.");
+        }
         return reserveRepository.findByMember_MemberNum(memberNum).stream()
                 .map(ReserveResponseDto::from)
                 .collect(Collectors.toList());
@@ -139,7 +147,7 @@ public class ReserveServiceImpl implements ReserveService {
     public LandDetailDto getAdminLandReserveDetail(Long reserveCode) {
         Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
-
+        
         MemberEntity member = reserve.getMember();
         Land land = reserve.getLandDetail();
 
@@ -194,6 +202,11 @@ public class ReserveServiceImpl implements ReserveService {
         if (!reserve.getMember().getMemberNum().equals(memberNum)) {
             throw new SecurityException("본인의 예약만 취소할 수 있습니다.");
         }
+        
+        //이미 취소된 상태일 경우 예외처리
+        if (reserve.getReserveState() == ReserveState.CANCEL) {
+            throw new IllegalStateException("이미 취소된 예약입니다.");
+        }
         reserve.setReserveState(ReserveState.CANCEL);
     }
     
@@ -241,10 +254,13 @@ public class ReserveServiceImpl implements ReserveService {
     @Override
     @Transactional(readOnly = true)
     public List<ReserveResponseDto> getReservesByMemberAndType(Long memberNum, int type) {
+    	//존재하지 않는 회원인 경우 예외처리
+    	if (!memberRepository.existsById(memberNum)) {
+            throw new IllegalArgumentException("존재하지 않는 회원 번호입니다.");
+        }
         return reserveRepository.findByMember_MemberNumAndReserveType(memberNum, type).stream()
                 .map(ReserveResponseDto::from)
                 .collect(Collectors.toList());
     }
-    
   
 }

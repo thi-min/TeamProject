@@ -1,5 +1,6 @@
 package com.project.volunteer.service;
 
+import com.project.volunteer.dto.VolunteerCountDto;
 import com.project.volunteer.dto.VolunteerDetailDto;
 import com.project.volunteer.dto.VolunteerRequestDto;
 import com.project.volunteer.entity.Volunteer;
@@ -9,6 +10,9 @@ import com.project.reserve.repository.ReserveRepository;
 import com.project.member.entity.MemberEntity;
 
 import lombok.RequiredArgsConstructor;
+
+import java.time.LocalDate;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,5 +60,22 @@ public class VolunteerServiceImpl implements VolunteerService {
                 .build();
 
         volunteerRepository.save(volunteer);
+    }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public VolunteerCountDto getVolunteerCountInfo(LocalDate volDate, String volTime) {
+        Integer count = volunteerRepository.countByDateAndTime(volDate, volTime);
+        
+        if (count == null) {
+            count = 0;
+        }
+        
+        return VolunteerCountDto.builder()
+                .volDate(volDate)
+                .volTime(volTime)
+                .reservedCount(count != null ? count : 0)
+                .capacity(10)  // 예: 봉사 정원
+                .build();
     }
 }
