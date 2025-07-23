@@ -190,7 +190,7 @@ public class AdminServiceImpl implements AdminService {
 				.toList();
 		
 		//페이지 결과를 PageResponseDto 형태로 래핑해서 리턴
-		return PageResponseDto<AdminMemberListResponseDto>builder()
+		return PageResponseDto.<AdminMemberListResponseDto>builder()
 				.content(dtoList)								//현재 페이지에 해당하는 데이터 목록
 				.currentPage(result.getNumber() + 1)			//현재 페이지 번호
 				.totalPage(result.getTotalElements())			//전체 페이지 수

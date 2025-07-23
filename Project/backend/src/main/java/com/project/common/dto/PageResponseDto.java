@@ -1,5 +1,6 @@
 package com.project.common.dto;
 
+import lombok.Builder;
 import lombok.Data;
 import org.springframework.data.domain.Pageable;
 
@@ -10,6 +11,7 @@ import org.springframework.data.domain.Sort;
 
 //페이지네이션 응답용 Dto
 @Data
+@Builder
 public class PageResponseDto<T> {
 	private List<T> content;	//현재 페이지에 해당하는 데이터 목록(게시글, 예약관리, 회원관리)
 	private int currentPage;	//현재 페이지 번호
