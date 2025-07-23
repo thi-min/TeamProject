@@ -9,8 +9,8 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ClosedDayRequestDto {
+public class ClosedDayResponseDto {
     private LocalDate closedDate;
     private Boolean isClosed;
 }
-//휴무일 등록, 수정용
+//달력에 휴무일 출력용

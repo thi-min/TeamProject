@@ -1,8 +1,10 @@
 package com.project.common.service;
 
 import com.project.common.dto.ClosedDayRequestDto;
+import com.project.common.dto.ClosedDayResponseDto;
 
 import java.time.LocalDate;
+import java.util.List;
 
 public interface ClosedDayService {
 
@@ -13,5 +15,11 @@ public interface ClosedDayService {
     void deleteClosedDay(LocalDate date);
 
     //해당 날짜가 휴무일인지 여부 확인
-    boolean isClosed(LocalDate date);
+    public boolean isClosed(LocalDate date);
+    
+    //특정 기간 내 휴무일 전체 조회(달력 ui)
+    List<ClosedDayResponseDto> getClosedDaysInPeriod(LocalDate start, LocalDate end);
+    
+    //명절이나 크리스마스 자동 등록
+    void registerHolidays(int year);
 }

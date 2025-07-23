@@ -6,6 +6,11 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Table(name = "closed_day")
 public class ClosedDay {
 
