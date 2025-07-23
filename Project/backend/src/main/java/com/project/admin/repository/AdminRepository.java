@@ -17,5 +17,4 @@ public interface AdminRepository extends JpaRepository<AdminEntity, Long>{
 	//관리자 비밀번호 변경
     //비밀번호 변경
     Optional<AdminEntity> adminchangeByPassword(String adminId);
-    
 }
