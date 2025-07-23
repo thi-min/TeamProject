@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.project.admin.dto.AdminForcedDeleteDto;
@@ -16,14 +15,13 @@ import com.project.admin.dto.AdminMemberListResponseDto;
 import com.project.admin.dto.AdminPasswordUpdateRequestDto;
 import com.project.admin.entity.AdminEntity;
 import com.project.admin.repository.AdminRepository;
-import com.project.banner.BannerRepository;
 import com.project.common.dto.PageRequestDto;
 import com.project.common.dto.PageResponseDto;
 import com.project.member.dto.LoginRequestDto;
 import com.project.member.entity.MemberEntity;
 import com.project.member.entity.MemberState;
 import com.project.member.repository.MemberRepository;
-import com.project.reserve.controller.AdminReserveController;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -33,17 +31,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor //final로 선언된 memberRepository를 자동으로 생성자 주입 시켜줌
 public class AdminServiceImpl implements AdminService {
 
-    private final BannerRepository bannerRepository;
-
-    private final AdminReserveController adminReserveController;
-
 	private final AdminRepository adminRepository;
 	private final MemberRepository memberRepository;
-
-    AdminServiceImpl(AdminReserveController adminReserveController, BannerRepository bannerRepository) {
-        this.adminReserveController = adminReserveController;
-        this.bannerRepository = bannerRepository;
-    }
 
 	@Override
 	//관리자 로그인
@@ -193,8 +182,8 @@ public class AdminServiceImpl implements AdminService {
 		return PageResponseDto.<AdminMemberListResponseDto>builder()
 				.content(dtoList)								//현재 페이지에 해당하는 데이터 목록
 				.currentPage(result.getNumber() + 1)			//현재 페이지 번호
-				.totalPage(result.getTotalElements())			//전체 페이지 수
-				.totalElement(result.getTotalElements())		//전체 데이터 수(회원, 예약, 게시판 등등)
+				.totalPages(result.getTotalPages())				//전체 페이지 수
+				.totalElements(result.getTotalElements())		//전체 데이터 수(회원, 예약, 게시판 등등)
 				.isFirst(result.isFirst())						//첫 페이지 여부
 				.isLast(result.isLast())						//마지막 페이지 여부
 				.build();

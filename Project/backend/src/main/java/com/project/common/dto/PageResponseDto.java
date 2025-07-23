@@ -20,6 +20,7 @@ public class PageResponseDto<T> {
 	private boolean isFirst;	//현재 페이지가 첫 번째 페이지인지 여부
 	private boolean isLast;		//현재 페이지가 마지막 페이지인지 여부
 }
+
 //예시 사용
 //Page<MemberEntity> result = repository.findAll(pageable);
 //PageResultDto<MemberResponseDto> dto = new PageResultDto<>(
