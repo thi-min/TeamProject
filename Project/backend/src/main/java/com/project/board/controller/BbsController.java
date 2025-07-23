@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.project.board.BoardType;
 import com.project.board.dto.BbsDto;
@@ -92,17 +93,27 @@ public class BbsController {
         return ResponseEntity.ok("이미지 수정 완료");
     }
 
-    // 이미지 개별 삭제
+    // 단일이미지 삭제 
     @DeleteMapping("/image/{imageId}")
     public ResponseEntity<?> deleteImage(@PathVariable Long imageId) {
         bbsService.deleteImage(imageId);
         return ResponseEntity.ok("이미지 삭제 완료");
     }
+    
+    // 이미지 개별 삭제
+    @DeleteMapping("/images")
+    public ResponseEntity<?> deleteImages(@RequestBody List<Long> imageIds) {
+        bbsService.deleteImages(imageIds);
+        return ResponseEntity.ok("이미지 삭제 완료");
+    }
 
     // 파일 업로드
     @PostMapping("/{bbsId}/files")
-    public List<FileUpLoadDto> uploadFiles(@PathVariable Long bbsId, @RequestBody List<FileUpLoadDto> dtos) {
-        return bbsService.saveFileList(bbsId, dtos);
+    public List<FileUpLoadDto> uploadFiles(
+            @PathVariable Long bbsId,
+            @RequestPart("files") List<MultipartFile> files
+    ) {
+        return bbsService.saveFileList(bbsId, files);
     }
 
     // 파일 조회

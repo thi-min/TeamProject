@@ -1,5 +1,9 @@
 package com.project.board.service;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.project.board.BoardType;
 import com.project.board.dto.BbsDto;
@@ -35,6 +40,13 @@ public class BbsService {
     private final QandARepository qandARepository;
     private final ImageBbsRepository imageBbsRepository;
     private final FileUpLoadRepository fileUploadRepository;
+    
+    private String getExtension(String filename) {
+    	 if (filename == null || filename.isBlank()) return null;
+    	 int dotIndex = filename.lastIndexOf('.');
+    	 if (dotIndex == -1 || dotIndex == filename.length() - 1) return null;
+    	 return filename.substring(dotIndex + 1).toLowerCase();
+    }
 
     public BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId) {
         BoardType type = dto.getBulletinType();
@@ -275,6 +287,37 @@ public class BbsService {
         }
         imageBbsRepository.deleteById(imageId);
     }
+    
+    @Transactional
+    public void deleteImages(List<Long> imageIds) {
+        List<ImageBbsEntity> imagesToDelete = imageBbsRepository.findAllById(imageIds);
+
+        if (imagesToDelete.isEmpty()) {
+            throw new BbsException("삭제할 이미지가 존재하지 않습니다.");
+        }
+
+        // 게시글 아이디 가져오기 (삭제할 이미지들이 모두 같은 게시글에 속하는지 확인)
+        Long bbsId = imagesToDelete.get(0).getBbs().getBulletinnum();
+
+        boolean allSameBbs = imagesToDelete.stream()
+            .allMatch(img -> img.getBbs().getBulletinnum().equals(bbsId));
+
+        if (!allSameBbs) {
+            throw new BbsException("서로 다른 게시글의 이미지를 동시에 삭제할 수 없습니다.");
+        }
+
+        // 게시글에 현재 이미지 개수
+        long currentImageCount = imageBbsRepository.countByBbs_BulletinNum(bbsId);
+
+        // 삭제 후 이미지가 최소 1장 남아야 한다는 조건 검사
+        if (currentImageCount - imagesToDelete.size() < 1) {
+            throw new BbsException("게시글에는 최소 1장의 이미지가 있어야 합니다.");
+        }
+
+        // 실제 삭제 수행
+        imageBbsRepository.deleteAllById(imageIds);
+    }
+
 
     public ImageBbsDto updateImage(Long imageId, ImageBbsDto dto) {
         ImageBbsEntity image = imageBbsRepository.findById(imageId)
@@ -290,27 +333,47 @@ public class BbsService {
             .build();
     }
 
-    public List<FileUpLoadDto> saveFileList(Long bbsId, List<FileUpLoadDto> dtos) {
+    public List<FileUpLoadDto> saveFileList(Long bbsId, List<MultipartFile> files) {
         BbsEntity bbs = bbsRepository.findById(bbsId)
-            .orElseThrow(() -> new BbsException("게시글 없음"));
+            .orElseThrow(() -> new BbsException("해당 게시글이 존재하지 않습니다"));
 
         List<String> allowedExtensions = List.of("jpg", "jpeg");
+        List<String> allowedMimeTypes = List.of("image/jpeg");
+        long maxSize = 5 * 1024 * 1024; // 5MB
 
-        // 확장자 검사 + 필터링
-        List<FileUpLoadEntity> entities = dtos.stream()
-            .filter(dto -> {
-                String ext = dto.getExtension();
-                if (ext == null) return false;
-                return allowedExtensions.contains(ext.toLowerCase());
+        String uploadDir = "/var/www/uploads"; // 실제 경로로 변경 필요
+
+        List<FileUpLoadEntity> entities = files.stream()
+            .filter(file -> {
+                if (file == null || file.isEmpty()) return false;
+
+                String ext = getExtension(file.getOriginalFilename());
+                String contentType = file.getContentType();
+
+                return ext != null && allowedExtensions.contains(ext.toLowerCase())
+                        && contentType != null && allowedMimeTypes.contains(contentType.toLowerCase())
+                        && file.getSize() <= maxSize;
             })
-            .map(dto -> FileUpLoadEntity.builder()
-                .bbs(bbs)
-                .originalName(dto.getOriginalName())
-                .savedName(dto.getSavedName())
-                .path(dto.getPath())
-                .size(dto.getSize())
-                .extension(dto.getExtension())
-                .build())
+            .map(file -> {
+                String ext = getExtension(file.getOriginalFilename());
+                String savedName = UUID.randomUUID().toString() + "." + ext;
+                Path target = Paths.get(uploadDir, savedName);
+
+                try {
+                    file.transferTo(target);
+                } catch (IOException e) {
+                    throw new BbsException("파일 저장 실패: " + file.getOriginalFilename(), e);
+                }
+
+                return FileUpLoadEntity.builder()
+                    .bbs(bbs)
+                    .originalName(file.getOriginalFilename())
+                    .savedName(savedName)
+                    .path(uploadDir)
+                    .size(file.getSize())
+                    .extension(ext)
+                    .build();
+            })
             .collect(Collectors.toList());
 
         if (entities.isEmpty()) {

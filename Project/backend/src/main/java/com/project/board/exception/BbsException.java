@@ -5,4 +5,7 @@ public class BbsException extends RuntimeException {
 		super(message);
 	}
 
+	public BbsException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

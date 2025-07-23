@@ -3,6 +3,8 @@ package com.project.board.dto;
 import lombok.*;
 import java.io.*;
 
+import org.springframework.web.multipart.MultipartFile;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -23,6 +25,8 @@ public class FileUpLoadDto {
     private Long size;           // 파일 크기
 
     private String extension;    // 확장자
+    
+    private MultipartFile file;  // 실제 업로드 되는 파일 데이터
     
     public static class FileUpLoadDtoBuilder {
         public FileUpLoadDtoBuilder originalName(String originalName) {
