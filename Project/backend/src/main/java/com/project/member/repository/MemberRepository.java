@@ -40,6 +40,8 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     Page<MemberEntity> findAll(Pageable pageable);
     //검색 + 페이징(이름에 키워드 포함된 회원 조회)
     Page<MemberEntity> findByMemberNameContaining(String keyword, Pageable pageable);
+
+	Optional<MemberEntity> findByMemberId(String string);
     
     //상태 기준 조회시 필요할떄 사용
     //Page<MemberEntity> findByMemberState(MemberState state, Pageable pageable);
