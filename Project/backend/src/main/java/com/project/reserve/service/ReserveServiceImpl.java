@@ -33,7 +33,8 @@ public class ReserveServiceImpl implements ReserveService {
     private final MemberRepository memberRepository;
     private final LandService landService; 
     private final VolunteerService volunteerService;
-
+    
+   
     // 사용자가 예약요청하면 예약상태 기본값으로 설정, DB에 저장
     @Override
     @Transactional
@@ -93,7 +94,10 @@ public class ReserveServiceImpl implements ReserveService {
     @Override
     @Transactional(readOnly = true)
     public List<AdminReservationListDto> getAllReservationsForAdmin() {
-        return reserveRepository.findAllReservationsForAdmin(); // @Query 기반
+        List<Reserve> reserveList = reserveRepository.findAllWithDetails(); // 엔티티만 가져옴
+        return reserveList.stream()
+                .map(AdminReservationListDto::from) // DTO로 가공
+                .collect(Collectors.toList());
     }
     
     //관리자 놀이터 예약목록 조회

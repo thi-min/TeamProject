@@ -59,10 +59,11 @@ public interface ReserveRepository extends JpaRepository<Reserve, Long> {
     	);
     
     //관리자가 예약리스트 전체목록 조회
-    @Query("SELECT new com.project.reserve.dto.AdminReservationListDto(" +
-    	       "r.reserveCode, m.memberName, r.programName, r.reserveDate, r.reserveState) " +
-    	       "FROM Reserve r JOIN r.member m")
-    	List<AdminReservationListDto> findAllReservationsForAdmin();
+    @Query("SELECT r FROM Reserve r " +
+    	       "JOIN FETCH r.member " +
+    	       "LEFT JOIN FETCH r.landDetail " +
+    	       "LEFT JOIN FETCH r.volunteerDetail")
+    	List<Reserve> findAllWithDetails();
     
     //관리자 놀이터예약 조회
     @Query("SELECT r FROM Reserve r WHERE r.reserveType = 1") // 1: 놀이터
