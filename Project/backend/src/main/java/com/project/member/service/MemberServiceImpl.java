@@ -82,6 +82,7 @@ public class MemberServiceImpl implements MemberService {
 		return MemberMyPageResponseDto.builder()
 				.memberName(member.getMemberName())
 				.memberId(member.getMemberId())
+				.memberPw(member.getMemberPw())
 				.memberBirth(member.getMemberBirth())
 				.memberSex(member.getMemberSex()) //enum은 그대로 호출
 				.memberAddress(member.getMemberAddress())
@@ -163,5 +164,6 @@ public class MemberServiceImpl implements MemberService {
 		//존재하지 않으면 인증가능
 		return "사용 가능한 번호입니다.";
 	}
+
 
 }
