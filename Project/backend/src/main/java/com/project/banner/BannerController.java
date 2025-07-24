@@ -20,22 +20,26 @@ public class BannerController {
 
     private final BannerService bannerService;
 
+    // 배너 생성
     @PostMapping
     public void createBanner(@RequestPart("data") BannerCreateDto dto,
                              @RequestPart("file") MultipartFile file) throws IOException {
         bannerService.createBanner(dto, file);
     }
 
+    // 배너 전체 목록 조회
     @GetMapping
     public List<BannerListDto> getAll() {
         return bannerService.getAll();
     }
 
+    // 특정 배너 상세 정보 조회
     @GetMapping("/{id}")
     public BannerListDto getDetail(@PathVariable Long id) {
         return bannerService.getDetail(id);
     }
 
+    // 배너 수정
     @PutMapping("/{id}")
     public void updateBanner(@PathVariable Long id,
                              @RequestPart("data") BannerUpdateDto dto,
@@ -43,11 +47,13 @@ public class BannerController {
         bannerService.update(id, dto, file);
     }
 
+    // 배너 단건 삭제
     @DeleteMapping("/{id}")
     public void deleteBanner(@PathVariable Long id) {
         bannerService.delete(id);
     }
 
+    // 배너 복수건 삭제
     @PostMapping("/delete-bulk")
     public void deleteBulk(@RequestBody BannerDeleteDto dto) {
         bannerService.deleteBulk(dto.getBannerIds());

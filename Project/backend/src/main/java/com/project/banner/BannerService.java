@@ -17,20 +17,26 @@ import java.util.stream.Collectors;
 public class BannerService {
 
     private final BannerRepository bannerRepository;
-    private final String UPLOAD_PATH = "C:/banner-uploads";
-
+    
+    // 배너 이미지 저장 경로
+    private final String UPLOAD_PATH = "C:/banner-uploads"; 
+    
+    // 배너 생성
     public void createBanner(BannerCreateDto dto, MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new RuntimeException("이미지 파일은 필수입니다.");
         }
 
+        // 이미지 파일 저장
         String fileName = saveFile(file);
 
+        // 관리자 정보 조회 (배너 작성자)
         AdminEntity admin = bannerRepository.findAdminByAdminId(dto.getAdminId());
         if (admin == null) {
             throw new RuntimeException("관리자 정보를 찾을 수 없습니다.");
         }
-
+        
+        // 배너 엔티티 생성 및 저장
         BannerEntity banner = BannerEntity.builder()
                 .title(dto.getTitle())
                 .subTitle(dto.getSubTitle())
@@ -47,22 +53,26 @@ public class BannerService {
         bannerRepository.save(banner);
     }
 
+    // 모든 배너 리스트 조회
     public List<BannerListDto> getAll() {
         return bannerRepository.findAll().stream()
                 .map(BannerListDto::fromEntity)
                 .collect(Collectors.toList());
     }
 
+    // 특정 배너 상세 정보 조회
     public BannerListDto getDetail(Long id) {
         BannerEntity banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("배너 없음"));
         return BannerListDto.fromEntity(banner);
     }
 
+    // 배너 수정
     public void update(Long id, BannerUpdateDto dto, MultipartFile file) throws IOException {
         BannerEntity banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("배너 없음"));
 
+        // 필드 수정
         banner.setTitle(dto.getTitle());
         banner.setSubTitle(dto.getSubTitle());
         banner.setAltText(dto.getAltText());
@@ -80,14 +90,17 @@ public class BannerService {
         bannerRepository.save(banner);
     }
 
+    // 배너 단건 삭제
     public void delete(Long id) {
         bannerRepository.deleteById(id);
     }
 
+    // 배너 복수건 삭제
     public void deleteBulk(List<Long> ids) {
         bannerRepository.deleteByBannerIdIn(ids);
     }
 
+    // 파일 저장 및 유효성 검사
     private String saveFile(MultipartFile file) throws IOException {
         String originalFileName = file.getOriginalFilename();
         if (originalFileName == null) {

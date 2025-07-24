@@ -8,29 +8,47 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface BbsService {
-    BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId);
-    BbsDto updateBbs(Long id, BbsDto dto, Long memberNum);
-    void deleteBbs(Long id, Long requesterMemberNum, Long requesterAdminId);
-    void deleteBbs(List<Long> ids, Long requesterAdminId, Long requesterMemberNum);
-    BbsDto getBbs(Long id);
-    List<BbsDto> getAllByType(BoardType type);
-    Page<BbsDto> getPagedPosts(BoardType type, String sort, Pageable pageable);
-    Page<BbsDto> searchPosts(String searchType, String keyword, BoardType type, Pageable pageable);
+	
+    BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId); // 게시글 생성 (회원 또는 관리자)
+    
+    BbsDto updateBbs(Long id, BbsDto dto, Long memberNum); // 게시글 수정 (작성자 본인만 가능)
+    
+    void deleteBbs(Long id, Long requesterMemberNum, Long requesterAdminId);  // 게시글 단건 삭제 (작성자 본인 또는 관리자)
+    
+    void deleteBbs(List<Long> ids, Long requesterAdminId, Long requesterMemberNum); // 게시글 복수건 삭제 (관리자 또는 본인 삭제 권한 확인)
+    
+    BbsDto getBbs(Long id); // 게시글 단건 조회
+    
+    List<BbsDto> getAllByType(BoardType type); // 특정 게시판 타입으로 모든 게시글 리스트 조회
+    
+    Page<BbsDto> getPagedPosts(BoardType type, String sort, Pageable pageable); // 게시판 타입 + 정렬 조건으로 페이징된 게시글 조회
+    
+    Page<BbsDto> searchPosts(String searchType, String keyword, BoardType type, Pageable pageable); // 게시판 타입 + 검색 조건으로 페이징된 게시글 조회
+    
+    QandADto saveQna(Long bbsId, QandADto dto, Long requesterAdminId); // QnA 답변 저장 (관리자만 가능)
+    
+    QandADto getQna(Long bbsId);  // 특정 게시글에 대한 QnA 답변 조회
+    
+    void deleteQna(Long qnaId); // QnA 답변 삭제
+    
+    QandADto updateQna(Long qnaId, QandADto dto); // QnA 답변 수정
 
-    QandADto saveQna(Long bbsId, QandADto dto, Long requesterAdminId);
-    QandADto getQna(Long bbsId);
-    void deleteQna(Long qnaId);
-    QandADto updateQna(Long qnaId, QandADto dto);
+    List<ImageBbsDto> saveImageFileList(Long bbsId, List<MultipartFile> files); // 이미지 파일 리스트 저장 (게시글 이미지 업로드)
+    
+    List<ImageBbsDto> getImageBbsList(Long bbsId); // 특정 게시글에 등록된 이미지 리스트 조회
+    
+    void deleteImage(Long imageId); // 이미지 단건 삭제
+    
+    void deleteImages(List<Long> imageIds); // 이미지 여러 개 삭제
+    
+    ImageBbsDto updateImage(Long imageId, ImageBbsDto dto); // 이미지 수정 (예: alt 텍스트나 순서 등 정보 변경)
 
-    List<ImageBbsDto> saveImageFileList(Long bbsId, List<MultipartFile> files);
-    List<ImageBbsDto> getImageBbsList(Long bbsId);
-    void deleteImage(Long imageId);
-    void deleteImages(List<Long> imageIds);
-    ImageBbsDto updateImage(Long imageId, ImageBbsDto dto);
-
-    List<FileUpLoadDto> saveFileList(Long bbsId, List<MultipartFile> files, BoardType boardType);
-    List<FileUpLoadDto> getFilesByBbs(Long bbsId);
-    void deleteFile(Long fileId);
-    FileUpLoadDto updateFile(Long fileId, FileUpLoadDto dto);
+    List<FileUpLoadDto> saveFileList(Long bbsId, List<MultipartFile> files, BoardType boardType); // 파일 업로드 리스트 저장 (첨부파일 등록)
+    
+    List<FileUpLoadDto> getFilesByBbs(Long bbsId); // 특정 게시글의 첨부파일 리스트 조회
+    
+    void deleteFile(Long fileId); // 첨부파일 단건 삭제
+    
+    FileUpLoadDto updateFile(Long fileId, FileUpLoadDto dto); // 첨부파일 정보 수정
 }
 
