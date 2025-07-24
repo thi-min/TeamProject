@@ -107,7 +107,7 @@ public class MemberServiceImpl implements MemberService {
 	@Override
 	//아이디 찾기
 	public String findMemberId(String memberName, String memberPhone) {
-		MemberEntity member = memberRepository.findByID(memberName, memberPhone)
+		MemberEntity member = memberRepository.findByMemberNameAndMemberPhone(memberName, memberPhone)
 				.orElseThrow(() -> new IllegalArgumentException("일치하는 아이디가 없습니다."));
 		
 		return member.getMemberId(); //마스킹 처리해서 반환해도됨
@@ -117,7 +117,7 @@ public class MemberServiceImpl implements MemberService {
 	@Override
 	//비밀번호 찾기
 	public String findMemberPw(String memberId, String memberName, String memberPhone) {
-		MemberEntity member = memberRepository.findByPassword(memberId, memberName, memberPhone)
+		MemberEntity member = memberRepository.findByMemberIdAndMemberNameAndMemberPhone(memberId, memberName, memberPhone)
 				.orElseThrow(() -> new IllegalArgumentException("입력하신 정보와 일치하는 회원이 없습니다."));
 		
 		return "본인 확인이 완료되었습니다. 비밀번호를 재설정 해주세요";

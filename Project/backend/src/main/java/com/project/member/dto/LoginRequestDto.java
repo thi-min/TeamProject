@@ -9,7 +9,7 @@ import lombok.Data;
 //로그인 요청
 public class LoginRequestDto {
 	@NotBlank(message = "아이디는 필수입니다.")
-	private String id;
+	private Long id;
 	
 	@NotBlank(message = "비밀번호는 필수입니다.")
 	private String pw;

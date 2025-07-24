@@ -1,22 +1,16 @@
 package com.project.admin.entity;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import com.project.member.entity.MemberEntity;
-import com.project.member.entity.MemberSex;
-import com.project.member.entity.MemberState;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -39,13 +33,10 @@ public class AdminEntity {
 	@Column(name = "admin_id",nullable = false)
 	private Long adminId; //관리자 아이디
 	
-	//왜래키
-	@OneToMany(fetch = FetchType.LAZY) // 다대일 관계
-	//참조할 키 member_num
-	@JoinColumn(name = "member_num", nullable = false)
-	//Member 상대 테이블 
-	//추후 작업된 MemberEntity 보고 작성
-	private MemberEntity member; //회원번호
+	@ManyToOne
+	@JoinColumn(name = "member_num")
+	private MemberEntity member; // ✅ 필드명도 가능하면 의미 있는 이름으로
+	
 	
 	@Column(name = "admin_email",nullable = false)
 	private String adminEmail; //이메일
@@ -68,5 +59,6 @@ public class AdminEntity {
 	private LocalDateTime registDate; //등록일시
 	@Column(name = "connect_data", nullable = false)
 	private LocalDateTime connectData; //접속일시
+
 
 }

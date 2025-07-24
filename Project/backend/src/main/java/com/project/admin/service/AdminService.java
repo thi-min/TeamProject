@@ -2,6 +2,8 @@ package com.project.admin.service;
 
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.project.admin.dto.AdminForcedDeleteDto;
 import com.project.admin.dto.AdminLoginResponseDto;
 import com.project.admin.dto.AdminMemberDateUpdateRequestDto;

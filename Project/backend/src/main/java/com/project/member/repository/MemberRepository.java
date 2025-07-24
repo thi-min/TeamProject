@@ -5,9 +5,11 @@ import com.project.member.entity.MemberEntity;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
+@Repository
 public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     // 로그인 시 사용: 아이디 + 비밀번호로 조회
     Optional<MemberEntity> findByMemberIdAndMemberPw(String memberId, String memberPw);
@@ -25,13 +27,13 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     Optional<MemberEntity> findByMemberPhone(String memberPhone);
     
     //아이디 찾기
-    Optional<MemberEntity> findByID(String MemberName, String memberPhone);
+    Optional<MemberEntity> findByMemberNameAndMemberPhone(String MemberName, String memberPhone);
     
     //비밀번호 찾기
-    Optional<MemberEntity> findByPassword(String MemberId, String MemberName, String memberPhone);
+    Optional<MemberEntity> findByMemberIdAndMemberNameAndMemberPhone(String MemberId, String MemberName, String memberPhone);
     
     //비밀번호 변경
-    Optional<MemberEntity> changeByPassword(String MemberId);
+    //Optional<MemberEntity> findByMemberIdAndChangePw(String MemberId);
 
     //페이지네이션 회원목록
     //페이징 처리된 전체 회원목록 조회

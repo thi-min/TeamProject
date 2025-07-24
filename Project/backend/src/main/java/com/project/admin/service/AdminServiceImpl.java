@@ -85,18 +85,17 @@ public class AdminServiceImpl implements AdminService {
     public List<AdminMemberListResponseDto> adminMemberList(){
 		//MemberEntity 리스트를 조회하여, 프론트에 필요한 데이터만 AdminMemberListResponseDto 형태로 변환 후 반환		
 		return memberRepository.findAll().stream()
-				//각 회원 데이터를 AdminMemberListResponseDto 객체로 반환시킴
 				.map(member -> AdminMemberListResponseDto.builder()
 						.memberNum(member.getMemberNum()) //회원 번호
 						.memberId(member.getMemberId()) //회원 아이디(이메일)
-						.memberName(member.getMemberName()) //회원이름
-						//가입일(LocalDate -> 문자열로 변환, null 체크 여부확인
+						.memberName(member.getMemberName()) 
+						
 						.memberDay(member.getMemberDay() != null
 								? member.getMemberDay().toString()
 								: null)
-						.memberState(member.getMemberState().name()) //회원상태
-						.memberLock(Boolean.TRUE.equals(member.getMemberLock())) //계정 잠금여부
-						.build() //dto객체 생성
+						.memberState(member.getMemberState().name()) 
+						.memberLock(Boolean.TRUE.equals(member.getMemberLock())) 
+						.build() 
 					)
 				//변환된 dto를 리스트로 수집
 				.collect(Collectors.toList());
