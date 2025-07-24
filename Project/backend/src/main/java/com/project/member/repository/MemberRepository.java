@@ -43,6 +43,9 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     
     //상태 기준 조회시 필요할떄 사용
     //Page<MemberEntity> findByMemberState(MemberState state, Pageable pageable);
+    
+    //아이디 조회 테스트용
+	Optional<MemberEntity> findByMemberId(String string);
 }
 
 //Optional 데이터가 있을수도 없을수도있음.

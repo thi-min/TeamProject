@@ -38,7 +38,7 @@ public class AdminServiceImpl implements AdminService {
 	//관리자 로그인
 	public AdminLoginResponseDto login(LoginRequestDto dto) {
 		//아이디와 비밀번호로 회원 정보 조회
-		AdminEntity admin = adminRepository.findByAdminIdAndAdminPw(dto.getId(), dto.getPw())
+		AdminEntity admin = adminRepository.findByAdminIdAndAdminPw(dto.getAdminId(), dto.getPw())
 			.orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
 		
 		//로그인 성공 시 필요한 정보 dto 반환

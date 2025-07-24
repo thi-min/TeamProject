@@ -26,7 +26,7 @@ public class MemberRepositoryTests {
     @Test
     void findByMemberIdAndMemberPw_정상작동() {
         MemberEntity member = MemberEntity.builder()
-        		.memberId("test123")
+        		.memberId("test@test.com")
                 .memberPw("1234")
                 .memberName("홍길동")
                 .memberBirth(LocalDate.of(1996, 1, 1))
@@ -41,7 +41,7 @@ public class MemberRepositoryTests {
 
         memberRepository.save(member);
 
-        Optional<MemberEntity> result = memberRepository.findByMemberIdAndMemberPw("test123", "1234");
+        Optional<MemberEntity> result = memberRepository.findByMemberIdAndMemberPw("test@test.com", "1234");
 
         assertThat(result).isPresent();
         assertThat(result.get().getMemberName()).isEqualTo("홍길동");
