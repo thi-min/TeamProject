@@ -14,7 +14,7 @@ import com.project.board.dto.BbsDto;
 import com.project.board.dto.FileUpLoadDto;
 import com.project.board.dto.ImageBbsDto;
 import com.project.board.dto.QandADto;
-import com.project.board.service.BbsService;
+import com.project.board.service.BbsServiceImpl;
 
 import lombok.RequiredArgsConstructor;
 
@@ -23,7 +23,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class BbsController {
 
-    private final BbsService bbsService;
+    private final BbsServiceImpl bbsService;
 
  // 게시글 작성 (관리자 or 회원 ID 필요)
     @PostMapping("/write")
@@ -76,8 +76,9 @@ public class BbsController {
 
     // 이미지 업로드
     @PostMapping("/{bbsId}/images")
-    public List<ImageBbsDto> uploadImages(@PathVariable Long bbsId, @RequestBody List<ImageBbsDto> dtos) {
-        return bbsService.saveImageBbsList(bbsId, dtos);
+    public List<ImageBbsDto> uploadImages(@PathVariable Long bbsId,
+                                          @RequestParam("files") List<MultipartFile> files) {
+        return bbsService.saveImageFileList(bbsId, files);
     }
 
     // 이미지 조회
@@ -111,9 +112,10 @@ public class BbsController {
     @PostMapping("/{bbsId}/files")
     public List<FileUpLoadDto> uploadFiles(
             @PathVariable Long bbsId,
+            @RequestParam BoardType boardType,
             @RequestPart("files") List<MultipartFile> files
     ) {
-        return bbsService.saveFileList(bbsId, files);
+        return bbsService.saveFileList(bbsId, files, boardType);
     }
 
     // 파일 조회
