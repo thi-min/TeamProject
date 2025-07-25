@@ -17,7 +17,8 @@ import lombok.Setter;
 @NoArgsConstructor
 //관리자 로그인
 public class AdminLoginResponseDto {
-    private Long adminId; //아이디
+	private String adminNum; //관리자번호
+    private String adminId; //아이디
     private String adminEmail; //이메일
     private String adminPhone; //핸드폰 번호
     private LocalDateTime connectData; //접속일시

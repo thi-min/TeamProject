@@ -1,23 +1,44 @@
 package com.project.admin;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDateTime;
 import java.util.Optional;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.Commit;
+import org.springframework.test.context.ActiveProfiles;
 
 import com.project.admin.entity.AdminEntity;
-import com.project.member.entity.MemberEntity;
+import com.project.admin.repository.AdminRepository;
 
-@Repository
-public interface AdminRepositoryTests extends JpaRepository<AdminEntity, Long>{
-	//관리자 로그인용 id + pw 조회
-	Optional<AdminEntity> findByAdminIdAndAdminPw(Long adminId, String adminPw);
+import jakarta.transaction.Transactional;
+
+@SpringBootTest
+@ActiveProfiles("test")
+@Transactional
+@Commit
+public class AdminRepositoryTests{
+	@Autowired
+	private AdminRepository adminRepository;
 	
-	//관리자 비밀번호 변경
-    //비밀번호 변경
-	// 예시: adminId로 해당 관리자 조회
-//	Optional<AdminEntity> findByAdminPw(Long adminId);
+	//@Test
+    void 테스트데이터_삽입() {
+        AdminEntity admin = AdminEntity.builder()
+        		.adminId("admin")
+                .adminPw("1234")
+                .adminName("안형주")
+                .adminEmail("admin@test.com")
+                .adminPhone("01096861400")
+                .registDate(LocalDateTime.now())	//등록일시
+                .connectData(LocalDateTime.now())	//접속일시
+                .build();
+
+        adminRepository.save(admin);
+        Optional<AdminEntity> result = adminRepository.findByAdminIdAndAdminPw("admin","1234");
+        assertThat(result).isPresent();
+        assertThat(result.get().getAdminName()).isEqualTo("안형주");
+	}
 }

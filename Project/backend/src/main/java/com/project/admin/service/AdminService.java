@@ -10,14 +10,14 @@ import com.project.admin.dto.AdminMemberDateUpdateRequestDto;
 import com.project.admin.dto.AdminMemberDetailResponseDto;
 import com.project.admin.dto.AdminMemberListResponseDto;
 import com.project.admin.dto.AdminPasswordUpdateRequestDto;
-import com.project.member.dto.LoginRequestDto;
+import com.project.admin.dto.AdminLoginRequestDto;
 
 public interface AdminService {
     
     //관리자 로그인
     //@param - 로그인요청 - AdminLoginRequestDto
     //@return - 로그인응답 - AdminLoginResponseDto
-    AdminLoginResponseDto login(LoginRequestDto dto);
+    AdminLoginResponseDto login(AdminLoginRequestDto dto);
     
     //회원 강제 탈퇴
     AdminForcedDeleteDto adminMemberOut(Long memberNum);
@@ -33,7 +33,7 @@ public interface AdminService {
     AdminMemberDateUpdateRequestDto adminMemberUpdateView(Long memberNum);
 
     //관리자 비밀번호 변경
-    void updatePassword(Long adminId, AdminPasswordUpdateRequestDto dto);
+    void updatePassword(String adminId, AdminPasswordUpdateRequestDto dto);
     
     
     

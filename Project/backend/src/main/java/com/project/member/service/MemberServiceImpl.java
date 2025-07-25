@@ -101,7 +101,7 @@ public class MemberServiceImpl implements MemberService {
 		
 		memberRepository.delete(member);
 		
-		return new MemberForcedDeleteDto(member.getMemberNum(), "회원 탈퇴 완료");
+		return new MemberForcedDeleteDto(member.getMemberNum(), member.getMemberName(), "회원 탈퇴 완료");
 	}
 	
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
