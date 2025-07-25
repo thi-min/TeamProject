@@ -1,10 +1,10 @@
 package com.project.member;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +13,7 @@ import com.project.member.dto.MemberForcedDeleteDto;
 import com.project.member.dto.MemberLoginRequestDto;
 import com.project.member.dto.MemberLoginResponseDto;
 import com.project.member.dto.MemberMyPageResponseDto;
+import com.project.member.dto.MemberPasswordUpdateRequestDto;
 import com.project.member.entity.MemberEntity;
 import com.project.member.repository.MemberRepository;
 import com.project.member.service.MemberServiceImpl;
@@ -28,14 +29,14 @@ class MemberServiceImplTests {
 
     private Long testMemberNum;
 
-    @BeforeEach
-    void setUp() {
-        Optional<MemberEntity> member = memberRepository.findByMemberId("test@test.com");
-        if (member.isEmpty()) {
-            throw new RuntimeException("사전 테스트 회원이 존재하지 않습니다.");
-        }
-        testMemberNum = member.get().getMemberNum();
-    }
+    //@BeforeEach
+//    void setUp() {
+//        Optional<MemberEntity> member = memberRepository.findByMemberId("test@test.com");
+//        if (member.isEmpty()) {
+//            throw new RuntimeException("사전 테스트 회원이 존재하지 않습니다.");
+//        }
+//        testMemberNum = member.get().getMemberNum();
+//    }
 
 
 
@@ -86,6 +87,34 @@ class MemberServiceImplTests {
         System.out.println(member.toString());
         System.out.println(result.toString());
     }
+    
+    //@Test
+    @DisplayName("회원 비밀번호 변경 - 성공")
+    void 회원_비밀번호_변경() {
+        // given
+        String memberId = "test2@test.com";
+
+        // 테스트용 회원이 DB에 없으면 삽입
+        memberRepository.findByMemberId(memberId);
+
+        // 비밀번호 변경 DTO
+        MemberPasswordUpdateRequestDto dto = new MemberPasswordUpdateRequestDto();
+        dto.setMemberId(memberId);
+        dto.setCurrentPassword("1234");
+        dto.setNewPassword("dks123");
+        dto.setNewPasswordCheck("dks123");
+
+        // when
+        memberService.updatePassword(dto);
+
+        // then
+        MemberEntity updated = memberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new RuntimeException("회원 없음"));
+
+        assertEquals("dks123", updated.getMemberPw());
+
+        System.out.println("비밀번호 변경 성공: " + updated.getMemberPw());
+    }
 
     //@Test
     void 탈퇴_테스트() {
@@ -96,5 +125,24 @@ class MemberServiceImplTests {
 
         System.out.println("결과 메시지: " + result);
     }
+    
+    @Test
+    @DisplayName("회원 휴대폰 번호 중복 확인 테스트")
+    void checkPhone() {
+    	//입력한 핸드폰
+//    	String registeredPhone = "01012222678";
+//
+//    	String result = memberService.checkPhoneNumber(registeredPhone);
+//    	assertEquals("사용 가능한 번호입니다.", result); 
+//    	System.out.println(result);
+    	
+    	//입력한 번호가 회원 핸드폰번호와 겹칠때.
+    	String duPhone = "01012345672";
+    	IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,() -> {
+    	    memberService.checkPhoneNumber(duPhone);
+    	});
+    	assertEquals("이미 가입된 휴대폰 번호입니다.", ex.getMessage());
+    	System.out.println(ex.getMessage());
 
+    }
 }

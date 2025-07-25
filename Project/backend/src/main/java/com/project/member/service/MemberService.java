@@ -28,13 +28,12 @@ public interface MemberService {
     MemberForcedDeleteDto memberOut(Long memberNum);
 
     // 비밀번호 변경
-    void updatePw(MemberPasswordUpdateRequestDto dto);
+    void updatePassword(MemberPasswordUpdateRequestDto dto);
     
     //아이디 찾기
     String findMemberId(String memberName, String memberPhone);
     
     //비밀번호 찾기
     String findMemberPw(String memberId, String memberName, String memberPhone);
-    
-    //
+
 }

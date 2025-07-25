@@ -69,7 +69,7 @@ public class AdminServiceImpl implements AdminService {
 			throw new IllegalArgumentException("변경할 비밀번호가 일치하지 않습니다.");
 		}
 		//이전 비밀번호와 같은지 확인
-		if(!dto.getCurrentPassword().equals(dto.getNewPassword())) {
+		if(dto.getCurrentPassword().equals(dto.getNewPassword())) {
 			throw new IllegalArgumentException("이전과 동일한 비밀번호는 사용할 수 없습니다.");
 		}
 		//비밀번호 변경
