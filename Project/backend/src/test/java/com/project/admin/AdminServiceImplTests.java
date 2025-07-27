@@ -103,4 +103,13 @@ class AdminServiceImplTests{
 
 		System.out.println(memberIds.toString());
 	}
+
+	@Test
+	//관리자가 회원 정보 상태를 수정 _ 휴먼/정상/탈퇴 and 
+	void 회원정보수정수정(){
+		System.out.println("test start");
+
+		d
+	}
 }
+
