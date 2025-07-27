@@ -22,4 +22,7 @@ public interface AdminRepository extends JpaRepository<AdminEntity, Long>{
 	//Optional<AdminEntity> findByAdminId(String adminId);
 	
 	Optional<AdminEntity> findFirstByAdminId(String adminId);
+
+	//회원 상태 변경
+	Optional<MemberEntity> findByMemberNum(Long memberNum);
 }
