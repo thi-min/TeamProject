@@ -7,13 +7,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.project.admin.dto.AdminForcedDeleteDto;
+import com.project.admin.dto.AdminLoginRequestDto;
 import com.project.admin.dto.AdminLoginResponseDto;
-import com.project.admin.dto.AdminMemberDateUpdateRequestDto;
 import com.project.admin.dto.AdminMemberDetailResponseDto;
 import com.project.admin.dto.AdminMemberListResponseDto;
+import com.project.admin.dto.AdminMemberLockChangeDto;
+import com.project.admin.dto.AdminMemberStateChangeDto;
 import com.project.admin.dto.AdminPasswordUpdateRequestDto;
-import com.project.admin.dto.AdminLoginRequestDto;
 import com.project.admin.entity.AdminEntity;
 import com.project.admin.repository.AdminRepository;
 import com.project.common.dto.PageRequestDto;
@@ -69,7 +69,7 @@ public class AdminServiceImpl implements AdminService {
 			throw new IllegalArgumentException("변경할 비밀번호가 일치하지 않습니다.");
 		}
 		//이전 비밀번호와 같은지 확인
-		if(!dto.getCurrentPassword().equals(dto.getNewPassword())) {
+		if(dto.getCurrentPassword().equals(dto.getNewPassword())) {
 			throw new IllegalArgumentException("이전과 동일한 비밀번호는 사용할 수 없습니다.");
 		}
 		//비밀번호 변경
@@ -118,35 +118,44 @@ public class AdminServiceImpl implements AdminService {
 				.memberAddress(member.getMemberAddress())	//주소
 				.memberSex(member.getMemberSex())		//성별
 				.memberLock(Boolean.TRUE.equals(member.getMemberLock())) //계정 잠금상태
-				.snsYn(member.isSnsYn())	//sms수신여부
+				.smsAgree(member.isSmsAgree())	//sms수신여부
 				.build();
 				
 	}
 	
+
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
-	//회원탈퇴(관리자기준)
-	public AdminForcedDeleteDto adminMemberOut(Long memberNum){
+	//회원상태변경(휴먼, 탈퇴)
+	public AdminMemberStateChangeDto adminMemberStateChange(Long memberNum, MemberState memberState){
 		MemberEntity member = memberRepository.findByMemberNum(memberNum)
 				.orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
 		
-		//MemberState 상태만 OUT로 변경
-		member.setMemberState(MemberState.OUT);
+		//선택한 상태로 변경
+		member.setMemberState(memberState);
 		//DB에서 바로 삭제(영구삭제)
 		//memberRepository.delete(member);
 		
-		return new AdminForcedDeleteDto(member.getMemberNum(), "회원 탈퇴 완료");
+		String message;
+		switch(memberState) {
+			case OUT -> message = "회원 탈퇴 상태로 변경 완료";
+			case REST -> message = "회원 휴먼 상태로 변경 완료";
+			case ACTIVE -> message = "정상 회원 상태로 변경 완료";
+			default -> message = "회원 상태가 성공적으로 변경되었습니다.";
+		}
+		
+		return new AdminMemberStateChangeDto(member.getMemberNum(), message);
 	}
-
-	@Override
-	public AdminMemberDateUpdateRequestDto adminMemberUpdateView(Long memberNum) {
+	
+	//회원 계정잠금 상태 변경
+	public AdminMemberLockChangeDto adminMemberLockChange(Long memberNum, boolean lockStatus) {
 		MemberEntity member = memberRepository.findByMemberNum(memberNum)
 				.orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
 		
-		return AdminMemberDateUpdateRequestDto.builder()
-				.memberLock(Boolean.TRUE.equals(member.getMemberLock()))
-				.memberState(member.getMemberState())
-				.build();
+		member.setMemberLock(lockStatus);
+		String message = lockStatus ? "계정이 잠금상태로 변경되었습니다." : "계정 잠금이 해제되었습니다.";
+		
+		return new AdminMemberLockChangeDto(member.getMemberNum(), message);
 	}
 
 	
@@ -187,4 +196,5 @@ public class AdminServiceImpl implements AdminService {
 				.isLast(result.isLast())						//마지막 페이지 여부
 				.build();
 	}
+	
 }

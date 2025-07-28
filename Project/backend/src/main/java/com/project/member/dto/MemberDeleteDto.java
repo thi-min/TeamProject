@@ -12,7 +12,7 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 //회원 강제 탈퇴처리
-public class MemberForcedDeleteDto {
+public class MemberDeleteDto {
 	private Long memberNum;
 	private String memberName;
     private String message; // 삭제 사유(선택)

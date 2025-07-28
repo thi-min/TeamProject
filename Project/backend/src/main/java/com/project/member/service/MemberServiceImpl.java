@@ -1,11 +1,13 @@
 package com.project.member.service;
 
+
 import org.springframework.stereotype.Service;
 
-import com.project.member.dto.MemberForcedDeleteDto;
+import com.project.member.dto.MemberDeleteDto;
 import com.project.member.dto.MemberLoginRequestDto;
 import com.project.member.dto.MemberLoginResponseDto;
 import com.project.member.dto.MemberMyPageResponseDto;
+import com.project.member.dto.MemberMyPageUpdateRequestDto;
 import com.project.member.dto.MemberPasswordUpdateRequestDto;
 import com.project.member.dto.MemberSignUpRequestDto;
 import com.project.member.dto.MemberSignUpResponseDto;
@@ -36,15 +38,15 @@ public class MemberServiceImpl implements MemberService {
 		//Entity 변환
 		MemberEntity newMember = MemberEntity.builder()
 				.memberId(dto.getMemberId())
-				.memberPw(dto.getMemberPw()) //비밀번호는 나중에 암호화 필요
+				.memberPw(dto.getMemberPw())
 				.memberName(dto.getMemberName())
 				.memberBirth(dto.getMemberBirth())
-				.memberPhone(dto.getMemberPhone())
+				.memberPhone(dto.getMemberPhone())	//암호화 적용
 				.memberAddress(dto.getMemberAddress())
 				.memberSex(dto.getMemberSex())
 		        .memberState(MemberState.ACTIVE) // 기본 상태
 		        .memberLock(false)
-		        .snsYn(dto.isSnsYn())
+		        .smsAgree(dto.isSmsAgree())
 		        .kakaoId(dto.getKakaoId())
 		        .build();
 		//DB저장
@@ -88,20 +90,62 @@ public class MemberServiceImpl implements MemberService {
 				.memberAddress(member.getMemberAddress())
 				.memberPhone(member.getMemberPhone())
 				.kakaoId(member.getKakaoId())
-				.snsYn(member.isSnsYn()) //boolean타입은 is로 호출
+				.smsAgree(member.isSmsAgree()) //boolean타입은 is로 호출
 				.build();
 	}
 	
+	//마이페이지 수정 + sms 동의
+	@Transactional
+	@Override
+	public MemberMyPageResponseDto updateMyPage(Long memberNum, MemberMyPageUpdateRequestDto dto) {
+	    MemberEntity member = memberRepository.findByMemberNum(memberNum)
+	            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+
+	    // 수정 가능한 항목만 반영
+	    member.setMemberName(dto.getMemberName());
+	    member.setMemberSex(dto.getMemberSex());
+	    member.setMemberPhone(dto.getMemberPhone());
+	    member.setMemberAddress(dto.getMemberAddress());
+	    member.setSmsAgree(dto.isSmsAgree()); //체크박스 상태 반영
+
+	    return MemberMyPageResponseDto.builder()
+	            .memberName(member.getMemberName())
+	            .memberId(member.getMemberId())
+	            .memberPw(member.getMemberPw())
+	            .memberBirth(member.getMemberBirth())
+	            .memberSex(member.getMemberSex())
+	            .memberAddress(member.getMemberAddress())
+	            .memberPhone(member.getMemberPhone())
+	            .kakaoId(member.getKakaoId())
+	            .smsAgree(member.isSmsAgree())
+	            .build();
+	}
+
+	
+//	//회원 sns 동의
+//	@Transactional
+//	@Override
+//	public MemberSmsAgreeUpdateResponseDto updateSmsAgree(Long memberNum, MemberSmsAgreeUpdateRequestDto dto) {
+//		MemberEntity member = memberRepository.findByMemberNum(memberNum)
+//				.orElseThrow(() -> new IllegalArgumentException("회원 계정에 문제가 발생했습니다."));
+//		
+//		member.setSmsAgree(dto.isSmsAgree());
+//		
+//		String message = dto.isSmsAgree() ? "SMS 수신 동의가 설정되었습니다." : "SMS 수신 동의가 해제 되었습니다.";
+//		
+//		return new MemberSmsAgreeUpdateResponseDto(member.getMemberNum(), member.isSmsAgree(), message);
+//	}
+	
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
-	//회원탈퇴(관리자기준)
-	public MemberForcedDeleteDto memberOut(Long memberNum) {
+	//회원탈퇴
+	public MemberDeleteDto memberOut(Long memberNum) {
 		MemberEntity member = memberRepository.findByMemberNum(memberNum)
 				.orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
 		
 		memberRepository.delete(member);
 		
-		return new MemberForcedDeleteDto(member.getMemberNum(), member.getMemberName(), "회원 탈퇴 완료");
+		return new MemberDeleteDto(member.getMemberNum(), member.getMemberName(), "회원 탈퇴 완료");
 	}
 	
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
@@ -127,11 +171,11 @@ public class MemberServiceImpl implements MemberService {
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
 	//비밀번호 변경
-	public void updatePw(MemberPasswordUpdateRequestDto dto) {
-		//아이디로 존재하는 회원인지 체크
-		MemberEntity member = memberRepository.findByMemberNum(dto.getMemberNum())
-				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-		
+	public void updatePassword(MemberPasswordUpdateRequestDto dto) {
+	    String memberId = dto.getMemberId(); // 여기서 꺼냄
+	    MemberEntity member = memberRepository.findByMemberId(memberId)
+	        .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
+	    
 		//현재 비밀번호 검증
 		if(!member.getMemberPw().equals(dto.getCurrentPassword())) {
 			throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
@@ -141,7 +185,7 @@ public class MemberServiceImpl implements MemberService {
 			throw new IllegalArgumentException("변경할 비밀번호가 일치하지 않습니다.");
 		}
 		//이전 비밀번호와 같은지 확인
-		if(!dto.getCurrentPassword().equals(dto.getNewPassword())) {
+		if(dto.getCurrentPassword().equals(dto.getNewPassword())) {
 			throw new IllegalArgumentException("이전과 동일한 비밀번호는 사용할 수 없습니다.");
 		}
 		
@@ -164,6 +208,5 @@ public class MemberServiceImpl implements MemberService {
 		//존재하지 않으면 인증가능
 		return "사용 가능한 번호입니다.";
 	}
-
 
 }

@@ -20,5 +20,5 @@ public class MemberMyPageResponseDto {
     private String memberAddress; //주소
     private String memberPhone; //연락처
     private String kakaoId; //카카오 계정
-    private boolean snsYn; // SNS 인증 여부
+    private boolean smsAgree; // SNS 인증 여부
 }

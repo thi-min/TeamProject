@@ -68,7 +68,7 @@ public class MemberEntity {
     private MemberState memberState; //회원상태
     
     @Column(name = "sns_yn")
-    private boolean snsYn; //문자 수신여부(동의/비동의)
+    private boolean smsAgree; //문자 수신여부(동의/비동의)
 
     @Column(name = "kakao_id", length = 255)
     private String kakaoId; //카카오아이디
@@ -76,5 +76,6 @@ public class MemberEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id")
     private AdminEntity admin;
+
 
 }
