@@ -44,5 +44,7 @@
   + 안형주
     + admin, member 테스트(response, service) 90% 완료
     + controller 진행 대기중
-  +  
+  + 이재복
+    + fund, chat - stay test(checking member entity)
+    + alarm, map - during with Front
   
