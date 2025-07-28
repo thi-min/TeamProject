@@ -82,6 +82,7 @@ public class MemberServiceImpl implements MemberService {
 		return MemberMyPageResponseDto.builder()
 				.memberName(member.getMemberName())
 				.memberId(member.getMemberId())
+				.memberPw(member.getMemberPw())
 				.memberBirth(member.getMemberBirth())
 				.memberSex(member.getMemberSex()) //enum은 그대로 호출
 				.memberAddress(member.getMemberAddress())
@@ -100,7 +101,7 @@ public class MemberServiceImpl implements MemberService {
 		
 		memberRepository.delete(member);
 		
-		return new MemberForcedDeleteDto(member.getMemberNum(), "회원 탈퇴 완료");
+		return new MemberForcedDeleteDto(member.getMemberNum(), member.getMemberName(), "회원 탈퇴 완료");
 	}
 	
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
@@ -126,11 +127,11 @@ public class MemberServiceImpl implements MemberService {
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
 	//비밀번호 변경
-	public void updatePw(MemberPasswordUpdateRequestDto dto) {
-		//아이디로 존재하는 회원인지 체크
-		MemberEntity member = memberRepository.findByMemberNum(dto.getMemberNum())
-				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-		
+	public void updatePassword(MemberPasswordUpdateRequestDto dto) {
+	    String memberId = dto.getMemberId(); // 여기서 꺼냄
+	    MemberEntity member = memberRepository.findByMemberId(memberId)
+	        .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
+	    
 		//현재 비밀번호 검증
 		if(!member.getMemberPw().equals(dto.getCurrentPassword())) {
 			throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
@@ -140,7 +141,7 @@ public class MemberServiceImpl implements MemberService {
 			throw new IllegalArgumentException("변경할 비밀번호가 일치하지 않습니다.");
 		}
 		//이전 비밀번호와 같은지 확인
-		if(!dto.getCurrentPassword().equals(dto.getNewPassword())) {
+		if(dto.getCurrentPassword().equals(dto.getNewPassword())) {
 			throw new IllegalArgumentException("이전과 동일한 비밀번호는 사용할 수 없습니다.");
 		}
 		
@@ -163,5 +164,6 @@ public class MemberServiceImpl implements MemberService {
 		//존재하지 않으면 인증가능
 		return "사용 가능한 번호입니다.";
 	}
+
 
 }

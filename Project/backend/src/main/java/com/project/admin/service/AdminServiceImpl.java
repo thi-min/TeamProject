@@ -13,11 +13,11 @@ import com.project.admin.dto.AdminMemberDateUpdateRequestDto;
 import com.project.admin.dto.AdminMemberDetailResponseDto;
 import com.project.admin.dto.AdminMemberListResponseDto;
 import com.project.admin.dto.AdminPasswordUpdateRequestDto;
+import com.project.admin.dto.AdminLoginRequestDto;
 import com.project.admin.entity.AdminEntity;
 import com.project.admin.repository.AdminRepository;
 import com.project.common.dto.PageRequestDto;
 import com.project.common.dto.PageResponseDto;
-import com.project.member.dto.LoginRequestDto;
 import com.project.member.entity.MemberEntity;
 import com.project.member.entity.MemberState;
 import com.project.member.repository.MemberRepository;
@@ -36,9 +36,9 @@ public class AdminServiceImpl implements AdminService {
 
 	@Override
 	//관리자 로그인
-	public AdminLoginResponseDto login(LoginRequestDto dto) {
+	public AdminLoginResponseDto login(AdminLoginRequestDto dto) {
 		//아이디와 비밀번호로 회원 정보 조회
-		AdminEntity admin = adminRepository.findByAdminIdAndAdminPw(dto.getId(), dto.getPw())
+		AdminEntity admin = adminRepository.findByAdminIdAndAdminPw(dto.getAdminId(), dto.getPw())
 			.orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
 		
 		//로그인 성공 시 필요한 정보 dto 반환
@@ -55,9 +55,9 @@ public class AdminServiceImpl implements AdminService {
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
 	//비밀번호 변경
-	public void updatePassword(Long adminId, AdminPasswordUpdateRequestDto dto) {
+	public void updatePassword(String adminId, AdminPasswordUpdateRequestDto dto) {
 		//아이디로 관리자 확인
-		AdminEntity admin = adminRepository.findById(adminId)
+		AdminEntity admin = adminRepository.findFirstByAdminId(adminId)
 				.orElseThrow(() -> new IllegalArgumentException("관리자 계정에 문제가 발생했습니다."));
 		
 		//현재 비밀번호 검증
@@ -69,7 +69,7 @@ public class AdminServiceImpl implements AdminService {
 			throw new IllegalArgumentException("변경할 비밀번호가 일치하지 않습니다.");
 		}
 		//이전 비밀번호와 같은지 확인
-		if(!dto.getCurrentPassword().equals(dto.getNewPassword())) {
+		if(dto.getCurrentPassword().equals(dto.getNewPassword())) {
 			throw new IllegalArgumentException("이전과 동일한 비밀번호는 사용할 수 없습니다.");
 		}
 		//비밀번호 변경

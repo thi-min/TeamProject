@@ -29,14 +29,16 @@ public class AdminEntity {
 	
 	//기본
 	@Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@Column(name = "admin_num",nullable = false)
+	private Long adminNum; //관리자 번호
+	
 	@Column(name = "admin_id",nullable = false)
-	private Long adminId; //관리자 아이디
+	private String adminId; //관리자 아이디
 	
 	@ManyToOne
 	@JoinColumn(name = "member_num")
 	private MemberEntity member; // ✅ 필드명도 가능하면 의미 있는 이름으로
-	
 	
 	@Column(name = "admin_email",nullable = false)
 	private String adminEmail; //이메일
