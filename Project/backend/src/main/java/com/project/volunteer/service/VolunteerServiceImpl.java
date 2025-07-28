@@ -58,7 +58,9 @@ public class VolunteerServiceImpl implements VolunteerService {
                 .volDate(volunteerDto.getVolDate())
                 .volTime(volunteerDto.getVolTime())
                 .build();
-
+        
+        reserve.setVolunteerDetail(volunteer);	//양방향 연결 
+        
         volunteerRepository.save(volunteer);
     }
     

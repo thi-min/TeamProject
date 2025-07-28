@@ -7,6 +7,7 @@ import lombok.*;
 
 @Getter
 @Setter
+@Builder
 public class FullReserveRequestDto {
     private ReserveRequestDto reserveDto;
     private LandRequestDto landDto;

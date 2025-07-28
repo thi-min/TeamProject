@@ -3,6 +3,7 @@ package com.project.land.dto;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.land.entity.LandType;
 import com.project.reserve.entity.ReserveState;
 import lombok.*;
@@ -19,6 +20,7 @@ public class LandDetailDto {
     private String memberName;		// 신청자명
     private String phone;			// 연락처
     private ReserveState reserveState;
+    @JsonFormat(pattern = "yyyy/MM/dd")
     private LocalDate landDate;	// 예: 2025/08/10
     private String landTime;		// 예: 11:00 ~ 13:00
     private LocalDateTime applyDate;      // 예: 2025/07/22 22:00:24 (신청일자)

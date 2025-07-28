@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.reserve.entity.ReserveState;
 
 @Getter
@@ -22,7 +23,8 @@ public class VolunteerDetailDto {
 
     // 예약 정보
     private ReserveState reserveState;   // 예약 상태 (ex: 신청중, 승인됨 등)
-    private int reserveNumber;       // 인원 수
+    private int reserveNumber;			// 인원 수
+    @JsonFormat(pattern = "yyyy/MM/dd")
     private LocalDate volDate;       // 실제 봉사 활동이 있는 날짜 (센터 지정)
     private String volTime;       // 예약 시간
     private String note;           // 비고

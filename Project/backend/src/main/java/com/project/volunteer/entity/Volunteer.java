@@ -16,7 +16,7 @@ import java.time.LocalDate;
 public class Volunteer {
 
     @Id
-    @Column(name = "reserve_code")
+    @Column(name = "reserve_code", nullable = false)
     private Long reserveCode; // PK Reserve와 1:1 관계
 
     @OneToOne(fetch = FetchType.LAZY)

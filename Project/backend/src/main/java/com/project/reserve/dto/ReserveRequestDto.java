@@ -24,6 +24,7 @@ public class ReserveRequestDto {
     private int reserveNumber;
     private String note;   
     
+    
     //dto -> entity 변환 (사용자가 예약정보 작성한걸 넘기는 과정)
     public Reserve toEntity(MemberEntity member) {
         return Reserve.builder()

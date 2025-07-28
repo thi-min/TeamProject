@@ -7,12 +7,15 @@ import com.project.reserve.dto.ReserveRequestDto;
 import com.project.reserve.dto.ReserveResponseDto;
 import com.project.reserve.entity.Reserve;
 import com.project.reserve.entity.ReserveState;
+import com.project.reserve.exception.DuplicateReservationException;
 import com.project.reserve.repository.ReserveRepository;
 import com.project.volunteer.dto.VolunteerDetailDto;
+import com.project.volunteer.dto.VolunteerRequestDto;
 import com.project.volunteer.entity.Volunteer;
 import com.project.volunteer.service.VolunteerService;
 import com.project.member.repository.MemberRepository;
 import com.project.land.dto.LandDetailDto;
+import com.project.land.dto.LandRequestDto;
 import com.project.land.entity.Land;
 import com.project.land.service.LandService;
 import com.project.member.entity.MemberEntity;
@@ -49,12 +52,45 @@ public class ReserveServiceImpl implements ReserveService {
         MemberEntity member = memberRepository.findById(memberNum)
                 .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
         
+        int reserveType = fullRequestDto.getReserveDto().getReserveType();
+        
+        // 중복 예약 검사(예외 처리)
+       
+        if (reserveType == 1) {
+            LandRequestDto landDto = fullRequestDto.getLandDto();
+            if (landDto == null) {
+                throw new IllegalArgumentException("놀이터 예약 세부 정보가 누락되었습니다.");
+            }
+
+            boolean exists = reserveRepository.existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_LandTime(
+                    memberNum, landDto.getLandDate(), landDto.getLandTime());
+
+            if (exists) {
+                throw new DuplicateReservationException("이미 해당 시간에 놀이터 예약이 존재합니다.");
+            }
+
+        } else if (reserveType == 2) {
+            VolunteerRequestDto volunteerDto = fullRequestDto.getVolunteerDto();
+            if (volunteerDto == null) {
+                throw new IllegalArgumentException("봉사 예약 세부 정보가 누락되었습니다.");
+            }
+
+            boolean exists = reserveRepository.existsByMember_MemberNumAndVolunteerDetail_VolDateAndVolunteerDetail_VolTime(
+                    memberNum, volunteerDto.getVolDate(), volunteerDto.getVolTime());
+
+            if (exists) {
+                throw new DuplicateReservationException("이미 해당 시간에 봉사 예약이 존재합니다.");
+            }
+
+        } else {
+            throw new IllegalArgumentException("예약 유형이 유효하지 않습니다.");
+        }
+        
         // Reserve 엔티티 생성 및 저장
         Reserve reserve = fullRequestDto.getReserveDto().toEntity(member);
         Reserve saved = reserveRepository.save(reserve);
         
         //예약 유형에 따라 세부 정보 저장
-        int reserveType = fullRequestDto.getReserveDto().getReserveType();
         
         if (reserveType == 1) { // 놀이터 예약
             if (fullRequestDto.getLandDto() == null) {

@@ -22,6 +22,7 @@ import java.time.LocalDateTime;
 public class Reserve {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "reserve_code", nullable = false)
     private Long reserveCode;
     

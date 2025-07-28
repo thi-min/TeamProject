@@ -23,9 +23,9 @@ public class AdminReservationListDto {
         dto.setReserveState(reserve.getReserveState().name());
 
         // 예약일은 reserveType에 따라 분기
-        if (reserve.getReserveType() == 0 && reserve.getLandDetail() != null) {
+        if (reserve.getReserveType() == 1 && reserve.getLandDetail() != null) {
             dto.setReserveDate(reserve.getLandDetail().getLandDate()); // 놀이터 예약
-        } else if (reserve.getReserveType() == 1 && reserve.getVolunteerDetail() != null) {
+        } else if (reserve.getReserveType() == 2 && reserve.getVolunteerDetail() != null) {
             dto.setReserveDate(reserve.getVolunteerDetail().getVolDate()); // 봉사 예약
         } else {
             dto.setReserveDate(null); // 잘못된 상태일 경우 null 처리

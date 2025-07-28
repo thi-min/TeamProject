@@ -8,6 +8,7 @@ import lombok.*;
 
 @Getter
 @Setter
+@Builder
 public class LandRequestDto {
     private ReserveRequestDto reserveDto;
     

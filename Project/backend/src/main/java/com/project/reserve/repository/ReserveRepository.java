@@ -28,7 +28,15 @@ public interface ReserveRepository extends JpaRepository<Reserve, Long> {
 
     // 예약번호로 단건 조회 (상세 페이지)
     Optional<Reserve> findByReserveCode(Long reserveCode);
+    
+    // 놀이터 예약 중복확인용
+    boolean existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_LandTime(
+            Long memberNum, LocalDate landDate, String landTime);
 
+    // 봉사 예약 중복확인용
+    boolean existsByMember_MemberNumAndVolunteerDetail_VolDateAndVolunteerDetail_VolTime(
+            Long memberNum, LocalDate volDate, String volTime);
+    
     //관리자 놀이터 예약리스트 검색필터
     @Query("SELECT r FROM Reserve r " +
     	       "WHERE r.reserveType = 1 " +  // 1: 놀이터

@@ -76,8 +76,10 @@ public class LandServiceImpl implements LandService {
                 .animalNumber(landDto.getAnimalNumber())
                 .payNumber(landDto.getPayNumber())
                 .build();
-
-        landRepository.save(land);
+        
+        reserve.setLandDetail(land); //reserve -> land
+        
+        landRepository.save(land);	//land->reserve 
     }
     
     
