@@ -123,9 +123,6 @@ public class AdminServiceImpl implements AdminService {
 				
 	}
 	
-	//회원 상태 변경
-	public 
-	
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
 	//회원탈퇴(관리자기준)
