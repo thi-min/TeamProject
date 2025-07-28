@@ -1,19 +1,15 @@
 package com.project.phoneVeify.service;
 
 import java.time.LocalDateTime;
-import java.util.function.Supplier;
 
 import org.springframework.stereotype.Service;
 
-import com.project.member.entity.MemberEntity;
 import com.project.member.repository.MemberRepository;
 import com.project.phoneVeify.dto.PhoneAuthRequestDto;
 import com.project.phoneVeify.dto.PhoneAuthVerifyDto;
 import com.project.phoneVeify.entity.PhoneAuthEntity;
 import com.project.phoneVeify.repository.PhoneVeifyRepository;
 
-import jakarta.persistence.Entity;
-import lombok.Builder;
 import lombok.RequiredArgsConstructor;
 
 @Service //tjqltmrPcmd(spring bean)으로 등록
@@ -52,7 +48,7 @@ public class PhoneVeifyServiceImpl implements PhoneVeifyService{
 	//사용자가 입력한 인증번호 검증 로직
 	public boolean verifyCode(PhoneAuthVerifyDto dto) {
 		//인증번호 조회
-		PhoneAuthEntity phoneAuth = phoneVeifyRepository.findByPhoneNumber(dto.getPhoneNum())
+		PhoneAuthEntity phoneAuth = phoneVeifyRepository.findByPhoneNum(dto.getPhoneNum())
 				.orElseThrow(() -> new IllegalArgumentException("먼저 휴대폰인증 해주세요."));
 		
 		//인증번호가 동일한지 체크

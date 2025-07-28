@@ -1,17 +1,11 @@
 package com.project.member.service;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 
-import com.project.board.controller.BbsController;
 import com.project.member.dto.MemberForcedDeleteDto;
-import com.project.member.dto.MemberListResponseDto;
 import com.project.member.dto.MemberLoginRequestDto;
 import com.project.member.dto.MemberLoginResponseDto;
 import com.project.member.dto.MemberMyPageResponseDto;
-import com.project.member.dto.MemberMyPageUpdateRequestDto;
 import com.project.member.dto.MemberPasswordUpdateRequestDto;
 import com.project.member.dto.MemberSignUpRequestDto;
 import com.project.member.dto.MemberSignUpResponseDto;
@@ -88,6 +82,7 @@ public class MemberServiceImpl implements MemberService {
 		return MemberMyPageResponseDto.builder()
 				.memberName(member.getMemberName())
 				.memberId(member.getMemberId())
+				.memberPw(member.getMemberPw())
 				.memberBirth(member.getMemberBirth())
 				.memberSex(member.getMemberSex()) //enum은 그대로 호출
 				.memberAddress(member.getMemberAddress())
@@ -106,14 +101,14 @@ public class MemberServiceImpl implements MemberService {
 		
 		memberRepository.delete(member);
 		
-		return new MemberForcedDeleteDto(member.getMemberNum(), "회원 탈퇴 완료");
+		return new MemberForcedDeleteDto(member.getMemberNum(), member.getMemberName(), "회원 탈퇴 완료");
 	}
 	
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
 	//아이디 찾기
 	public String findMemberId(String memberName, String memberPhone) {
-		MemberEntity member = memberRepository.findByID(memberName, memberPhone)
+		MemberEntity member = memberRepository.findByMemberNameAndMemberPhone(memberName, memberPhone)
 				.orElseThrow(() -> new IllegalArgumentException("일치하는 아이디가 없습니다."));
 		
 		return member.getMemberId(); //마스킹 처리해서 반환해도됨
@@ -123,7 +118,7 @@ public class MemberServiceImpl implements MemberService {
 	@Override
 	//비밀번호 찾기
 	public String findMemberPw(String memberId, String memberName, String memberPhone) {
-		MemberEntity member = memberRepository.findByPassword(memberId, memberName, memberPhone)
+		MemberEntity member = memberRepository.findByMemberIdAndMemberNameAndMemberPhone(memberId, memberName, memberPhone)
 				.orElseThrow(() -> new IllegalArgumentException("입력하신 정보와 일치하는 회원이 없습니다."));
 		
 		return "본인 확인이 완료되었습니다. 비밀번호를 재설정 해주세요";
@@ -142,8 +137,12 @@ public class MemberServiceImpl implements MemberService {
 			throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
 		}
 		//새 비밀번호와 비밀번호 확인 일치 여부
-		if(!dto.getNewPassword().equals(dto.getCurrentPassword())) {
+		if(!dto.getNewPassword().equals(dto.getNewPasswordCheck())) {
 			throw new IllegalArgumentException("변경할 비밀번호가 일치하지 않습니다.");
+		}
+		//이전 비밀번호와 같은지 확인
+		if(!dto.getCurrentPassword().equals(dto.getNewPassword())) {
+			throw new IllegalArgumentException("이전과 동일한 비밀번호는 사용할 수 없습니다.");
 		}
 		
 		//비밀번호 변경
@@ -165,5 +164,6 @@ public class MemberServiceImpl implements MemberService {
 		//존재하지 않으면 인증가능
 		return "사용 가능한 번호입니다.";
 	}
+
 
 }

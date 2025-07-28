@@ -4,7 +4,7 @@ import java.time.LocalDateTime;
 
 import com.project.board.BoardType;
 import com.project.member.entity.MemberEntity;
-import com.project.admin.AdminEntity; 
+import com.project.admin.entity.AdminEntity; 
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -27,11 +27,11 @@ public class BbsEntity {
     @Id
     @Column(name = "bulletin_num", nullable = true)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long bulletinnum;  // 게시글 번호 (PK)
+    private Long bulletinNum;  // 게시글 번호 (PK)
 
     // 관리자 아이디 (FK) - Admin 엔티티 필요
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id", nullable = false)
+    @JoinColumn(name = "admin_id", nullable = true)
     private AdminEntity adminId;
 
     // 회원번호 (FK) - Member 엔티티 필요

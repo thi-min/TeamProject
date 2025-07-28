@@ -8,7 +8,7 @@ import com.project.board.entity.FileUpLoadEntity;
 
 public interface FileUpLoadRepository extends JpaRepository<FileUpLoadEntity, Long> {
 	
-    List<FileUpLoadEntity> findByBbs_BulletinNum(Long bulletinNum); // 특정 게시글 번호(bulletinNum)에 해당하는 모든 첨부파일 리스트 조회
+    List<FileUpLoadEntity> findByBbsBulletinNum(Long bulletinNum); // 특정 게시글 번호(bulletinNum)에 해당하는 모든 첨부파일 리스트 조회
     
-    void deleteByBbs_BulletinNum(Long bulletinNum); // 특정 게시글 번호(bulletinNum)에 해당하는 모든 첨부파일 삭제
+    void deleteByBbsBulletinNum(Long bulletinNum); // 특정 게시글 번호(bulletinNum)에 해당하는 모든 첨부파일 삭제
 }

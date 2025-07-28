@@ -1,7 +1,7 @@
 package com.project.banner;
 
 import com.project.banner.dto.*;
-import com.project.admin.AdminEntity;
+import com.project.admin.entity.AdminEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

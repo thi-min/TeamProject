@@ -1,6 +1,6 @@
 package com.project.banner;
 
-import com.project.admin.AdminEntity;
+import com.project.admin.entity.AdminEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -64,4 +64,3 @@ public class BannerEntity {
     @JoinColumn(name = "admin_id", nullable = false) // 외래키(FK) 설정
     private AdminEntity admin; // 배너를 등록한 관리자
 }
-

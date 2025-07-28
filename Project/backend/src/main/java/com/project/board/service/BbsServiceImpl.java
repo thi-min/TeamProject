@@ -30,6 +30,7 @@ import com.project.board.repository.FileUpLoadRepository;
 import com.project.board.repository.ImageBbsRepository;
 import com.project.board.repository.QandARepository;
 import com.project.member.entity.MemberEntity;
+import com.project.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -40,13 +41,9 @@ public class BbsServiceImpl implements BbsService {
     private final QandARepository qandARepository;
     private final ImageBbsRepository imageBbsRepository;
     private final FileUpLoadRepository fileUploadRepository;
+    private final MemberRepository memberRepository;
     
-    private String getExtension(String filename) {
-        if (filename == null || filename.isBlank()) return null;
-        int dotIndex = filename.lastIndexOf('.');
-        if (dotIndex == -1 || dotIndex == filename.length() - 1) return null;
-        return filename.substring(dotIndex + 1).toLowerCase();
-    }
+    
 
     @Override
     public BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId) {
@@ -61,14 +58,20 @@ public class BbsServiceImpl implements BbsService {
         }
 
         if (type == BoardType.POTO) {
-            List<ImageBbsEntity> images = imageBbsRepository.findByBbs_BulletinNum(dto.getBulletinNum());
+            List<ImageBbsEntity> images = imageBbsRepository.findByBbsBulletinNum(dto.getBulletinNum());
             if (images == null || images.isEmpty()) {
                 throw new BbsException("이미지 게시판은 최소 1장 이상의 사진을 등록해야 합니다.");
             }
         }
-
+        
+     // DTO에서 받은 memberNum(Long) -> MemberEntity 조회 후 엔티티에 세팅
+        MemberEntity member = null;
+        if(dto.getMemberNum() != null){
+            member = memberRepository.findByMemberNum(dto.getMemberNum())
+                    .orElseThrow(() -> new BbsException("회원이 존재하지 않습니다."));
+        }
         BbsEntity entity = BbsEntity.builder()
-            .bulletinnum(dto.getBulletinNum())
+            .bulletinNum(dto.getBulletinNum())
             .bbstitle(dto.getBbsTitle())
             .bbscontent(dto.getBbsContent())
             .registdate(dto.getRegistDate())
@@ -76,7 +79,7 @@ public class BbsServiceImpl implements BbsService {
             .deldate(dto.getDelDate())
             .viewers(dto.getViewers())
             .bulletinType(dto.getBulletinType())
-            .memberNum(requesterMemberNum != null ? MemberEntity.builder().memberNum(requesterMemberNum).build() : null)
+            .memberNum(member) 
             .build();
 
         return convertToDto(bbsRepository.save(entity));
@@ -108,9 +111,9 @@ public class BbsServiceImpl implements BbsService {
         boolean isAuthor = requesterMemberNum != null && bbs.getMemberNum().getMemberNum().equals(requesterMemberNum);
 
         if (isAdmin || isAuthor) {
-            fileUploadRepository.deleteByBbs_BulletinNum(id);
-            imageBbsRepository.deleteByBbs_BulletinNum(id);
-            qandARepository.deleteByBbs_BulletinNum(id);
+            fileUploadRepository.deleteByBbsBulletinNum(id);
+            imageBbsRepository.deleteByBbsBulletinNum(id);
+            qandARepository.deleteByBbsBulletinNum(id);
             bbsRepository.deleteById(id);
         } else {
             throw new BbsException("삭제 권한이 없습니다.");
@@ -151,22 +154,20 @@ public class BbsServiceImpl implements BbsService {
     }
 
     @Override
-    public Page<BbsDto> searchPosts(String searchType, String keyword, BoardType type, Pageable pageable) {
+    public Page<BbsDto> searchPosts(String searchType, String bbstitle, String bbscontent, BoardType type, Pageable pageable) {
         Page<BbsEntity> result;
         if (type != null) {
             result = switch (searchType.toLowerCase()) {
-                case "title" -> bbsRepository.findByBulletinTypeAndBbstitleContaining(type, keyword, pageable);
-                case "author" -> bbsRepository.findByBulletinTypeAndMember_MemberNameContaining(type, keyword, pageable);
-                case "content" -> bbsRepository.findByBulletinTypeAndBbscontentContaining(type, keyword, pageable);
-                case "title+content" -> bbsRepository.findByBulletinTypeAndTitleOrContent(type, keyword, pageable);
+                case "title" -> bbsRepository.findByBulletinTypeAndBbstitleContaining(type, bbstitle, pageable);
+                case "content" -> bbsRepository.findByBulletinTypeAndBbscontentContaining(type, bbscontent, pageable);
+                case "title+content" -> bbsRepository.findByBulletinTypeAndTitleOrContent(type, bbstitle, bbscontent, pageable);
                 default -> throw new IllegalArgumentException("Invalid search type: " + searchType);
             };
         } else {
             result = switch (searchType.toLowerCase()) {
-                case "title" -> bbsRepository.findByBbstitleContaining(keyword, pageable);
-                case "author" -> bbsRepository.findByMember_MemberNameContaining(keyword, pageable);
-                case "content" -> bbsRepository.findByBbscontentContaining(keyword, pageable);
-                case "title+content" -> bbsRepository.findByBbstitleContainingOrBbscontentContaining(keyword, keyword, pageable);
+                case "title" -> bbsRepository.findByBbstitleContaining(bbstitle, pageable);
+                case "content" -> bbsRepository.findByBbscontentContaining(bbstitle, pageable);
+                case "title+content" -> bbsRepository.findByBbstitleContainingOrBbscontentContaining(bbstitle, bbstitle, pageable);
                 default -> throw new IllegalArgumentException("Invalid search type: " + searchType);
             };
         }
@@ -177,7 +178,7 @@ public class BbsServiceImpl implements BbsService {
         String originalName = e.getMemberNum().getMemberName();
         String filteredName = filterName(originalName);
         return BbsDto.builder()
-                .bulletinNum(e.getBulletinnum())
+                .bulletinNum(e.getBulletinNum())
                 .bbsTitle(e.getBbstitle())
                 .bbsContent(e.getBbscontent())
                 .registDate(e.getRegistdate())
@@ -220,7 +221,7 @@ public class BbsServiceImpl implements BbsService {
         QandAEntity saved = qandARepository.save(entity);
 
         return QandADto.builder()
-            .bulletinNum(saved.getBbs().getBulletinnum())
+            .bulletinNum(saved.getBbs().getBulletinNum())
             .question(saved.getQuestion())
             .answer(saved.getAnswer())
             .build();
@@ -228,11 +229,11 @@ public class BbsServiceImpl implements BbsService {
 
     @Override
     public QandADto getQna(Long bbsId) {
-        QandAEntity qna = qandARepository.findByBbs_BulletinNum(bbsId)
+        QandAEntity qna = qandARepository.findByBbsBulletinNum(bbsId)
             .orElseThrow(() -> new BbsException("QnA 없음"));
 
         return QandADto.builder()
-            .bulletinNum(qna.getBbs().getBulletinnum())
+            .bulletinNum(qna.getBbs().getBulletinNum())
             .question(qna.getQuestion())
             .answer(qna.getAnswer())
             .build();
@@ -255,7 +256,7 @@ public class BbsServiceImpl implements BbsService {
         qna.setAnswer(dto.getAnswer());
 
         return QandADto.builder()
-            .bulletinNum(qna.getBbs().getBulletinnum())
+            .bulletinNum(qna.getBbs().getBulletinNum())
             .question(qna.getQuestion())
             .answer(qna.getAnswer())
             .build();
@@ -305,18 +306,19 @@ public class BbsServiceImpl implements BbsService {
 
         return imageBbsRepository.saveAll(imageEntities).stream()
             .map(entity -> ImageBbsDto.builder()
-                .bulletinNum(entity.getBbs().getBulletinnum())
+                .bulletinNum(entity.getBbs().getBulletinNum())
                 .thumbnailPath(entity.getThumbnailPath())
                 .imagePath(entity.getImagePath())
                 .build())
             .collect(Collectors.toList());
     }
 
+   
     @Override
     public List<ImageBbsDto> getImageBbsList(Long bbsId) {
-        return imageBbsRepository.findByBbs_BulletinNum(bbsId).stream()
+        return imageBbsRepository.findByBbsBulletinNum(bbsId).stream()
             .map(entity -> ImageBbsDto.builder()
-                .bulletinNum(entity.getBbs().getBulletinnum())
+                .bulletinNum(entity.getBbs().getBulletinNum())
                 .thumbnailPath(entity.getThumbnailPath())
                 .imagePath(entity.getImagePath())
                 .build())
@@ -341,17 +343,17 @@ public class BbsServiceImpl implements BbsService {
         }
 
         // 게시글 아이디 가져오기 (삭제할 이미지들이 모두 같은 게시글에 속하는지 확인)
-        Long bbsId = imagesToDelete.get(0).getBbs().getBulletinnum();
+        Long bbsId = imagesToDelete.get(0).getBbs().getBulletinNum();
 
         boolean allSameBbs = imagesToDelete.stream()
-            .allMatch(img -> img.getBbs().getBulletinnum().equals(bbsId));
+            .allMatch(img -> img.getBbs().getBulletinNum().equals(bbsId));
 
         if (!allSameBbs) {
             throw new BbsException("서로 다른 게시글의 이미지를 동시에 삭제할 수 없습니다.");
         }
 
         // 게시글에 현재 이미지 개수
-        long currentImageCount = imageBbsRepository.countByBbs_BulletinNum(bbsId);
+        long currentImageCount = imageBbsRepository.countByBbsBulletinNum(bbsId);
 
         // 삭제 후 이미지가 최소 1장 남아야 한다는 조건 검사
         if (currentImageCount - imagesToDelete.size() < 1) {
@@ -371,7 +373,7 @@ public class BbsServiceImpl implements BbsService {
         image.setImagePath(dto.getImagePath());
 
         return ImageBbsDto.builder()
-            .bulletinNum(image.getBbs().getBulletinnum())
+            .bulletinNum(image.getBbs().getBulletinNum())
             .thumbnailPath(image.getThumbnailPath())
             .imagePath(image.getImagePath())
             .build();
@@ -408,7 +410,7 @@ public class BbsServiceImpl implements BbsService {
         }
 
         long maxSize = 5 * 1024 * 1024; // 5MB
-        String uploadDir = "/var/www/uploads"; // 실제 경로로 변경 필요
+        String uploadDir = "C:/photo"; // 실제 경로로 변경 필요
 
         List<FileUpLoadEntity> entities = files.stream()
             .filter(file -> {
@@ -459,9 +461,15 @@ public class BbsServiceImpl implements BbsService {
             .collect(Collectors.toList());
     }
 
+    private String getExtension(String filename) {
+        if (filename == null || filename.isBlank()) return null;
+        int dotIndex = filename.lastIndexOf('.');
+        if (dotIndex == -1 || dotIndex == filename.length() - 1) return null;
+        return filename.substring(dotIndex + 1).toLowerCase();
+    }
     @Override
     public List<FileUpLoadDto> getFilesByBbs(Long bbsId) {
-        return fileUploadRepository.findByBbs_BulletinNum(bbsId).stream()
+        return fileUploadRepository.findByBbsBulletinNum(bbsId).stream()
             .map(entity -> FileUpLoadDto.dtoBuilder()
                 .fileNum(entity.getFilenum())
                 .originalName(entity.getOriginalName())

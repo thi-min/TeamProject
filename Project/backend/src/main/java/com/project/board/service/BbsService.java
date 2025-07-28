@@ -23,7 +23,7 @@ public interface BbsService {
     
     Page<BbsDto> getPagedPosts(BoardType type, String sort, Pageable pageable); // 게시판 타입 + 정렬 조건으로 페이징된 게시글 조회
     
-    Page<BbsDto> searchPosts(String searchType, String keyword, BoardType type, Pageable pageable); // 게시판 타입 + 검색 조건으로 페이징된 게시글 조회
+    Page<BbsDto> searchPosts(String searchType, String bbstitle, String bbscontent, BoardType type, Pageable pageable); // 게시판 타입 + 검색 조건으로 페이징된 게시글 조회
     
     QandADto saveQna(Long bbsId, QandADto dto, Long requesterAdminId); // QnA 답변 저장 (관리자만 가능)
     

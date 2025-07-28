@@ -37,4 +37,3 @@ public class FileUpLoadEntity {
     @Column(name = "extension", nullable = false)
     private String extension; // 확장자
 }
-

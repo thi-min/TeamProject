@@ -13,7 +13,8 @@ import lombok.*;
 public class ImageBbsEntity {
 
     @Id
-    private Long bulletin_num; // 외래키이자 기본키
+    @Column(name = "bulletin_num")
+    private Long bulletinNum; // 외래키이자 기본키
 
     @MapsId
     @OneToOne

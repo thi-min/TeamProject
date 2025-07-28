@@ -6,12 +6,10 @@ import com.project.board.BoardType;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -19,7 +17,7 @@ public class BbsDto {
 
     private Long bulletinNum;  // 게시글 번호
 
-    private Long adminId;    // 관리자 아이디 
+    private String adminId;    // 관리자 아이디 
 
     private Long memberNum;    // 회원 번호 
     

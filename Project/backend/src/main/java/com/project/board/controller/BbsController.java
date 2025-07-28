@@ -171,11 +171,23 @@ public class BbsController {
     // 게시글 검색
     @GetMapping("/search")
     public Page<BbsDto> searchPosts(
-        @RequestParam("keyword") String keyword,
+        @RequestParam(name = "bbstitle", required = false) String bbstitle,
+        @RequestParam(name = "bbscontent", required = false) String bbscontent,
         @RequestParam(name = "searchType", required = false, defaultValue = "title") String searchType,
         @RequestParam(name = "type", required = false) BoardType type,
         @PageableDefault(size = 10) Pageable pageable
     ) {
-        return bbsService.searchPosts(searchType, keyword, type, pageable);
+        // searchType에 따라 유효성 보정
+        if ("title".equalsIgnoreCase(searchType)) {
+            bbscontent = null;  // 제목만 검색
+        } else if ("content".equalsIgnoreCase(searchType)) {
+            bbstitle = null;    // 내용만 검색
+        } else if ("title+content".equalsIgnoreCase(searchType)) {
+            // 둘 다 그대로 사용
+        } else {
+            throw new IllegalArgumentException("Invalid search type: " + searchType);
+        }
+
+        return bbsService.searchPosts(searchType, bbstitle, bbscontent, type, pageable);
     }
 }
