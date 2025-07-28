@@ -50,12 +50,9 @@ public class MemberSignUpRequestDto {
     private String memberAddress;
     
     @Enumerated(EnumType.STRING)
-    @Column(name = "member_sex")
     private MemberSex memberSex; //성별
     
-    @Column(name = "sns_yn")
-    private boolean snsYn; //문자 수신여부(동의/비동의)
+    private boolean smsAgree; //문자 수신여부(동의/비동의)
     
-    @Column(name = "kakao_id", length = 255)
     private String kakaoId; //카카오아이디
 }

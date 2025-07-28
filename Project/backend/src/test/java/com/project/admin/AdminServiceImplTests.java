@@ -1,24 +1,21 @@
 package com.project.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.RuntimeBeanNameReference;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import com.project.admin.dto.AdminForcedDeleteDto;
 import com.project.admin.dto.AdminLoginRequestDto;
 import com.project.admin.dto.AdminLoginResponseDto;
 import com.project.admin.dto.AdminMemberDetailResponseDto;
 import com.project.admin.dto.AdminMemberListResponseDto;
+import com.project.admin.dto.AdminMemberLockChangeDto;
+import com.project.admin.dto.AdminMemberStateChangeDto;
 import com.project.admin.dto.AdminPasswordUpdateRequestDto;
 import com.project.admin.entity.AdminEntity;
 import com.project.admin.repository.AdminRepository;
@@ -26,17 +23,18 @@ import com.project.admin.service.AdminServiceImpl;
 import com.project.member.entity.MemberEntity;
 import com.project.member.entity.MemberState;
 import com.project.member.repository.MemberRepository;
+import com.project.member.service.MemberService;
 
 @SpringBootTest
 class AdminServiceImplTests{
 	@Autowired
 	private AdminServiceImpl adminService;
-	
 	@Autowired
 	private AdminRepository adminRepository;
 	@Autowired
 	private MemberRepository memberRepository;
-	
+	private MemberService memberService;
+	private MemberEntity memberEntity;
 	private Long testAdminNum;
 	
 	//관리자 조회
@@ -103,31 +101,78 @@ class AdminServiceImplTests{
     }
     
     //@Test
-    void 회원탈퇴시키기() {
-    	Long testMemberNum = 3L;
-        //회원 강제 탈퇴
-    	AdminForcedDeleteDto result = adminService.adminMemberOut(testMemberNum);
-    	System.out.println("삭제할 회원 조회 완료");
+    void 회원상태_정상변경() {
+    	Long memberNum = 3L;
     	
-    	//결과검증
+    	AdminMemberStateChangeDto result = adminService.adminMemberStateChange(3L, MemberState.ACTIVE);
+    	
     	assertThat(result).isNotNull();
-    	assertThat(result.getMemberNum()).isEqualTo(testMemberNum);
-    	assertThat(result.getMessage()).isEqualTo("회원 탈퇴 완료");
+    	assertThat(result.getMessage()).contains("정상");
     	
-    	//회원상태가 OUT으로 바뀌었는지 검사
-    	MemberEntity updated = memberRepository.findByMemberNum(testMemberNum)
+    	MemberEntity update = memberRepository.findByMemberNum(memberNum)
     			.orElseThrow(() -> new RuntimeException("회원 조회 실패"));
-    	assertThat(updated.getMemberState()).isEqualTo(MemberState.OUT);
     	
-    	//출력
+    	assertThat(update.getMemberState()).isEqualTo(MemberState.ACTIVE);
+    	
+    	System.out.println("회원상태 : " + update.getMemberState());
+    }
+//    @Test
+    void 회원상태_휴먼변경() {
+    	Long memberNum = 1L;
+    	
+    	AdminMemberStateChangeDto result = adminService.adminMemberStateChange(1L, MemberState.REST);
+    	
+    	assertThat(result).isNotNull();
+    	assertThat(result.getMessage()).contains("휴먼");
+    	
+    	MemberEntity update = memberRepository.findByMemberNum(memberNum)
+    			.orElseThrow(() -> new RuntimeException("회원 조회 실패"));
+    	
+    	assertThat(update.getMemberState()).isEqualTo(MemberState.REST);
+    	
     	System.out.println(result);
-    	System.out.println("회원 상태 : " + updated.getMemberState());
+    	System.out.println("회원상태 : " + update.getMemberState());
+    }
+//    @Test
+    void 회원상태_탈퇴변경() {
+    	Long memberNum = 2L;
+    	
+    	AdminMemberStateChangeDto result = adminService.adminMemberStateChange(2L, MemberState.OUT);
+    	
+    	assertThat(result).isNotNull();
+    	assertThat(result.getMessage()).contains("탈퇴");
+    	
+    	MemberEntity update = memberRepository.findByMemberNum(memberNum)
+    			.orElseThrow(() -> new RuntimeException("회원 조회 실패"));
+    	
+    	assertThat(update.getMemberState()).isEqualTo(MemberState.OUT);
+    	
+    	System.out.println(result);
+    	System.out.println("회원상태 : " + update.getMemberState());
     }
     
+    //@Test
+    void 회원잠금_상태변경() {
+    	Long memberNum = 2L;
+    	
+    	AdminMemberLockChangeDto result = adminService.adminMemberLockChange(memberNum, true);
+    	
+    	assertThat(result).isNotNull();
+    	assertThat(result.getMessage()).contains("잠금상태");
+    	
+    	MemberEntity update = memberRepository.findByMemberNum(memberNum)
+    			.orElseThrow(() -> new RuntimeException("회원 조회 실패"));
+    	
+    	assertThat(update.getMemberLock()).isTrue();
+    	
+    	System.out.println(result);
+    	System.out.println("회원상태 : " + update.getMemberLock());
+    }
+
+
     // --------------------비밀번호 변경 -------------------
     //@Test
-    @DisplayName("1. 비밀번호 변경 성공")
-    void updatePassword() {
+    void 비밀번호변경() {
     	String adminId = "admin";
     	AdminEntity admin = AdminEntity.builder()
     			.adminId(adminId)

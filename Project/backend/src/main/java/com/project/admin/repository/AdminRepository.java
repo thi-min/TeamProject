@@ -20,9 +20,6 @@ public interface AdminRepository extends JpaRepository<AdminEntity, Long>{
     //비밀번호 변경
 	//예시: adminId로 해당 관리자 조회
 	//Optional<AdminEntity> findByAdminId(String adminId);
-	
 	Optional<AdminEntity> findFirstByAdminId(String adminId);
 
-	//회원 상태 변경
-	Optional<MemberEntity> findByMemberNum(Long memberNum);
 }

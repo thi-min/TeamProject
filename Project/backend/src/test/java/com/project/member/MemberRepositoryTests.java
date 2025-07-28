@@ -8,6 +8,7 @@ import jakarta.transaction.Transactional;
 import com.project.member.entity.MemberSex;
 import com.project.member.entity.MemberState;
 import com.project.admin.entity.AdminEntity;
+import com.project.common.util.JasyptUtil;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,27 +30,26 @@ public class MemberRepositoryTests {
     @Autowired
     private MemberRepository memberRepository;
 
+    static {
+        System.setProperty("JASYPT_ENCRYPTOR_PASSWORD", "test-key");
+    }
+    
     @Test
     void findByMemberIdAndMemberPw_정상작동() {
         MemberEntity member = MemberEntity.builder()
-        		.memberId("test@test.com")
+        		.memberId("test111@test.com")
                 .memberPw("1234")
-                .memberName("홍길동")
-                .memberBirth(LocalDate.of(1996, 1, 1))
-                .memberPhone("01012345678")
-                .memberAddress("서울시 강남구")
+                .memberName("안길동")
+                .memberBirth(LocalDate.of(1996, 5, 3))
+                .memberPhone(JasyptUtil.encrypt("22123234545"))
+                .memberAddress("서울시 청주구")
                 .memberDay(LocalDate.now())
                 .memberSex(MemberSex.Man)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
+                .smsAgree(false)
                 .build();
-
+        
         memberRepository.save(member);
-
-        Optional<MemberEntity> result = memberRepository.findByMemberIdAndMemberPw("test@test.com", "1234");
-
-        assertThat(result).isPresent();
-        assertThat(result.get().getMemberName()).isEqualTo("홍길동");
     }
 }

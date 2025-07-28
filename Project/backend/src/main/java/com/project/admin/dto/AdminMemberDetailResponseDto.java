@@ -24,7 +24,7 @@ public class AdminMemberDetailResponseDto {
 	private String memberAddress; //주소
 	private String memberDay; //가입일시
 	private boolean memberLock; //계정 잠금여부(true/flase)
-	private boolean snsYn; //sns 수신여부
+	private boolean smsAgree; //sns 수신여부
     private MemberState memberState; //회원상태("ACTIVE","REST","OUT")
 	private MemberSex memberSex; //성별
 }
