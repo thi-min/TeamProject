@@ -31,10 +31,8 @@ public interface AdminService {
     
     //회원 정보 수정(관리자용)
     AdminMemberDateUpdateRequestDto adminMemberUpdateView(Long memberNum);
-
+    
     //관리자 비밀번호 변경
     void updatePassword(String adminId, AdminPasswordUpdateRequestDto dto);
-    
-    
     
 }
