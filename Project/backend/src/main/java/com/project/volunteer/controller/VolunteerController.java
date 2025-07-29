@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.project.volunteer.dto.VolunteerCountDto;
+import com.project.volunteer.dto.VolunteerDetailDto;
 import com.project.volunteer.service.VolunteerService;
 
 import lombok.RequiredArgsConstructor;
@@ -26,5 +27,11 @@ public class VolunteerController {
 
         VolunteerCountDto countInfo = volunteerService.getVolunteerCountInfo(volDate, volTime);
         return ResponseEntity.ok(countInfo);
+    }
+    
+    @GetMapping("/preview/{reserveCode}")
+    public ResponseEntity<VolunteerDetailDto> getVolunteerPreview(@PathVariable Long reserveCode) {
+        VolunteerDetailDto dto = volunteerService.getVolunteerDetailByReserveCode(reserveCode);
+        return ResponseEntity.ok(dto);
     }
 }
