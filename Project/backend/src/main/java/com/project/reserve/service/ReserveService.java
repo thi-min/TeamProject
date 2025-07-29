@@ -4,6 +4,7 @@ import com.project.land.dto.LandDetailDto;
 import com.project.reserve.dto.AdminReservationListDto;
 import com.project.reserve.dto.AdminReservationSearchDto;
 import com.project.reserve.dto.FullReserveRequestDto;
+import com.project.reserve.dto.ReserveCompleteResponseDto;
 import com.project.reserve.dto.ReserveRequestDto;
 import com.project.reserve.dto.ReserveResponseDto;
 import com.project.reserve.entity.ReserveState;
@@ -15,7 +16,7 @@ import java.util.List;
 
 public interface ReserveService {
 
-     Long createReserve(FullReserveRequestDto fullRequestDto); //사용자 - 예약생성
+	 ReserveCompleteResponseDto createReserve(FullReserveRequestDto fullRequestDto); //사용자 - 예약생성
 
 	 List<ReserveResponseDto> getReservesByMember(Long memberNum); //사용자 - 본인의 예약 목록 조회(마이페이지)
 	 

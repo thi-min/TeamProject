@@ -2,6 +2,7 @@ package com.project.reserve.controller;
 
 import com.project.land.dto.LandDetailDto;
 import com.project.reserve.dto.FullReserveRequestDto;
+import com.project.reserve.dto.ReserveCompleteResponseDto;
 import com.project.reserve.dto.ReserveRequestDto;
 import com.project.reserve.dto.ReserveResponseDto;
 import com.project.reserve.entity.ReserveState;
@@ -24,9 +25,9 @@ public class ReserveController {
 
     //사용자 - 예약 생성
     @PostMapping
-    public ResponseEntity<Long> createReserve(@RequestBody FullReserveRequestDto fullRequestDto) {
-        Long reserveCode = reserveService.createReserve(fullRequestDto);
-        return ResponseEntity.ok(reserveCode);
+    public ResponseEntity<ReserveCompleteResponseDto> createReserve(@RequestBody FullReserveRequestDto fullRequestDto) {
+        ReserveCompleteResponseDto response = reserveService.createReserve(fullRequestDto);
+        return ResponseEntity.ok(response);
     }
     
     //사용자 - 회원 예약목록 조회 (마이페이지)

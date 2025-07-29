@@ -4,9 +4,11 @@ import java.time.LocalDate;
 
 import com.project.reserve.entity.ReserveState;
 
+import lombok.Builder;
 import lombok.Data;
 
 @Data
+@Builder
 public class AdminReservationSearchDto {
 	private LocalDate startDate; // 검색 시작일
     private LocalDate endDate;   // 검색 종료일

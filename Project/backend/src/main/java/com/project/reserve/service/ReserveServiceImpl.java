@@ -3,6 +3,7 @@ package com.project.reserve.service;
 import com.project.reserve.dto.AdminReservationListDto;
 import com.project.reserve.dto.AdminReservationSearchDto;
 import com.project.reserve.dto.FullReserveRequestDto;
+import com.project.reserve.dto.ReserveCompleteResponseDto;
 import com.project.reserve.dto.ReserveRequestDto;
 import com.project.reserve.dto.ReserveResponseDto;
 import com.project.reserve.entity.Reserve;
@@ -41,7 +42,7 @@ public class ReserveServiceImpl implements ReserveService {
     // 사용자가 예약요청하면 예약상태 기본값으로 설정, DB에 저장
     @Override
     @Transactional
-    public Long createReserve(FullReserveRequestDto fullRequestDto) {
+    public ReserveCompleteResponseDto createReserve(FullReserveRequestDto fullRequestDto) {
     	
     	//여러곳에서 참조해오기때문에 null값 나올수 있어서 추가 (예외처리)
     	if (fullRequestDto == null || fullRequestDto.getReserveDto() == null) {
@@ -90,6 +91,8 @@ public class ReserveServiceImpl implements ReserveService {
         Reserve reserve = fullRequestDto.getReserveDto().toEntity(member);
         Reserve saved = reserveRepository.save(reserve);
         
+        String message;
+        
         //예약 유형에 따라 세부 정보 저장
         
         if (reserveType == 1) { // 놀이터 예약
@@ -97,19 +100,25 @@ public class ReserveServiceImpl implements ReserveService {
                 throw new IllegalArgumentException("놀이터 예약 세부 정보가 누락되었습니다.");
             }
             landService.createLand(saved, fullRequestDto.getLandDto());
+            message = "놀이터 예약이 완료되었습니다.";
+            
 
         } else if (reserveType == 2) { // 봉사 예약
             if (fullRequestDto.getVolunteerDto() == null) {
                 throw new IllegalArgumentException("봉사 예약 세부 정보가 누락되었습니다.");
             }
             volunteerService.createVolunteer(saved, fullRequestDto.getVolunteerDto());
+            message = "봉사활동 신청이 완료되었습니다.";
         }
         else {
             //잘못된 예약유형에 대해 예외 발생
             throw new IllegalArgumentException("예약 유형이 유효하지 않습니다. (1: 놀이터, 2: 봉사)");
         }
 
-        return saved.getReserveCode();
+        return ReserveCompleteResponseDto.builder()
+        	    .reserveCode(saved.getReserveCode())    // Long 타입으로 저장
+        	    .message(message)
+        	    .build();
     }
     
     //특정회원(membernum)이 신청한 예약 목록 조회
