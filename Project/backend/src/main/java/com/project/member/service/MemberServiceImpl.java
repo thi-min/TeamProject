@@ -1,8 +1,11 @@
 package com.project.member.service;
 
+//비밀번호 단뱡향 복호화
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import org.springframework.stereotype.Service;
 
+import com.project.common.util.JasyptUtil;
 import com.project.member.dto.MemberDeleteDto;
 import com.project.member.dto.MemberLoginRequestDto;
 import com.project.member.dto.MemberLoginResponseDto;
@@ -23,7 +26,8 @@ import lombok.RequiredArgsConstructor;
 public class MemberServiceImpl implements MemberService {
 
 	private final MemberRepository memberRepository;
-	 
+	private final BCryptPasswordEncoder passwordEncoder;
+	
 	//회원가입
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
@@ -35,13 +39,18 @@ public class MemberServiceImpl implements MemberService {
 			throw new IllegalArgumentException("이미 존재하는 아이디 입니다.");
 		}
 		
+		//비밀번호 암호화
+		String encodedPw = passwordEncoder.encode(dto.getMemberPw());
+		//핸드폰번호 암호화
+		String encryptedPhone = JasyptUtil.encrypt(dto.getMemberPhone());
+		
 		//Entity 변환
 		MemberEntity newMember = MemberEntity.builder()
 				.memberId(dto.getMemberId())
-				.memberPw(dto.getMemberPw())
+				.memberPw(encodedPw)
 				.memberName(dto.getMemberName())
 				.memberBirth(dto.getMemberBirth())
-				.memberPhone(dto.getMemberPhone())	//암호화 적용
+				.memberPhone(encryptedPhone)
 				.memberAddress(dto.getMemberAddress())
 				.memberSex(dto.getMemberSex())
 		        .memberState(MemberState.ACTIVE) // 기본 상태
@@ -70,7 +79,8 @@ public class MemberServiceImpl implements MemberService {
 				.memberId(member.getMemberId())
 				.memberName(member.getMemberName())
 				.message("로그인 성공")
-				.accessToken("생성된 토큰값")
+				.accessToken("정상 토큰")
+				.refreshToken("재발급 토큰")
 				.build();
 	}
 	
@@ -81,14 +91,16 @@ public class MemberServiceImpl implements MemberService {
 		MemberEntity member = memberRepository.findByMemberNum(memberNum)
 				.orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다"));
 		
+		//핸드폰번호 복호화
+		String decryptedPhone = JasyptUtil.decrypt(member.getMemberPhone());
+		
 		return MemberMyPageResponseDto.builder()
 				.memberName(member.getMemberName())
 				.memberId(member.getMemberId())
-				.memberPw(member.getMemberPw())
 				.memberBirth(member.getMemberBirth())
 				.memberSex(member.getMemberSex()) //enum은 그대로 호출
 				.memberAddress(member.getMemberAddress())
-				.memberPhone(member.getMemberPhone())
+				.memberPhone(decryptedPhone)
 				.kakaoId(member.getKakaoId())
 				.smsAgree(member.isSmsAgree()) //boolean타입은 is로 호출
 				.build();
@@ -111,7 +123,6 @@ public class MemberServiceImpl implements MemberService {
 	    return MemberMyPageResponseDto.builder()
 	            .memberName(member.getMemberName())
 	            .memberId(member.getMemberId())
-	            .memberPw(member.getMemberPw())
 	            .memberBirth(member.getMemberBirth())
 	            .memberSex(member.getMemberSex())
 	            .memberAddress(member.getMemberAddress())
@@ -176,8 +187,9 @@ public class MemberServiceImpl implements MemberService {
 	    MemberEntity member = memberRepository.findByMemberId(memberId)
 	        .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
 	    
+	    //비밀번호 단뱡향 복호화
 		//현재 비밀번호 검증
-		if(!member.getMemberPw().equals(dto.getCurrentPassword())) {
+		if(!passwordEncoder.matches(dto.getCurrentPassword(), member.getMemberPw())) {
 			throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
 		}
 		//새 비밀번호와 비밀번호 확인 일치 여부
@@ -185,28 +197,40 @@ public class MemberServiceImpl implements MemberService {
 			throw new IllegalArgumentException("변경할 비밀번호가 일치하지 않습니다.");
 		}
 		//이전 비밀번호와 같은지 확인
-		if(dto.getCurrentPassword().equals(dto.getNewPassword())) {
+		if(passwordEncoder.matches(dto.getNewPassword(), member.getMemberPw())) {
 			throw new IllegalArgumentException("이전과 동일한 비밀번호는 사용할 수 없습니다.");
 		}
 		
-		//비밀번호 변경
-		member.setMemberPw(dto.getNewPassword());
-		
-		//변경된 값 저장하기
+		//새 비밀번호 암호화 및 저장
+		String newEncodePw = passwordEncoder.encode(dto.getNewPassword());
+		member.setMemberPw(newEncodePw);
 		memberRepository.save(member); //저장
 	}
 
 	//휴대폰 번호로 회원 존재 여부 확인
 	public String checkPhoneNumber(String phoneNum) {
+	    String encryptedPhone;
 		//memberPhone컬럼에 phoneNum와 같은 값이 존재하는지 조회
-		boolean exists = memberRepository.findByMemberPhone(phoneNum).isPresent();
-		
-		//동일한 값이 존재한다면 예외 발생
-		if(exists) {
-			throw new IllegalArgumentException("이미 가입된 휴대폰 번호입니다.");
-		}
-		//존재하지 않으면 인증가능
-		return "사용 가능한 번호입니다.";
-	}
+	    try {
+	    	//입력값을 암호화
+	        encryptedPhone = JasyptUtil.encrypt(phoneNum);
+	        System.out.println("📦 암호화된 입력값: " + encryptedPhone); // 🔍 여기에 로그 찍기
+	    } catch (Exception e) {
+	        throw new RuntimeException("휴대폰 번호 확인중 암호화 오류 발생", e);
+	    }
+	    //암호화된 값으로 조회
+	    boolean exists = memberRepository.findByMemberPhone(encryptedPhone).isPresent();
 
+	    //동일한 값이 존재한다면 예외 발생
+	    if (exists) {
+	        throw new IllegalArgumentException("이미 가입된 휴대폰 번호입니다.");
+	    }
+	    //존재하지 않으면 인증가능
+	    return "사용 가능한 번호입니다.";
+	    
+		//1. 사용자가 핸드폰번호 입력
+  		//2. encrypt 핸드폰번호 암호화
+  		//3. 암호화된 문자열을 memberPhone과 비교
+  		//4. 존재여부 판단 > 중복 확인 처리
+	}
 }

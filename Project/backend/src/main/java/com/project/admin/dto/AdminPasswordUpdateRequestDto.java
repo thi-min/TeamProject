@@ -13,6 +13,9 @@ import lombok.Setter;
 @Data
 //비밀번호 변경
 public class AdminPasswordUpdateRequestDto {
+	
+	private String adminId;
+	
 	@NotBlank(message = "현재 비밀번호를 입력해주세요.")
 	private String currentPassword;    // 현재 비밀번호(일반 비밀번호 변경시 사용)
 	
