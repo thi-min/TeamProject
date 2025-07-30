@@ -9,10 +9,17 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice(basePackages = "com.project.member")
 public class MemberExceptionHandler {
 	
-	//아이디 중복 등 IllegalArgumentException 처리
+	//IllegalArgumentException (입력값 오류, 검증 실패 등)
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<String> handleIllegalArgument(IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+    }
+    
+    //예상치 못한 서버 에러 처리
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<String> handleOther(Exception ex) {
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("서버 오류가 발생했습니다. 고객센터에 문의해주세요.");
     }
     
 //    회원가입	"이미 존재하는 아이디 입니다."

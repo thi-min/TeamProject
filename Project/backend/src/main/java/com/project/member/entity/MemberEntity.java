@@ -1,6 +1,7 @@
 package com.project.member.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.project.admin.entity.AdminEntity;
 
@@ -38,7 +39,7 @@ public class MemberEntity {
     @Column(name = "member_id", nullable = false, length = 80)
     private String memberId; //이메일 아이디
 
-    @Column(name = "member_pw", nullable = false, length = 20)
+    @Column(name = "member_pw", nullable = false, length = 255)
     private String memberPw; //비밀번호
 
     @Column(name = "member_name", nullable = false, length = 12)
@@ -63,9 +64,12 @@ public class MemberEntity {
     @Column(name = "member_sex")
     private MemberSex memberSex; //성별
     
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.STRING) 
     @Column(name = "member_state")
     private MemberState memberState; //회원상태
+    
+    @Column(name = "out_date")
+    private LocalDateTime outDate; // 회원이 OUT 상태로 변경된 순간 기록
     
     @Column(name = "sns_yn")
     private boolean smsAgree; //문자 수신여부(동의/비동의)
@@ -77,5 +81,6 @@ public class MemberEntity {
     @JoinColumn(name = "admin_id")
     private AdminEntity admin;
 
-
+    private String accessToken;
+    private String refreshToken;
 }

@@ -61,20 +61,21 @@ public class MemberController {
 		return ResponseEntity.ok(memberService.sigup(dto));
 	}
 	
-	//마이페이지 조회
-	@GetMapping("/mypage/{memberNum}")
-	//@PathVariable	URL 경로 매핑
-	public ResponseEntity<MemberMyPageResponseDto> myPage(@PathVariable Long memberNum){
-		return ResponseEntity.ok(memberService.myPage(memberNum));
-	}
-	
-	//마이페이지 수정 + SMS 수신 동의 여부
-	@PutMapping("/mypage/{memberNum}")
-	public ResponseEntity<MemberMyPageResponseDto> updateMyPage(
-			@PathVariable Long memberNum,
-			@RequestBody MemberMyPageUpdateRequestDto dto){
-		return ResponseEntity.ok(memberService.updateMyPage(memberNum, dto));
-	}
+	//AuthController에 구현해서 주석처리
+//	//마이페이지 조회
+//	@GetMapping("/mypage/{memberNum}")
+//	//@PathVariable	URL 경로 매핑
+//	public ResponseEntity<MemberMyPageResponseDto> myPage(@PathVariable Long memberNum){
+//		return ResponseEntity.ok(memberService.myPage(memberNum));
+//	}
+//	
+//	//마이페이지 수정 + SMS 수신 동의 여부
+//	@PutMapping("/mypage/{memberNum}")
+//	public ResponseEntity<MemberMyPageResponseDto> updateMyPage(
+//			@PathVariable Long memberNum,
+//			@RequestBody MemberMyPageUpdateRequestDto dto){
+//		return ResponseEntity.ok(memberService.updateMyPage(memberNum, dto));
+//	}
 	
 	//회원탈퇴
 	@DeleteMapping("/{memberNum}")
@@ -83,7 +84,7 @@ public class MemberController {
 	}
 
 	//아이디 찾기
-	@DeleteMapping("/find-id")
+	@GetMapping("/find-id")
 	public ResponseEntity<String> findId(
 			@RequestParam String memberName,
 			@RequestParam String memberPhone){
@@ -92,7 +93,7 @@ public class MemberController {
 	}
 	
 	//비밀번호 찾기
-	@DeleteMapping("/find-pw")
+	@PostMapping("/find-pw")
 	public ResponseEntity<String> findMemberPw(
 			@RequestParam String memberId,
 			@RequestParam String memberName,
@@ -109,7 +110,7 @@ public class MemberController {
 	}
 	
 	//휴대폰인증(중복확인)
-	@GetMapping("/chech-phone")
+	@GetMapping("/check-phone")
 	public ResponseEntity<String> checkPhoneNumber(@RequestParam String phoneNum){
 		return ResponseEntity.ok(memberService.checkPhoneNumber(phoneNum));
 	}

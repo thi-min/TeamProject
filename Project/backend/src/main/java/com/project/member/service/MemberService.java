@@ -42,4 +42,5 @@ public interface MemberService {
 
     //휴대폰 번호 중복 확인
     String checkPhoneNumber(String phoneNum);
+
 }

@@ -1,13 +1,16 @@
 package com.project.member.repository;
 
-import com.project.member.entity.MemberEntity;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import com.project.member.entity.MemberEntity;
+import com.project.member.entity.MemberState;
 
 @Repository
 public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
@@ -34,6 +37,9 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     
     //비밀번호 찾기
     Optional<MemberEntity> findByMemberIdAndMemberNameAndMemberPhone(String memberId, String memberName, String memberPhone);
+    
+    //탈퇴일 기준으로 삭제 대상 회원 찾기
+    List<MemberEntity> findByMemberStateAndOutDateBefore(MemberState state, LocalDateTime dateTime);
     
     //페이지네이션 회원목록
     //페이징 처리된 전체 회원목록 조회

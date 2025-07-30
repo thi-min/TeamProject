@@ -3,10 +3,16 @@ package com.project.member;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.LocalDateTime;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.test.context.TestPropertySource;
 
 import com.project.member.dto.MemberDeleteDto;
 import com.project.member.dto.MemberLoginRequestDto;
@@ -15,10 +21,14 @@ import com.project.member.dto.MemberMyPageResponseDto;
 import com.project.member.dto.MemberMyPageUpdateRequestDto;
 import com.project.member.dto.MemberPasswordUpdateRequestDto;
 import com.project.member.entity.MemberEntity;
+import com.project.member.entity.MemberState;
 import com.project.member.repository.MemberRepository;
 import com.project.member.service.MemberServiceImpl;
 
+import jakarta.transaction.Transactional;
+
 @SpringBootTest
+@TestPropertySource(properties = "JASYPT_ENCRYPTOR_PASSWORD=test-key")
 class MemberServiceImplTests {
 
     @Autowired
@@ -28,7 +38,9 @@ class MemberServiceImplTests {
     private MemberRepository memberRepository;
 
     private Long testMemberNum;
-
+    //단방향 암호화
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    
     //@BeforeEach
 //    void setUp() {
 //        Optional<MemberEntity> member = memberRepository.findByMemberId("test@test.com");
@@ -37,8 +49,6 @@ class MemberServiceImplTests {
 //        }
 //        testMemberNum = member.get().getMemberNum();
 //    }
-
-
 
     //@Test
     void 마이페이지_조회_테스트() {
@@ -110,26 +120,23 @@ class MemberServiceImplTests {
     @DisplayName("회원 비밀번호 변경 - 성공")
     void 회원_비밀번호_변경() {
         // given
-        String memberId = "test2@test.com";
-
-        // 테스트용 회원이 DB에 없으면 삽입
-        memberRepository.findByMemberId(memberId);
+        String memberId = "test96@test.com";
 
         // 비밀번호 변경 DTO
         MemberPasswordUpdateRequestDto dto = new MemberPasswordUpdateRequestDto();
         dto.setMemberId(memberId);
-        dto.setCurrentPassword("1234");
-        dto.setNewPassword("dks123");
-        dto.setNewPasswordCheck("dks123");
+        dto.setCurrentPassword("korandoi1");
+        dto.setNewPassword("123444");
+        dto.setNewPasswordCheck("123444");
 
         // when
         memberService.updatePassword(dto);
-
+        
         // then
         MemberEntity updated = memberRepository.findByMemberId(memberId)
                 .orElseThrow(() -> new RuntimeException("회원 없음"));
 
-        assertEquals("dks123", updated.getMemberPw());
+        assertTrue(passwordEncoder.matches("123444", updated.getMemberPw()));
 
         System.out.println("비밀번호 변경 성공: " + updated.getMemberPw());
     }
@@ -163,22 +170,23 @@ class MemberServiceImplTests {
     }
     
     //@Test
-    @DisplayName("회원 휴대폰 번호 중복 확인 테스트")
-    void checkPhone() {
-    	//입력한 핸드폰
-//    	String registeredPhone = "01012222678";
-//
-//    	String result = memberService.checkPhoneNumber(registeredPhone);
-//    	assertEquals("사용 가능한 번호입니다.", result); 
-//    	System.out.println(result);
-    	
-    	//입력한 번호가 회원 핸드폰번호와 겹칠때.
-    	String duPhone = "01012345672";
-    	IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,() -> {
-    	    memberService.checkPhoneNumber(duPhone);
-    	});
-    	assertEquals("이미 가입된 휴대폰 번호입니다.", ex.getMessage());
-    	System.out.println(ex.getMessage());
+    @DisplayName("✅ 이미 등록된 휴대폰 번호는 중복 예외 발생")
+    void checkPhoneNumber_중복예외발생() {
+        IllegalArgumentException ex = assertThrows(IllegalArgumentException.class, () -> {
+            memberService.checkPhoneNumber("01096861400"); // 등록된 번호 사용
+        });
 
+        assertEquals("이미 가입된 휴대폰 번호입니다.", ex.getMessage());
+        System.out.println("✔ 예외 메시지 확인: " + ex.getMessage());
     }
+    
+    //@Test
+    @DisplayName("✅ 등록되지 않은 휴대폰 번호는 사용 가능")
+    void checkPhoneNumber_사용가능() {
+        String result = memberService.checkPhoneNumber("01096861400"); // 미등록 번호
+        assertThat(result).isEqualTo("사용 가능한 번호입니다.");
+    }
+   
+
+
 }

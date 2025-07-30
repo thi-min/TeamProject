@@ -61,6 +61,7 @@ public class AdminEntity {
 	private LocalDateTime registDate; //등록일시
 	@Column(name = "connect_data", nullable = false)
 	private LocalDateTime connectData; //접속일시
-
-
+	
+    private String accessToken;
+    private String refreshToken;
 }
