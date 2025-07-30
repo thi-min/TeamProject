@@ -179,7 +179,7 @@ public class Bbsrepositorytests {
     }
 */
     
-   /* @Test
+    /*@Test
     @DisplayName("10개 이상 게시글 페이지 조회 테스트")
     public void testFindByBulletinTypeWithMoreThan10Posts() {
         // 1. 페이지 정보 세팅 (한 페이지에 10개)

@@ -1,5 +1,7 @@
 package com.project.board.entity;
 
+import com.project.admin.entity.AdminEntity;
+
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -25,4 +27,6 @@ public class QandAEntity {
 
     @Column(columnDefinition = "TEXT")
     private String answer;
+    
+   
 }

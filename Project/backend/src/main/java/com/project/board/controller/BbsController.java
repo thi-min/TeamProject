@@ -50,7 +50,7 @@ public class BbsController {
 
     // QNA 저장
     @PostMapping("/{bbsId}/qna")
-    public QandADto saveQna(@PathVariable Long bbsId, @RequestBody QandADto dto,  @RequestParam Long requesterAdminId) {
+    public QandADto saveQna(@PathVariable Long bbsId, @RequestBody QandADto dto,  @RequestParam String requesterAdminId) {
     	return bbsService.saveQna(bbsId, dto, requesterAdminId);
     }
 

@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.project.admin.entity.AdminEntity;
+import com.project.admin.repository.AdminRepository;
 import com.project.board.BoardType;
 import com.project.board.dto.BbsDto;
 import com.project.board.dto.FileUpLoadDto;
@@ -42,7 +44,7 @@ public class BbsServiceImpl implements BbsService {
     private final ImageBbsRepository imageBbsRepository;
     private final FileUpLoadRepository fileUploadRepository;
     private final MemberRepository memberRepository;
-    
+    private final AdminRepository adminRepository;
     
 
     @Override
@@ -107,8 +109,17 @@ public class BbsServiceImpl implements BbsService {
         BbsEntity bbs = bbsRepository.findById(id)
             .orElseThrow(() -> new BbsException("게시글 없음: " + id));
 
+        // 작성자 회원이 실제 존재하는지 확인
+        if (bbs.getMemberNum() != null) {
+            memberRepository.findById(bbs.getMemberNum().getMemberNum())
+                .orElseThrow(() -> new BbsException("작성자 회원 정보가 존재하지 않습니다."));
+        }
+
         boolean isAdmin = requesterAdminId != null;
-        boolean isAuthor = requesterMemberNum != null && bbs.getMemberNum().getMemberNum().equals(requesterMemberNum);
+        boolean isAuthor = false;
+        if (requesterMemberNum != null && bbs.getMemberNum() != null) {
+            isAuthor = requesterMemberNum.equals(bbs.getMemberNum().getMemberNum());
+        }
 
         if (isAdmin || isAuthor) {
             fileUploadRepository.deleteByBbsBulletinNum(id);
@@ -203,14 +214,18 @@ public class BbsServiceImpl implements BbsService {
         return sb.toString();
     }
 
+    @Transactional
     @Override
-    public QandADto saveQna(Long bbsId, QandADto dto, Long requesterAdminId) {
+    public QandADto saveQna(Long bbsId, QandADto dto, String requesterAdminId) {
         if (requesterAdminId == null) {
             throw new BbsException("QnA 답변은 관리자만 작성할 수 있습니다.");
         }
 
         BbsEntity bbs = bbsRepository.findById(bbsId)
             .orElseThrow(() -> new BbsException("게시글 없음"));
+        
+        AdminEntity adminEntity = adminRepository.findFirstByAdminId(requesterAdminId)
+                .orElseThrow(() -> new RuntimeException("관리자 없음"));
 
         QandAEntity entity = QandAEntity.builder()
             .bbs(bbs)
@@ -270,7 +285,7 @@ public class BbsServiceImpl implements BbsService {
         List<String> allowedExtensions = List.of("jpg", "jpeg");
         List<String> allowedMimeTypes = List.of("image/jpeg");
         long maxSize = 5 * 1024 * 1024;
-        String uploadDir = "/var/www/uploads"; // 실제 업로드 경로
+        String uploadDir = "C:/Image"; // 실제 업로드 경로
 
         List<ImageBbsEntity> imageEntities = files.stream()
             .filter(file -> {
