@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.project.land.dto.LandCountDto;
 import com.project.land.dto.LandDetailDto;
+import com.project.land.entity.LandType;
 import com.project.land.service.LandService;
 
 import lombok.RequiredArgsConstructor;
@@ -29,10 +30,12 @@ public class LandController {
     		//날짜
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate landDate,
             //시간대
-            @RequestParam("time") String landTime) { 
+            @RequestParam("time") String landTime,
+            
+    		@RequestParam("type") LandType landType){ 
     	
     	//서비스에서 예약 수 조회 및 DTO 생성
-        LandCountDto countInfo = landService.getLandCountInfo(landDate, landTime);
+        LandCountDto countInfo = landService.getLandCountInfo(landDate, landTime, landType);
         return ResponseEntity.ok(countInfo); //JSON 형태로 응답 반환
     }
     

@@ -30,6 +30,4 @@ public class Volunteer {
     @Column(name = "vol_time")
     private String volTime; // 봉사 시간 (셀렉트박스 형식 선택지 3개)
     
-    @Column(name ="sum_time")
-    private String sumTime; //봉사 누적 시간
 }

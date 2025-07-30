@@ -23,6 +23,7 @@ public class VolunteerServiceImpl implements VolunteerService {
     private final VolunteerRepository volunteerRepository;
     private final ReserveRepository reserveRepository;
 
+    //봉사 상세내용 조회
     @Override
     @Transactional(readOnly = true)
     public VolunteerDetailDto getVolunteerDetailByReserveCode(Long reserveCode) {

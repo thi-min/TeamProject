@@ -13,6 +13,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, Long> {
     // 예약 코드로 봉사 정보 조회
     Optional<Volunteer> findByReserveCode(Long reserveCode);
     
+    //봉사시간에 따른 봉사인원 체크
     @Query("SELECT SUM(r.reserveNumber) FROM Volunteer v JOIN v.reserve r WHERE v.volDate = :volDate AND v.volTime = :volTime")
     Integer countByDateAndTime(@Param("volDate") LocalDate volDate, @Param("volTime") String volTime);
 }

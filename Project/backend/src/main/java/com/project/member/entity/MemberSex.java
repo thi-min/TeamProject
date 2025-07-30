@@ -1,6 +1,6 @@
 package com.project.member.entity;
 
 public enum MemberSex {
-	Man, //남자
-	Woman, //여자
+	MAN, //남자
+	WOMAN, //여자
 }

@@ -65,7 +65,7 @@ public class ReserveRepositoryTest {
                 .memberPhone("01012345678")
                 .memberAddress("서울시 강남구")
                 .memberDay(LocalDate.now())
-                .memberSex(MemberSex.Man)
+                .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
                 .snsYn(false)
@@ -105,7 +105,7 @@ public class ReserveRepositoryTest {
                 .memberPhone("01088889999")
                 .memberAddress("서울시 종로구")
                 .memberDay(LocalDate.now())
-                .memberSex(MemberSex.Man)
+                .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
                 .snsYn(false)
@@ -156,7 +156,7 @@ public class ReserveRepositoryTest {
                 .memberPhone("01098765432")
                 .memberAddress("서울시 도봉구")
                 .memberDay(LocalDate.now())
-                .memberSex(MemberSex.Woman)
+                .memberSex(MemberSex.WOMAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
                 .snsYn(false)
@@ -217,7 +217,7 @@ public class ReserveRepositoryTest {
                 .memberPhone("01011112222")
                 .memberAddress("부산광역시")
                 .memberDay(LocalDate.now())
-                .memberSex(MemberSex.Man)
+                .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
                 .snsYn(false)
@@ -242,7 +242,6 @@ public class ReserveRepositoryTest {
                 .reserve(reserve)
                 .volDate(LocalDate.of(2025, 8, 4))
                 .volTime("13:00 ~ 15:00")
-                .sumTime(null)
                 .build();
         
         volunteer.setReserve(reserve);
@@ -278,7 +277,7 @@ public class ReserveRepositoryTest {
                 .memberPhone("01012345678")
                 .memberAddress("서울시 강남구")
                 .memberDay(LocalDate.now())
-                .memberSex(MemberSex.Man)
+                .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
                 .snsYn(false)
@@ -323,7 +322,6 @@ public class ReserveRepositoryTest {
         Volunteer volunteer = Volunteer.builder()
                 .volDate(LocalDate.of(2025, 8, 3))
                 .volTime("09:00 ~ 12:00")
-                .sumTime(null) // null 허용
                 .build();
         volunteer.setReserve(reserve2);
         reserve2.setVolunteerDetail(volunteer);
@@ -362,7 +360,7 @@ public class ReserveRepositoryTest {
                 .memberPhone("01012345555")
                 .memberAddress("서울시 강남구")
                 .memberDay(LocalDate.now())
-                .memberSex(MemberSex.Man) // <-- enum 이름 대문자 확인
+                .memberSex(MemberSex.MAN) // <-- enum 이름 대문자 확인
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
                 .snsYn(false)
@@ -415,7 +413,7 @@ public class ReserveRepositoryTest {
                 .memberPhone("01012345555")
                 .memberAddress("서울시 강남구")
                 .memberDay(LocalDate.now())
-                .memberSex(MemberSex.Man) // <-- enum 이름 대문자 확인
+                .memberSex(MemberSex.MAN) // <-- enum 이름 대문자 확인
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
                 .snsYn(false)

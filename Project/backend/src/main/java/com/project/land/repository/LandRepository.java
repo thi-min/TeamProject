@@ -20,7 +20,8 @@ public interface LandRepository extends JpaRepository<Land, Long> {
     List<Land> findByLandType(LandType landType);
     
     //int형 예약 마리수를 반환
-    @Query("SELECT SUM(l.animalNumber) FROM Land l WHERE l.landDate = :landDate AND l.landTime = :landTime")
-    Integer countByDateAndTime(@Param("landDate") LocalDate landDate, 
-    					   @Param("landTime") String landTime);
+    @Query("SELECT SUM(l.animalNumber) FROM Land l WHERE l.landDate = :landDate AND l.landTime = :landTime AND l.landType = :landType")
+    Integer countByDateAndTimeAndType(@Param("landDate") LocalDate landDate,
+                                      @Param("landTime") String landTime,
+                                      @Param("landType") LandType landType);
 }

@@ -4,6 +4,7 @@ import com.project.land.dto.LandCountDto;
 import com.project.land.dto.LandDetailDto;
 import com.project.land.dto.LandRequestDto;
 import com.project.land.entity.Land;
+import com.project.land.entity.LandType;
 import com.project.land.repository.LandRepository;
 import com.project.reserve.entity.Reserve;
 import com.project.reserve.repository.ReserveRepository;
@@ -21,9 +22,10 @@ public class LandServiceImpl implements LandService {
 
     private final LandRepository landRepository;
     private final ReserveRepository reserveRepository;
-
+    
+    // 놀이터 예약 상세보기 화면
     @Override
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = false)
     public LandDetailDto getLandDetailByReserveCode(Long reserveCode) {
         // 1. Land 조회
         Land land = landRepository.findByReserveCode(reserveCode)
@@ -43,7 +45,8 @@ public class LandServiceImpl implements LandService {
         // 반려견 수가 2마리 이상이라면 추가 반려견 수 만큼 1000원씩 요금 부가 + 보호자 수 만큼 인당 1000원 부가
         int additionalPrice = (AnimalNumber > 1 ? (AnimalNumber - 1) * 1000 : 0) + ReserveNumber * 1000;
         int totalPrice = basePrice + additionalPrice;
-
+        
+        land.setPayNumber(totalPrice);	//totalprice를 paynumber로
         // 5. DTO 구성
         return LandDetailDto.builder()
         		.reserveCode(reserve.getReserveCode())
@@ -57,9 +60,9 @@ public class LandServiceImpl implements LandService {
                 .landType(land.getLandType())
                 .animalNumber(land.getAnimalNumber())
                 .reserveNumber(reserve.getReserveNumber())
-                .basePrice(2000)
-                .additionalPrice(1000 * (reserve.getReserveNumber() - 1))
-                .totalPrice(2000 + 1000 * (reserve.getReserveNumber() - 1))
+                .basePrice(basePrice)
+                .additionalPrice(additionalPrice)
+                .totalPrice(totalPrice)
                 .basePriceDetail("중, 소형견 x " + land.getAnimalNumber() + "마리")
                 .extraPriceDetail(" 추가 인원 x" + reserve.getReserveNumber() + "명")
                 .build();
@@ -82,20 +85,24 @@ public class LandServiceImpl implements LandService {
         landRepository.save(land);	//land->reserve 
     }
     
-    
+    // 예약 마리수 체크
     @Override
     @Transactional(readOnly = true)
-    public LandCountDto getLandCountInfo(LocalDate landDate, String landTime) {
-        Integer count = landRepository.countByDateAndTime(landDate, landTime);
-        
+    public LandCountDto getLandCountInfo(LocalDate landDate, String landTime, LandType landType) {
+        Integer count = landRepository.countByDateAndTimeAndType(landDate, landTime, landType);
+
         if (count == null) {
             count = 0;
         }
+
+        int capacity = (landType == LandType.SMALL) ? 15 : 10; // 유형별 정원 설정 가능
+
         return LandCountDto.builder()
                 .landDate(landDate)
                 .landTime(landTime)
+                .landType(landType)
                 .reservedCount(count)
-                .capacity(15) // 고정된 정원 값 (필요 시 설정값으로 변경 가능)
+                .capacity(capacity)
                 .build();
     }
     

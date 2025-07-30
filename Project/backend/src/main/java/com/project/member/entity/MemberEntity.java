@@ -70,5 +70,8 @@ public class MemberEntity {
 
     @Column(name = "kakao_id", length = 255)
     private String kakaoId; //카카오아이디
+    
+    @JoinColumn(name = "vol_sumtime")
+    private String valSumtime; // 총 봉사시간
 
 }

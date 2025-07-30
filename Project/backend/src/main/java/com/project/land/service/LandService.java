@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import com.project.land.dto.LandCountDto;
 import com.project.land.dto.LandDetailDto;
 import com.project.land.dto.LandRequestDto;
+import com.project.land.entity.LandType;
 import com.project.reserve.entity.Reserve;
 
 public interface LandService {
@@ -15,6 +16,6 @@ public interface LandService {
     void createLand(Reserve reserve, LandRequestDto landDto);
     
     // 예약일과 시간대를 불러와서 반려견수 집계 + 예약 현황 정보 제공
-    LandCountDto getLandCountInfo(LocalDate landDate, String landTime); 
+    LandCountDto getLandCountInfo(LocalDate landDate, String landTime, LandType landType); 
 }
     
