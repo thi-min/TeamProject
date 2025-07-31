@@ -8,8 +8,9 @@
 <details>
     <summary>진행상황</summary>
 
-<!-- summary 아래 한칸 공백 두고 내용 삽입 -->
-
+    <details>
+        <summary>1주차</summary>
+    </details>
 </details>
 + 1주차
   + 안형주
