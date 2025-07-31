@@ -14,8 +14,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.project.admin.repository.AdminRepository;
 import com.project.admin.service.AdminService;
 import com.project.member.dto.MemberDeleteDto;
-import com.project.member.dto.MemberMyPageResponseDto;
-import com.project.member.dto.MemberMyPageUpdateRequestDto;
+import com.project.member.dto.MemberFindPasswordRequestDto;
+import com.project.member.dto.MemberIdCheckResponseDto;
 import com.project.member.dto.MemberPasswordUpdateRequestDto;
 import com.project.member.dto.MemberSignUpRequestDto;
 import com.project.member.dto.MemberSignUpResponseDto;
@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 
 @RestController	//JSON 응답 전용 컨트롤러
 @RequiredArgsConstructor	//생성자주입
-@RequestMapping	//클래스/메서드에 공통 URL 설정
+@RequestMapping//클래스/메서드에 공통 URL 설정
 
 //요청수신, 로직호출, 결과응답
 public class MemberController {
@@ -61,6 +61,12 @@ public class MemberController {
 		return ResponseEntity.ok(memberService.sigup(dto));
 	}
 	
+	//아이디 중복 체크
+	@GetMapping("/check-id")
+	public ResponseEntity<MemberIdCheckResponseDto> checkDuplicateId(@RequestParam String memberId) {
+	    return ResponseEntity.ok(memberService.checkDuplicateMemberId(memberId));
+	}
+    
 	//AuthController에 구현해서 주석처리
 //	//마이페이지 조회
 //	@GetMapping("/mypage/{memberNum}")
@@ -78,7 +84,7 @@ public class MemberController {
 //	}
 	
 	//회원탈퇴
-	@DeleteMapping("/{memberNum}")
+	@DeleteMapping("/mypage/del/{memberNum}")
 	public ResponseEntity<MemberDeleteDto> memberOut(@PathVariable Long memberNum){
 		return ResponseEntity.ok(memberService.memberOut(memberNum));
 	}
@@ -94,12 +100,9 @@ public class MemberController {
 	
 	//비밀번호 찾기
 	@PostMapping("/find-pw")
-	public ResponseEntity<String> findMemberPw(
-			@RequestParam String memberId,
-			@RequestParam String memberName,
-			@RequestParam String memberPhone){
-		
-		return ResponseEntity.ok(memberService.findMemberPw(memberId, memberName, memberPhone));
+	public ResponseEntity<String> findMemberPw(@RequestBody MemberFindPasswordRequestDto dto){
+		String result = memberService.findMemberPw(dto.getMemberId(), dto.getMemberName(), dto.getMemberPhone());
+		return ResponseEntity.ok(result);
 	}
 
 	//비밀번호 변경

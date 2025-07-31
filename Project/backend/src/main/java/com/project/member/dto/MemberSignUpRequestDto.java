@@ -2,12 +2,15 @@ package com.project.member.dto;
 
 import java.time.LocalDate;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.member.entity.MemberSex;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 //회원가입 요청
@@ -38,7 +41,7 @@ public class MemberSignUpRequestDto {
     private String memberPwCheck;
 
     @NotBlank(message = "생년월일은 필수입니다.")
-    @Pattern(regexp = "\\d{4}-\\d{2}-\\d{2}", message = "생년월일은 yyyy-MM-dd 형식으로 입력하세요.")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate memberBirth;
     //private String memberBirth;
 
@@ -46,6 +49,8 @@ public class MemberSignUpRequestDto {
     @Pattern(regexp = "^\\d{10,11}$", message = "휴대폰 번호는 숫자만 10~11자리 입력하세요.")
     private String memberPhone;
 
+    private LocalDate memberDay; //가입일
+    
     @NotBlank(message = "주소는 필수입니다.")
     private String memberAddress;
     

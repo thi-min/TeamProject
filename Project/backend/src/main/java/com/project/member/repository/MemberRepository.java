@@ -38,6 +38,9 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     //비밀번호 찾기
     Optional<MemberEntity> findByMemberIdAndMemberNameAndMemberPhone(String memberId, String memberName, String memberPhone);
     
+    //비밀번호 만료 스케줄러
+    List<MemberEntity> findByPwUpdatedBefore(LocalDateTime expiryThreshold);
+    
     //탈퇴일 기준으로 삭제 대상 회원 찾기
     List<MemberEntity> findByMemberStateAndOutDateBefore(MemberState state, LocalDateTime dateTime);
     
@@ -46,7 +49,7 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     Page<MemberEntity> findAll(Pageable pageable);
     //검색 + 페이징(이름에 키워드 포함된 회원 조회)
     Page<MemberEntity> findByMemberNameContaining(String keyword, Pageable pageable);
-
+    
 
     //상태 기준 조회시 필요할떄 사용
     //Page<MemberEntity> findByMemberState(MemberState state, Pageable pageable);
