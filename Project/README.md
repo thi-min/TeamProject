@@ -100,8 +100,8 @@
 <details>
     <summary>김강민</summary>
 
-    - 여기에
-    - 작성
+    - land, volunteer timeslot 파트 수정중(50%) + 테스트 필요
+    - reserve repository, serviceimpl 유닛테스트 완료
 </details>
 <details>
     <summary>유승주</summary>
