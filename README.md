@@ -5,12 +5,13 @@
 + [유스케이스](https://app.diagrams.net/#G1TyS2MtcFxZIYL2ozCjKoXumwz_kmENtK#%7B%22pageId%22%3A%22aozdoE-P7H4EPuOHVj0a%22%7D)
 
 -----------------------------------------------------------------------------------------------------------------
+# 진행상황
 <details>
-    <summary>진행상황</summary>
+    <summary>안형주</summary>
 
-    <details>
-        <summary>1주차</summary>
-    </details>
+    <!-- 한줄띄고 작성 -->
+    - 여기에
+    - 작성
 </details>
 + 1주차
   + 안형주
