@@ -1,7 +1,6 @@
 package com.project.common.controller;
 
 import com.project.common.dto.TimeSlotDto;
-
 import com.project.common.service.TimeSlotService;
 
 import lombok.RequiredArgsConstructor;

@@ -97,6 +97,13 @@ public class ReserveServiceImpl implements ReserveService {
 
         // Reserve 엔티티 생성 및 저장
         Reserve reserve = fullRequestDto.getReserveDto().toEntity(member);
+        
+        // 보호자 수 유효성 검사
+        int reserveNumber = reserve.getReserveNumber();
+        if (reserveNumber <= 0) {
+            throw new IllegalArgumentException("보호자 수는 최소 1명 이상이어야 합니다.");
+        }
+        
         Reserve saved = reserveRepository.save(reserve);
 
         String message;
@@ -210,9 +217,10 @@ public class ReserveServiceImpl implements ReserveService {
         MemberEntity member = reserve.getMember();
         Land land = reserve.getLandDetail();
         
-        int basePrice = 2000;
-        int animalNumber = land.getAnimalNumber();
-        int reserveNumber = reserve.getReserveNumber();
+        // 결제금액 계산
+        int basePrice = 2000;	//기본금(반려견 1마리)
+        int animalNumber = land.getAnimalNumber();	//반려견수
+        int reserveNumber = reserve.getReserveNumber();	//보호자수
 
         int additionalPrice = (animalNumber > 1 ? (animalNumber - 1) * 1000 : 0) + reserveNumber * 1000;
         int totalPrice = basePrice + additionalPrice;

@@ -3,6 +3,7 @@ package com.project.common.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "time_slot")
@@ -28,4 +29,14 @@ public class TimeSlot {
 
     @Column(name = "enabled", nullable = false)
     private boolean enabled = true;  // 이용가능여부 기본값 true
+    
+    //label 자동생성
+    @PrePersist
+    @PreUpdate
+    public void generateLabel() {
+        if (startTime != null && endTime != null) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+            this.label = startTime.format(formatter) + " ~ " + endTime.format(formatter);
+        }
+    }
 }
