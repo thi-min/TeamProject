@@ -2,6 +2,7 @@ package com.project.volunteer.service;
 
 import java.time.LocalDate;
 
+import com.project.common.entity.TimeSlot;
 import com.project.reserve.entity.Reserve;
 import com.project.volunteer.dto.VolunteerCountDto;
 import com.project.volunteer.dto.VolunteerDetailDto;
@@ -13,8 +14,9 @@ public interface VolunteerService {
     VolunteerDetailDto getVolunteerDetailByReserveCode(Long reserveCode);
     
     //예약 생성시 volunteer정보와 reserv정보 합칠때 사용
-    void createVolunteer(Reserve reserve, VolunteerRequestDto volunteerDto); 
+    void createVolunteer(Reserve reserve, VolunteerRequestDto volunteerDto, TimeSlot timeSlot); 
     
-    VolunteerCountDto getVolunteerCountInfo(LocalDate volDate, String volTime);
+    // 봉사인원체크
+    VolunteerCountDto getVolunteerCountInfo(LocalDate volDate, Long timeSlotId);
     
 }

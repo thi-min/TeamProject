@@ -1,5 +1,6 @@
 package com.project.volunteer.repository;
 
+import com.project.common.entity.TimeSlot;
 import com.project.volunteer.entity.Volunteer;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -14,6 +15,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, Long> {
     Optional<Volunteer> findByReserveCode(Long reserveCode);
     
     //봉사시간에 따른 봉사인원 체크
-    @Query("SELECT SUM(r.reserveNumber) FROM Volunteer v JOIN v.reserve r WHERE v.volDate = :volDate AND v.volTime = :volTime")
-    Integer countByDateAndTime(@Param("volDate") LocalDate volDate, @Param("volTime") String volTime);
+    @Query("SELECT SUM(r.reserveNumber) FROM Volunteer v JOIN v.reserve r WHERE v.volDate = :volDate AND v.timeSlot = :timeSlot")
+    Integer countByDateAndTimeSlot(@Param("volDate") LocalDate volDate, 
+                                   @Param("timeSlot") TimeSlot timeSlot);
 }

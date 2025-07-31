@@ -14,7 +14,8 @@ public class AdminReservationListDto {
     private String programName;     // 예약된 프로그램 이름
     private String reserveState;   // 상태 (예: DONE, REJ, ING)
     private LocalDate reserveDate; //예약일
-
+    private int reserveType;	// 예약유형
+    
     public static AdminReservationListDto from(Reserve reserve) {
         AdminReservationListDto dto = new AdminReservationListDto();
         dto.setReserveCode(reserve.getReserveCode());

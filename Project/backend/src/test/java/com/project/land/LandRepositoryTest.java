@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Rollback;
 
+import com.project.common.entity.TimeSlot;
 import com.project.land.entity.Land;
 import com.project.land.entity.LandType;
 import com.project.land.repository.LandRepository;
@@ -24,6 +26,7 @@ import com.project.reserve.entity.Reserve;
 import com.project.reserve.entity.ReserveState;
 import com.project.reserve.repository.ReserveRepository;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 @SpringBootTest
@@ -39,7 +42,10 @@ class LandRepositoryTest {
 
     @Autowired
     private MemberRepository memberRepository;
-
+    
+    @Autowired
+    private EntityManager em;
+    
     //@Test
     @DisplayName("예약코드로 land 조회 - 성공")
     void findByReserveCode_성공() {
@@ -57,7 +63,14 @@ class LandRepositoryTest {
                 .memberLock(false)
                 .snsYn(false)
                 .build());
-
+        
+        TimeSlot timeSlot = TimeSlot.builder()
+                .label("09:00 ~ 11:00")
+                .startTime(LocalTime.of(9, 0))
+                .endTime(LocalTime.of(11, 0))
+                .build();
+        em.persist(timeSlot);
+        
         // 2. 예약 저장
         Reserve reserve = Reserve.builder()
         	    .member(member)
@@ -71,7 +84,7 @@ class LandRepositoryTest {
         // 3. land 저장
         Land land = Land.builder()
         	    .landDate(LocalDate.of(2025, 8, 15))
-        	    .landTime("09:00 ~ 11:00")
+        	    .timeSlot(timeSlot)
         	    .landType(LandType.SMALL)
         	    .animalNumber(1)
         	    .payNumber(10000)
@@ -88,7 +101,7 @@ class LandRepositoryTest {
 
         assertThat(found).isPresent();
         assertThat(found.get().getLandDate()).isEqualTo(LocalDate.of(2025, 8, 15));
-        assertThat(found.get().getLandTime()).isEqualTo("09:00 ~ 11:00");
+        assertThat(found.get().getTimeSlot().getLabel()).isEqualTo("09:00 ~ 11:00");
         assertThat(found.get().getLandType()).isEqualTo(LandType.SMALL);
         assertThat(found.get().getAnimalNumber()).isEqualTo(1);
     }
@@ -109,6 +122,14 @@ class LandRepositoryTest {
                 .memberLock(false)
                 .snsYn(false)
                 .build());
+    	
+    	TimeSlot timeSlot1 = TimeSlot.builder()
+                .label("10:00 ~ 12:00")
+                .startTime(LocalTime.of(10, 0))
+                .endTime(LocalTime.of(12, 0))       
+                .build();
+        em.persist(timeSlot1);
+        
         // 2. 소형견 놀이터 예약
         Reserve reserve1 = Reserve.builder()
                 .member(member)
@@ -121,7 +142,7 @@ class LandRepositoryTest {
 
         Land land1 = Land.builder()
                 .landDate(LocalDate.of(2025, 9, 1))
-                .landTime("10:00 ~ 12:00")
+                .timeSlot(timeSlot1)
                 .landType(LandType.SMALL)
                 .animalNumber(2)
                 .payNumber(15000)
@@ -131,6 +152,13 @@ class LandRepositoryTest {
         reserveRepository.save(reserve1);
         
         //3. 대형견 놀이터 예약
+        TimeSlot timeSlot2 = TimeSlot.builder()
+                .label("12:00 ~ 14:00")
+                .startTime(LocalTime.of(10, 0))
+                .endTime(LocalTime.of(12, 0))       
+                .build();
+        em.persist(timeSlot1);
+        
         Reserve reserve2 = Reserve.builder()
                 .member(member)
                 .applyDate(LocalDateTime.now())
@@ -142,7 +170,7 @@ class LandRepositoryTest {
 
         Land land2 = Land.builder()
                 .landDate(LocalDate.of(2025, 9, 2))
-                .landTime("14:00 ~ 16:00")
+                .timeSlot(timeSlot2)
                 .landType(LandType.LARGE)
                 .animalNumber(1)
                 .payNumber(12000)

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -25,6 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 
+import com.project.common.entity.TimeSlot;
 import com.project.land.dto.LandDetailDto;
 import com.project.land.dto.LandRequestDto;
 import com.project.land.entity.Land;
@@ -83,6 +85,29 @@ class ReserveServiceImplTest {
     //@Test
     @DisplayName("중복된 놀이터 예약이 존재할 경우 예외 발생")
     void createReserve_shouldThrow_whenDuplicateLandReservationExists() {
+    	// 회원정보
+    	MemberEntity member = MemberEntity.builder()
+                .memberId("duplicate@test.com")
+                .memberPw("1234")
+                .memberName("김중복")
+                .memberBirth(LocalDate.of(1991, 5, 5))
+                .memberPhone("01011112222")
+                .memberAddress("서울시 마포구")
+                .memberDay(LocalDate.now())
+                .memberSex(MemberSex.MAN)
+                .memberState(MemberState.ACTIVE)
+                .memberLock(false)
+                .snsYn(false)
+                .build();
+        memberRepository.save(member);
+        
+    	TimeSlot timeSlot = TimeSlot.builder()
+                .label("11:00 ~ 13:00")
+                .startTime(LocalTime.of(11, 0))
+                .endTime(LocalTime.of(13, 0))
+                .build();
+        entityManager.persist(timeSlot);
+        
         // given: 첫 번째 예약 선 저장 (중복 예약 조건 유도)
         Reserve reserve = Reserve.builder()
                 .member(memberRepository.findById(testMemberNum).orElseThrow())
@@ -97,7 +122,7 @@ class ReserveServiceImplTest {
         Land land = Land.builder()
                 .reserve(reserve)
                 .landDate(LocalDate.of(2025, 8, 10))
-                .landTime("11:00 ~ 13:00")
+                .timeSlot(timeSlot)
                 .landType(LandType.SMALL)
                 .animalNumber(1)
                 .payNumber(10000)
@@ -116,17 +141,16 @@ class ReserveServiceImplTest {
                 .memberNum(testMemberNum)
                 .reserveType(1)
                 .reserveNumber(1)
-                .note("선행 예약")
+                .note("중복 예약 시도")
                 .build();
 
         LandRequestDto landDto = LandRequestDto.builder()
                 .landDate(LocalDate.of(2025, 8, 10))
-                .landTime("11:00 ~ 13:00")
+                .timeSlotId(timeSlot.getId()) // ✅ 변경된 필드
                 .landType(LandType.SMALL)
                 .animalNumber(1)
                 .payNumber(10000)
                 .build();
-      
 
         FullReserveRequestDto fullDto = FullReserveRequestDto.builder()
                 .reserveDto(reserveDto)
@@ -159,6 +183,14 @@ class ReserveServiceImplTest {
                 .build());
     	Long testMemberNum = member.getMemberNum();
     	
+    	//시간 정보
+    	TimeSlot timeSlot = TimeSlot.builder()
+                .label("11:00 ~ 13:00")
+                .startTime(LocalTime.of(11, 0))
+                .endTime(LocalTime.of(13, 0))
+                .build();
+        entityManager.persist(timeSlot);
+        
         ReserveRequestDto reserveDto = ReserveRequestDto.builder()
                 .memberNum(testMemberNum)
                 .reserveType(1)  // 놀이터 예약
@@ -168,7 +200,7 @@ class ReserveServiceImplTest {
 
         LandRequestDto landDto = LandRequestDto.builder()
                 .landDate(LocalDate.of(2025, 8, 10))
-                .landTime("11:00 ~ 13:00")
+                .timeSlotId(timeSlot.getId())
                 .landType(LandType.SMALL)
                 .animalNumber(1)
                 .payNumber(10000)
@@ -197,7 +229,7 @@ class ReserveServiceImplTest {
         Land land = savedReserve.getLandDetail();
         assertThat(land).isNotNull();
         assertThat(land.getLandDate()).isEqualTo(LocalDate.of(2025, 8, 10));
-        assertThat(land.getLandTime()).isEqualTo("11:00 ~ 13:00");
+        assertThat(land.getTimeSlot().getLabel()).isEqualTo("11:00 ~ 13:00");
         assertThat(land.getLandType()).isEqualTo(LandType.SMALL);
     }
     
@@ -269,7 +301,14 @@ class ReserveServiceImplTest {
                 .memberLock(false)
                 .snsYn(false)
                 .build());
-
+        
+        TimeSlot timeSlot = TimeSlot.builder()
+                .label("11:00 ~ 13:00")
+                .startTime(LocalTime.of(11, 0))
+                .endTime(LocalTime.of(13, 0))
+                .build();
+        entityManager.persist(timeSlot);
+        
         Reserve reserve = reserveRepository.save(Reserve.builder()
                 .member(member)
                 .reserveType(1)
@@ -283,7 +322,7 @@ class ReserveServiceImplTest {
         Land land = Land.builder()
                 .reserve(reserve)
                 .landDate(expectedDate)
-                .landTime("11:00 ~ 13:00")
+                .timeSlot(timeSlot)
                 .landType(LandType.SMALL)
                 .animalNumber(1)
                 .payNumber(1)
@@ -301,6 +340,7 @@ class ReserveServiceImplTest {
         assertThat(result.get(0).getReserveCode()).isEqualTo(reserve.getReserveCode());
         assertThat(result.get(0).getReserveState()).isEqualTo(ReserveState.ING.name());
         assertThat(dto.getReserveDate()).isEqualTo(expectedDate);
+        
     }
     //@Test
     @DisplayName("본인의 놀이터 예약 상세 정보를 정상적으로 조회한다")
@@ -320,6 +360,13 @@ class ReserveServiceImplTest {
                 .snsYn(false)
                 .build());
         
+        TimeSlot timeSlot = TimeSlot.builder()
+                .label("11:00 ~ 13:00")
+                .startTime(LocalTime.of(11, 0))
+                .endTime(LocalTime.of(13, 0))
+                .build();
+        entityManager.persist(timeSlot);
+        
         Reserve reserve = reserveRepository.save(Reserve.builder()
                 .member(member)
                 .reserveType(1)
@@ -332,7 +379,7 @@ class ReserveServiceImplTest {
         Land land = Land.builder()
                 .reserve(reserve)
                 .landDate(LocalDate.of(2025, 8, 10))
-                .landTime("11:00 ~ 13:00")
+                .timeSlot(timeSlot) // ✅ timeSlot 설정
                 .landType(LandType.SMALL)
                 .animalNumber(1)
                 .payNumber(10000)
@@ -348,6 +395,7 @@ class ReserveServiceImplTest {
         assertThat(result.getReserveCode()).isEqualTo(reserve.getReserveCode());
         assertThat(result.getMemberName()).isEqualTo(member.getMemberName());
         assertThat(result.getLandDate()).isEqualTo(LocalDate.of(2025, 8, 10));
+        assertThat(result.getLabel()).isEqualTo("11:00 ~ 13:00"); 
     }
     //@Test
     @DisplayName("사용자가 자신의 예약을 정상적으로 취소한다")
@@ -464,7 +512,14 @@ class ReserveServiceImplTest {
                 .memberLock(false)
                 .snsYn(false)
                 .build());
-
+    	
+    	TimeSlot timeSlot = TimeSlot.builder()
+                .label("10:00 ~ 12:00")
+                .startTime(LocalTime.of(10, 0))
+                .endTime(LocalTime.of(12, 0))
+                .build();
+        entityManager.persist(timeSlot);
+        
         // 예약 1 - 조건에 맞는 예약
         Reserve matchingReserve = reserveRepository.save(
             Reserve.builder()
@@ -479,7 +534,7 @@ class ReserveServiceImplTest {
         Land land = Land.builder()
                 .reserve(matchingReserve)
                 .landDate(LocalDate.of(2025, 7, 1)) // 검색에 걸릴 날짜
-                .landTime("10:00 ~ 12:00")
+                .timeSlot(timeSlot)
                 .landType(LandType.SMALL)
                 .animalNumber(1)
                 .payNumber(10000)
@@ -514,7 +569,7 @@ class ReserveServiceImplTest {
         Land wrongDateLand = Land.builder()
                 .reserve(wrongDateReserve)
                 .landDate(LocalDate.of(2024, 1, 1))
-                .landTime("10:00 ~ 12:00")
+                .timeSlot(timeSlot)
                 .landType(LandType.SMALL)
                 .animalNumber(1)
                 .payNumber(8000)
@@ -559,7 +614,14 @@ class ReserveServiceImplTest {
                 .memberLock(false)
                 .snsYn(false)
                 .build());
-
+        
+        TimeSlot timeSlot = TimeSlot.builder()
+                .label("10:00 ~ 12:00")
+                .startTime(LocalTime.of(10, 0))
+                .endTime(LocalTime.of(12, 0))
+                .build();
+        entityManager.persist(timeSlot);
+        
         // 조건에 맞는 봉사 예약 생성
         Reserve matchingReserve = reserveRepository.save(Reserve.builder()
                 .member(member)
@@ -573,7 +635,7 @@ class ReserveServiceImplTest {
         Volunteer volunteer = Volunteer.builder()
                 .reserve(matchingReserve)
                 .volDate(LocalDate.of(2025, 8, 1))
-                .volTime("09:00 ~ 12:00")
+                .timeSlot(timeSlot)
                 .build();
         matchingReserve.setVolunteerDetail(volunteer);
         volunteerRepository.save(volunteer);
@@ -604,7 +666,7 @@ class ReserveServiceImplTest {
         assertThat(result).hasSize(1);
         assertThat(result.get(0).getMemberName()).isEqualTo("유봉사");
         assertThat(result.get(0).getReserveDate()).isEqualTo(LocalDate.of(2025, 8, 1));
-        assertThat(result.get(0).getReserveState()).isEqualTo(ReserveState.ING);
+        assertThat(result.get(0).getReserveState()).isEqualTo(ReserveState.ING.name());
     }
     //@Test
     @DisplayName("관리자 - 예약 상태 변경 성공")

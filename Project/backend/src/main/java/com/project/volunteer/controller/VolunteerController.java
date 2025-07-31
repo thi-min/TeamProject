@@ -23,12 +23,13 @@ public class VolunteerController {
     @GetMapping("/count")
     public ResponseEntity<VolunteerCountDto> getVolunteerCountInfo(
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate volDate,
-            @RequestParam("time") String volTime) {
+            @RequestParam("timeSlotId") Long timeSlotId) {
 
-        VolunteerCountDto countInfo = volunteerService.getVolunteerCountInfo(volDate, volTime);
+        VolunteerCountDto countInfo = volunteerService.getVolunteerCountInfo(volDate, timeSlotId);
         return ResponseEntity.ok(countInfo);
     }
     
+    //관리자 예약 상세 미리보기
     @GetMapping("/preview/{reserveCode}")
     public ResponseEntity<VolunteerDetailDto> getVolunteerPreview(@PathVariable Long reserveCode) {
         VolunteerDetailDto dto = volunteerService.getVolunteerDetailByReserveCode(reserveCode);

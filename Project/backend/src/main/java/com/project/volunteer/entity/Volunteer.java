@@ -1,5 +1,6 @@
 package com.project.volunteer.entity;
 
+import com.project.common.entity.TimeSlot;
 import com.project.reserve.entity.Reserve;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,7 +28,8 @@ public class Volunteer {
     @Column(name = "vol_date")
     private LocalDate volDate; // 봉사 일정
 
-    @Column(name = "vol_time")
-    private String volTime; // 봉사 시간 (셀렉트박스 형식 선택지 3개)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_slot_id", nullable = false)
+    private TimeSlot timeSlot; // 봉사 시간 슬롯
     
 }

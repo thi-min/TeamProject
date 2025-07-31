@@ -26,7 +26,7 @@ public class VolunteerDetailDto {
     private int reserveNumber;			// 인원 수
     @JsonFormat(pattern = "yyyy/MM/dd")
     private LocalDate volDate;       // 실제 봉사 활동이 있는 날짜 (센터 지정)
-    private String volTime;       // 예약 시간
+    private String label;       // 예약 시간
     private String note;           // 비고
       // 실제 봉사 활동이 있는 날짜 (센터 지정)
    	//봉사 시간

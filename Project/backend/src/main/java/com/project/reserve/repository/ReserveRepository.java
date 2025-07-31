@@ -30,12 +30,12 @@ public interface ReserveRepository extends JpaRepository<Reserve, Long> {
     Optional<Reserve> findByReserveCode(Long reserveCode);
     
     // 놀이터 예약 중복확인용
-    boolean existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_LandTime(
-            Long memberNum, LocalDate landDate, String landTime);
+    boolean existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_TimeSlot_Id(
+    		Long memberNum, LocalDate volDate, Long timeSlotId);
 
     // 봉사 예약 중복확인용
-    boolean existsByMember_MemberNumAndVolunteerDetail_VolDateAndVolunteerDetail_VolTime(
-            Long memberNum, LocalDate volDate, String volTime);
+    boolean existsByMember_MemberNumAndVolunteerDetail_VolDateAndVolunteerDetail_TimeSlot_Id(
+    	    Long memberNum, LocalDate volDate, Long timeSlotId);
     
     //관리자 놀이터 예약리스트 검색필터
     @Query("SELECT r FROM Reserve r " +

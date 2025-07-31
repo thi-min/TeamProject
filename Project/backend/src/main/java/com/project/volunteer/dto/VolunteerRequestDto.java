@@ -13,5 +13,5 @@ public class VolunteerRequestDto {
 	private Long memberNum;
 
     private LocalDate volDate;	//일정
-    private String volTime;		//봉사시간
+    private Long timeSlotId; // 선택된 타임슬롯의 ID
 }

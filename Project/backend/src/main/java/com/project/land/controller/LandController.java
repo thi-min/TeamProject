@@ -22,7 +22,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class LandController {
 
-    private final LandService landService; //
+    private final LandService landService; 
 
     // 관리자 - 예약 마릿수 조회 (날짜 + 시간대 기준)
     @GetMapping("/count")
@@ -30,12 +30,12 @@ public class LandController {
     		//날짜
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate landDate,
             //시간대
-            @RequestParam("time") String landTime,
+            @RequestParam("timeSlotId") Long timeSlotId,
             
     		@RequestParam("type") LandType landType){ 
     	
     	//서비스에서 예약 수 조회 및 DTO 생성
-        LandCountDto countInfo = landService.getLandCountInfo(landDate, landTime, landType);
+        LandCountDto countInfo = landService.getLandCountInfo(landDate, timeSlotId, landType);
         return ResponseEntity.ok(countInfo); //JSON 형태로 응답 반환
     }
     

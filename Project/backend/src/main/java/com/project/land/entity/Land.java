@@ -2,6 +2,7 @@ package com.project.land.entity;
 
 import java.time.LocalDate;
 
+import com.project.common.entity.TimeSlot;
 import com.project.reserve.entity.Reserve;
 
 import jakarta.persistence.*;
@@ -28,8 +29,9 @@ public class Land {
     @Column(name = "land_date")
     private LocalDate landDate;	//예약일
     
-    @Column(name = "land_time")
-    private String landTime; 	// 예약 시간
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_slot_id", nullable = false)
+    private TimeSlot timeSlot; // 놀이터 예약 시간 슬롯
     
     @Enumerated(EnumType.STRING)
     @Column(name = "land_type")

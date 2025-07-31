@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 
 import org.junit.jupiter.api.DisplayName;
@@ -14,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Commit;
 import org.springframework.test.annotation.Rollback;
 
+import com.project.common.entity.TimeSlot;
 import com.project.land.entity.Land;
 import com.project.land.entity.LandType;
 import com.project.land.repository.LandRepository;
@@ -163,7 +165,14 @@ public class ReserveRepositoryTest {
                 .build();
         
         memberRepository.save(member);
-
+        
+        TimeSlot timeSlot = TimeSlot.builder()
+                .label("09:00 ~ 11:00")
+                .startTime(LocalTime.of(9, 0))
+                .endTime(LocalTime.of(11, 0))
+                .build();
+        em.persist(timeSlot);
+        
         // 놀이터 예약 생성
         Reserve reserve = Reserve.builder()
         		 .member(member)
@@ -179,7 +188,7 @@ public class ReserveRepositoryTest {
 
         Land land = Land.builder()
                 .landDate(LocalDate.of(2025, 8, 1)) // 예약일
-                .landTime("10:00 ~ 12:00")
+                .timeSlot(timeSlot)
                 .landType(LandType.SMALL)
                 .animalNumber(2)
                 .payNumber(10000)
@@ -203,6 +212,7 @@ public class ReserveRepositoryTest {
         // then
         assertThat(result).isNotEmpty();
         assertThat(result.get(0).getMember().getMemberName()).isEqualTo("강지원");
+        
     }
     
     //@Test
@@ -223,7 +233,15 @@ public class ReserveRepositoryTest {
                 .snsYn(false)
                 .build();
         memberRepository.save(member);
-
+        
+        //시간대 설정
+        TimeSlot timeSlot = TimeSlot.builder()
+                .label("09:00 ~ 11:00")
+                .startTime(LocalTime.of(9, 0))
+                .endTime(LocalTime.of(11, 0))
+                .build();
+        em.persist(timeSlot);
+        
         // 예약 생성
         Reserve reserve = Reserve.builder()
                 .member(member)
@@ -241,7 +259,7 @@ public class ReserveRepositoryTest {
         Volunteer volunteer = Volunteer.builder()
                 .reserve(reserve)
                 .volDate(LocalDate.of(2025, 8, 4))
-                .volTime("13:00 ~ 15:00")
+                .timeSlot(timeSlot)
                 .build();
         
         volunteer.setReserve(reserve);
@@ -259,11 +277,17 @@ public class ReserveRepositoryTest {
                 LocalDate.of(2025, 8, 5),
                 ReserveState.ING
         );
-
+ 
         // then
         assertThat(result).isNotEmpty();
         assertThat(result.get(0).getMember().getMemberName()).isEqualTo("김봉사");
         assertThat(result.get(0).getVolunteerDetail()).isNotNull();
+        
+        Volunteer volunteerDetail = result.get(0).getVolunteerDetail();
+        assertThat(volunteerDetail.getTimeSlot()).isNotNull(); // 시간대가 존재하는지
+        assertThat(volunteerDetail.getTimeSlot().getLabel()).isEqualTo("09:00 ~ 11:00"); // 정확한 label 확인
+        assertThat(volunteerDetail.getTimeSlot().getStartTime()).isEqualTo(LocalTime.of(9, 0));
+        assertThat(volunteerDetail.getTimeSlot().getEndTime()).isEqualTo(LocalTime.of(11, 0));
     }
     
     //@Test
@@ -283,6 +307,15 @@ public class ReserveRepositoryTest {
                 .snsYn(false)
                 .build();
         memberRepository.save(member);
+        
+        //시간대 설정
+        TimeSlot timeSlot = TimeSlot.builder()
+                .label("09:00 ~ 11:00")
+                .startTime(LocalTime.of(9, 0))
+                .endTime(LocalTime.of(11, 0))
+                .build();
+        em.persist(timeSlot);
+        timeSlot.getId();
 
         // given: 예약 생성 (reserveType 1 = 놀이터)
         Reserve reserve1 = Reserve.builder()
@@ -298,7 +331,7 @@ public class ReserveRepositoryTest {
         // land 연결
         Land land = Land.builder()
                 .landDate(LocalDate.of(2025, 8, 2))
-                .landTime("13:00 ~ 15:00")
+                .timeSlot(timeSlot)
                 .landType(LandType.LARGE)
                 .animalNumber(1)
                 .payNumber(15000)
@@ -321,7 +354,7 @@ public class ReserveRepositoryTest {
         // volunteer 연결
         Volunteer volunteer = Volunteer.builder()
                 .volDate(LocalDate.of(2025, 8, 3))
-                .volTime("09:00 ~ 12:00")
+                .timeSlot(timeSlot)
                 .build();
         volunteer.setReserve(reserve2);
         reserve2.setVolunteerDetail(volunteer);
@@ -366,7 +399,16 @@ public class ReserveRepositoryTest {
                 .snsYn(false)
                 .build();
         em.persist(member);;
-
+        
+        // 시간대 설정 및 저장
+        TimeSlot timeSlot = TimeSlot.builder()
+                .label("09:00 ~ 11:00")
+                .startTime(LocalTime.of(9, 0))
+                .endTime(LocalTime.of(11, 0))
+                .build();
+        em.persist(timeSlot);
+        
+        //예약 생성
         Reserve reserve = Reserve.builder()
                 .member(member)
                 .reserveType(1)
@@ -376,11 +418,11 @@ public class ReserveRepositoryTest {
                 .note("중복 테스트")
                 .build();
         em.persist(reserve);
-
+        
         Land land = Land.builder()
                 .reserve(reserve)
                 .landDate(LocalDate.of(2025, 8, 10))
-                .landTime("11:00 ~ 13:00")
+                .timeSlot(timeSlot)
                 .landType(null)
                 .animalNumber(2)
                 .payNumber(10000)
@@ -390,11 +432,10 @@ public class ReserveRepositoryTest {
         em.flush();
         em.clear();
 
-        // when
-        boolean exists = reserveRepository.existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_LandTime(
+        boolean exists = reserveRepository.existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_TimeSlot_Id(
                 member.getMemberNum(),
                 LocalDate.of(2025, 8, 10),
-                "11:00 ~ 13:00"
+                timeSlot.getId() // ✅ label 대신 ID 전달
         );
 
         // then
@@ -419,7 +460,15 @@ public class ReserveRepositoryTest {
                 .snsYn(false)
                 .build();
         em.persist(member);;
-
+        
+     // 시간대 생성 및 저장
+        TimeSlot timeSlot = TimeSlot.builder()
+                .label("11:00 ~ 13:00")
+                .startTime(LocalTime.of(11, 0))
+                .endTime(LocalTime.of(13, 0))
+                .build();
+        em.persist(timeSlot);
+        
         // 첫 번째 예약
         Reserve firstReserve = Reserve.builder()
                 .member(member)
@@ -430,11 +479,11 @@ public class ReserveRepositoryTest {
                 .note("첫 예약")
                 .build();
         em.persist(firstReserve);
-
+        	
         Land firstLand = Land.builder()
                 .reserve(firstReserve)
                 .landDate(LocalDate.of(2025, 8, 10))
-                .landTime("11:00 ~ 13:00")
+                .timeSlot(timeSlot)
                 .landType(LandType.SMALL)
                 .animalNumber(1)
                 .payNumber(10000)
@@ -452,11 +501,11 @@ public class ReserveRepositoryTest {
                 .note("중복 예약")
                 .build();
         em.persist(secondReserve);
-
+        	
         Land secondLand = Land.builder()
                 .reserve(secondReserve)
                 .landDate(LocalDate.of(2025, 8, 10)) // 같은 날짜
-                .landTime("11:00 ~ 13:00")           // 같은 시간
+                .timeSlot(timeSlot) 				// 같은 시간
                 .landType(LandType.SMALL)
                 .animalNumber(1)
                 .payNumber(10000)
@@ -467,11 +516,11 @@ public class ReserveRepositoryTest {
         em.flush();
         em.clear();
 
-        // when: 중복 검사
-        boolean exists = reserveRepository.existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_LandTime(
+     // when
+        boolean exists = reserveRepository.existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_TimeSlot_Id(
                 member.getMemberNum(),
                 LocalDate.of(2025, 8, 10),
-                "11:00 ~ 13:00"
+                timeSlot.getId() // ✅ ID로 전달
         );
 
         // then: 중복이므로 true여야 함

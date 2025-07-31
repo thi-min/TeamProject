@@ -1,5 +1,7 @@
 package com.project.land.service;
 
+import com.project.common.entity.TimeSlot;
+import com.project.common.repository.TimeSlotRepository;
 import com.project.land.dto.LandCountDto;
 import com.project.land.dto.LandDetailDto;
 import com.project.land.dto.LandRequestDto;
@@ -22,6 +24,7 @@ public class LandServiceImpl implements LandService {
 
     private final LandRepository landRepository;
     private final ReserveRepository reserveRepository;
+    private final TimeSlotRepository timeSlotRepository;
     
     // 놀이터 예약 상세보기 화면
     @Override
@@ -39,14 +42,15 @@ public class LandServiceImpl implements LandService {
 
         // 4. 결제 계산
         int basePrice = 2000; // 기준금액 (예: 반려견 1마리 기준)
-        int AnimalNumber = land.getAnimalNumber();
-        int ReserveNumber = reserve.getReserveNumber();
+        int animalNumber = land.getAnimalNumber();
+        int reserveNumber = reserve.getReserveNumber();
         
         // 반려견 수가 2마리 이상이라면 추가 반려견 수 만큼 1000원씩 요금 부가 + 보호자 수 만큼 인당 1000원 부가
-        int additionalPrice = (AnimalNumber > 1 ? (AnimalNumber - 1) * 1000 : 0) + ReserveNumber * 1000;
+        int additionalPrice = (animalNumber > 1 ? (animalNumber - 1) * 1000 : 0) + reserveNumber * 1000;
         int totalPrice = basePrice + additionalPrice;
         
         land.setPayNumber(totalPrice);	//totalprice를 paynumber로
+        landRepository.save(land);
         // 5. DTO 구성
         return LandDetailDto.builder()
         		.reserveCode(reserve.getReserveCode())
@@ -54,7 +58,7 @@ public class LandServiceImpl implements LandService {
                 .phone(member.getMemberPhone())
                 .reserveState(reserve.getReserveState())
                 .landDate(land.getLandDate())
-                .landTime(land.getLandTime())
+                .label(land.getTimeSlot().getLabel())
                 .applyDate(reserve.getApplyDate())
                 .note(reserve.getNote())
                 .landType(land.getLandType())
@@ -63,18 +67,18 @@ public class LandServiceImpl implements LandService {
                 .basePrice(basePrice)
                 .additionalPrice(additionalPrice)
                 .totalPrice(totalPrice)
-                .basePriceDetail("중, 소형견 x " + land.getAnimalNumber() + "마리")
+                .basePriceDetail("반려견 x " + land.getAnimalNumber() + "마리")
                 .extraPriceDetail(" 추가 인원 x" + reserve.getReserveNumber() + "명")
                 .build();
     }
     
     //놀이터 예약 생성(기본 정보랑 놀이터 상세 정보 합친 예약)
     @Override
-    public void createLand(Reserve reserve, LandRequestDto landDto) {
+    public void createLand(Reserve reserve, LandRequestDto landDto, TimeSlot timeSlot) {
         Land land = Land.builder()
                 .reserve(reserve)
                 .landDate(landDto.getLandDate())
-                .landTime(landDto.getLandTime())
+                .timeSlot(timeSlot)
                 .landType(landDto.getLandType())
                 .animalNumber(landDto.getAnimalNumber())
                 .payNumber(landDto.getPayNumber())
@@ -88,18 +92,21 @@ public class LandServiceImpl implements LandService {
     // 예약 마리수 체크
     @Override
     @Transactional(readOnly = true)
-    public LandCountDto getLandCountInfo(LocalDate landDate, String landTime, LandType landType) {
-        Integer count = landRepository.countByDateAndTimeAndType(landDate, landTime, landType);
+    public LandCountDto getLandCountInfo(LocalDate landDate, Long timeSlotId, LandType landType) {
+    	TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId)
+    	        .orElseThrow(() -> new IllegalArgumentException("해당 타임슬롯이 존재하지 않습니다."));
+    	
+        Integer count = landRepository.countByDateAndTimeAndType(landDate, timeSlot, landType);
 
         if (count == null) {
             count = 0;
         }
 
-        int capacity = (landType == LandType.SMALL) ? 15 : 10; // 유형별 정원 설정 가능
+        int capacity = (landType == LandType.SMALL) ? 15 : 10; // 유형별 정원 설정
 
         return LandCountDto.builder()
                 .landDate(landDate)
-                .landTime(landTime)
+                .label(timeSlot.getLabel()) // DTO에서 label로 수정한 경우
                 .landType(landType)
                 .reservedCount(count)
                 .capacity(capacity)

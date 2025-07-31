@@ -15,6 +15,8 @@ import com.project.volunteer.dto.VolunteerRequestDto;
 import com.project.volunteer.entity.Volunteer;
 import com.project.volunteer.service.VolunteerService;
 import com.project.member.repository.MemberRepository;
+import com.project.common.entity.TimeSlot;
+import com.project.common.repository.TimeSlotRepository;
 import com.project.land.dto.LandDetailDto;
 import com.project.land.dto.LandRequestDto;
 import com.project.land.entity.Land;
@@ -37,47 +39,53 @@ public class ReserveServiceImpl implements ReserveService {
     private final MemberRepository memberRepository;
     private final LandService landService; 
     private final VolunteerService volunteerService;
-    
+    private final TimeSlotRepository timeSlotRepository;
    
     // 사용자가 예약요청하면 예약상태 기본값으로 설정, DB에 저장
     @Override
     @Transactional
     public ReserveCompleteResponseDto createReserve(FullReserveRequestDto fullRequestDto) {
-    	
-    	//여러곳에서 참조해오기때문에 null값 나올수 있어서 추가 (예외처리)
-    	if (fullRequestDto == null || fullRequestDto.getReserveDto() == null) {
+
+        if (fullRequestDto == null || fullRequestDto.getReserveDto() == null) {
             throw new IllegalArgumentException("예약 정보가 잘못되었습니다.");
         }
-    	// 회원 정보 조회
-    	Long memberNum = fullRequestDto.getReserveDto().getMemberNum();
+
+        Long memberNum = fullRequestDto.getReserveDto().getMemberNum();
         MemberEntity member = memberRepository.findById(memberNum)
                 .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
-        
+
         int reserveType = fullRequestDto.getReserveDto().getReserveType();
-        
-        // 중복 예약 검사(예외 처리)
-       
-        if (reserveType == 1) {
+
+        // 예약 유형에 따른 중복 예약 검사
+        if (reserveType == 1) { // 놀이터
             LandRequestDto landDto = fullRequestDto.getLandDto();
             if (landDto == null) {
                 throw new IllegalArgumentException("놀이터 예약 세부 정보가 누락되었습니다.");
             }
 
-            boolean exists = reserveRepository.existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_LandTime(
-                    memberNum, landDto.getLandDate(), landDto.getLandTime());
+            boolean exists = reserveRepository
+            		.existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_TimeSlot_Id(
+            	        memberNum,
+            	        landDto.getLandDate(),
+            	        landDto.getTimeSlotId()
+            	    );
 
             if (exists) {
                 throw new DuplicateReservationException("이미 해당 시간에 놀이터 예약이 존재합니다.");
             }
 
-        } else if (reserveType == 2) {
+        } else if (reserveType == 2) { // 봉사
             VolunteerRequestDto volunteerDto = fullRequestDto.getVolunteerDto();
             if (volunteerDto == null) {
                 throw new IllegalArgumentException("봉사 예약 세부 정보가 누락되었습니다.");
             }
 
-            boolean exists = reserveRepository.existsByMember_MemberNumAndVolunteerDetail_VolDateAndVolunteerDetail_VolTime(
-                    memberNum, volunteerDto.getVolDate(), volunteerDto.getVolTime());
+            boolean exists = reserveRepository
+            	    .existsByMember_MemberNumAndVolunteerDetail_VolDateAndVolunteerDetail_TimeSlot_Id(
+            	        memberNum,
+            	        volunteerDto.getVolDate(),
+            	        volunteerDto.getTimeSlotId()
+            	    );
 
             if (exists) {
                 throw new DuplicateReservationException("이미 해당 시간에 봉사 예약이 존재합니다.");
@@ -86,39 +94,41 @@ public class ReserveServiceImpl implements ReserveService {
         } else {
             throw new IllegalArgumentException("예약 유형이 유효하지 않습니다.");
         }
-        
+
         // Reserve 엔티티 생성 및 저장
         Reserve reserve = fullRequestDto.getReserveDto().toEntity(member);
         Reserve saved = reserveRepository.save(reserve);
-        
-        String message;
-        
-        //예약 유형에 따라 세부 정보 저장
-        
-        if (reserveType == 1) { // 놀이터 예약
-            if (fullRequestDto.getLandDto() == null) {
-                throw new IllegalArgumentException("놀이터 예약 세부 정보가 누락되었습니다.");
-            }
-            landService.createLand(saved, fullRequestDto.getLandDto());
-            message = "놀이터 예약이 완료되었습니다.";
-            
 
-        } else if (reserveType == 2) { // 봉사 예약
-            if (fullRequestDto.getVolunteerDto() == null) {
-                throw new IllegalArgumentException("봉사 예약 세부 정보가 누락되었습니다.");
-            }
-            volunteerService.createVolunteer(saved, fullRequestDto.getVolunteerDto());
+        String message;
+
+        // 세부 정보 저장
+        if (reserveType == 1) {
+            LandRequestDto landDto = fullRequestDto.getLandDto();
+
+            TimeSlot timeSlot = TimeSlot.builder()
+                    .id(landDto.getTimeSlotId())
+                    .build();
+
+            landService.createLand(saved, landDto, timeSlot);
+            message = "놀이터 예약이 완료되었습니다.";
+
+        } else if (reserveType == 2) {
+            VolunteerRequestDto volunteerDto = fullRequestDto.getVolunteerDto();
+
+            TimeSlot timeSlot = TimeSlot.builder()
+                    .id(volunteerDto.getTimeSlotId())
+                    .build();
+
+            volunteerService.createVolunteer(saved, volunteerDto, timeSlot);
             message = "봉사활동 신청이 완료되었습니다.";
-        }
-        else {
-            //잘못된 예약유형에 대해 예외 발생
-            throw new IllegalArgumentException("예약 유형이 유효하지 않습니다. (1: 놀이터, 2: 봉사)");
+        } else {
+            throw new IllegalArgumentException("예약 유형이 유효하지 않습니다.");
         }
 
         return ReserveCompleteResponseDto.builder()
-        	    .reserveCode(saved.getReserveCode())    // Long 타입으로 저장
-        	    .message(message)
-        	    .build();
+                .reserveCode(saved.getReserveCode())
+                .message(message)
+                .build();
     }
     
     //특정회원(membernum)이 신청한 예약 목록 조회
@@ -199,25 +209,34 @@ public class ReserveServiceImpl implements ReserveService {
         
         MemberEntity member = reserve.getMember();
         Land land = reserve.getLandDetail();
+        
+        int basePrice = 2000;
+        int animalNumber = land.getAnimalNumber();
+        int reserveNumber = reserve.getReserveNumber();
 
+        int additionalPrice = (animalNumber > 1 ? (animalNumber - 1) * 1000 : 0) + reserveNumber * 1000;
+        int totalPrice = basePrice + additionalPrice;
+
+        
         return LandDetailDto.builder()
-                .reserveCode(reserve.getReserveCode())
-                .memberName(member.getMemberName())
-                .phone(member.getMemberPhone())
-                .reserveState(reserve.getReserveState())
-                .landDate(land.getLandDate())
-                .landTime(land.getLandTime())
-                .applyDate(reserve.getApplyDate())
-                .note(reserve.getNote())
-                .landType(land.getLandType())
-                .animalNumber(land.getAnimalNumber())
-                .reserveNumber(reserve.getReserveNumber())
-                .basePrice(2000)			//기본가격
-                .additionalPrice(1000 * (reserve.getReserveNumber() - 1))	//추가요금
-                .totalPrice(2000 + 1000 * (reserve.getReserveNumber() - 1)) 	//총 결제금액
-                .basePriceDetail("중, 소형견 x " + land.getAnimalNumber() + "마리")
-                .extraPriceDetail(" 추가 인원 x" + reserve.getReserveNumber() + "명")
-                .build();
+        	    .reserveCode(reserve.getReserveCode())
+        	    .memberName(member.getMemberName())
+        	    .phone(member.getMemberPhone())
+        	    .reserveState(reserve.getReserveState())
+        	    .landDate(land.getLandDate())
+        	    .label(land.getTimeSlot().getLabel())
+        	    .applyDate(reserve.getApplyDate())
+        	    .note(reserve.getNote())
+        	    .landType(land.getLandType())
+        	    .animalNumber(land.getAnimalNumber())
+        	    .reserveNumber(reserve.getReserveNumber())
+        	    .basePrice(basePrice)
+        	    .additionalPrice(additionalPrice)
+        	    .totalPrice(totalPrice)
+        	    .basePriceDetail("반려견 x " + animalNumber + "마리")
+        	    .extraPriceDetail(" 추가 인원 x" + reserveNumber + "명")
+        	    .build();
+
     }
     
     //관리자용 봉사 예약 상세보기
@@ -237,7 +256,7 @@ public class ReserveServiceImpl implements ReserveService {
                 .memberBirth(member.getMemberBirth())
                 .reserveState(reserve.getReserveState())
                 .volDate(volunteer.getVolDate())
-                .volTime(volunteer.getVolTime())
+                .label(volunteer.getTimeSlot().getLabel())
                 .note(reserve.getNote())
                 .reserveNumber(reserve.getReserveNumber())
                 .build();
