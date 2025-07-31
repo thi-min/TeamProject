@@ -228,12 +228,12 @@ public class BbsServicetests {
     }
 */
    
-    @DisplayName("게시글 검색 - 제목, 내용, 제목+내용 / 타입 필터 포함 및 미포함 (DB 실 데이터 활용)")
+ /*   @DisplayName("게시글 검색 - 제목, 내용, 제목+내용 / 타입 필터 포함 및 미포함 (DB 실 데이터 활용)")
     @Test
     @Transactional
     void testSearchPostsWithExistingData() {
         Pageable pageable = PageRequest.of(0, 10);
-        BoardType type = BoardType.FAQ;
+        BoardType type = BoardType.FAQ; */
 
      /*   // 제목으로 검색 + 타입 필터
         Page<BbsDto> titleResult = bbsService.searchPosts("title", "고기", null, BoardType.FAQ, pageable);
@@ -266,7 +266,7 @@ public class BbsServicetests {
             assertTrue(dto.getBbsTitle().contains("검색어"));
         });  */
         
-        Page<BbsDto> result = bbsService.searchPosts("content", "+", null, BoardType.FAQ, pageable);
+   /*     Page<BbsDto> result = bbsService.searchPosts("title", "글", null, BoardType.FAQ, pageable);
 
         System.out.println("검색된 총 게시글 수: " + result.getTotalElements());
         System.out.println("현재 페이지에 포함된 게시글 수: " + result.getNumberOfElements());
@@ -275,8 +275,32 @@ public class BbsServicetests {
             System.out.println("제목: " + dto.getBbsTitle());
             System.out.println("내용: " + dto.getBbsContent());
         }
+         */
+        
+      /*  Page<BbsDto> result = bbsService.searchPosts("content", null, "뭐야", BoardType.FAQ, pageable);
 
-    }
+        System.out.println("검색된 총 게시글 수: " + result.getTotalElements());
+        System.out.println("현재 페이지에 포함된 게시글 수: " + result.getNumberOfElements());
+
+        for (BbsDto dto : result.getContent()) {
+            System.out.println("제목: " + dto.getBbsTitle());
+            System.out.println("내용: " + dto.getBbsContent());
+            System.out.println("----------------------------");
+        } */
+
+       /* String keyword = "기";
+        Page<BbsDto> result = bbsService.searchPosts("title+content", keyword , keyword , BoardType.FAQ, pageable);
+
+        System.out.println("검색된 총 게시글 수: " + result.getTotalElements());
+        System.out.println("현재 페이지에 포함된 게시글 수: " + result.getNumberOfElements());
+
+        for (BbsDto dto : result.getContent()) {
+            System.out.println("제목: " + dto.getBbsTitle());
+            System.out.println("내용: " + dto.getBbsContent());
+            System.out.println("----------------------------");
+        }
+        
+    } */
     
     
    

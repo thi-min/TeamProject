@@ -3,6 +3,7 @@ package com.project.board.controller;
 import java.util.List;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
@@ -165,7 +166,13 @@ public class BbsController {
         @RequestParam(name = "sort", defaultValue = "latest") String sort,
         @PageableDefault(size = 10) Pageable pageable
     ) {
-        return bbsService.getPagedPosts(type, sort, pageable);
+        int pageSize = 10;
+        if (type == BoardType.POTO) {
+            pageSize = 12;
+        }
+        Pageable fixedPageable = PageRequest.of(pageable.getPageNumber(), pageSize, pageable.getSort());
+
+        return bbsService.getPagedPosts(type, sort, fixedPageable);
     }
 
     // 게시글 검색

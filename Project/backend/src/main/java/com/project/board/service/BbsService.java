@@ -11,6 +11,8 @@ public interface BbsService {
 	
     BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId); // 게시글 생성 (회원 또는 관리자)
     
+    BbsDto createBbsWithFiles(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files); // 생성된 게시글 + 파일첨부 (회원 또는 관리자)
+    
     BbsDto updateBbs(Long id, BbsDto dto, Long memberNum); // 게시글 수정 (작성자 본인만 가능)
     
     void deleteBbs(Long id, Long requesterMemberNum, Long requesterAdminId);  // 게시글 단건 삭제 (작성자 본인 또는 관리자)

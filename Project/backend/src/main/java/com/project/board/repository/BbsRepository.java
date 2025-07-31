@@ -30,7 +30,7 @@ public interface BbsRepository extends JpaRepository<BbsEntity, Long> {
     
     Page<BbsEntity> findByBbscontentContaining(String bbscontent, Pageable pageable);  // 게시글 내용에 키워드가 포함된 게시글을 페이지 단위로 조회 (내용 검색)
     
-    Page<BbsEntity> findByBbstitleContainingOrBbscontentContaining(String bbstitle, String bbscontent, Pageable pageable); // 제목 또는 내용에 키워드가 포함된 게시글을 페이지 단위로 조회
+    Page<BbsEntity> findByBbstitleContainingAndBbscontentContaining(String bbstitle, String bbscontent, Pageable pageable); // 제목 또는 내용에 키워드가 포함된 게시글을 페이지 단위로 조회
 
     Page<BbsEntity> findByBulletinTypeAndBbstitleContaining(BoardType type, String bbstitle, Pageable pageable); // 게시판 타입 + 제목 검색 (AND 조건)
     
@@ -39,10 +39,15 @@ public interface BbsRepository extends JpaRepository<BbsEntity, Long> {
     Page<BbsEntity> findByBulletinTypeAndBbscontentContaining(BoardType type, String bbscontent, Pageable pageable); // 게시판 타입 + 내용 검색 (AND 조건)
 
  // 게시판 타입 + (제목 OR 내용) 검색 (복합 조건) → 직접 JPQL 쿼리로 명확하게 작성
-    @Query("SELECT b FROM BbsEntity b WHERE b.bulletinType = :type AND (b.bbstitle LIKE %:keyword% OR b.bbscontent LIKE %:keyword%)")
-    Page<BbsEntity> findByBulletinTypeAndTitleOrContent(   @Param("type") BoardType type,
-    	    @Param("bbstitle") String bbstitle,
-    	    @Param("bbscontent") String bbscontent,
-    	    Pageable pageable);
+    @Query("SELECT b FROM BbsEntity b WHERE b.bulletinType = :type " +
+    	       "AND b.bbstitle LIKE CONCAT('%', :keyword, '%') " +
+    	       "AND b.bbscontent LIKE CONCAT('%', :keyword, '%')")
+    	Page<BbsEntity> findByBulletinTypeAndTitleAndContent(
+    	    @Param("type") BoardType type,
+    	    @Param("keyword") String keyword,
+    	    Pageable pageable
+    	);
+
+
     
 }
