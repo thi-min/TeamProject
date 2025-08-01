@@ -25,4 +25,5 @@ public interface LandRepository extends JpaRepository<Land, Long> {
     Integer countByDateAndTimeAndType(@Param("landDate") LocalDate landDate,
                                       @Param("timeSlot") TimeSlot timeSlot,
                                       @Param("landType") LandType landType);
+    
 }

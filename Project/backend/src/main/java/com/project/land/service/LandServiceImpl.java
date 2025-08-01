@@ -1,5 +1,6 @@
 package com.project.land.service;
 
+import com.project.common.dto.TimeSlotDto;
 import com.project.common.entity.TimeSlot;
 import com.project.common.repository.TimeSlotRepository;
 import com.project.land.dto.LandCountDto;
@@ -14,6 +15,8 @@ import com.project.member.entity.MemberEntity;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,6 +28,7 @@ public class LandServiceImpl implements LandService {
     private final LandRepository landRepository;
     private final ReserveRepository reserveRepository;
     private final TimeSlotRepository timeSlotRepository;
+
     
     // 놀이터 예약 상세보기 화면
     @Override

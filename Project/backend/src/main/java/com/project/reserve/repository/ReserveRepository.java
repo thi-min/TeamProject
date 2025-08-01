@@ -1,5 +1,6 @@
 package com.project.reserve.repository;
 
+import com.project.common.entity.TimeSlot;
 import com.project.reserve.dto.AdminReservationListDto;
 import com.project.reserve.entity.Reserve;
 import com.project.reserve.entity.ReserveState;
@@ -80,4 +81,6 @@ public interface ReserveRepository extends JpaRepository<Reserve, Long> {
     //관리자 봉사예약 조회
     @Query("SELECT r FROM Reserve r WHERE r.reserveType = 2") // 2: 봉사
     List<Reserve> findVolunteerReservationsForAdmin();
+    
+   
 }

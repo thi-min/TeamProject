@@ -48,4 +48,6 @@ public class TimeSlotDto {
                 .enabled(enabled)
                 .build();
     }
+    
+   
 }

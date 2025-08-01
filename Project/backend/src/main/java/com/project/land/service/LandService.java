@@ -1,7 +1,9 @@
 package com.project.land.service;
 
 import java.time.LocalDate;
+import java.util.List;
 
+import com.project.common.dto.TimeSlotDto;
 import com.project.common.entity.TimeSlot;
 import com.project.land.dto.LandCountDto;
 import com.project.land.dto.LandDetailDto;
@@ -18,5 +20,6 @@ public interface LandService {
     
     // 예약일과 시간대를 불러와서 반려견수 집계 + 예약 현황 정보 제공
     LandCountDto getLandCountInfo(LocalDate landDate, Long timeSlotId, LandType landType);
+    
 }
     
