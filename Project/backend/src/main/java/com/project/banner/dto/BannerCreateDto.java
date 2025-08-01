@@ -7,6 +7,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class BannerCreateDto {
     private String title;
     private String subTitle;

@@ -1,9 +1,16 @@
 package com.project.board;
 
+import com.project.admin.entity.AdminEntity;
+import com.project.admin.repository.AdminRepository;
 import com.project.board.dto.BbsDto;
-import com.project.member.entity.MemberEntity;
-import com.project.board.BoardType;
+import com.project.board.dto.QandADto;
+import com.project.board.entity.BbsEntity;
+import com.project.board.entity.QandAEntity;
 import com.project.board.repository.BbsRepository;
+import com.project.board.repository.FileUpLoadRepository;
+import com.project.board.repository.ImageBbsRepository;
+import com.project.board.repository.QandARepository;
+import com.project.member.entity.MemberEntity;
 import com.project.member.repository.MemberRepository;
 import com.project.board.service.BbsService;
 
@@ -13,13 +20,24 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.annotation.Rollback;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
 public class BbsServiceFileUploadTest {
@@ -28,49 +46,61 @@ public class BbsServiceFileUploadTest {
     private BbsService bbsService;
 
     @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
-    private BbsRepository bbsRepository;
+    private AdminRepository adminRepository;
 
     @Test
-    @DisplayName("공지사항 + 실제 파일 업로드 통합 테스트")
-    public void createNoticePostWithRealFile() throws Exception {
-        // 1. 회원 조회
-        MemberEntity member = memberRepository.findById(3L)
-            .orElseThrow(() -> new RuntimeException("회원이 존재하지 않습니다."));
+    @Transactional
+    @Rollback(false)
+    @DisplayName("공지사항 작성 + 파일 첨부 + 본문 삽입 검증")
+    void testCreateNoticeBoardByAdmin_withFileAndContentInjection() throws Exception {
+        // 1. 관리자 엔티티 준비
+        Long fakeAdminId = 1L;
+        AdminEntity admin = adminRepository.findById(fakeAdminId).orElseGet(() -> {
+            AdminEntity newAdmin = AdminEntity.builder()
+                    .adminId("fakeAdminId")
+                    .adminName("테스트관리자")
+                    .adminEmail("admin@test.com")
+                    .adminPw("encoded_password")
+                    .adminPhone("010-1234-5678") 
+                    .registDate(LocalDateTime.now())
+                    .connectData(LocalDateTime.now())
+                    .build();
 
-        // 2. 실제 파일 불러오기
-        File realFile = new File("src/test/resources/testfiles/test.pdf");
-        FileInputStream fis = new FileInputStream(realFile);
-        MockMultipartFile multipartFile = new MockMultipartFile(
-            "file",
-            realFile.getName(),
-            "application/pdf",
-            fis
-        );
+            return adminRepository.save(newAdmin);
+        });
 
-        // 3. 게시글 DTO 구성
+        // 2. 게시글 DTO 생성
         BbsDto dto = BbsDto.builder()
-                .bbsTitle("실제 파일 업로드 공지사항")
-                .bbsContent("본문에 파일 링크가 추가되어야 합니다.")
+                .bbsTitle("파일 삽입 본문 테스트")
+                .bbsContent("본문 시작")
                 .registDate(LocalDateTime.now())
                 .revisionDate(null)
                 .delDate(null)
                 .viewers(0)
-                .bulletinType(BoardType.NORMAL) // 공지사항
-                .memberNum(member.getMemberNum())
+                .bulletinType(BoardType.NORMAL) // NORMAL → 본문 수정 대상
+                .memberNum(null)
                 .build();
 
-        // 4. 서비스 호출 (관리자 ID 전달)
-        BbsDto saved = bbsService.createBbsWithFiles(dto, null, 1L, List.of(multipartFile));
+        // 3. 테스트 파일 생성 (JPEG 이미지)
+        Path filePath = Path.of("D:/temp/test.jpg"); // 존재하는 테스트 이미지 필요
+        byte[] fileBytes = Files.readAllBytes(filePath);
 
-        // 5. 결과 확인
-        assertThat(saved.getBulletinNum()).isNotNull();
-        assertThat(saved.getBbsTitle()).contains("실제 파일 업로드");
-        assertThat(saved.getBbsContent()).contains(realFile.getName());
+        MockMultipartFile mockFile = new MockMultipartFile(
+                "files",
+                "test.jpg",
+                "image/jpeg",
+                fileBytes
+        );
 
-        System.out.println("등록된 게시글 번호: " + saved.getBulletinNum());
-        System.out.println("본문 내용: " + saved.getBbsContent());
+        List<MultipartFile> fileList = List.of(mockFile);
+
+        // 4. 서비스 호출
+        BbsDto saved = bbsService.createBbsWithFiles(dto, null, fakeAdminId, fileList);
+
+        // 5. 본문 삽입 확인
+        String updatedContent = saved.getBbsContent();
+        assertNotNull(updatedContent);
+        assertTrue(updatedContent.contains("<img src=\"/uploads/"));  // 이미지 삽입 확인
+        assertTrue(updatedContent.contains("alt=\"test.jpg\""));      // 파일 이름이 alt로 들어가는지 확인
     }
 }
