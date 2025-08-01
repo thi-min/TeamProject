@@ -17,6 +17,7 @@ public class TimeSlotDto {
     private String label; // 예: "09:00 ~ 11:00" — 출력용
     private LocalTime startTime;
     private LocalTime endTime;
+    private int capacity;
     private boolean enabled;
 
     // 출력용 시간 범위 포맷
@@ -33,6 +34,7 @@ public class TimeSlotDto {
                 .startTime(entity.getStartTime())
                 .endTime(entity.getEndTime())
                 .enabled(entity.isEnabled())
+                .capacity(entity.getCapacity())
                 .build();
     }
 
@@ -42,6 +44,7 @@ public class TimeSlotDto {
                 .id(id)
                 .startTime(startTime)
                 .endTime(endTime)
+                .capacity(capacity)
                 .enabled(enabled)
                 .build();
     }

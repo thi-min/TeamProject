@@ -1,5 +1,6 @@
 package com.project.volunteer;
 
+import com.project.common.entity.TimeSlot;
 import com.project.member.entity.*;
 import com.project.member.repository.MemberRepository;
 import com.project.reserve.entity.Reserve;
@@ -11,6 +12,7 @@ import com.project.volunteer.entity.Volunteer;
 import com.project.volunteer.repository.VolunteerRepository;
 import com.project.volunteer.service.VolunteerService;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -21,6 +23,7 @@ import org.springframework.test.annotation.Rollback;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -41,7 +44,10 @@ public class VolunteerServiceImplTest {
 
     @Autowired
     private MemberRepository memberRepository;
-
+    
+    @Autowired
+    private EntityManager em;
+    
     //@Test
     @DisplayName("봉사 인원수 조회 기능 테스트 - 성공")
     void getVolunteerCountInfo_성공() {
@@ -76,8 +82,13 @@ public class VolunteerServiceImplTest {
 
         // given - 기준 날짜 및 시간
         LocalDate targetDate = LocalDate.of(2025, 9, 15);
-        String targetTime = "13:00 ~ 15:00";
-
+        TimeSlot timeSlot = TimeSlot.builder()
+                .label("13:00 ~ 15:00")
+                .startTime(LocalTime.of(13, 0))
+                .endTime(LocalTime.of(15, 0))
+                .build();
+        em.persist(timeSlot);
+        
         // 봉사 예약 1
         Reserve reserve1 = reserveRepository.save(Reserve.builder()
                 .member(member1)
@@ -90,7 +101,7 @@ public class VolunteerServiceImplTest {
 
         volunteerRepository.save(Volunteer.builder()
                 .volDate(targetDate)
-                .volTime(targetTime)
+                .timeSlot(timeSlot)
                 .reserve(reserve1)
                 .build());
 
@@ -106,17 +117,17 @@ public class VolunteerServiceImplTest {
 
         volunteerRepository.save(Volunteer.builder()
                 .volDate(targetDate)
-                .volTime(targetTime)
+                .timeSlot(timeSlot)
                 .reserve(reserve2)
                 .build());
 
         // when - 서비스 호출
-        VolunteerCountDto result = volunteerService.getVolunteerCountInfo(targetDate, targetTime);
+        VolunteerCountDto result = volunteerService.getVolunteerCountInfo(targetDate, timeSlot.getId());
 
         // then - 검증
         assertThat(result).isNotNull();
         assertThat(result.getVolDate()).isEqualTo(targetDate);
-        assertThat(result.getVolTime()).isEqualTo(targetTime);
+        assertThat(result.getLabel()).isEqualTo("13:00 ~ 15:00");
         assertThat(result.getReservedCount()).isEqualTo(5); // 2 + 3
         assertThat(result.getCapacity()).isEqualTo(10);
     }
@@ -138,6 +149,13 @@ public class VolunteerServiceImplTest {
                 .memberLock(false)
                 .snsYn(false)
                 .build());
+        
+        TimeSlot timeSlot = TimeSlot.builder()
+                .label("10:00 ~ 12:00")
+                .startTime(LocalTime.of(10, 0))
+                .endTime(LocalTime.of(12, 0))
+                .build();
+        em.persist(timeSlot);
 
         // 예약 생성
         Reserve reserve = reserveRepository.save(Reserve.builder()
@@ -152,7 +170,7 @@ public class VolunteerServiceImplTest {
         // 봉사 생성
         Volunteer volunteer = volunteerRepository.save(Volunteer.builder()
                 .volDate(LocalDate.of(2025, 8, 10))
-                .volTime("10:00 ~ 12:00")
+                .timeSlot(timeSlot)
                 .reserve(reserve)
                 .build());
 
@@ -165,7 +183,7 @@ public class VolunteerServiceImplTest {
         assertThat(dto.getMemberBirth()).isEqualTo(LocalDate.of(2005, 4, 23));
         assertThat(dto.getReserveState()).isEqualTo(ReserveState.ING);
         assertThat(dto.getVolDate()).isEqualTo(LocalDate.of(2025, 8, 10));
-        assertThat(dto.getVolTime()).isEqualTo("10:00 ~ 12:00");
+        assertThat(dto.getLabel()).isEqualTo("10:00 ~ 12:00");
         assertThat(dto.getReserveNumber()).isEqualTo(1);
         assertThat(dto.getNote()).isEqualTo("봉사 예약 메모");
     }

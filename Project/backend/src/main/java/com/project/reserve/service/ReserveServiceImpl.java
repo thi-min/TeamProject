@@ -112,9 +112,8 @@ public class ReserveServiceImpl implements ReserveService {
         if (reserveType == 1) {
             LandRequestDto landDto = fullRequestDto.getLandDto();
 
-            TimeSlot timeSlot = TimeSlot.builder()
-                    .id(landDto.getTimeSlotId())
-                    .build();
+            TimeSlot timeSlot = timeSlotRepository.findById(landDto.getTimeSlotId())
+                    .orElseThrow(() -> new IllegalArgumentException("해당 시간대 정보를 찾을 수 없습니다."));
 
             landService.createLand(saved, landDto, timeSlot);
             message = "놀이터 예약이 완료되었습니다.";
@@ -122,9 +121,8 @@ public class ReserveServiceImpl implements ReserveService {
         } else if (reserveType == 2) {
             VolunteerRequestDto volunteerDto = fullRequestDto.getVolunteerDto();
 
-            TimeSlot timeSlot = TimeSlot.builder()
-                    .id(volunteerDto.getTimeSlotId())
-                    .build();
+            TimeSlot timeSlot = timeSlotRepository.findById(volunteerDto.getTimeSlotId())
+                    .orElseThrow(() -> new IllegalArgumentException("해당 시간대 정보를 찾을 수 없습니다."));
 
             volunteerService.createVolunteer(saved, volunteerDto, timeSlot);
             message = "봉사활동 신청이 완료되었습니다.";

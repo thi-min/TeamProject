@@ -16,17 +16,29 @@ import java.util.List;
 public class TimeSlotServiceImpl implements TimeSlotService {
 
     private final TimeSlotRepository timeSlotRepository;
-
+    
+    // 유효성 검사
+    private void validateTimeSlotDto(TimeSlotDto dto) {
+    	if (dto == null) {
+            throw new IllegalArgumentException("시간대 정보가 누락되었습니다.");
+        }
+        if (dto.getStartTime().compareTo(dto.getEndTime()) >= 0) {
+            throw new IllegalArgumentException("시작 시간은 종료 시간보다 이전이어야 합니다.");
+        }
+        if (dto.getCapacity() < 1 || dto.getCapacity() > 30) {
+            throw new IllegalArgumentException("정원은 1명 이상 30명 이하이어야 합니다.");
+        }
+    }
 
     // 시간대 추가
     @Override
     @Transactional
     public void addTimeSlot(TimeSlotDto dto) {
-        TimeSlot timeSlot = dto.toEntity(); // label은 엔티티 @PrePersist에서 자동 생성됨
-        timeSlotRepository.save(timeSlot);
+        validateTimeSlotDto(dto);
+        timeSlotRepository.save(dto.toEntity());
     }
 
-
+    // 시간대 수정
     @Override
     @Transactional
     public void updateTimeSlot(Long id, TimeSlotDto dto) {
@@ -35,6 +47,7 @@ public class TimeSlotServiceImpl implements TimeSlotService {
 
         existing.setStartTime(dto.getStartTime());
         existing.setEndTime(dto.getEndTime());
+        existing.setCapacity(dto.getCapacity());
         existing.setEnabled(dto.isEnabled());
         // label은 @PreUpdate로 자동 재생성됨
     }
@@ -55,4 +68,5 @@ public class TimeSlotServiceImpl implements TimeSlotService {
     public boolean isDuplicateLabel(String label) {
         return timeSlotRepository.existsByLabel(label);
     }
+    
 }

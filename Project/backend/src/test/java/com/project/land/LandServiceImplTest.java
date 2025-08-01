@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +16,7 @@ import org.springframework.test.annotation.Rollback;
 
 import com.project.land.entity.Land;
 import com.project.land.entity.LandType;
+import com.project.common.entity.TimeSlot;
 import com.project.land.dto.LandCountDto;
 import com.project.land.dto.LandDetailDto;
 import com.project.land.repository.LandRepository;
@@ -28,6 +30,7 @@ import com.project.reserve.entity.ReserveState;
 import com.project.reserve.repository.ReserveRepository;
 import com.project.land.dto.LandCountDto;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 @SpringBootTest
@@ -47,6 +50,9 @@ class LandServiceImplTest {
 
     @Autowired
     private LandService landService;
+    
+    @Autowired
+    private EntityManager em;
     
     //@Test
     @DisplayName("소형견 놀이터 예약 마릿수 조회 - 성공")
@@ -70,7 +76,15 @@ class LandServiceImplTest {
 	    LocalDate date = LocalDate.of(2025, 9, 10);
 	    String time = "09:00 ~ 11:00";
 	    LandType type = LandType.SMALL;
-	
+	    
+	    // 시간 설정
+	    TimeSlot timeSlot = TimeSlot.builder()
+	            .label("09:00 ~ 11:00")
+	            .startTime(LocalTime.of(9, 0))
+	            .endTime(LocalTime.of(11, 0))
+	            .build();
+	    em.persist(timeSlot);
+	    
 	    // 3. 예약 및 Land 저장 (3마리)
 	    Reserve reserve = Reserve.builder()
 	            .member(member)
@@ -83,7 +97,7 @@ class LandServiceImplTest {
 	
 	    Land land = Land.builder()
 	            .landDate(date)
-	            .landTime(time)
+	            .timeSlot(timeSlot)
 	            .landType(type)
 	            .animalNumber(3)
 	            .payNumber(12000)
@@ -94,12 +108,12 @@ class LandServiceImplTest {
 	    reserveRepository.save(reserve);
 	
 	    // 4. 서비스 호출
-	    LandCountDto result = landService.getLandCountInfo(date, time, type);
+	    LandCountDto result = landService.getLandCountInfo(date, timeSlot.getId(), type);
 	
 	    // 5. 검증
 	    assertThat(result).isNotNull();
 	    assertThat(result.getLandDate()).isEqualTo(date);
-	    assertThat(result.getLandTime()).isEqualTo(time);
+	    assertThat(result.getLabel()).isEqualTo("09:00 ~ 11:00");
 	    assertThat(result.getLandType()).isEqualTo(type);
 	    assertThat(result.getReservedCount()).isEqualTo(3);
 	    assertThat(result.getCapacity()).isEqualTo(15);
@@ -122,6 +136,13 @@ class LandServiceImplTest {
 	            .memberLock(false)
 	            .snsYn(false)
 	            .build());
+    	// 시간
+    	TimeSlot timeSlot = TimeSlot.builder()
+	            .label("09:00 ~ 11:00")
+	            .startTime(LocalTime.of(9, 0))
+	            .endTime(LocalTime.of(11, 0))
+	            .build();
+	    em.persist(timeSlot);
 
         // given - 예약 저장
         Reserve reserve = Reserve.builder()
@@ -143,7 +164,7 @@ class LandServiceImplTest {
         Land land = Land.builder()
                 .reserve(reserve)
                 .landDate(LocalDate.now().plusDays(1))
-                .landTime("11:00 ~ 13:00")
+                .timeSlot(timeSlot)
                 .landType(LandType.SMALL)
                 .animalNumber(2)  // 반려견 2마리
                 .payNumber(expectedTotal)

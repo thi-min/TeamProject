@@ -423,7 +423,7 @@ public class ReserveRepositoryTest {
                 .reserve(reserve)
                 .landDate(LocalDate.of(2025, 8, 10))
                 .timeSlot(timeSlot)
-                .landType(null)
+                .landType(LandType.LARGE)
                 .animalNumber(2)
                 .payNumber(10000)
                 .build();

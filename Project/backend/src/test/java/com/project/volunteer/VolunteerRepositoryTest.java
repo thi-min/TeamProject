@@ -1,5 +1,6 @@
 package com.project.volunteer;
 
+import com.project.common.entity.TimeSlot;
 import com.project.member.entity.*;
 import com.project.member.repository.MemberRepository;
 import com.project.reserve.entity.Reserve;
@@ -8,6 +9,7 @@ import com.project.reserve.repository.ReserveRepository;
 import com.project.volunteer.entity.Volunteer;
 import com.project.volunteer.repository.VolunteerRepository;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 import org.junit.jupiter.api.DisplayName;
@@ -18,6 +20,7 @@ import org.springframework.test.annotation.Rollback;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,6 +38,9 @@ public class VolunteerRepositoryTest {
 
     @Autowired
     private MemberRepository memberRepository;
+    
+    @Autowired
+    private EntityManager em;
 
     @Test
     @DisplayName("봉사 일자와 시간대에 해당하는 총 예약 인원 수 조회 - 성공")
@@ -56,7 +62,12 @@ public class VolunteerRepositoryTest {
 
         // 기준 일자/시간
         LocalDate targetDate = LocalDate.of(2025, 9, 10);
-        String targetTime = "13:00 ~ 15:00";
+        TimeSlot timeSlot = TimeSlot.builder()
+                .label("13:00 ~ 15:00")
+                .startTime(LocalTime.of(13, 0))
+                .endTime(LocalTime.of(15, 0))
+                .build();
+        em.persist(timeSlot);
 
         // 봉사 예약 1
         Reserve reserve1 = Reserve.builder()
@@ -71,7 +82,7 @@ public class VolunteerRepositoryTest {
 
         Volunteer volunteer1 = Volunteer.builder()
                 .volDate(targetDate)
-                .volTime(targetTime)
+                .timeSlot(timeSlot)
                 .reserve(reserve1)
                 .build();
         volunteerRepository.save(volunteer1);
@@ -103,13 +114,13 @@ public class VolunteerRepositoryTest {
 
         Volunteer volunteer2 = Volunteer.builder()
                 .volDate(targetDate)
-                .volTime(targetTime)
+                .timeSlot(timeSlot)
                 .reserve(reserve2)
                 .build();
         volunteerRepository.save(volunteer2);
 
         // when
-        Integer totalCount = volunteerRepository.countByDateAndTime(targetDate, targetTime);
+        Integer totalCount = volunteerRepository.countByDateAndTimeSlot(targetDate, timeSlot);
 
         // then
         assertThat(totalCount).isEqualTo(5); // 3명 + 2명

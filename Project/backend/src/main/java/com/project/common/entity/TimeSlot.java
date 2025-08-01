@@ -26,6 +26,9 @@ public class TimeSlot {
 
     @Column(name = "end_time", nullable = false)
     private LocalTime endTime;		//종료 시각 ex)11:00
+    
+    @Column(name = "capacity", nullable = false)
+    private int capacity; // 정원 (도메인별로 다른 정원 설정 가능)
 
     @Column(name = "enabled", nullable = false)
     private boolean enabled = true;  // 이용가능여부 기본값 true

@@ -30,6 +30,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 
 @SpringBootTest
+@Transactional
 @Rollback(false)
 @DisplayName("LandRepository 테스트")
 class LandRepositoryTest {
@@ -105,6 +106,7 @@ class LandRepositoryTest {
         assertThat(found.get().getLandType()).isEqualTo(LandType.SMALL);
         assertThat(found.get().getAnimalNumber()).isEqualTo(1);
     }
+    
     //@Test
     @DisplayName("LandType으로 land 조회 - 성공")
     void findByLandType_성공() {
@@ -153,11 +155,11 @@ class LandRepositoryTest {
         
         //3. 대형견 놀이터 예약
         TimeSlot timeSlot2 = TimeSlot.builder()
-                .label("12:00 ~ 14:00")
+                .label("14:00 ~ 16:00")
                 .startTime(LocalTime.of(10, 0))
                 .endTime(LocalTime.of(12, 0))       
                 .build();
-        em.persist(timeSlot1);
+        em.persist(timeSlot2);
         
         Reserve reserve2 = Reserve.builder()
                 .member(member)
@@ -209,7 +211,12 @@ class LandRepositoryTest {
 
         // 2. 기준 날짜 및 시간
         LocalDate targetDate = LocalDate.of(2025, 9, 5);
-        String targetTime = "10:00 ~ 12:00";
+        TimeSlot timeSlot = TimeSlot.builder()
+                .label("10:00 ~ 12:00")
+                .startTime(LocalTime.of(10, 0))
+                .endTime(LocalTime.of(12, 0))
+                .build();
+        em.persist(timeSlot);
 
         // 3. 소형견 예약 (3마리)
         Reserve reserve1 = Reserve.builder()
@@ -223,9 +230,9 @@ class LandRepositoryTest {
 
         Land land1 = Land.builder()
                 .landDate(targetDate)
-                .landTime(targetTime)
+                .timeSlot(timeSlot)
                 .landType(LandType.SMALL)
-                .animalNumber(3)
+                .animalNumber(3)		//3마리
                 .payNumber(15000)
                 .build();
         reserve1.setLandDetail(land1);
@@ -244,9 +251,9 @@ class LandRepositoryTest {
 
         Land land2 = Land.builder()
                 .landDate(targetDate)
-                .landTime(targetTime)
+                .timeSlot(timeSlot)
                 .landType(LandType.LARGE)
-                .animalNumber(2)
+                .animalNumber(2)		//2마리
                 .payNumber(12000)
                 .build();
         
@@ -267,9 +274,9 @@ class LandRepositoryTest {
 
         Land land3 = Land.builder()
                 .landDate(targetDate)
-                .landTime(targetTime)
+                .timeSlot(timeSlot)
                 .landType(LandType.SMALL)
-                .animalNumber(1)
+                .animalNumber(1)	//1마리
                 .payNumber(12000)
                 .build();
         
@@ -278,7 +285,7 @@ class LandRepositoryTest {
         reserveRepository.save(reserve3);
 
         // 5. 쿼리 테스트 (소형견만)
-        Integer result = landRepository.countByDateAndTimeAndType(targetDate, targetTime, LandType.SMALL);
+        Integer result = landRepository.countByDateAndTimeAndType(targetDate, timeSlot, LandType.SMALL);
 
         // 6. 검증: 소형견 예약만 합산되어야 하므로 3이어야 함
         assertThat(result).isEqualTo(4);
