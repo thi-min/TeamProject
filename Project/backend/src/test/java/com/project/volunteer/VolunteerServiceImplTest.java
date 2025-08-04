@@ -126,7 +126,7 @@ public class VolunteerServiceImplTest {
 
         // then - 검증
         assertThat(result).isNotNull();
-        assertThat(result.getVolDate()).isEqualTo(targetDate);
+       
         assertThat(result.getLabel()).isEqualTo("13:00 ~ 15:00");
         assertThat(result.getReservedCount()).isEqualTo(5); // 2 + 3
         assertThat(result.getCapacity()).isEqualTo(10);

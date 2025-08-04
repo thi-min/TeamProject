@@ -93,29 +93,43 @@ public class LandServiceImpl implements LandService {
         landRepository.save(land);	//land->reserve 
     }
     
-    // 예약 마리수 체크
+    // 관리자용 - 단일 시간대에 대해 정원 및 현재 예약 수 조회, 시간대별 예약현황 조회
     @Override
-    @Transactional(readOnly = true)
-    public LandCountDto getLandCountInfo(LocalDate landDate, Long timeSlotId, LandType landType) {
-    	TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId)
-    	        .orElseThrow(() -> new IllegalArgumentException("해당 타임슬롯이 존재하지 않습니다."));
-    	
-        Integer count = landRepository.countByDateAndTimeAndType(landDate, timeSlot, landType);
+    public LandCountDto getLandCountForSlot(LocalDate landDate, Long timeSlotId, LandType landType) {
+        TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 시간대가 존재하지 않습니다."));
 
-        if (count == null) {
-            count = 0;
-        }
-
-        int capacity = (landType == LandType.SMALL) ? 15 : 10; // 유형별 정원 설정
+        Integer reserved = landRepository.countByDateAndTimeAndType(landDate, timeSlot, landType);
+        int reservedCount = reserved != null ? reserved : 0;
 
         return LandCountDto.builder()
-                .landDate(landDate)
-                .label(timeSlot.getLabel()) // DTO에서 label로 수정한 경우
+                .timeSlotId(timeSlot.getId())
+                .label(timeSlot.getLabel())
                 .landType(landType)
-                .reservedCount(count)
-                .capacity(capacity)
+                .reservedCount(reservedCount)
+                .capacity(timeSlot.getCapacity())
                 .build();
     }
     
+    // 사용자용 - 프론트에서 시간대 선택 ui 구성때 사용
+    @Override
+    public List<LandCountDto> getLandTimeSlotsWithCount(LocalDate landDate, Long memberNum, LandType landType) {
+        List<TimeSlot> timeSlots = timeSlotRepository.findAll(); // 필터링 필요시 LAND 전용만
+
+        return timeSlots.stream()
+                .map(timeSlot -> {
+                    Integer reserved = landRepository.countByDateAndTimeAndType(landDate, timeSlot, landType);
+                    int reservedCount = reserved != null ? reserved : 0;
+
+                    return LandCountDto.builder()
+                            .timeSlotId(timeSlot.getId())
+                            .label(timeSlot.getLabel())
+                            .landType(landType)
+                            .reservedCount(reservedCount)
+                            .capacity(timeSlot.getCapacity())
+                            .build();
+                })
+                .collect(Collectors.toList());
+    }
     
 }

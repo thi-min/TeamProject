@@ -17,4 +17,12 @@ public interface TimeSlotService {
 
     // 중복 여부 확인 (label 기준만)
     boolean isDuplicateLabel(String label);
+    
+    // 놀이터용 시간대 
+    List<TimeSlotDto> getLandTimeSlots();
+    
+    // 봉사용 시간대
+    List<TimeSlotDto> getVolunteerTimeSlots();  
+    
+    
 }

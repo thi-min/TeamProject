@@ -82,10 +82,10 @@ public class VolunteerServiceImpl implements VolunteerService {
         }
         
         return VolunteerCountDto.builder()
-                .volDate(volDate)
+        		.timeSlotId(timeSlot.getId())
                 .label(timeSlot.getLabel())
                 .reservedCount(count != null ? count : 0)
-                .capacity(10)  // 예: 봉사 정원
+                .capacity(timeSlot.getCapacity())  // 예: 봉사 정원
                 .build();
     }
 }

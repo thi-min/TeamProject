@@ -18,8 +18,11 @@ public interface LandService {
     //예약 생성시 land정보와 reserve정보 합칠때 사용
     void createLand(Reserve reserve, LandRequestDto landDto, TimeSlot timeSlot);
     
-    // 예약일과 시간대를 불러와서 반려견수 집계 + 예약 현황 정보 제공
-    LandCountDto getLandCountInfo(LocalDate landDate, Long timeSlotId, LandType landType);
+    //  단일 시간대 예약 마릿수 (관리자용)
+    LandCountDto getLandCountForSlot(LocalDate landDate, Long timeSlotId, LandType landType);
+
+    //  전체 시간대별 현황 조회 (사용자용)
+    List<LandCountDto> getLandTimeSlotsWithCount(LocalDate landDate, Long memberNum, LandType landType);
     
 }
     

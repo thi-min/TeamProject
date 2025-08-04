@@ -13,6 +13,7 @@ import com.project.reserve.repository.ReserveRepository;
 import com.project.volunteer.dto.VolunteerDetailDto;
 import com.project.volunteer.dto.VolunteerRequestDto;
 import com.project.volunteer.entity.Volunteer;
+import com.project.volunteer.repository.VolunteerRepository;
 import com.project.volunteer.service.VolunteerService;
 import com.project.member.repository.MemberRepository;
 import com.project.common.entity.TimeSlot;
@@ -20,6 +21,7 @@ import com.project.common.repository.TimeSlotRepository;
 import com.project.land.dto.LandDetailDto;
 import com.project.land.dto.LandRequestDto;
 import com.project.land.entity.Land;
+import com.project.land.repository.LandRepository;
 import com.project.land.service.LandService;
 import com.project.member.entity.MemberEntity;
 
@@ -41,6 +43,9 @@ public class ReserveServiceImpl implements ReserveService {
     private final VolunteerService volunteerService;
     private final TimeSlotRepository timeSlotRepository;
    
+    private final LandRepository landRepository;
+    private final VolunteerRepository volunteerRepository;
+    
     // 사용자가 예약요청하면 예약상태 기본값으로 설정, DB에 저장
     @Override
     @Transactional
@@ -56,78 +61,84 @@ public class ReserveServiceImpl implements ReserveService {
 
         int reserveType = fullRequestDto.getReserveDto().getReserveType();
 
-        // 예약 유형에 따른 중복 예약 검사
-        if (reserveType == 1) { // 놀이터
+        // 보호자 수 유효성 검사
+        int reserveNumber = fullRequestDto.getReserveDto().getReserveNumber();
+        if (reserveNumber <= 0) {
+            throw new IllegalArgumentException("보호자 수는 최소 1명 이상이어야 합니다.");
+        }
+
+        String message;
+        TimeSlot timeSlot;
+
+        // 중복 예약 검사 + 시간대 유효성 검사
+        if (reserveType == 1) { // LAND
             LandRequestDto landDto = fullRequestDto.getLandDto();
             if (landDto == null) {
                 throw new IllegalArgumentException("놀이터 예약 세부 정보가 누락되었습니다.");
             }
 
-            boolean exists = reserveRepository
-            		.existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_TimeSlot_Id(
-            	        memberNum,
-            	        landDto.getLandDate(),
-            	        landDto.getTimeSlotId()
-            	    );
+            Long timeSlotId = landDto.getTimeSlotId();
 
+            // ✅ 시간대 유효성 검사
+            if (!landRepository.existsByTimeSlot_TimeSlotId(timeSlotId)) {
+                throw new IllegalArgumentException("선택한 시간대는 놀이터 예약에 유효하지 않습니다.");
+            }
+
+            // ✅ 중복 예약 검사
+            boolean exists = reserveRepository
+                    .existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_TimeSlot_Id(
+                            memberNum,
+                            landDto.getLandDate(),
+                            timeSlotId
+                    );
             if (exists) {
                 throw new DuplicateReservationException("이미 해당 시간에 놀이터 예약이 존재합니다.");
             }
 
-        } else if (reserveType == 2) { // 봉사
+            timeSlot = timeSlotRepository.findById(timeSlotId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 시간대 정보를 찾을 수 없습니다."));
+
+        } else if (reserveType == 2) { // VOLUNTEER
             VolunteerRequestDto volunteerDto = fullRequestDto.getVolunteerDto();
             if (volunteerDto == null) {
                 throw new IllegalArgumentException("봉사 예약 세부 정보가 누락되었습니다.");
             }
 
-            boolean exists = reserveRepository
-            	    .existsByMember_MemberNumAndVolunteerDetail_VolDateAndVolunteerDetail_TimeSlot_Id(
-            	        memberNum,
-            	        volunteerDto.getVolDate(),
-            	        volunteerDto.getTimeSlotId()
-            	    );
+            Long timeSlotId = volunteerDto.getTimeSlotId();
 
+            // ✅ 시간대 유효성 검사
+            if (!volunteerRepository.existsByTimeSlot_TimeSlotId(timeSlotId)) {
+                throw new IllegalArgumentException("선택한 시간대는 봉사 예약에 유효하지 않습니다.");
+            }
+
+            // ✅ 중복 예약 검사
+            boolean exists = reserveRepository
+                    .existsByMember_MemberNumAndVolunteerDetail_VolDateAndVolunteerDetail_TimeSlot_Id(
+                            memberNum,
+                            volunteerDto.getVolDate(),
+                            timeSlotId
+                    );
             if (exists) {
                 throw new DuplicateReservationException("이미 해당 시간에 봉사 예약이 존재합니다.");
             }
 
+            timeSlot = timeSlotRepository.findById(timeSlotId)
+                    .orElseThrow(() -> new IllegalArgumentException("해당 시간대 정보를 찾을 수 없습니다."));
         } else {
             throw new IllegalArgumentException("예약 유형이 유효하지 않습니다.");
         }
 
-        // Reserve 엔티티 생성 및 저장
+        // ✅ 예약 저장
         Reserve reserve = fullRequestDto.getReserveDto().toEntity(member);
-        
-        // 보호자 수 유효성 검사
-        int reserveNumber = reserve.getReserveNumber();
-        if (reserveNumber <= 0) {
-            throw new IllegalArgumentException("보호자 수는 최소 1명 이상이어야 합니다.");
-        }
-        
         Reserve saved = reserveRepository.save(reserve);
 
-        String message;
-
-        // 세부 정보 저장
+        // ✅ 세부 정보 저장
         if (reserveType == 1) {
-            LandRequestDto landDto = fullRequestDto.getLandDto();
-
-            TimeSlot timeSlot = timeSlotRepository.findById(landDto.getTimeSlotId())
-                    .orElseThrow(() -> new IllegalArgumentException("해당 시간대 정보를 찾을 수 없습니다."));
-
-            landService.createLand(saved, landDto, timeSlot);
+            landService.createLand(saved, fullRequestDto.getLandDto(), timeSlot);
             message = "놀이터 예약이 완료되었습니다.";
-
-        } else if (reserveType == 2) {
-            VolunteerRequestDto volunteerDto = fullRequestDto.getVolunteerDto();
-
-            TimeSlot timeSlot = timeSlotRepository.findById(volunteerDto.getTimeSlotId())
-                    .orElseThrow(() -> new IllegalArgumentException("해당 시간대 정보를 찾을 수 없습니다."));
-
-            volunteerService.createVolunteer(saved, volunteerDto, timeSlot);
-            message = "봉사활동 신청이 완료되었습니다.";
         } else {
-            throw new IllegalArgumentException("예약 유형이 유효하지 않습니다.");
+            volunteerService.createVolunteer(saved, fullRequestDto.getVolunteerDto(), timeSlot);
+            message = "봉사활동 신청이 완료되었습니다.";
         }
 
         return ReserveCompleteResponseDto.builder()

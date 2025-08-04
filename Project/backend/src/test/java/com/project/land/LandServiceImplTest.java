@@ -108,11 +108,10 @@ class LandServiceImplTest {
 	    reserveRepository.save(reserve);
 	
 	    // 4. 서비스 호출
-	    LandCountDto result = landService.getLandCountInfo(date, timeSlot.getId(), type);
+	    LandCountDto result = landService.getLandCountForSlot(date, timeSlot.getId(), type);
 	
 	    // 5. 검증
 	    assertThat(result).isNotNull();
-	    assertThat(result.getLandDate()).isEqualTo(date);
 	    assertThat(result.getLabel()).isEqualTo("09:00 ~ 11:00");
 	    assertThat(result.getLandType()).isEqualTo(type);
 	    assertThat(result.getReservedCount()).isEqualTo(3);

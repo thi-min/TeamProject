@@ -7,8 +7,8 @@ import lombok.*;
 @Setter
 @Builder
 public class VolunteerCountDto {
-    private LocalDate volDate;	//날짜
+    private Long timeSlotId; 	// 타임슬롯 id
     private String label;		// 시간대 (예: "09:00 ~ 12:00")
-    private int reservedCount;
-    private int capacity; // 고정값 예: 10명
+    private int reservedCount;	// 예약된 반려견수
+    private int capacity; 		// 고정값 예: 10명
 }

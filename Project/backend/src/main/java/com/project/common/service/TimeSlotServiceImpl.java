@@ -9,7 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -29,7 +31,25 @@ public class TimeSlotServiceImpl implements TimeSlotService {
             throw new IllegalArgumentException("정원은 1명 이상 30명 이하이어야 합니다.");
         }
     }
-
+    
+    // 놀이터용 시간대 불러오기
+    @Override
+    public List<TimeSlotDto> getLandTimeSlots() {
+        return timeSlotRepository.findUsedInLand().stream()
+                .sorted(Comparator.comparing(TimeSlot::getStartTime))
+                .map(TimeSlotDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+    
+    // 봉사용 시간대 불러오기
+    @Override
+    public List<TimeSlotDto> getVolunteerTimeSlots() {
+        return timeSlotRepository.findUsedInVolunteer().stream()
+                .sorted(Comparator.comparing(TimeSlot::getStartTime))
+                .map(TimeSlotDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+    
     // 시간대 추가
     @Override
     @Transactional
@@ -37,7 +57,8 @@ public class TimeSlotServiceImpl implements TimeSlotService {
         validateTimeSlotDto(dto);
         timeSlotRepository.save(dto.toEntity());
     }
-
+    
+    
     // 시간대 수정
     @Override
     @Transactional

@@ -18,4 +18,7 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, Long> {
     @Query("SELECT SUM(r.reserveNumber) FROM Volunteer v JOIN v.reserve r WHERE v.volDate = :volDate AND v.timeSlot = :timeSlot")
     Integer countByDateAndTimeSlot(@Param("volDate") LocalDate volDate, 
                                    @Param("timeSlot") TimeSlot timeSlot);
+    
+    // timeslotid가 봉사예약용으로 사용된적 있는지 확인
+    boolean existsByTimeSlot_TimeSlotId(Long timeSlotId);
 }

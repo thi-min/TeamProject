@@ -2,7 +2,6 @@ package com.project.common.controller;
 
 import com.project.common.dto.TimeSlotDto;
 import com.project.common.service.TimeSlotService;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,38 +9,23 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/time-slots")  // 공통 URI
+@RequestMapping("/api/time-slots")  // 사용자용 prefix
 @RequiredArgsConstructor
-public class TimeSlotController {
+public class TimeSlotController { // 사용자용이므로 클래스명도 구분 추천
 
     private final TimeSlotService timeSlotService;
 
-    // 관리자 - 시간대 추가
-    @PostMapping
-    public ResponseEntity<Void> addTimeSlot(@RequestBody TimeSlotDto dto) {
-        timeSlotService.addTimeSlot(dto);
-        return ResponseEntity.ok().build();
+    // 사용자 - 놀이터 시간대 조회
+    @GetMapping("/land")
+    public ResponseEntity<List<TimeSlotDto>> getLandTimeSlots() {
+        List<TimeSlotDto> result = timeSlotService.getLandTimeSlots();
+        return ResponseEntity.ok(result);
     }
 
-    // 관리자 - 시간대 수정
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> updateTimeSlot(@PathVariable Long id,
-                                               @RequestBody TimeSlotDto dto) {
-        timeSlotService.updateTimeSlot(id, dto);
-        return ResponseEntity.ok().build();
-    }
-
-    // 관리자 - 시간대 삭제
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTimeSlot(@PathVariable Long id) {
-        timeSlotService.deleteTimeSlot(id);
-        return ResponseEntity.ok().build();
-    }
-
-    // 관리자 - 중복 체크 (label만)
-    @GetMapping("/check-duplicate")
-    public ResponseEntity<Boolean> isDuplicateLabel(@RequestParam("label") String label) {
-        boolean isDuplicate = timeSlotService.isDuplicateLabel(label);
-        return ResponseEntity.ok(isDuplicate);
+    // 사용자 - 봉사 시간대 조회
+    @GetMapping("/volunteer")
+    public ResponseEntity<List<TimeSlotDto>> getVolunteerTimeSlots() {
+        List<TimeSlotDto> result = timeSlotService.getVolunteerTimeSlots();
+        return ResponseEntity.ok(result);
     }
 }

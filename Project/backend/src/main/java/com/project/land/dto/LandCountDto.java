@@ -1,10 +1,6 @@
 package com.project.land.dto;
 
-
-import java.time.LocalDate;
-
 import com.project.land.entity.LandType;
-
 import lombok.*;
 
 @Getter
@@ -13,9 +9,9 @@ import lombok.*;
 @AllArgsConstructor
 @Builder
 public class LandCountDto {
-    private LocalDate landDate;  // 날짜
-    private String label;     // 시간대 (예: "09:00 ~ 11:00")
-    private LandType landType;  	//소형견 놀이터/ 대형견 놀이터
-    private Integer reservedCount;   // 현재 예약된 마릿수
-    private int capacity;        // 최대 수용 정원 (예: 30)
+    private Long timeSlotId;         // ✅ 시간대 ID (TimeSlot.id)
+    private String label;            // 예: "09:00 ~ 11:00"
+    private LandType landType;       // 소형견 or 대형견
+    private int reservedCount;       // 현재 예약된 반려견 수
+    private int capacity;            // 최대 수용 정원
 }
