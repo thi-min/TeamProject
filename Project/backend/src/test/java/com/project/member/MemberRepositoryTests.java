@@ -33,21 +33,20 @@ public class MemberRepositoryTests {
     static {
         System.setProperty("JASYPT_ENCRYPTOR_PASSWORD", "test-key");
     }
-    
-    //@Test
+    @Test
     void findByMemberIdAndMemberPw_정상작동() {
-    	String encryptedPhone = JasyptUtil.encrypt("01096861400");
-    	System.out.println("📌 저장용 암호화 값: " + encryptedPhone);
+    	String encryptedPhone = JasyptUtil.encrypt("01077779999");
+        System.out.println("📌 저장용 암호화 값: " + encryptedPhone); // ✅ 이 값이 DB에 저장됨
     	
         MemberEntity member = MemberEntity.builder()
-        		.memberId("test9666@test.com")
-                .memberPw(passwordEncoder.encode("korandoi1"))
-                .memberName("안꺽정")
+        		.memberId("ahj123123@test.com")
+                .memberPw(passwordEncoder.encode("112233"))
+                .memberName("내가왕이될상인가")
                 .memberBirth(LocalDate.of(1996, 5, 3))
-                .memberPhone(JasyptUtil.encrypt("12345678111")) //인코딩 예시
-                .memberAddress("서울시 청주구")
+                .memberPhone(encryptedPhone) //인코딩 예시
+                .memberAddress("서울시 청주구 rnrnrnrnrnrnrnrnrnrnrn")
                 .memberDay(LocalDate.now())
-                .memberSex(MemberSex.Man)
+                .memberSex(MemberSex.MAN)
                 .memberState(MemberState.OUT)
                 .memberLock(false)
                 .smsAgree(false)

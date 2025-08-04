@@ -42,6 +42,9 @@ public class MemberEntity {
     @Column(name = "member_pw", nullable = false, length = 255)
     private String memberPw; //비밀번호
 
+    @Column(name = "pw_updated")
+    private LocalDateTime pwUpdated; // 마지막 비밀번호 변경일
+    
     @Column(name = "member_name", nullable = false, length = 12)
     private String memberName; //이름
 
@@ -81,6 +84,9 @@ public class MemberEntity {
     @JoinColumn(name = "admin_id")
     private AdminEntity admin;
 
+    @JoinColumn(name = "vol_sumtime")
+    private String volSumtime;	//총 봉사시간
+    
     private String accessToken;
     private String refreshToken;
 }

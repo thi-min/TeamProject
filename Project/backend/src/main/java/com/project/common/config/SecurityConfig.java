@@ -40,7 +40,9 @@ public class SecurityConfig {
             
             //URL 접근 권한 설정(토큰없이 접근가능)
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/auth/login", "/auth/signup", "/auth/**").permitAll()  // 로그인, 회원가입은 허용
+                //.requestMatchers("/swagger-ui/**","/v3/api-docs/**","/swagger-resources/**","/webjars/**").permitAll()
+                //사용자 인증 API 허용
+                .requestMatchers("/**","/signup","/auth/login", "/auth/signup", "/auth/**").permitAll()
                 .anyRequest().authenticated()  //그 외 요청은 인증 필요
             )
 
