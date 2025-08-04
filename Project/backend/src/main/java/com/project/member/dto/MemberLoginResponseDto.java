@@ -14,4 +14,7 @@ public class MemberLoginResponseDto {
     private String message; //내용
     private String accessToken; // JWT 또는 세션 기반이라면 포함
     private String refreshToken; // JWT 또는 세션 기반이라면 포함
+    
+    private String kakaoId;	//카카오 아이디
+    private boolean requireSignup;	//카카오 로그인 사용자 확인
 }

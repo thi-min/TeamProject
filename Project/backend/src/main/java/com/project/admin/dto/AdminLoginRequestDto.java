@@ -13,7 +13,5 @@ public class AdminLoginRequestDto {
 	private String adminId;
 	
 	@NotBlank(message = "비밀번호는 필수입니다.")
-	private String pw;
-
-
+	private String adminPw;
 }
