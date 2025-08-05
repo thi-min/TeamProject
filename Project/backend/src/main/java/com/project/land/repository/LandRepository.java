@@ -27,6 +27,6 @@ public interface LandRepository extends JpaRepository<Land, Long> {
                                       @Param("landType") LandType landType);
     
     // timeslotid가 놀이터예약에 사용된적있는지 확인
-    boolean existsByTimeSlot_TimeSlotId(Long timeSlotId);
+    boolean existsByTimeSlot_Id(Long timeSlotId);
     
 }

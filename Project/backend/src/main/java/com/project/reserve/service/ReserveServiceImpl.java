@@ -80,7 +80,7 @@ public class ReserveServiceImpl implements ReserveService {
             Long timeSlotId = landDto.getTimeSlotId();
 
             // ✅ 시간대 유효성 검사
-            if (!landRepository.existsByTimeSlot_TimeSlotId(timeSlotId)) {
+            if (!landRepository.existsByTimeSlot_Id(timeSlotId)) {
                 throw new IllegalArgumentException("선택한 시간대는 놀이터 예약에 유효하지 않습니다.");
             }
 
@@ -107,7 +107,7 @@ public class ReserveServiceImpl implements ReserveService {
             Long timeSlotId = volunteerDto.getTimeSlotId();
 
             // ✅ 시간대 유효성 검사
-            if (!volunteerRepository.existsByTimeSlot_TimeSlotId(timeSlotId)) {
+            if (!volunteerRepository.existsByTimeSlot_Id(timeSlotId)) {
                 throw new IllegalArgumentException("선택한 시간대는 봉사 예약에 유효하지 않습니다.");
             }
 

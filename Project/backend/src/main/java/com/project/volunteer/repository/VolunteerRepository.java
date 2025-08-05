@@ -20,5 +20,5 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, Long> {
                                    @Param("timeSlot") TimeSlot timeSlot);
     
     // timeslotid가 봉사예약용으로 사용된적 있는지 확인
-    boolean existsByTimeSlot_TimeSlotId(Long timeSlotId);
+    boolean existsByTimeSlot_Id(Long timeSlotId);
 }
