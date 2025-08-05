@@ -9,7 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface BbsService {
 	
-    BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId); // 게시글 생성 (회원 또는 관리자)
+    BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files); // 게시글 생성 (회원 또는 관리자)
+    
+    BbsDto createPotoBbs(BbsDto dto, Long requesterMemberNum, List<MultipartFile> files);
     
     BbsDto createBbsWithFiles(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files); // 생성된 게시글 + 파일첨부 (회원 또는 관리자)
     
@@ -35,7 +37,7 @@ public interface BbsService {
     
     QandADto updateQna(Long qnaId, QandADto dto); // QnA 답변 수정
 
-    List<ImageBbsDto> saveImageFileList(Long bbsId, List<MultipartFile> files); // 이미지 파일 리스트 저장 (게시글 이미지 업로드)
+  //   List<ImageBbsDto> saveImageFileList(Long bbsId, List<MultipartFile> files); // 이미지 파일 리스트 저장 (게시글 이미지 업로드)
     
     List<ImageBbsDto> getImageBbsList(Long bbsId); // 특정 게시글에 등록된 이미지 리스트 조회
     
@@ -43,7 +45,7 @@ public interface BbsService {
     
     void deleteImages(List<Long> imageIds); // 이미지 여러 개 삭제
     
-    ImageBbsDto updateImage(Long imageId, ImageBbsDto dto); // 이미지 수정 (예: alt 텍스트나 순서 등 정보 변경)
+    ImageBbsDto updateImage(Long imageId, ImageBbsDto dto, MultipartFile newFile); // 이미지 수정 (예: alt 텍스트나 순서 등 정보 변경)
 
     List<FileUpLoadDto> saveFileList(Long bbsId, List<MultipartFile> files, BoardType boardType); // 파일 업로드 리스트 저장 (첨부파일 등록)
     
@@ -51,6 +53,6 @@ public interface BbsService {
     
     void deleteFile(Long fileId); // 첨부파일 단건 삭제
     
-    FileUpLoadDto updateFile(Long fileId, FileUpLoadDto dto); // 첨부파일 정보 수정
+    FileUpLoadDto updateFile(Long fileId, FileUpLoadDto dto, MultipartFile newFile); // 첨부파일 정보 수정
 }
 

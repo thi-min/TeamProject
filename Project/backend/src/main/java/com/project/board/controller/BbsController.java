@@ -27,14 +27,16 @@ public class BbsController {
     private final BbsServiceImpl bbsService;
 
  // 게시글 작성 (관리자 or 회원 ID 필요)
-    @PostMapping("/write")
+    @PostMapping(value = "/write")
     public BbsDto write(
-        @RequestBody BbsDto dto,
+        @RequestPart("dto") BbsDto dto,
         @RequestParam(required = false) Long memberNum,
-        @RequestParam(required = false) Long adminId
+        @RequestParam(required = false) Long adminId,
+        @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
-        return bbsService.createBbs(dto, memberNum, adminId);
+        return bbsService.createBbs(dto, memberNum, adminId, files);
     }
+
 
 
     // 게시글 조회
@@ -76,11 +78,11 @@ public class BbsController {
     }
 
     // 이미지 업로드
-    @PostMapping("/{bbsId}/images")
+/*    @PostMapping("/{bbsId}/images")
     public List<ImageBbsDto> uploadImages(@PathVariable Long bbsId,
                                           @RequestParam("files") List<MultipartFile> files) {
         return bbsService.saveImageFileList(bbsId, files);
-    }
+    } */
 
     // 이미지 조회
     @GetMapping("/{bbsId}/images")

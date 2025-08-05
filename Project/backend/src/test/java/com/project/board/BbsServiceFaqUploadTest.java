@@ -167,13 +167,13 @@ public class BbsServiceFaqUploadTest {
         assertTrue(result.isEmpty(), "QnA는 삭제되어야 합니다.");
     }
     */
-    
-   /* @Test
+  /*  
+    @Test
     @Transactional
     @Rollback(false)
     @DisplayName("관리자 단일 게시글 삭제 성공")
     void testAdminDeleteSingleBbs() {
-        Long bbsId = 28L; // 삭제 대상 게시글 ID (DB에 반드시 존재해야 함)
+        Long bbsId = 38L; // 삭제 대상 게시글 ID (DB에 반드시 존재해야 함)
         Long adminId = 10L; // 관리자 ID
 
         // 삭제 전 게시글, 첨부파일, 이미지, QnA 존재 여부 확인 (필요 시)
@@ -190,7 +190,7 @@ public class BbsServiceFaqUploadTest {
         assertTrue(fileUploadRepository.findByBbsBulletinNum(bbsId).isEmpty());
         assertTrue(imageBbsRepository.findByBbsBulletinNum(bbsId).isEmpty());
         assertTrue(qandARepository.findByBbsBulletinNum(bbsId).isEmpty());
-    } */
+    }  */
     
     @Test
     @Transactional
@@ -212,6 +212,6 @@ public class BbsServiceFaqUploadTest {
             boolean exists = bbsRepository.findById(bulletinNum).isPresent();
             assertFalse(exists, "게시글 번호 " + bulletinNum + "은 삭제되어야 합니다.");
         }
-    }
+    } 
 
 }
