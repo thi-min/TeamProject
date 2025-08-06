@@ -1,5 +1,4 @@
 {
-  "homepage": "https://shallow960.github.io/TeamProject/Project/front-end/",
   "name": "font-end",
   "version": "0.1.0",
   "private": true,
@@ -8,8 +7,12 @@
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^13.5.0",
+    "axios": "^1.11.0",
+    "date-fns": "^4.1.0",
     "gh-pages": "^6.3.0",
     "react": "^19.1.0",
+    "react-calendar": "^6.0.0",
+    "react-datepicker": "^8.4.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.7.1",
     "react-scripts": "5.0.1",

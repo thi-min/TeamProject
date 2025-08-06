@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 13.0.0, SVG Export Plug-In  -->
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd" [
+	<!ENTITY ns_flows "http://ns.adobe.com/Flows/1.0/">
+]>
+<svg version="1.1"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:a="http://ns.adobe.com/AdobeSVGViewerExtensions/3.0/"
+	 x="0px" y="0px" width="18px" height="19px" viewBox="0 -0.2 18 19" enable-background="new 0 -0.2 18 19" xml:space="preserve">
+<defs>
+</defs>
+<g>
+	<defs>
+		<rect id="SVGID_3_" width="17.4" height="18.8"/>
+	</defs>
+	<clipPath id="SVGID_4_">
+		<use xlink:href="#SVGID_3_"  overflow="visible"/>
+	</clipPath>
+	<g clip-path="url(#SVGID_4_)">
+		<defs>
+			<rect id="SVGID_2_" width="17.4" height="18.8"/>
+		</defs>
+		<clipPath id="SVGID_5_">
+			<use xlink:href="#SVGID_2_"  overflow="visible"/>
+		</clipPath>
+		<defs>
+			<filter id="Adobe_OpacityMaskFilter" filterUnits="userSpaceOnUse" x="8" y="0" width="9.4" height="18.8">
+				<feColorMatrix  type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 1 0"/>
+			</filter>
+		</defs>
+		<mask maskUnits="userSpaceOnUse" x="8" y="0" width="9.4" height="18.8" id="SVGID_6_">
+			<g filter="url(#Adobe_OpacityMaskFilter)">
+				<rect x="8" clip-path="url(#SVGID_5_)" width="9.4" height="18.8"/>
+				<g enable-background="new    ">
+					<path clip-path="url(#SVGID_5_)" fill="#FFFFFF" d="M8,1.399h7c0.553,0,1,0.448,1,1v14c0,0.553-0.447,1-1,1H8V1.399z"/>
+				</g>
+			</g>
+		</mask>
+		<g clip-path="url(#SVGID_5_)" mask="url(#SVGID_6_)">
+			<g>
+				<defs>
+					<rect id="SVGID_1_" x="8" width="9.4" height="18.8"/>
+				</defs>
+				<clipPath id="SVGID_7_">
+					<use xlink:href="#SVGID_1_"  overflow="visible"/>
+				</clipPath>
+				<path clip-path="url(#SVGID_7_)" fill="#2D2D2D" d="M8,0h7c1.326,0,2.4,1.075,2.4,2.4L14.6,2.8H8V0z M17.4,16.399
+					c0,1.326-1.074,2.4-2.4,2.4H8V16h6.6L17.4,16.399z M8,17.399v-16V17.399z M15,0c1.326,0,2.4,1.075,2.4,2.4v14
+					c0,1.326-1.074,2.4-2.4,2.4L14.6,16V2.8L15,0z"/>
+			</g>
+		</g>
+		<line clip-path="url(#SVGID_5_)" fill="none" stroke="#2D2D2D" stroke-width="1.4" x1="0" y1="9.4" x2="12" y2="9.4"/>
+	</g>
+	<polyline clip-path="url(#SVGID_4_)" fill="none" stroke="#2D2D2D" stroke-width="1.2" points="8.5,5.9 12,9.4 8.5,12.899 	"/>
+</g>
+</svg>

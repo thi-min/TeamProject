@@ -16,5 +16,4 @@ public class LandRequestDto {
     private Long timeSlotId; // 선택된 타임슬롯의 ID
     private LandType landType;	//놀이터유형(중,소형견/ 대형견)
     private int animalNumber;	//반려견 수
-    private int payNumber;		//결제 금액 
 }

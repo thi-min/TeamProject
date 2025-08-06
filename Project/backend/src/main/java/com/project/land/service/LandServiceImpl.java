@@ -79,18 +79,24 @@ public class LandServiceImpl implements LandService {
     //놀이터 예약 생성(기본 정보랑 놀이터 상세 정보 합친 예약)
     @Override
     public void createLand(Reserve reserve, LandRequestDto landDto, TimeSlot timeSlot) {
+        int basePrice = 2000;
+        int animalNumber = landDto.getAnimalNumber();
+        int reserveNumber = reserve.getReserveNumber();
+
+        int additionalPrice = (animalNumber > 1 ? (animalNumber - 1) * 1000 : 0) + reserveNumber * 1000;
+        int totalPrice = basePrice + additionalPrice;
+
         Land land = Land.builder()
                 .reserve(reserve)
                 .landDate(landDto.getLandDate())
                 .timeSlot(timeSlot)
                 .landType(landDto.getLandType())
-                .animalNumber(landDto.getAnimalNumber())
-                .payNumber(landDto.getPayNumber())
+                .animalNumber(animalNumber)
+                .payNumber(totalPrice) // ✅ 서버에서 계산된 금액
                 .build();
-        
-        reserve.setLandDetail(land); //reserve -> land
-        
-        landRepository.save(land);	//land->reserve 
+
+        reserve.setLandDetail(land);
+        landRepository.save(land);
     }
     
     // 관리자용 - 단일 시간대에 대해 정원 및 현재 예약 수 조회, 시간대별 예약현황 조회

@@ -1,0 +1,159 @@
+/* 전체 페이지 래퍼 */
+.land-date-page {
+  width: 100vw;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 20px 0; /* 상하 패딩으로 버튼 간격 확보 */
+  overflow-y: auto;
+}
+
+/* 캘린더 중앙 정렬 및 최대 너비 고정 */
+.calendar-wrapper {
+  width: 100%;
+  max-width: 1600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* 캘린더 크기 지정 */
+.react-calendar {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* 요일 줄 고정 */
+.react-calendar__month-view__weekdays {
+  height: 60px;
+  display: flex;
+}
+
+/* 날짜 셀 그리드 */
+.react-calendar__month-view__days {
+  display: grid !important;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+  height: 100%;
+}
+
+
+/* 날짜 타일 */
+.react-calendar__tile {
+  flex: unset !important;
+  height: 100px !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 !important;
+}
+
+/*예약 마감일 날짜 숨기기*/
+.react-calendar__tile.closed-date abbr {
+  display: none;
+}
+
+
+/* 버튼 영역 */
+.calendar-buttons {
+  margin-top: 40px;
+  display: flex;
+  justify-content: flex-end;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1600px;
+  padding: 0 0 5px 5px;
+  box-sizing: border-box;
+}
+
+.calendar-buttons .next-button {
+  padding: 14px 28px;
+  font-size: 1rem;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  min-width: 100px;
+  margin-left: auto;
+}
+
+.calendar-buttons .prev-button {
+  padding: 14px 28px;
+  font-size: 1rem;
+  background-color: #6c757d; /* 회색 */
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  min-width: 100px;
+}
+/*--------------------------LandReserveFormPage------------------------*/
+
+.land-form-page {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: "Noto Sans KR", sans-serif;
+}
+
+.land-form-page h2 {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.land-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* 공통 input 스타일 */
+.land-form input[type="text"],
+.land-form input[type="number"],
+.land-form select,
+.land-form textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* 시간대 버튼 영역 */
+.time-slot-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.time-slot-button {
+  background-color: #eee;
+  border: 1px solid #aaa;
+  padding: 10px 16px;
+  cursor: pointer;
+  border-radius: 6px;
+  min-width: 150px;
+}
+
+.time-slot-button.selected {
+  background-color: #444;
+  color: white;
+  font-weight: bold;
+}
+
+.time-slot-button:disabled {
+  background-color: #ddd;
+  color: #aaa;
+  cursor: not-allowed;
+}
