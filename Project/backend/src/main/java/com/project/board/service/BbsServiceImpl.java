@@ -313,13 +313,80 @@ public class BbsServiceImpl implements BbsService {
         // ✅ 4. 마지막으로 게시글 삭제
         bbsRepository.deleteById(id);
     }
-
-
-
+    
     @Override
-    public void deleteBbs(List<Long> ids, Long requesterAdminId, Long requesterMemberNum) {
+    @Transactional
+    public void deleteBbsMultiple(List<Long> ids, Long requesterMemberNum, Long requesterAdminId) {
+        if (requesterAdminId == null) {
+            throw new BbsException("관리자 권한이 필요합니다.");
+        }
+
+        String uploadDir = "C:/photo"; // 실제 파일 저장 경로
+
         for (Long id : ids) {
-            deleteBbs(id, requesterMemberNum, requesterAdminId);
+            BbsEntity bbs = bbsRepository.findById(id)
+                .orElseThrow(() -> new BbsException("게시글 없음: " + id));
+
+            // 작성자 회원 존재 여부 확인 (필요시)
+            if (bbs.getMemberNum() != null) {
+                memberRepository.findById(bbs.getMemberNum().getMemberNum())
+                    .orElseThrow(() -> new BbsException("작성자 회원 정보가 존재하지 않습니다."));
+            }
+
+            // 관리자만 삭제 가능하므로 작성자 권한 체크는 생략 가능
+            boolean isAdmin = requesterAdminId != null;
+            if (!isAdmin) {
+                throw new BbsException("삭제 권한이 없습니다.");
+            }
+
+            // 1. QANDA 게시판 관련 데이터 삭제
+            if (bbs.getBulletinType() == BoardType.FAQ) {
+                qandARepository.deleteByBbsBulletinNum(bbs.getBulletinNum());
+            }
+
+            // 2. 첨부파일 삭제
+            switch (bbs.getBulletinType()) {
+                case NORMAL:
+                case FAQ:
+                case POTO:
+                    List<FileUpLoadEntity> files = fileUploadRepository.findByBbsBulletinNum(id);
+                    for (FileUpLoadEntity file : files) {
+                        try {
+                            Path filePath = Paths.get(uploadDir, file.getSavedName());
+                            Files.deleteIfExists(filePath);
+                        } catch (IOException e) {
+                            System.err.println("첨부파일 삭제 실패: " + e.getMessage());
+                        }
+                    }
+                    fileUploadRepository.deleteByBbsBulletinNum(id);
+                    break;
+                default:
+                    // 기타 게시판 타입이 있으면 여기에 처리
+                    break;
+            }
+
+            // 3. POTO 게시판 대표 이미지 + 썸네일 삭제
+            if (bbs.getBulletinType() == BoardType.POTO) {
+                List<ImageBbsEntity> images = imageBbsRepository.findByBbsBulletinNum(id);
+                for (ImageBbsEntity image : images) {
+                    try {
+                        if (image.getThumbnailPath() != null) {
+                            String thumbnailFile = Paths.get(image.getThumbnailPath()).getFileName().toString();
+                            Files.deleteIfExists(Paths.get(uploadDir, thumbnailFile));
+                        }
+                        if (image.getImagePath() != null) {
+                            String imageFile = Paths.get(image.getImagePath()).getFileName().toString();
+                            Files.deleteIfExists(Paths.get(uploadDir, imageFile));
+                        }
+                    } catch (IOException e) {
+                        System.err.println("이미지 삭제 실패: " + e.getMessage());
+                    }
+                }
+                imageBbsRepository.deleteByBbsBulletinNum(id);
+            }
+
+            // 4. 게시글 삭제
+            bbsRepository.deleteById(id);
         }
     }
 
@@ -456,15 +523,6 @@ public class BbsServiceImpl implements BbsService {
             .answer(qna.getAnswer())
             .build();
     }
-    
-    @Override
-    public void deleteQna(Long qnaId) {
-        if (!qandARepository.existsById(qnaId)) {
-            throw new BbsException("QnA 없음");
-        }
-        qandARepository.deleteById(qnaId);
-    }
-
     @Override
     public QandADto updateQna(Long qnaId, QandADto dto) {
         QandAEntity qna = qandARepository.findById(qnaId)
@@ -543,126 +601,39 @@ public class BbsServiceImpl implements BbsService {
     }
 
     @Override
-    public void deleteImage(Long imageId) {
-        // 1. DB에서 이미지 엔티티 조회
-        ImageBbsEntity image = imageBbsRepository.findById(imageId)
-            .orElseThrow(() -> new BbsException("이미지 없음"));
-
-        // 2. 실제 파일 삭제
-        try {
-            String uploadDir = "C:/photo"; // 실제 파일 저장 경로
-
-            // imagePath 삭제
-            if (image.getImagePath() != null && !image.getImagePath().isBlank()) {
-                String imageFileName = Paths.get(image.getImagePath()).getFileName().toString();
-                Path imageFilePath = Paths.get(uploadDir, imageFileName);
-                Files.deleteIfExists(imageFilePath);
-            }
-
-            // thumbnailPath 삭제
-            if (image.getThumbnailPath() != null && !image.getThumbnailPath().isBlank()) {
-                String thumbFileName = Paths.get(image.getThumbnailPath()).getFileName().toString();
-                Path thumbFilePath = Paths.get(uploadDir, thumbFileName);
-                Files.deleteIfExists(thumbFilePath);
-            }
-
-        } catch (IOException e) {
-            throw new BbsException("이미지 파일 삭제 실패", e);
-        }
-
-        // 3. DB에서 삭제
-        imageBbsRepository.deleteById(imageId);
-    }
-
-
     @Transactional
-    @Override
-    public void deleteImages(List<Long> imageIds) {
-        List<ImageBbsEntity> imagesToDelete = imageBbsRepository.findAllById(imageIds);
+    public ImageBbsDto updateImage(Long bulletinNum, ImageBbsDto dto, MultipartFile newFile) {
+        // bulletinNum 으로 이미지 리스트 조회
+        List<ImageBbsEntity> images = imageBbsRepository.findByBbsBulletinNum(bulletinNum);
 
-        if (imagesToDelete.isEmpty()) {
-            throw new BbsException("삭제할 이미지가 존재하지 않습니다.");
+        if (images.isEmpty()) {
+            throw new BbsException("해당 게시글에 이미지가 없습니다.");
         }
 
-        Long bbsId = imagesToDelete.get(0).getBbs().getBulletinNum();
-        boolean allSameBbs = imagesToDelete.stream()
-            .allMatch(img -> img.getBbs().getBulletinNum().equals(bbsId));
-
-        if (!allSameBbs) {
-            throw new BbsException("서로 다른 게시글의 이미지를 동시에 삭제할 수 없습니다.");
-        }
-
-        long currentImageCount = imageBbsRepository.countByBbsBulletinNum(bbsId);
-
-        if (currentImageCount - imagesToDelete.size() < 1) {
-            throw new BbsException("게시글에는 최소 1장의 이미지가 있어야 합니다.");
-        }
-
-        // 실제 이미지 파일 삭제
-        for (ImageBbsEntity image : imagesToDelete) {
-            try {
-                // 실제 파일 경로: 예를 들어 경로가 "/uploads/파일명"이라면 물리 경로로 변환
-                String uploadDir = "C:/photo"; // 실제 파일 저장 폴더
-                String filename = Paths.get(image.getImagePath()).getFileName().toString();
-                Path filePath = Paths.get(uploadDir, filename);
-
-                Files.deleteIfExists(filePath);
-
-                // 썸네일 파일도 있다면 같이 삭제
-                String thumbnailFilename = Paths.get(image.getThumbnailPath()).getFileName().toString();
-                Path thumbnailPath = Paths.get(uploadDir, thumbnailFilename);
-                Files.deleteIfExists(thumbnailPath);
-
-            } catch (IOException e) {
-                // 삭제 실패 로그 남기거나 예외처리
-                System.err.println("파일 삭제 실패: " + e.getMessage());
-            }
-        }
-
-        // DB 레코드 삭제
-        imageBbsRepository.deleteAllById(imageIds);
-    }
-
-
-    @Override
-    @Transactional
-    public ImageBbsDto updateImage(Long imageId, ImageBbsDto dto, MultipartFile newFile) {
-        ImageBbsEntity image = imageBbsRepository.findById(imageId)
-            .orElseThrow(() -> new BbsException("이미지 없음"));
+        // 우선 첫 번째 이미지 선택 (특정 이미지 지정 로직이 없으므로)
+        ImageBbsEntity image = images.get(0);
 
         if (newFile != null && !newFile.isEmpty()) {
             try {
-                // 파일 확장자 추출
                 String ext = getExtension(newFile.getOriginalFilename());
-                // 저장할 파일명 (UUID + 확장자)
                 String savedName = UUID.randomUUID().toString() + "." + ext;
-                // 저장할 폴더 경로 (환경에 맞게 변경)
                 String uploadDir = "C:/photo";
-
-                // 실제 저장 경로
                 Path savedPath = Paths.get(uploadDir, savedName);
 
-                // 서버에 파일 저장
                 newFile.transferTo(savedPath);
 
-                // DB에 저장할 경로 (예: 웹 접근용 URL 경로)
                 String dbImagePath = "/uploads/" + savedName;
-                String dbThumbnailPath = "/uploads/thumb_" + savedName; // 썸네일 경로가 있다면 따로 처리
+                String dbThumbnailPath = "/uploads/thumb_" + savedName;
 
-                // DB 엔티티 업데이트
                 image.setImagePath(dbImagePath);
-                image.setThumbnailPath(dbThumbnailPath); // 썸네일 생성 로직 있으면 호출 후 경로 세팅
-
+                image.setThumbnailPath(dbThumbnailPath);
             } catch (IOException e) {
                 throw new BbsException("이미지 파일 저장 실패", e);
             }
         } else {
-            // newFile이 없으면 DTO에서 넘어온 경로만 DB에 업데이트할 수도 있고, 필요에 따라 처리
             image.setImagePath(dto.getImagePath());
             image.setThumbnailPath(dto.getThumbnailPath());
         }
-
-        // 변경된 엔티티는 트랜잭션 커밋 시 자동 저장됨
 
         return ImageBbsDto.builder()
             .bulletinNum(image.getBbs().getBulletinNum())
@@ -670,6 +641,7 @@ public class BbsServiceImpl implements BbsService {
             .imagePath(image.getImagePath())
             .build();
     }
+
 
 
     @Override
@@ -773,14 +745,6 @@ public class BbsServiceImpl implements BbsService {
                 .extension(entity.getExtension())
                 .build())
             .collect(Collectors.toList());
-    }
-
-    @Override
-    public void deleteFile(Long fileId) {
-        if (!fileUploadRepository.existsById(fileId)) {
-            throw new BbsException("파일 없음");
-        }
-        fileUploadRepository.deleteById(fileId);
     }
     
     @Override
