@@ -1,20 +1,9 @@
-# 1단계: Build stage
-FROM maven:3.9.6-eclipse-temurin-17 AS builder
-
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 WORKDIR /app
+COPY . /app
+RUN mvn clean package -Dmaven.test.skip=true -ntp
 
-COPY ./pom.xml .
-COPY ./src ./src
-
-RUN mvn clean package -DskipTests
-
-# 2단계: Run stage
-FROM eclipse-temurin:17-jdk
-
+FROM openjdk:17-jdk-slim
 WORKDIR /app
-
-COPY --from=builder /app/target/*.jar app.jar
-
-EXPOSE 8090
-
-ENTRYPOINT ["java", "-jar", "app.jar"]
+COPY --from=build /app/target/teamproject-0.0.1-SNAPSHOT.jar /app/app.jar
+CMD ["java", "-jar", "app.jar"]
