@@ -9,6 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.project.common.util.JasyptUtil;
+import com.project.member.dto.KakaoSignUpRequestDto;
 import com.project.member.dto.MemberDeleteDto;
 import com.project.member.dto.MemberIdCheckResponseDto;
 import com.project.member.dto.MemberLoginRequestDto;
@@ -66,7 +67,7 @@ public class MemberServiceImpl implements MemberService {
 		MemberEntity saved = memberRepository.save(newMember);
 		
 		//응답 DTO 반환
-		return new MemberSignUpResponseDto(saved.getMemberId(), "회원가입 완료");
+		return new MemberSignUpResponseDto(null, saved.getMemberId(), "회원가입 완료");
 	}
 	
 	//아이디 중복체크
@@ -285,4 +286,34 @@ public class MemberServiceImpl implements MemberService {
   		//3. 암호화된 문자열을 memberPhone과 비교
   		//4. 존재여부 판단 > 중복 확인 처리
 	}
+	
+	//카카오 회원가입
+	@Transactional
+	@Override
+	public MemberEntity kakaoSignUp(KakaoSignUpRequestDto dto) {
+		//중복방지 이미 kakaoID가 있는 경우 예외 처리
+		if (memberRepository.findByKakaoId(dto.getKakaoId()).isPresent()) {
+	        throw new IllegalArgumentException("이미 가입된 카카오 계정입니다.");
+	    }
+
+	    // LocalDate 생년월일 처리
+	    LocalDate birth = dto.getMemberBirth();
+
+	    MemberEntity newMember = MemberEntity.builder()
+    		.memberId(dto.getKakaoId())           // memberId로 kakaoId 사용
+            .kakaoId(dto.getKakaoId())            // 중복 방지를 위해 별도로 저장
+            .memberName(dto.getMemberName())
+            .memberBirth(dto.getMemberBirth())
+            .memberPhone(dto.getMemberPhone())
+            .memberAddress(dto.getMemberAddress())
+            .memberSex(dto.getMemberSex())
+            .smsAgree(dto.isSmsAgree())
+            .memberDay(LocalDate.now())
+            .smsAgree(true)                          // SNS 가입 여부
+            .memberPw(null)                       // 비밀번호 없음
+            .build();
+
+	    return memberRepository.save(newMember);
+	}
+
 }

@@ -105,11 +105,11 @@
 		    <version>0.11.5</version>
 		    <scope>runtime</scope>
 		</dependency>
-		<dependency>
+<!--	<dependency>
 			<groupId>com.springboot</groupId>
 			<artifactId>advanced_jpa</artifactId>
 			<version>0.0.1-SNAPSHOT</version>
-		</dependency>
+		</dependency> -->
 	</dependencies>
 
 	<build>

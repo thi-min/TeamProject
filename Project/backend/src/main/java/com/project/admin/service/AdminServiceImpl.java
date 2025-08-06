@@ -20,6 +20,7 @@ import com.project.admin.repository.AdminRepository;
 import com.project.common.dto.PageRequestDto;
 import com.project.common.dto.PageResponseDto;
 import com.project.common.jwt.JwtTokenProvider;
+import com.project.common.util.JasyptUtil;
 import com.project.member.entity.MemberEntity;
 import com.project.member.entity.MemberState;
 import com.project.member.repository.MemberRepository;
@@ -37,7 +38,11 @@ public class AdminServiceImpl implements AdminService {
 	private final MemberRepository memberRepository;
 	private final PasswordEncoder passwordEncoder;
 	private final JwtTokenProvider jwtTokenProvider;
-	
+	//복호화 고정키값 and 테스트 키값 ☆필수★
+	//추후 변경
+    static {
+        System.setProperty("JASYPT_ENCRYPTOR_PASSWORD", "test-key");
+    }
 	@Override
 	//관리자 로그인
 	public AdminLoginResponseDto login(AdminLoginRequestDto dto) {
@@ -56,7 +61,7 @@ public class AdminServiceImpl implements AdminService {
 	        .orElseThrow(() -> new IllegalArgumentException("아이디가 일치하지 않습니다."));
 	    
 		//암호화된 비밀번호 비교
-		if(!passwordEncoder.matches(dto.getPw(), admin.getAdminPw())){
+		if(!passwordEncoder.matches(dto.getAdminPw(), admin.getAdminPw())){
 			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
 		}
 		
@@ -156,12 +161,14 @@ public class AdminServiceImpl implements AdminService {
 		MemberEntity member = memberRepository.findByMemberNum(memberNum)
 				.orElseThrow(() ->  new IllegalArgumentException("해당 회원을 찾을 수 없습니다."));
 		
+		String decryptedPhone = JasyptUtil.decrypt(member.getMemberPhone());
+		
 		return AdminMemberDetailResponseDto.builder()
 				.memberNum(member.getMemberNum())		//회원번호
 				.memberId(member.getMemberId())			//회원 아이디(이메일)
 				.memberName(member.getMemberName())		//회원 이름
 				.memberBirth(member.getMemberBirth())	//생년월일
-				.memberPhone(member.getMemberPhone())	//핸드폰 번호
+				.memberPhone(decryptedPhone)	//핸드폰 번호
 				.memberAddress(member.getMemberAddress())	//주소
 				.memberSex(member.getMemberSex())		//성별
 				.memberLock(Boolean.TRUE.equals(member.getMemberLock())) //계정 잠금상태

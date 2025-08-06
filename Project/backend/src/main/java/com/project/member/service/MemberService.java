@@ -1,5 +1,8 @@
 package com.project.member.service;
 
+import org.springframework.stereotype.Service;
+
+import com.project.member.dto.KakaoSignUpRequestDto;
 import com.project.member.dto.MemberDeleteDto;
 import com.project.member.dto.MemberIdCheckResponseDto;
 import com.project.member.dto.MemberLoginRequestDto;
@@ -13,6 +16,7 @@ import com.project.member.entity.MemberEntity;
 
 //회원관련 서비스 인터페이스
 //회원가입, 로그인, 마이페이지등
+@Service
 public interface MemberService {
 	//회원가입
 	//@param - 회원가입 요청 - MemberSignUpRequestDto
@@ -50,5 +54,11 @@ public interface MemberService {
     
     //비밀번호 만료
 	boolean isPasswordExpired(MemberEntity member);
+	
+	//카카오 인증 회원가입
+	// 추가
+	MemberEntity kakaoSignUp(KakaoSignUpRequestDto dto);
+
+	//MemberSignUpResponseDto kakaoSignup(KakaoSignUpRequestDto dto);
 
 }
