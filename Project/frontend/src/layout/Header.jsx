@@ -1,9 +1,12 @@
 import React from 'react';
-
+import LogoutLink from '../program/login/pages/LogoutLink';
 import { Link } from 'react-router-dom'; // 페이지 이동용
 
 const Header = () => {
-  return (
+
+    const isLogin = !!localStorage.getItem('accessToken');
+
+    return (
     <header id="header">
         {/* 헤더 상단 로그인/회원가입 링크 */}
         <div className="header_top_box">
@@ -87,13 +90,8 @@ const Header = () => {
             </nav>
             </div>
             <div className="top_link_list">
-                {/* 로그인 안되어 있을때 표츌 */}
                 <div className="link_item">
-                    <Link to="/login" className="user_item login">로그인</Link>
-                </div>
-                {/* 로그인 했을때 버튼 표출 */}
-                <div className="link_item">
-                    <Link to="/logout" className="user_item logout">로그아웃</Link>
+                    {isLogin ? <LogoutLink /> : <Link to="/login" className="user_item login">로그인</Link>}
                 </div>
                 {/* 로그인 했을때 숨김 */}
                 <div className="link_item">
