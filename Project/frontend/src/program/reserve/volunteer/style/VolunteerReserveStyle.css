@@ -1,10 +1,10 @@
 /* ---------- 공통 ---------- */
 body {
-  overflow-x: hidden; /* 오른쪽 쏠림 방지 */
+  overflow-x: hidden;
 }
 
-/* ---------- 놀이터 예약 날짜 선택 페이지 ---------- */
-.land-date-page {
+/* ---------- 봉사 예약 날짜 선택 페이지 ---------- */
+.volunteer-date-page {
   width: 100%;
   min-height: 100vh;
   display: flex;
@@ -53,16 +53,16 @@ body {
 }
 
 .react-calendar__tile.closed-date abbr {
-  display: none; /* 예약 마감일 숨기기 */
+  display: none;
 }
 
 /* 버튼 영역 */
 .form-action-buttons {
   display: flex;
   justify-content: flex-start;
-  width: 100%; 
+  width: 100%;
   gap: 10px;
-  margin-top: 30px;
+  margin-top: 400px;
 }
 
 .form-action-buttons .prev-button,
@@ -78,18 +78,17 @@ body {
 }
 
 .form-action-buttons .prev-button {
-  background-color: #6c757d; /* 회색 */
+  background-color: #6c757d;
 }
 
 .form-action-buttons .next-button {
-  background-color: #007bff; /* 파란색 */
+  background-color: #007bff;
   margin-left: auto;
 }
 
 
-/* ---------- 놀이터 예약 신청 폼 페이지 ---------- */
-/* 전체 페이지 스타일 */
-.land-form-page {
+/* ---------- 봉사 예약 신청 폼 페이지 ---------- */
+.volunteer-form-page {
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
@@ -98,12 +97,12 @@ body {
   background-color: #ffff;
 }
 
-/* 제목 정렬 */
 .form-title {
   font-size: 24px;
   text-align: center;
   margin-bottom: 24px;
 }
+
 .required-info {
   font-size: 16px;
   color: #888;
@@ -112,25 +111,21 @@ body {
   margin-bottom: 10px;
 }
 
-/* 날짜 표시 */
 .selected-date {
   font-weight: bold;
   text-align: left;
   margin-bottom: 10px;
 }
 
-/* 폼 섹션 구분 박스 */
 .form-section {
   border: 1px solid #ccc;
   border-radius: 10px;
-  background-color: #fafafa; 
+  background-color: #fafafa;
   padding: 24px;
   margin-bottom: 24px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-
-/* 각 라벨과 입력창을 테이블 형식처럼 정렬 */
 .form-container {
   display: flex;
   flex-direction: column;
@@ -141,7 +136,7 @@ body {
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom:12px;
+  margin-bottom: 12px;
 }
 
 .form-row label {
@@ -149,7 +144,6 @@ body {
   font-weight: 500;
 }
 
-/* input, select, textarea 공통 스타일 */
 .form-row input[type="text"],
 .form-row input[type="number"],
 .form-row select,
@@ -166,38 +160,35 @@ textarea {
   resize: vertical;
 }
 
-/* 필수 입력 빨간 별표 */
 .required {
   color: red;
   margin-left: 4px;
 }
 
-/* 연락처 flex 정렬 */
 .phone-input-wrapper {
   display: flex;
   align-items: center;
   gap: 10px;
 }
-/* 라디오 박스 스타일*/
+
 .radio-group {
   display: flex;
-  gap: 30px; 
+  gap: 30px;
   align-items: center;
 }
 
 .radio-group input[type="radio"] {
-  transform: scale(1.5); /* 크기 조정 */
+  transform: scale(1.5);
   cursor: pointer;
 }
 
 .radio-group label {
   display: flex;
   align-items: center;
-  gap: 15px; 
+  gap: 15px;
   font-size: 16px;
 }
 
-/* 시간대 선택 버튼 스타일 */
 .section-title {
   font-weight: bold;
   margin-bottom: 8px;
@@ -234,8 +225,8 @@ textarea {
 }
 
 
-/*---------------놀이터예약확인페이지----------------*/
-.land-confirm-page {
+/* ---------- 봉사 예약 확인 페이지 ---------- */
+.volunteer-confirm-page {
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;

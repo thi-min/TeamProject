@@ -51,23 +51,25 @@ const isDateClosed = (date) => {
         <Calendar
           onChange={handleDateSelect}
           value={selectedDate}
-          minDate={new Date()}
+          minDate={new Date()} // 오늘부터
+          maxDate={new Date(new Date().setMonth(new Date().getMonth() + 3))}
           tileDisabled={({ date }) => isDateClosed(date)}
-          tileClassName={({ date }) =>
-            isDateClosed(date) ? "closed-date" : null
-          }
+        tileClassName={({ date }) =>
+          isDateClosed(date) ? "closed-date" : null
+        }
           tileContent={({ date, view }) =>
             view === "month" && isDateClosed(date) ? (
-               <div className="closed-day-wrapper">
-                <div className="calendar-date">{date.getDate()}일</div>
-                <div className="calendar-status">예약마감</div>
+              <div className="closed-text">
+                <div>{date.getDate()}일</div>
+                <div>예약마감</div>
               </div>
             ) : null
           }
         />
       </div>
 
-      <div className="calendar-buttons">
+      <div className="form-action-buttons">
+        
         <button className="next-button" onClick={handleNextClick}>
           다음
         </button>
