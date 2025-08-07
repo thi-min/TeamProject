@@ -125,7 +125,6 @@ class ReserveServiceImplTest {
                 .timeSlot(timeSlot)
                 .landType(LandType.SMALL)
                 .animalNumber(1)
-                .payNumber(10000)
                 .build();
         
         landRepository.save(land);
@@ -149,7 +148,6 @@ class ReserveServiceImplTest {
                 .timeSlotId(timeSlot.getId()) // ✅ 변경된 필드
                 .landType(LandType.SMALL)
                 .animalNumber(1)
-                .payNumber(10000)
                 .build();
 
         FullReserveRequestDto fullDto = FullReserveRequestDto.builder()
@@ -205,7 +203,6 @@ class ReserveServiceImplTest {
                 .timeSlotId(timeSlot.getId())
                 .landType(LandType.SMALL)
                 .animalNumber(1)
-                .payNumber(10000)
                 .build();
 
         FullReserveRequestDto fullDto = FullReserveRequestDto.builder()
@@ -326,7 +323,6 @@ class ReserveServiceImplTest {
                 .timeSlot(timeSlot)
                 .landType(LandType.SMALL)
                 .animalNumber(1)
-                .payNumber(1)
                 .build();
         landRepository.save(land);
         
@@ -383,7 +379,6 @@ class ReserveServiceImplTest {
                 .timeSlot(timeSlot) // ✅ timeSlot 설정
                 .landType(LandType.SMALL)
                 .animalNumber(1)
-                .payNumber(10000)
                 .build();
         landRepository.save(land);
         reserve.setLandDetail(land);
@@ -538,7 +533,7 @@ class ReserveServiceImplTest {
                 .timeSlot(timeSlot)
                 .landType(LandType.SMALL)
                 .animalNumber(1)
-                .payNumber(10000)
+
                 .build();
         
         matchingReserve.setLandDetail(land);
@@ -573,7 +568,6 @@ class ReserveServiceImplTest {
                 .timeSlot(timeSlot)
                 .landType(LandType.SMALL)
                 .animalNumber(1)
-                .payNumber(8000)
                 .build();
 
         wrongDateReserve.setLandDetail(wrongDateLand);
