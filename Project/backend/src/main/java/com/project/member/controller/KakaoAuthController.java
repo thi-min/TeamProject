@@ -40,62 +40,54 @@ public class KakaoAuthController {
 	private final MemberRepository memberRepository;
 	private final JwtTokenProvider jwtTokenProvider;	//일반 로그인에서 사용중인 JWT 유틸
 	
+	@GetMapping("/oauth/kakao/test-user-info")
+	public ResponseEntity<?> testKakaoUser(@RequestParam String accessToken) throws Exception {
+	    KakaoUserInfoDto user = kakaoApiService.getUserInfo(accessToken);
+	    return ResponseEntity.ok(user);
+	}
+
+	
 	//카카오 로그인 콜백 처리
 	@GetMapping("/kakao/callback")
 	public ResponseEntity<MemberLoginResponseDto> kakaoLogin(@RequestParam String code) throws Exception{
-		//카카오 access token 요청
-		String accessToken = kakaoApiService.getAccessToken(code);
-		//사용자 정보 요청 (kakaoId 포함)
-		KakaoUserInfoDto userInfo = kakaoApiService.getUserInfo(accessToken);
-		//기존 회원 여부 조회 (kakaoId로 memberId 대체)
-		Optional<MemberEntity> existing = memberRepository.findByKakaoId(userInfo.getKakaoId());
-		
-		if(existing.isPresent()) {
-			//기존 카카오회원 > 로그인처리 > JWT발급
-			MemberEntity member = existing.get();
-			String jwtAccess = jwtTokenProvider.generateAccessToken(member.getKakaoId());
-			String jwtRefresh = jwtTokenProvider.generateRefreshToken(member.getKakaoId());
-			return ResponseEntity.ok(MemberLoginResponseDto.builder()
-					.memberId(member.getMemberId())
-					.memberName(member.getMemberName())
-					.accessToken(jwtAccess)
-					.refreshToken(jwtRefresh)
-					.requireSignup(false)
-					.build());
-		}else{
-			//신규회원 : 회원가입 + 카카오정보 제공
-			String birth = parseBirth(userInfo.getBirthyear(), userInfo.getBirthday());
-			String phone = formatPhoneNumber(userInfo.getPhoneNumber());
-			
-			return ResponseEntity.ok(MemberLoginResponseDto.builder()
-					.memberId(userInfo.getKakaoId()) // memberId로 사용
-                    .kakaoId(userInfo.getKakaoId())
-                    .memberName(userInfo.getNickname())
-                    .gender(userInfo.getGender())
-                    .birth(birth)	//yyyy-mm-dd
-                    .phone(phone)	//010-0000-0000
-                    .requireSignup(true)
-                    .build());
-		}
+		return ResponseEntity.ok(memberService.handleKakaoLogin(code));
+//		
+//		//카카오 access token 요청
+//		String accessToken = kakaoApiService.getAccessToken(code);
+//		//사용자 정보 요청 (kakaoId 포함)
+//		KakaoUserInfoDto userInfo = kakaoApiService.getUserInfo(accessToken);
+//		//기존 회원 여부 조회 (kakaoId로 memberId 대체)
+//		Optional<MemberEntity> existing = memberRepository.findByKakaoId(userInfo.getKakaoId());
+//		
+//		if(existing.isPresent()) {
+//			//기존 카카오회원 > 로그인처리 > JWT발급
+//			MemberEntity member = existing.get();
+//			String jwtAccess = jwtTokenProvider.generateAccessToken(member.getKakaoId());
+//			String jwtRefresh = jwtTokenProvider.generateRefreshToken(member.getKakaoId());
+//			return ResponseEntity.ok(MemberLoginResponseDto.builder()
+//					.memberId(member.getMemberId())
+//					.memberName(member.getMemberName())
+//					.accessToken(jwtAccess)
+//					.refreshToken(jwtRefresh)
+//					.requireSignup(false)
+//					.build());
+//		}else{
+//			//신규회원 : 회원가입 + 카카오정보 제공
+//			String birth = parseBirth(userInfo.getBirthyear(), userInfo.getBirthday());
+//			String phone = formatPhoneNumber(userInfo.getPhoneNumber());
+//			
+//			return ResponseEntity.ok(MemberLoginResponseDto.builder()
+//					.memberId(userInfo.getKakaoId()) // memberId로 사용
+//                    .kakaoId(userInfo.getKakaoId())
+//                    .memberName(userInfo.getNickname())
+//                    .gender(userInfo.getGender())
+//                    .birth(birth)	//yyyy-mm-dd
+//                    .phone(phone)	//010-0000-0000
+//                    .requireSignup(true)
+//                    .build());
+//		}
 	}
-	//생년월일 처리
-	private String parseBirth(String year, String mmdd) {
-		if(year != null && mmdd != null && mmdd.length() == 4) {
-			return year + "-" + mmdd.substring(0,2) + "-" + mmdd.substring(2);
-		}
-		return null;
-	}
-    //휴대폰 번호 데이터 처리(+82삭제)
-	private String formatPhoneNumber(String rawPhone) {
-	    // 예시: +82 10-1234-5678 → 01012345678
-	    String cleaned = rawPhone.replaceAll("[^0-9]", ""); // 숫자만 남김
-	    if (cleaned.startsWith("82")) {
-	        cleaned = "0" + cleaned.substring(2);
-	    }
-	    return cleaned;
-	}
-
-    
+	
 	//카카오 로그인 신규 회원가입 처리
 	@PostMapping("/signup/kakao")
 	public ResponseEntity<MemberSignUpResponseDto> kakaoSignup(@RequestBody KakaoSignUpRequestDto dto){

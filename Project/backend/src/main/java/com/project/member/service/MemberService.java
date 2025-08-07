@@ -55,10 +55,11 @@ public interface MemberService {
     //비밀번호 만료
 	boolean isPasswordExpired(MemberEntity member);
 	
-	//카카오 인증 회원가입
-	// 추가
-	MemberEntity kakaoSignUp(KakaoSignUpRequestDto dto);
+	//카카오 로그인 콜백 처리 (인가코드 → 토큰 → 회원 조회 or 신규)
+	MemberLoginResponseDto handleKakaoLogin(String code) throws Exception;
 
+	//카카오 회원가입
+    MemberEntity kakaoSignUp(KakaoSignUpRequestDto dto);
 	//MemberSignUpResponseDto kakaoSignup(KakaoSignUpRequestDto dto);
 
 }

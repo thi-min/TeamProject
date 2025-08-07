@@ -8,8 +8,10 @@ import java.util.Optional;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import com.project.common.jwt.JwtTokenProvider;
 import com.project.common.util.JasyptUtil;
 import com.project.member.dto.KakaoSignUpRequestDto;
+import com.project.member.dto.KakaoUserInfoDto;
 import com.project.member.dto.MemberDeleteDto;
 import com.project.member.dto.MemberIdCheckResponseDto;
 import com.project.member.dto.MemberLoginRequestDto;
@@ -32,6 +34,8 @@ public class MemberServiceImpl implements MemberService {
 
 	private final MemberRepository memberRepository;
 	private final BCryptPasswordEncoder passwordEncoder;
+	private final KakaoApiService kakaoApiService;
+	private final JwtTokenProvider jwtTokenProvider;
 	
 	//회원가입
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
@@ -315,5 +319,71 @@ public class MemberServiceImpl implements MemberService {
 
 	    return memberRepository.save(newMember);
 	}
+	//카카오 로그인 처리 메서드
+    public MemberLoginResponseDto handleKakaoLogin(String code) throws Exception {
+        // 1️⃣ 카카오에서 받은 인가 코드(code)를 통해 access token 요청
+        String accessToken = kakaoApiService.getAccessToken(code);
+
+        // 2️⃣ access token을 사용하여 사용자 정보 요청 (kakaoId, email, nickname 등)
+        KakaoUserInfoDto userInfo = kakaoApiService.getUserInfo(accessToken);
+
+        // 3️⃣ DB에 해당 kakaoId로 등록된 회원이 있는지 확인
+        Optional<MemberEntity> existing = memberRepository.findByKakaoId(userInfo.getKakaoId());
+
+        // 4️⃣ 이미 등록된 회원이라면 → 로그인 처리 후 JWT 토큰 발급
+        if (existing.isPresent()) {
+            MemberEntity member = existing.get();
+
+            // ✅ access token, refresh token 생성 (사용자 고유 식별자는 kakaoId 사용)
+            String jwtAccess = jwtTokenProvider.generateAccessToken(member.getKakaoId());
+            String jwtRefresh = jwtTokenProvider.generateRefreshToken(member.getKakaoId());
+
+            // 🔁 로그인 응답 객체 반환
+            return MemberLoginResponseDto.builder()
+                    .memberId(member.getMemberId())           // 이메일(또는 kakaoId)
+                    .memberName(member.getMemberName())       // 회원 이름
+                    .accessToken(jwtAccess)                   // JWT Access Token
+                    .refreshToken(jwtRefresh)                 // JWT Refresh Token
+                    .requireSignup(false)                     // 추가 회원가입 불필요
+                    .build();
+        } else {
+            // 5️⃣ 등록된 회원이 없으면 → 회원가입 필요 플래그와 함께 사용자 정보 전달
+
+            // 🎯 yyyy-MM-dd 형식으로 생년월일 변환
+            String birth = parseBirth(userInfo.getBirthyear(), userInfo.getBirthday());
+
+            // 🎯 전화번호 하이픈 형식으로 변환
+            String phone = formatPhoneNumber(userInfo.getPhoneNumber());
+
+            // ➕ 프론트에서 추가 정보 입력 후 회원가입 진행을 위해 필요한 데이터 전달
+            return MemberLoginResponseDto.builder()
+                    .memberId(userInfo.getKakaoId())          // kakaoId → 회원 ID 대체
+                    .kakaoId(userInfo.getKakaoId())           // 고유 식별자
+                    .memberName(userInfo.getNickname())       // 사용자 닉네임
+                    .gender(userInfo.getGender())             // 성별 (male/female)
+                    .birth(birth)                             // 생년월일 (yyyy-MM-dd)
+                    .phone(phone)                             // 전화번호 (010-xxxx-xxxx)
+                    .requireSignup(true)                      // 회원가입 필요 플래그
+                    .build();
+        }
+    }
+    //생년월일 처리
+  	private String parseBirth(String year, String mmdd) {
+  		if(year != null && mmdd != null && mmdd.length() == 4) {
+  			return year + "-" + mmdd.substring(0,2) + "-" + mmdd.substring(2);
+  		}
+  		return null;
+  	}
+      //휴대폰 번호 데이터 처리(+82삭제)
+  	private String formatPhoneNumber(String rawPhone) {
+  		if(rawPhone == null) return null; //null방어
+  		
+  	    // 예시: +82 10-1234-5678 → 01012345678
+  	    String cleaned = rawPhone.replaceAll("[^0-9]", ""); // 숫자만 남김
+  	    if (cleaned.startsWith("82")) {
+  	        cleaned = "0" + cleaned.substring(2);
+  	    }
+  	    return cleaned;
+  	}
 
 }
