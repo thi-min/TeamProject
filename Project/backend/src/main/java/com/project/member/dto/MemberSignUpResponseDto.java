@@ -2,11 +2,14 @@ package com.project.member.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 //회원가입 응답(완료창)
 @Data
 @AllArgsConstructor
 public class MemberSignUpResponseDto {
+	private Long memberNum;
 	private String memberId; //이메일 아이디
 	private String message; //메시지
 	

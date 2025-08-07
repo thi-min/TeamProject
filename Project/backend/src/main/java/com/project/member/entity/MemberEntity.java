@@ -1,6 +1,7 @@
 package com.project.member.entity;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import com.project.admin.entity.AdminEntity;
 
@@ -32,49 +33,47 @@ public class MemberEntity {
 	
 	@Id //기본키
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_num")
     private Long memberNum; //회원번호
 
-    @Column(name = "member_id", nullable = false, length = 80)
     private String memberId; //이메일 아이디
 
-    @Column(name = "member_pw", nullable = false, length = 20)
     private String memberPw; //비밀번호
 
-    @Column(name = "member_name", nullable = false, length = 12)
+    private LocalDateTime pwUpdated; // 마지막 비밀번호 변경일
+    
     private String memberName; //이름
 
-    @Column(name = "member_birth", nullable = false, length = 25)
     private LocalDate memberBirth; //생년월일
 
     @Column(name = "member_phone")
     private String memberPhone; //휴대폰 번호
 
-    @Column(name = "member_address", nullable = false, length = 255)
     private String memberAddress; //주소
 
-    @Column(name = "member_day")
     private LocalDate memberDay; //가입일시
 
-    @Column(name = "member_lock")
     private Boolean memberLock; //계정 잠금 여부
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "member_sex")
     private MemberSex memberSex; //성별
     
-    @Enumerated(EnumType.STRING)
-    @Column(name = "member_state")
+    @Enumerated(EnumType.STRING) 
     private MemberState memberState; //회원상태
     
+    private LocalDateTime outDate; // 회원이 OUT 상태로 변경된 순간 기록
+    
     @Column(name = "sns_yn")
-    private boolean snsYn; //문자 수신여부(동의/비동의)
+    private boolean smsAgree; //문자 수신여부(동의/비동의)
 
-    @Column(name = "kakao_id", length = 255)
+    //카카오 인증시 memberId로 저장되니까 이건 필요없을꺼 같은데
     private String kakaoId; //카카오아이디
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "admin_id")
     private AdminEntity admin;
 
+    private String volSumtime;	//총 봉사시간
+    
+    private String accessToken;
+    private String refreshToken;
 }

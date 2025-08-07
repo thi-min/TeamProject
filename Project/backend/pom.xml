@@ -80,6 +80,36 @@
 		    <artifactId>jakarta.validation-api</artifactId>
 	    	<version>3.0.2</version>
 	    </dependency>
+	    
+	    <!-- 보안관련 JasyPt 라이브러리 설치 코드 -->
+	    <dependency>
+		    <groupId>com.github.ulisesbocchio</groupId>
+		    <artifactId>jasypt-spring-boot-starter</artifactId>
+		    <version>3.0.5</version>
+		</dependency>
+		<!-- JWT 의존성 추가 -->
+		<dependency>
+		    <groupId>io.jsonwebtoken</groupId>
+		    <artifactId>jjwt-api</artifactId>
+		    <version>0.11.5</version>
+		</dependency>
+		<dependency>
+		    <groupId>io.jsonwebtoken</groupId>
+		    <artifactId>jjwt-impl</artifactId>
+		    <version>0.11.5</version>
+		    <scope>runtime</scope>
+		</dependency>
+		<dependency>
+		    <groupId>io.jsonwebtoken</groupId>
+		    <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson -->
+		    <version>0.11.5</version>
+		    <scope>runtime</scope>
+		</dependency>
+<!--	<dependency>
+			<groupId>com.springboot</groupId>
+			<artifactId>advanced_jpa</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency> -->
 	</dependencies>
 
 	<build>

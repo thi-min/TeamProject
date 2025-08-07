@@ -5,6 +5,9 @@ import com.project.board.dto.*;
 import com.project.board.service.BbsService;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -25,17 +28,15 @@ public class MemberBbsController {
             @RequestPart("bbsDto") BbsDto dto,
             @RequestPart(value = "files", required = false) List<MultipartFile> files) {
         
-
         if (type == BoardType.POTO) {
-            // 이미지 게시판 별도 처리 (대표이미지 포함)
             BbsDto created = bbsService.createPotoBbs(dto, memberNum, files);
             return ResponseEntity.ok(created);
         } else {
-            // QnA 등 일반 게시판 작성
             BbsDto created = bbsService.createBbs(dto, memberNum, null, files);
             return ResponseEntity.ok(created);
         }
     }
+
 
     // 게시글 수정 (본인만)
     @PutMapping("/{id}")//게시글번호
@@ -86,4 +87,17 @@ public class MemberBbsController {
         BbsDto dto = bbsService.getBbs(id);
         return ResponseEntity.ok(dto);
     }
+    
+    @GetMapping("/bbslist")
+    public ResponseEntity<Page<BbsDto>> getBbsList(
+            @RequestParam(required = false) String searchType,
+            @RequestParam(required = false) String bbstitle,
+            @RequestParam(required = false) String bbscontent,
+            @RequestParam(required = false) BoardType type,
+            @PageableDefault(size = 10) Pageable pageable) {
+
+        Page<BbsDto> result = bbsService.searchPosts(searchType, bbstitle, bbscontent, type, pageable);
+        return ResponseEntity.ok(result);
+    }
+
 }

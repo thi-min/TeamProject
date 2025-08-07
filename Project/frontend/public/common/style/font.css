@@ -1,0 +1,31 @@
+@charset "utf-8";
+
+@font-face{
+	font-family: 'NotoKr';
+	font-weight: 200;
+	src: url('/common/font/SpoqaHanSans-Light.woff2') format('woff2'),
+	url('/common/font/SpoqaHanSans-Light.woff') format('woff');
+}
+@font-face{
+	font-family: 'NotoKr';
+	font-weight: 400;
+	src: url('/common/font/SpoqaHanSans-Regular.woff2') format('woff2'),
+	url('/common/font/SpoqaHanSans-Regular.woff') format('woff');
+}
+@font-face{
+	font-family: 'NotoKr';
+	font-weight: 600;
+	src: url('/common/font/SpoqaHanSans-Bold.woff2') format('woff2'),
+	url('/common/font/SpoqaHanSans-Bold.woff') format('woff');
+}
+
+@font-face {
+    font-family:'CWD';
+    src:url('/common/font/ChangwonDangamAsac_Bold.woff2'),
+    url('/common/font/ChangwonDangamAsac_Bold.woff');
+}
+@font-face {
+    font-family:'Rikodeo';
+    src:url('/common/font/HakgyoansimRikodeoR.woff2') format('woff2'),
+    url('/common/font/HakgyoansimRikodeoR.woff') format('woff');
+}

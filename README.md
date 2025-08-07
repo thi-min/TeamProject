@@ -36,3 +36,15 @@
   5. exception - 예외 처리 및 메시지 통일
   6. controller - 외부 요청 응답 처리
   7. config - 설정파일 (필요 시 WebMvc, Security 등)
+ 
+
+
+
++ 7월28일
+  + 안형주
+    + admin, member 테스트(response, service) 90% 완료
+    + controller 진행 대기중
+  + 이재복
+    + fund, chat - stay test(checking member entity)
+    + alarm, map - during with Front
+  
