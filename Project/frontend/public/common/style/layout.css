@@ -58,7 +58,7 @@ body{font-size:16px;line-height:28px;letter-spacing:0;font-weight:400;font-famil
 /* top_box */
 #footer .top_box{display:inline-block;z-index:1;position:absolute;top:42px;right:50px;font-size:0;line-height:0;box-sizing:border-box;}
 #footer .top_box .top_btn{display:inline-block;position:relative;width:60px;height:60px;border:none;border-radius:100%;background-color:rgba(255, 255, 255, 0.08);vertical-align:top;box-sizing:border-box;}
-#footer .top_box .top_btn:before{display:block;position:absolute;top:calc(50% - 8px);left:calc(50% - 7px);width:14px;height:16px;background:url(../images/common/footer_top_icon.png) no-repeat left top;content:'';box-sizing:border-box;}
+#footer .top_box .top_btn:before{display:block;position:absolute;top:calc(50% - 8px);left:calc(50% - 7px);width:14px;height:16px;content:'';box-sizing:border-box;}
 @media all and (max-width:1500px) {
     #footer .top_box .top_btn{width:56px;height:56px;}
 }
