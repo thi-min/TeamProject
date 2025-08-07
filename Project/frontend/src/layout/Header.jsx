@@ -1,9 +1,9 @@
 import React from 'react';
 import {isLogin, useAuth } from '../common/context/AuthContext';
 import LogoutLink from '../program/login/pages/LogoutLink';
-import { routeAccessMap } from '../common/routes/router';
 import { Link } from 'react-router-dom'; // 페이지 이동용
 
+import MenuRoutes from '../common/routes/menuRoutes';
 
 const Header = () => {
 
@@ -41,20 +41,8 @@ const Header = () => {
         </h1>
         <div className="nav_box">
             <div className="depth_area">
-            {/* 사이드 메뉴 렌더링 */}
-            {routeAccessMap.map(menu => (
-              <li key={menu.path}>
-                <Link to={menu.path}>{menu.title}</Link>
-                {menu.children && (
-                  <ul>
-                    {menu.children.map(sub => (
-                      <li key={sub.path}>
-                        <Link to={sub.path}>{sub.title}</Link>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
+            {MenuRoutes.map(menu => (
+              <Link key={menu.path} to={menu.path}>{menu.title}</Link>
             ))}
             </div>
             <div className="top_link_list">

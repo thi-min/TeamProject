@@ -4,7 +4,7 @@ import { AuthProvider } from './common/context/AuthContext'; //로그인 상태 
 import Layout from './layout/Layout';
 import React from 'react';
 
-import { layoutRoutes } from './common/routes/generatedRoutes';
+import layoutRoutes from './common/routes/layoutRoutes';
 function App() {
   return (
     <AuthProvider>
