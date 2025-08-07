@@ -26,3 +26,4 @@ public class MemberLoginResponseDto {
     private String birth;          // 생년월일 (yyyy-MM-dd)
     private String phone;          // 01012345678 ← 아래에서 가공 처리
 }
+
