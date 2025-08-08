@@ -97,7 +97,6 @@ class ReserveServiceImplTest {
                 .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build();
         memberRepository.save(member);
         
@@ -162,7 +161,7 @@ class ReserveServiceImplTest {
     }
     
     @Transactional
-    //@Test
+    @Test
     @DisplayName("정상적인 놀이터 예약 생성")
     void createLandReservation_success() {
         // given
@@ -177,7 +176,6 @@ class ReserveServiceImplTest {
                 .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build());
     	Long testMemberNum = member.getMemberNum();
     	
@@ -297,7 +295,6 @@ class ReserveServiceImplTest {
                 .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build());
         
         TimeSlot timeSlot = TimeSlot.builder()
@@ -354,7 +351,6 @@ class ReserveServiceImplTest {
                 .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build());
         
         TimeSlot timeSlot = TimeSlot.builder()
@@ -432,7 +428,6 @@ class ReserveServiceImplTest {
     	            .memberSex(MemberSex.MAN)
     	            .memberState(MemberState.ACTIVE)
     	            .memberLock(false)
-    	            .snsYn(false)
     	            .build()
     	    );
     	//타인
@@ -448,7 +443,6 @@ class ReserveServiceImplTest {
     	            .memberSex(MemberSex.MAN)
     	            .memberState(MemberState.ACTIVE)
     	            .memberLock(false)
-    	            .snsYn(false)
     	            .build()
     	    );
     	Reserve reserve = reserveRepository.save(
@@ -506,7 +500,6 @@ class ReserveServiceImplTest {
                 .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build());
     	
     	TimeSlot timeSlot = TimeSlot.builder()
@@ -607,7 +600,6 @@ class ReserveServiceImplTest {
                 .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build());
         
         TimeSlot timeSlot = TimeSlot.builder()
@@ -679,7 +671,6 @@ class ReserveServiceImplTest {
                 .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build()
         );
 
@@ -718,7 +709,6 @@ class ReserveServiceImplTest {
             .memberSex(MemberSex.MAN)
             .memberState(MemberState.ACTIVE)
             .memberLock(false)
-            .snsYn(false)
             .build());
 
         // 놀이터 예약 (type = 1)

@@ -69,7 +69,6 @@ class LandServiceImplTest {
 	            .memberSex(MemberSex.MAN)
 	            .memberState(MemberState.ACTIVE)
 	            .memberLock(false)
-	            .snsYn(false)
 	            .build());
 	
 	    // 2. 기준 날짜, 시간대, 타입
@@ -133,7 +132,6 @@ class LandServiceImplTest {
 	            .memberSex(MemberSex.MAN)
 	            .memberState(MemberState.ACTIVE)
 	            .memberLock(false)
-	            .snsYn(false)
 	            .build());
     	// 시간
     	TimeSlot timeSlot = TimeSlot.builder()

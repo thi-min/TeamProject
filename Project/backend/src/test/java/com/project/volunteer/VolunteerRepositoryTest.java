@@ -57,7 +57,6 @@ public class VolunteerRepositoryTest {
                 .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build());
 
         // 기준 일자/시간
@@ -98,7 +97,6 @@ public class VolunteerRepositoryTest {
                 .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build());
 
         // 봉사 예약 2

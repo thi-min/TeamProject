@@ -63,7 +63,6 @@ public class VolunteerServiceImplTest {
                 .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build());
 
         MemberEntity member2 = memberRepository.save(MemberEntity.builder()
@@ -77,7 +76,6 @@ public class VolunteerServiceImplTest {
                 .memberSex(MemberSex.WOMAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build());
 
         // given - 기준 날짜 및 시간
@@ -147,7 +145,6 @@ public class VolunteerServiceImplTest {
                 .memberSex(MemberSex.WOMAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build());
         
         TimeSlot timeSlot = TimeSlot.builder()

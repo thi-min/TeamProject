@@ -70,7 +70,6 @@ public class ReserveRepositoryTest {
                 .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build();
         
         memberRepository.save(member);
@@ -110,7 +109,6 @@ public class ReserveRepositoryTest {
                 .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build();
 
         memberRepository.save(member);
@@ -161,7 +159,6 @@ public class ReserveRepositoryTest {
                 .memberSex(MemberSex.WOMAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build();
         
         memberRepository.save(member);
@@ -230,7 +227,6 @@ public class ReserveRepositoryTest {
                 .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build();
         memberRepository.save(member);
         
@@ -304,7 +300,6 @@ public class ReserveRepositoryTest {
                 .memberSex(MemberSex.MAN)
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build();
         memberRepository.save(member);
         
@@ -396,7 +391,6 @@ public class ReserveRepositoryTest {
                 .memberSex(MemberSex.MAN) // <-- enum 이름 대문자 확인
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build();
         em.persist(member);;
         
@@ -457,7 +451,6 @@ public class ReserveRepositoryTest {
                 .memberSex(MemberSex.MAN) // <-- enum 이름 대문자 확인
                 .memberState(MemberState.ACTIVE)
                 .memberLock(false)
-                .snsYn(false)
                 .build();
         em.persist(member);;
         
