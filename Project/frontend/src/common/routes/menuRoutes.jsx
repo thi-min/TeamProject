@@ -39,9 +39,12 @@ const menuRoutes = [
     ],
   },
   {
-    title: "마이페이지",
-    path: "/mypage",
-    access: "USER",
+    title: "후원하기",
+    access: "ALL",
+    children: [
+      { title: "후원안내", path: "/fund/info", access: "ALL" },
+      { title: "후원금 사용내역", path: "/fund/allfund", access: "ALL" },
+    ],
   },
   {
     title: "관리자 메뉴",

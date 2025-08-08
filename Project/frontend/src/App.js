@@ -7,13 +7,11 @@ import React from 'react';
 import layoutRoutes from './common/routes/layoutRoutes';
 function App() {
   return (
-    <AuthProvider>
-      <BrowserRouter>
-        <Layout>
-          <Routes>{layoutRoutes}</Routes>
-        </Layout>
-      </BrowserRouter>
-    </AuthProvider>
+    <BrowserRouter>
+      <Layout>
+        <Routes>{layoutRoutes}</Routes>
+      </Layout>
+    </BrowserRouter>
   );
 }
 export default App;

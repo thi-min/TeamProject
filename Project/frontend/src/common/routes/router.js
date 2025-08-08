@@ -39,9 +39,10 @@ const routes = {
   member: {
     signup: { path: "/member/signup", label: "회원가입" },
     login: { path: "/login", label: "로그인" },
-    mypage: { path: "/member/mypage", label: "마이페이지" }, // USER 전용
-    update: { path: "/member/update", label: "회원정보 수정" },
-    delete: { path: "/member/delete", label: "회원 탈퇴" },
+    logout: { path: "/logout", label: "로그아웃" },
+    mypage: { path: "/mypage", label: "마이페이지" }, // USER 전용
+    update: { path: "/mypage/update", label: "회원정보 수정" },
+    delete: { path: "/mypage/update/delete", label: "회원 탈퇴" },
   },
 
   // 관리자
@@ -70,6 +71,7 @@ const routes = {
   common: {
     notFound: { path: "*", label: "페이지를 찾을 수 없습니다" },
   },
+  
 };
 
 export default routes;

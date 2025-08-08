@@ -8,6 +8,8 @@ import { loginUser } from '../services/auth';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../../common/context/AuthContext'; //전역 로그인 상태 불러오기
 
+console.log('[LoginPage] sees AuthContext id =', window.__AUTH_CTX_ID__);
+
 const LoginPage = () => {
     const [form, setForm] = useState({ memberId: '', memberPw: '' });
     const [error, setError] = useState('');
@@ -24,15 +26,19 @@ const LoginPage = () => {
             const result = await loginUser(form); // 로그인 API 호출
             console.log('✅ 로그인 성공:', result);
             
-            const token =result.accessToken;
-            login(token);
+            //const token =result.accessToken;
+
+            login({
+                accessToken: result.accessToken,
+                refreshToken: result.refreshToken // 백엔드 응답에 있으면 같이 전달
+            });
             // JWT 토큰 저장
             //localStorage.setItem('accessToken', result.accessToken);
 
             alert("로그인 성공");
 
             // 메인 페이지 이동 (SPA 방식)
-            navigate('/main');
+            navigate('/');
         } catch (err) {
             // 에러 메시지 처리
             alert("로그인 실패");
