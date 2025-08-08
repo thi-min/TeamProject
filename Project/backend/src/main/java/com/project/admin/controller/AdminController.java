@@ -1,5 +1,6 @@
 package com.project.admin.controller;
 
+import org.springframework.data.domain.jaxb.SpringDataJaxb.PageRequestDto;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +22,6 @@ import com.project.admin.dto.AdminPasswordUpdateRequestDto;
 import com.project.admin.entity.AdminEntity;
 import com.project.admin.repository.AdminRepository;
 import com.project.admin.service.AdminService;
-import com.project.common.dto.PageRequestDto;
 import com.project.common.dto.PageResponseDto;
 import com.project.common.jwt.JwtTokenProvider;
 import com.project.member.entity.MemberState;

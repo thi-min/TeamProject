@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 @Service //tjqltmrPcmd(spring bean)으로 등록
 @Transactional
 @RequiredArgsConstructor //final로 선언된 memberRepository를 자동으로 생성자 주입 시켜줌
-public class AdminServiceImpl implements AdminService {
+public abstract class AdminServiceImpl implements AdminService {
 
 	private final AdminRepository adminRepository;
 	private final MemberRepository memberRepository;
