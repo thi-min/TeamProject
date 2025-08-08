@@ -193,7 +193,6 @@ class AdminServiceImplTests{
     	System.out.println("현재 비밀번호" + update.getAdminPw());
     	
     }
-    
     //관리자가 회원 삭제 로직(MemberState OUT으로 바뀌고 1분뒤 DB에서 삭제로직)
     @Test
     public void markTestUserForDeletion() {

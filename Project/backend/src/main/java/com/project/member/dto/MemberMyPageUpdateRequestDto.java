@@ -1,5 +1,6 @@
 package com.project.member.dto;
 
+
 import com.project.member.entity.MemberSex;
 
 import lombok.Data;
@@ -7,6 +8,7 @@ import lombok.Data;
 @Data
 //수정페이지
 //사용자가 정보를 수정하고 서버에 수정요청할때 쓰는 dto
+
 public class MemberMyPageUpdateRequestDto {
 
     //private Long memberId; //로그인 id(수정불가)

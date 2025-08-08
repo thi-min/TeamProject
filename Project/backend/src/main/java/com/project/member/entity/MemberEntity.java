@@ -3,8 +3,6 @@ package com.project.member.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.project.admin.entity.AdminEntity;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -68,9 +66,8 @@ public class MemberEntity {
     //카카오 인증시 memberId로 저장되니까 이건 필요없을꺼 같은데
     private String kakaoId; //카카오아이디
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_id")
-    private AdminEntity admin;
+    @JoinColumn(name = "vol_sumtime")
+    private String valSumtime; // 총 봉사시간
 
     private String volSumtime;	//총 봉사시간
     

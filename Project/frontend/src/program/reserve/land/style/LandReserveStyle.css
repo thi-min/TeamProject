@@ -1,0 +1,279 @@
+/* ---------- 공통 ---------- */
+body {
+  overflow-x: hidden; /* 오른쪽 쏠림 방지 */
+}
+
+/* ---------- 놀이터 예약 날짜 선택 페이지 ---------- */
+.land-date-page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: #fff;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 20px 0;
+  overflow-y: auto;
+}
+
+.calendar-wrapper {
+  width: 100%;
+  max-width: 1600px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+.react-calendar {
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.react-calendar__month-view__weekdays {
+  height: 60px;
+  display: flex;
+}
+
+.calendar-wrapper .react-calendar__month-view__days {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-template-rows: repeat(6, 1fr);
+}
+
+.calendar-wrapper .react-calendar__tile {
+  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.react-calendar__tile.closed-date abbr {
+  display: none; /* 예약 마감일 숨기기 */
+}
+
+/* 버튼 영역 */
+.form-action-buttons {
+  display: flex;
+  justify-content: flex-start;
+  width: 100%; 
+  gap: 10px;
+  margin-top: 30px;
+}
+
+.form-action-buttons .prev-button,
+.form-action-buttons .next-button {
+  padding: 12px 24px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  min-width: 100px;
+  font-weight: bold;
+  color: #fff;
+}
+
+.form-action-buttons .prev-button {
+  background-color: #6c757d; /* 회색 */
+}
+
+.form-action-buttons .next-button {
+  background-color: #007bff; /* 파란색 */
+  margin-left: auto;
+}
+
+
+/* ---------- 놀이터 예약 신청 폼 페이지 ---------- */
+/* 전체 페이지 스타일 */
+.land-form-page {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: "Noto Sans KR", sans-serif;
+  background-color: #ffff;
+}
+
+/* 제목 정렬 */
+.form-title {
+  font-size: 24px;
+  text-align: center;
+  margin-bottom: 24px;
+}
+.required-info {
+  font-size: 16px;
+  color: #888;
+  text-align: right;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+/* 날짜 표시 */
+.selected-date {
+  font-weight: bold;
+  text-align: left;
+  margin-bottom: 10px;
+}
+
+/* 폼 섹션 구분 박스 */
+.form-section {
+  border: 1px solid #ccc;
+  border-radius: 10px;
+  background-color: #fafafa; 
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+
+/* 각 라벨과 입력창을 테이블 형식처럼 정렬 */
+.form-container {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom:12px;
+}
+
+.form-row label {
+  width: 120px;
+  font-weight: 500;
+}
+
+/* input, select, textarea 공통 스타일 */
+.form-row input[type="text"],
+.form-row input[type="number"],
+.form-row select,
+.form-row textarea {
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  flex: 1;
+  max-width: 300px;
+  box-sizing: border-box;
+}
+
+textarea {
+  resize: vertical;
+}
+
+/* 필수 입력 빨간 별표 */
+.required {
+  color: red;
+  margin-left: 4px;
+}
+
+/* 연락처 flex 정렬 */
+.phone-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+/* 라디오 박스 스타일*/
+.radio-group {
+  display: flex;
+  gap: 30px; 
+  align-items: center;
+}
+
+.radio-group input[type="radio"] {
+  transform: scale(1.5); /* 크기 조정 */
+  cursor: pointer;
+}
+
+.radio-group label {
+  display: flex;
+  align-items: center;
+  gap: 15px; 
+  font-size: 16px;
+}
+
+/* 시간대 선택 버튼 스타일 */
+.section-title {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.time-slot-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.time-slot-button {
+  padding: 16px;
+  border: 1px solid #bbb;
+  border-radius: 10px;
+  background-color: #fff;
+  font-size: 15px;
+  min-width: 280px;
+  cursor: pointer;
+  transition: 0.2s ease-in-out;
+}
+
+.time-slot-button.selected {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+.time-slot-button:disabled {
+  background-color: #eee;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+
+/*---------------놀이터예약확인페이지----------------*/
+.land-confirm-page {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 30px;
+  box-sizing: border-box;
+  background-color: #fff;
+}
+
+.page-title {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 30px;
+}
+
+.info-section,
+.payment-section {
+  margin-bottom: 30px;
+}
+
+.info-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.info-table th,
+.info-table td {
+  border: 1px solid #ccc;
+  padding: 12px;
+  text-align: left;
+}
+
+.info-table th {
+  background-color: #f8f8f8;
+  width: 150px;
+}
+
+.total-row td {
+  font-weight: bold;
+  font-size: 18px;
+}

@@ -1,0 +1,48 @@
+
+/* 공통 게시판 테이블 스타일 */
+.bbs-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'Arial', sans-serif;
+  font-size: 14px;
+}
+
+.bbs-table th,
+.bbs-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+.bbs-table th {
+  background-color: #f9f9f9;
+  font-weight: bold;
+}
+
+.bbs-table td.title-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400px;
+}
+
+/* 페이징 스타일 */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
+.pagination button,
+.pagination span {
+  margin: 0 4px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  background-color: white;
+  cursor: pointer;
+}
+
+.pagination .active {
+  background-color: #5c5c5c;
+  color: white;
+}
