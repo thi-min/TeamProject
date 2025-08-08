@@ -1,8 +1,7 @@
 package com.project.member.service;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -19,7 +18,11 @@ import org.springframework.web.client.RestTemplate;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.project.common.jwt.JwtTokenProvider;
 import com.project.member.dto.KakaoUserInfoDto;
+import com.project.member.dto.MemberLoginResponseDto;
+import com.project.member.entity.MemberEntity;
+import com.project.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,8 +36,8 @@ public class KakaoApiServiceImpl implements KakaoApiService{
 	//application.properties에서 주입받는 설정 값들
     @Value("${kakao.client-id}")
     private String clientId;
-    @Value("${kakao.redirect-uri}")
-    private String redirectUri;
+    //@Value("${kakao.redirect-uri}")
+    //private String redirectUri;
     @Value("${kakao.token-uri}")
     private String tokenUri;
     @Value("${kakao.user-info-uri}")
@@ -45,8 +48,12 @@ public class KakaoApiServiceImpl implements KakaoApiService{
     //return : access token 문자열
     //throws : Exception JSON 파싱 실패시 예외 발생
     public String getAccessToken(String code) throws Exception{
-    	
+
     	try {
+    		System.out.println("🧪 getAccessToken 파라미터 확인");
+    		System.out.println("🧪 code: " + code);
+
+    		
 	    	//요청 헤더 설정
 	    	HttpHeaders headers = new HttpHeaders();
 	    	headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
@@ -55,7 +62,8 @@ public class KakaoApiServiceImpl implements KakaoApiService{
 	    	MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
 	    	params.add("grant_type", "authorization_code");		//고정값
 	    	params.add("client_id", clientId);					//카카오 REST API 키값
-	    	params.add("redirect_uri", redirectUri);			//카카오에 등록된 리다이렉트 URI
+	    	params.add("redirect_uri", "http://localhost:8090/oauth/kakao/callback");
+	    	//params.add("redirect_uri", redirectUri);			//카카오에 등록된 리다이렉트 URI
 	    	params.add("code", code);							//인가코드
 	    	
 	    	//요청 생성
@@ -95,6 +103,7 @@ public class KakaoApiServiceImpl implements KakaoApiService{
     //return : 사용자 정보(kakaoUserInfoDto) 객체
     //throws : Exception JSON 파싱 실패시 예외 발생
     public KakaoUserInfoDto getUserInfo(String accessToken) throws Exception{
+    	System.out.println("🟢 사용자 정보 조회용 AccessToken: " + accessToken); // 추가
     	
     	//요청 헤더 설정
     	HttpHeaders headers = new HttpHeaders();
@@ -107,8 +116,8 @@ public class KakaoApiServiceImpl implements KakaoApiService{
     	
     	//사용자 정보 요청
     	ResponseEntity<String> response = restTemplate.exchange(userInfoUri, HttpMethod.GET, entity, String.class);
-    	System.out.println("응답: " + response);
-    	System.out.println("본문: " + response.getBody());
+    	System.out.println("🟢 사용자 정보 응답: " + response);
+        System.out.println("🟢 사용자 정보 바디: " + response.getBody());
     	
     	//응답 JSON 파싱
     	JsonNode json = objectMapper.readTree(response.getBody());
@@ -136,4 +145,7 @@ public class KakaoApiServiceImpl implements KakaoApiService{
 
     	return userInfo;	//kakaoUserInfoDto
     }
+    
+    
+
 }
