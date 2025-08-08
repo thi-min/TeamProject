@@ -19,7 +19,7 @@ public class AdminMemberDetailResponseDto {
 	private Long memberNum; //회원 번호
 	private String memberId; //아이디
 	private String memberName; //이름
-	private LocalDate memberBirth; //생년월일 일
+	private LocalDate memberBirth; //생년월일 yyyy-mm-dd
 	private String memberPhone; //핸드폰 번호
 	private String memberAddress; //주소
 	private String memberDay; //가입일시
