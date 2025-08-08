@@ -31,7 +31,7 @@ public class ReserveController {
     }
     
     //사용자 - 회원 예약목록 조회 (마이페이지)
-    @GetMapping("/member")
+    @GetMapping("/my")//reserveAllList
     public ResponseEntity<List<ReserveResponseDto>> getMyReserves(@RequestParam("memberNum") Long memberNum) {
         List<ReserveResponseDto> list = reserveService.getReservesByMember(memberNum);
         return ResponseEntity.ok(list);
@@ -49,7 +49,7 @@ public class ReserveController {
     //ex)DELETE /api/reserve/101/cancel?memberNum=5 
 
     //사용자 - 놀이터 예약 상세조회(마이페이지)
-    @GetMapping("/land/{reserveCode}/member/{memberNum}")
+    @GetMapping("/land/{reserveCode}")	//LandList
     public ResponseEntity<LandDetailDto> getMyLandReserveDetail(
             @PathVariable Long reserveCode,
             @PathVariable Long memberNum) {
@@ -58,7 +58,7 @@ public class ReserveController {
     }
     
     //사용자 - 봉사 예약 상세조회(마이페이지)
-    @GetMapping("/volunteer/{reserveCode}/member/{memberNum}")
+    @GetMapping("/volunteer/{reserveCode}")
     public ResponseEntity<VolunteerDetailDto> getMyVolunteerReserveDetail(
             @PathVariable Long reserveCode,
             @PathVariable Long memberNum) {
@@ -67,7 +67,7 @@ public class ReserveController {
     }
     
     //예약 유형별 탭기능  (봉사 / 놀이터)
-    @GetMapping("/type")
+    @GetMapping("/my/type")
     public ResponseEntity<List<ReserveResponseDto>> getMyReservesByType(
     		@RequestParam("memberNum") Long memberNum,
             @RequestParam("type") int type) {
