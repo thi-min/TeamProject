@@ -32,6 +32,6 @@ public class AdminVolunteerController {
     @GetMapping("/preview/{reserveCode}")
     public ResponseEntity<VolunteerDetailDto> getVolunteerPreview(@PathVariable Long reserveCode) {
         VolunteerDetailDto dto = volunteerService.getVolunteerDetailByReserveCode(reserveCode);
-        return ResponseEntity.ok(dto);
+        return ResponseEntity.ok(dto);  //xptmxm
     }
 }
