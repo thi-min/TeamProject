@@ -12,6 +12,7 @@ import VolunteerReserveDatePage from './program/reserve/volunteer/pages/Voluntee
 import VolunteerReserveFormPage from './program/reserve/volunteer/pages/VolunteerReserveFormPage';
 import VolunteerReserveConfirmPage from './program/reserve/volunteer/pages/VolunteerReserveConfirmPage';
 import VolunteerReserveSuccessPage from './program/reserve/volunteer/pages/VolunteerReserveFormPage';
+import MyReserveListPage from './program/mypage/reserve/pages/MyReserveListPage';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
           <Route path="/reserve/volunteer/form" element={<VolunteerReserveFormPage />} />
           <Route path="/reserve/volunteer/confirm" element={<VolunteerReserveConfirmPage />} />
           <Route path="/reserve/volunteer/success" element={<VolunteerReserveSuccessPage />} />
+          <Route path="/mypage/reserve" element={<MyReserveListPage />} />
         </Routes>
       </Layout>
     </BrowserRouter>
