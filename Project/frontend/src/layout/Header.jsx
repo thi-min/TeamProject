@@ -36,7 +36,7 @@ const Header = () => {
       <div className="header_inner">
         <h1 className="logo">
           <Link to="/">
-            <img src="/common/image/dp_logo.png" alt="로고" className="logo_image" />
+            <img src="/common/images/dp_logo.png" alt="로고" className="logo_image" />
             <span className="logo_text">함께마당</span>
           </Link>
         </h1>
