@@ -1,5 +1,9 @@
 package com.project.member.controller;
 
+
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,11 +27,12 @@ import com.project.member.repository.MemberRepository;
 import com.project.member.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @RestController	//JSON 응답 전용 컨트롤러
 @RequiredArgsConstructor	//생성자주입
 @RequestMapping//클래스/메서드에 공통 URL 설정
-
+@Slf4j
 //요청수신, 로직호출, 결과응답
 public class MemberController {
 	private final MemberService memberService;
@@ -61,11 +66,52 @@ public class MemberController {
 		return ResponseEntity.ok(memberService.sigup(dto));
 	}
 	
-	//아이디 중복 체크
-	@GetMapping("/check-id")
-	public ResponseEntity<MemberIdCheckResponseDto> checkDuplicateId(@RequestParam String memberId) {
-	    return ResponseEntity.ok(memberService.checkDuplicateMemberId(memberId));
-	}
+//	//아이디 중복 체크
+//	@GetMapping("/check-id")
+//	public ResponseEntity<MemberIdCheckResponseDto> checkDuplicateId(@RequestParam String memberId) {
+//	    return ResponseEntity.ok(memberService.checkDuplicateMemberId(memberId));
+//	}
+    
+	// 아이디 중복 체크
+//    @GetMapping("/check-id")
+//    public ResponseEntity<?> checkDuplicateId(@RequestParam("memberId") String memberId) {
+//        try {
+//            log.info("[check-id] memberId={}", memberId); // ✅ 파라미터 확인
+//            MemberIdCheckResponseDto dto = memberService.checkDuplicateMemberId(memberId);
+//            log.info("[check-id] exists={} message={}", dto.isExists(), dto.getMessage());
+//            return ResponseEntity.ok(dto);
+//        } catch (Exception e) {
+//            // ✅ 어떤 예외가 나는지 로그로 캡처
+//            log.error("[check-id] ERROR: {}", e.getMessage(), e);
+//            // 프론트 디버깅 편의상 200으로 메시지 내려줘도 되고, 500 유지해도 OK
+//            return ResponseEntity.internalServerError().body(
+//                new MemberIdCheckResponseDto(true, "서버 오류: " + e.getClass().getSimpleName())
+//            );
+//        }
+//    }
+
+	 // ✅ 아이디 중복 체크: 존재하면 409, 없으면 200
+    @GetMapping("/check-id") // 최종 경로: (클래스 prefix) + "/check-id"
+    public ResponseEntity<Map<String, String>> checkDuplicateId(@RequestParam("memberId") String memberId) {
+        log.info("[check-id] memberId={}", memberId);
+
+        // ⚠ null/blank 방어
+        if (memberId == null || memberId.isBlank()) {
+            return ResponseEntity.badRequest().body(Map.of("message", "memberId가 비어있습니다."));
+        }
+
+        try {
+            boolean exists = memberService.isDuplicatedMemberId(memberId);
+            if (exists) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of("message", "이미 사용 중인 아이디입니다."));
+            }
+            return ResponseEntity.ok(Map.of("message", "사용 가능한 아이디입니다."));
+        } catch (Exception e) {
+            log.error("[check-id] ERROR: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                                 .body(Map.of("message", "서버 오류: " + e.getClass().getSimpleName()));
+        }
+    }
     
 	//AuthController에 구현해서 주석처리
 //	//마이페이지 조회

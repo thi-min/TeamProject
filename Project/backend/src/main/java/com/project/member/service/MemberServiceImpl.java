@@ -27,7 +27,9 @@ import com.project.member.repository.MemberRepository;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 @Service //tjqltmrPcmd(spring bean)으로 등록
 @RequiredArgsConstructor //final로 선언된 memberRepository를 자동으로 생성자 주입 시켜줌
 public class MemberServiceImpl implements MemberService {
@@ -74,13 +76,21 @@ public class MemberServiceImpl implements MemberService {
 		return new MemberSignUpResponseDto(null, saved.getMemberId(), "회원가입 완료");
 	}
 	
-	//아이디 중복체크
+//	//아이디 중복체크
+//	@Override
+//	public MemberIdCheckResponseDto checkDuplicateMemberId(String memberId) {
+//	    boolean exists = memberRepository.existsByMemberId(memberId);
+//	    String message = exists ? "사용할 수 없는 아이디입니다." : "사용 가능한 아이디입니다.";
+//	    return new MemberIdCheckResponseDto(exists, message);
+//	}
+	
 	@Override
-	public MemberIdCheckResponseDto checkDuplicateMemberId(String memberId) {
-	    boolean exists = memberRepository.existsByMemberId(memberId);
-	    String message = exists ? "사용할 수 없는 아이디입니다." : "사용 가능한 아이디입니다.";
-	    return new MemberIdCheckResponseDto(exists, message);
-	}
+    public MemberIdCheckResponseDto checkDuplicateMemberId(String memberId) {
+        log.info("[svc] existsByMemberId({}) 호출", memberId);
+        boolean exists = memberRepository.existsByMemberId(memberId); // 🔥 여기서 예외가 나면 500
+        String message = exists ? "사용할 수 없는 아이디입니다." : "사용 가능한 아이디입니다.";
+        return new MemberIdCheckResponseDto(exists, message);
+    }
 	
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
@@ -386,4 +396,11 @@ public class MemberServiceImpl implements MemberService {
   	    return cleaned;
   	}
 
+    @Override
+    public boolean isDuplicatedMemberId(String memberId) {
+        // 방어코드: null/blank는 중복 아님으로 처리(컨트롤러에서 이미 막지만 한 번 더)
+        if (memberId == null || memberId.isBlank()) return false;
+        return memberRepository.existsByMemberId(memberId);
+    }
+    
 }

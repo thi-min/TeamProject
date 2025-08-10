@@ -21,7 +21,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "Member")
+@Table(name = "member")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -33,10 +33,11 @@ public class MemberEntity {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long memberNum; //회원번호
 
+	@Column(name = "member_id")
     private String memberId; //이메일 아이디
 
     private String memberPw; //비밀번호
-
+    
     private LocalDateTime pwUpdated; // 마지막 비밀번호 변경일
     
     private String memberName; //이름
@@ -66,9 +67,6 @@ public class MemberEntity {
     //카카오 인증시 memberId로 저장되니까 이건 필요없을꺼 같은데
     private String kakaoId; //카카오아이디
     
-    @JoinColumn(name = "vol_sumtime")
-    private String valSumtime; // 총 봉사시간
-
     private String volSumtime;	//총 봉사시간
     
     private String accessToken;
