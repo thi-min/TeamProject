@@ -32,7 +32,8 @@ textarea{display:block;overflow:auto;resize:vertical}
 /*input[type=search],input[type=text]{-webkit-border-radius:0;-webkit-appearance:none} */
 /*input[type=search]{outline-offset:-2px;-webkit-appearance:none} */
 input[type=search]::-webkit-search-decoration{-webkit-appearance:none}
-input[type=checkbox],input[type=radio]{padding:0;border:none}
+input[type=checkbox],input[type=radio]{padding:0;border:none;cursor: pointer;}
+input[type=checkbox] + label,input[type=radio] + label{cursor: pointer; }
 /* input[type=file]{border:none}
 input[type=file]::-webkit-file-upload-button{font:inherit;-webkit-appearance:button;-moz-appearance:button;border:1px solid #bbb;background:#e0e0e0;box-shadow:none} */
 [type=button],[type=reset],[type=submit],button{overflow:visible;border-color:transparent;background-color:transparent;cursor:pointer}
