@@ -4190,3 +4190,18 @@ span.temp_form{display:inline-block;width:auto;}
     .con_popup_box .popup_box .popup_item .item_inner .pop_close_btn{top:20px;right:20px;width:24px;height:24px;}
 }
 /* --------팝업 끝 ------ */
+
+/* from size 클래스화 */
+.form_1{width:10% !important;}
+.form_2{width:20% !important;}
+.form_3{width:30% !important;}
+.form_4{width:40% !important;}
+.form_5{width:50% !important;}
+.form_6{width:60% !important;}
+.form_7{width:70% !important;}
+.form_8{width:80% !important;}
+.form_9{width:90% !important;}
+.form_10{width:10% !important;}
+
+/* from box 레이아웃 */
+.form_flex{display:flex;gap:20px;align-items:center;}

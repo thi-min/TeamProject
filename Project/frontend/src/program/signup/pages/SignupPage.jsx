@@ -392,8 +392,8 @@ export default function Signup() {
 
             <tr>
               <th scope="row">전화번호</th>
-              <td>
-                <div className="temp_form md">
+              <td className="form_flex">
+                <div className="temp_form md form_4">
                   <input
                     ref={refs.memberPhone}
                     className="temp_input"
@@ -404,6 +404,10 @@ export default function Signup() {
                     placeholder="숫자만 입력"
                   />
                 </div>
+                <span className="temp_form">
+                    <input type="checkbox" id="snsYn" class="temp_check" />
+                    <label for="snsYn">수신동의</label>
+                </span>
               </td>
             </tr>
 
