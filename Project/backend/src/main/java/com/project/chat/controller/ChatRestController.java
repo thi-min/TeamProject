@@ -1,48 +1,50 @@
 package com.project.chat.controller;
 
+import com.project.chat.dto.ChatMessageRequestDto;
+import com.project.chat.dto.ChatMessageResponseDto;
 import com.project.chat.entity.ChatMessageEntity;
 import com.project.chat.entity.ChatRoomEntity;
-import com.project.chat.repository.ChatRoomRepository;
-import com.project.chat.service.ChatMessageService;
-import com.project.chat.service.ChatRoomService;
+import com.project.chat.mapper.ChatMapper;
+import com.project.chat.service.ChatService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/chat")
 @RequiredArgsConstructor
 public class ChatRestController {
-    private final ChatRoomService chatRoomService;
-    private final ChatMessageService chatMessageService;
-    private final ChatRoomRepository chatRoomRepository;
+    private final ChatService chatService;
+    private final ChatMapper chatMapper;
 
-    // 모든 채팅룸(관리자용)
     @GetMapping("/rooms")
     public ResponseEntity<List<ChatRoomEntity>> listRooms() {
-        return ResponseEntity.ok(chatRoomRepository.findAll());
+        // admin view
+        return ResponseEntity.ok(chatService.getAllRooms());
     }
 
-    // 특정 룸 조회
-    @GetMapping("/rooms/{roomId}")
-    public ResponseEntity<ChatRoomEntity> getRoom(@PathVariable Long roomId) {
-        ChatRoomEntity r = chatRoomService.getRoom(roomId);
-        if (r == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(r);
-    }
-
-    // 룸 생성 (회원번호로)
     @PostMapping("/rooms")
     public ResponseEntity<ChatRoomEntity> createRoom(@RequestParam Long memberNum) {
-        ChatRoomEntity created = chatRoomService.createRoomForMember(memberNum);
-        return ResponseEntity.ok(created);
+        return ResponseEntity.ok(chatService.createRoomForMember(memberNum));
     }
 
-    // 룸의 메시지 목록
     @GetMapping("/rooms/{roomId}/messages")
-    public ResponseEntity<List<ChatMessageEntity>> getMessages(@PathVariable Long roomId) {
-        return ResponseEntity.ok(chatMessageService.getMessagesByRoom(roomId));
+    public ResponseEntity<List<ChatMessageResponseDto>> getMessages(@PathVariable Long roomId) {
+        List<ChatMessageEntity> list = chatService.getMessages(roomId);
+        return ResponseEntity.ok(list.stream().map(chatMapper::toDto).collect(Collectors.toList()));
+    }
+
+    @PostMapping("/rooms/{roomId}/messages")
+    public ResponseEntity<ChatMessageResponseDto> postMessage(@PathVariable Long roomId,
+                                                              @RequestBody ChatMessageRequestDto req) {
+        ChatMessageEntity entity = chatMapper.toEntity(req);
+        // ensure room entity is set
+        ChatRoomEntity room = chatService.getRoom(roomId);
+        if (room == null) return ResponseEntity.notFound().build();
+        entity.setChatRoom(room);
+        ChatMessageEntity saved = chatService.saveMessage(entity);
+        return ResponseEntity.ok(chatMapper.toDto(saved));
     }
 }

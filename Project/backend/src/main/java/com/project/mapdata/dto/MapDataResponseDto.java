@@ -1,15 +1,12 @@
-package com.project.adopt.dto;
+package com.project.mapdata.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-@Data
-@AllArgsConstructor
+import lombok.*;
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class MapDataDto {
+public class MapDataResponseDto {
     private Long mapdataNum;
     private String placeName;
     private String address;

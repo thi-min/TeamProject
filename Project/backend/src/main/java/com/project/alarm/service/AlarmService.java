@@ -18,6 +18,11 @@ public class AlarmService {
         return alarmRepository.findByMemberMemberNumOrderByAlarmTimeDesc(memberNum);
     }
 
+    @Transactional(readOnly = true)
+    public AlarmEntity get(Long id) {
+        return alarmRepository.findById(id).orElse(null);
+    }
+
     @Transactional
     public AlarmEntity create(AlarmEntity e) {
         return alarmRepository.save(e);
@@ -26,9 +31,5 @@ public class AlarmService {
     @Transactional
     public AlarmEntity update(AlarmEntity e) {
         return alarmRepository.save(e);
-    }
-    @Transactional(readOnly = true)
-    public AlarmEntity get(Long id) {
-        return alarmRepository.findById(id).orElse(null);
     }
 }

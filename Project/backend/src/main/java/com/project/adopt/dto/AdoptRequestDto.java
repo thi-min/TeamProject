@@ -1,24 +1,22 @@
 package com.project.adopt.dto;
 
 import com.project.common.enums.AdoptState;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class AdoptListDto {
+public class AdoptRequestDto {
     private Long adoptNum;
     private Long memberNum;
-    private String memberName;
     private Long animalId;
-    private String adoptTitle;
+    private LocalDate vistDt;
     private LocalDateTime consultDt;
-    private java.time.LocalDate vistDt;
+    private String adoptTitle;
+    private String adoptContent;
     private AdoptState adoptState;
 }

@@ -1,22 +1,18 @@
-package com.project.adopt.dto;
+package com.project.chat.dto;
 
 import com.project.common.enums.CheckState;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
 import java.time.LocalDateTime;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class ChatMessageDto {
+public class ChatMessageResponseDto {
     private Long chatMessageId;
     private Long chatRoomId;
     private Long memberNum;
-    private String memberName;
     private String adminId;
     private LocalDateTime sendTime;
     private String chatCont;

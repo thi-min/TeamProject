@@ -1,0 +1,434 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Admin Chat - UI Prototype</title>
+<style>
+  :root{
+    --bg: #f6f6f6;
+    --panel-bg: #fff;
+    --muted: #9b9b9b;
+    --accent: #24a0b3;
+    --user-bubble: #fff7d9;   /* 연한 노랑 */
+    --admin-bubble: #ffdce6;  /* 연한 핑크 */
+    --notice-bg: #fff3e0;
+    --shadow: 0 6px 18px rgba(0,0,0,0.06);
+    --radius: 12px;
+    --max-width: 1100px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: "Noto Sans KR", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background:var(--bg);
+    color:#222;
+    padding:18px;
+    display:flex;
+    justify-content:center;
+  }
+
+  .admin-chat{
+    width:100%;
+    max-width:var(--max-width);
+    display:flex;
+    gap:18px;
+  }
+
+  /* Left: chat list */
+  .chat-list{
+    width:42%;
+    background:var(--panel-bg);
+    border-radius:8px;
+    box-shadow:var(--shadow);
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    min-height:540px;
+    overflow:hidden;
+  }
+  .chat-list header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:6px 8px 12px;
+    border-bottom:1px solid #ececec;
+  }
+  .chat-list header h3{
+    margin:0;
+    font-size:16px;
+    font-weight:700;
+  }
+  .list-scroll{
+    overflow:auto;
+    padding:8px;
+  }
+  .list-item{
+    display:grid;
+    grid-template-columns: 28px 1fr 160px 84px;
+    gap:8px;
+    align-items:center;
+    padding:12px;
+    border-radius:6px;
+    margin-bottom:6px;
+    transition:background .15s, box-shadow .15s;
+    cursor:pointer;
+  }
+  .list-item:hover{ background:#fafafa; }
+  .list-item.active{ background:#f1fbfd; box-shadow:0 2px 8px rgba(36,160,179,.08); }
+
+  .list-item input[type="radio"]{ width:18px; height:18px; }
+
+  .meta{
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+  }
+  .meta .name-row{
+    display:flex; gap:8px; align-items:center;
+  }
+  .meta .name{ font-weight:700; font-size:14px; }
+  .meta .email{ color:var(--muted); font-size:13px; }
+  .meta .last{ color:#555; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%; }
+
+  .date-col{
+    color:var(--muted);
+    font-size:13px;
+    text-align:right;
+  }
+
+  .badge-new{
+    background:#ff3b30;
+    color:#fff;
+    padding:3px 6px;
+    border-radius:12px;
+    font-size:11px;
+    font-weight:700;
+  }
+
+  /* Right: chat panel */
+  .chat-panel{
+    width:58%;
+    background:transparent;
+    display:flex;
+    flex-direction:column;
+  }
+
+  .chat-header{
+    background:var(--panel-bg);
+    border-radius:8px;
+    box-shadow:var(--shadow);
+    padding:12px 16px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+  }
+  .chat-header .user-info{display:flex;flex-direction:column}
+  .chat-header .user-info .title{ font-weight:800; font-size:16px; }
+  .chat-header .user-info .sub{ color:var(--muted); font-size:13px; }
+
+  .chat-body{
+    margin-top:12px;
+    flex:1;
+    display:flex;
+    gap:12px;
+    min-height:420px;
+  }
+
+  /* left area: large empty history like in wireframe */
+  .history{
+    flex:1;
+    background:linear-gradient(transparent 0, rgba(0,0,0,0.02) 1px);
+    background-size:100% 40px;
+    padding:16px;
+    border-radius:8px;
+    border:1px solid #e9e9e9;
+    overflow:auto;
+    position:relative;
+  }
+  .history .date-line{
+    display:flex;
+    justify-content:flex-end;
+    color:var(--muted);
+    font-size:13px;
+    margin-bottom:12px;
+  }
+  .history p{
+    color:#333;
+    line-height:1.9;
+    white-space:pre-wrap;
+  }
+
+  /* right chat box (연한 노란 박스) */
+  .chat-box{
+    width:360px;
+    min-height:360px;
+    background:#fff9e7; /* 전체 노란 틀 */
+    border-radius:10px;
+    border:1px solid #f1e7c5;
+    padding:12px;
+    display:flex;
+    flex-direction:column;
+    box-shadow:0 4px 18px rgba(0,0,0,0.04);
+  }
+  .chat-box .box-header{
+    text-align:center;
+    font-weight:700;
+    color:#777;
+    padding:6px;
+    border-radius:6px;
+    background:linear-gradient(180deg, rgba(255,255,255,0.4), transparent);
+    font-size:14px;
+    margin-bottom:8px;
+  }
+  .chat-box .notice{
+    background: #fff6f6;
+    color:#777;
+    font-size:12px;
+    padding:6px 8px;
+    border-radius:8px;
+    margin-bottom:8px;
+    text-align:center;
+  }
+
+  .messages{
+    flex:1;
+    overflow:auto;
+    padding:6px;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+
+  /* bubble: user(left) / admin(right) */
+  .msg{
+    max-width:78%;
+    padding:10px 14px;
+    border-radius:16px;
+    position:relative;
+    word-break:break-word;
+    font-size:14px;
+    line-height:1.4;
+  }
+  .msg.user{
+    align-self:flex-start;
+    background:var(--user-bubble);
+    border:1px solid rgba(0,0,0,0.03);
+    border-bottom-left-radius:4px;
+  }
+  .msg.admin{
+    align-self:flex-end;
+    background:var(--admin-bubble);
+    border:1px solid rgba(0,0,0,0.03);
+    border-bottom-right-radius:4px;
+  }
+  .msg small{
+    display:block;
+    margin-top:6px;
+    font-size:12px;
+    color:var(--muted);
+  }
+
+  .input-area{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+    align-items:center;
+  }
+  .input-area textarea{
+    flex:1;
+    min-height:42px;
+    max-height:120px;
+    resize:vertical;
+    padding:8px 10px;
+    border-radius:8px;
+    border:1px solid #e6e6e6;
+    font-size:14px;
+    line-height:1.4;
+    background:#fff;
+  }
+  .input-area button{
+    background:var(--accent);
+    color:#fff;
+    border:none;
+    padding:10px 14px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:700;
+  }
+  .input-area button:disabled{ opacity:.6; cursor:not-allowed; }
+
+  /* scrollbar nice */
+  .list-scroll::-webkit-scrollbar,
+  .history::-webkit-scrollbar,
+  .messages::-webkit-scrollbar{
+    height:8px; width:8px;
+  }
+  .list-scroll::-webkit-scrollbar-thumb,
+  .history::-webkit-scrollbar-thumb,
+  .messages::-webkit-scrollbar-thumb{
+    background:#d6d6d6; border-radius:6px;
+  }
+
+  /* responsive */
+  @media (max-width:900px){
+    .admin-chat{flex-direction:column; padding:12px}
+    .chat-list,.chat-panel{width:100%}
+    .chat-body{flex-direction:column}
+    .chat-box{width:100%}
+  }
+</style>
+</head>
+<body>
+<div class="admin-chat" role="application" aria-label="관리자 채팅">
+  <aside class="chat-list" aria-labelledby="listTitle">
+    <header><h3 id="listTitle">상담 목록</h3></header>
+    <div class="list-scroll" id="listScroll">
+      <!-- 샘플 항목들 -->
+      <div class="list-item active" data-id="1" tabindex="0" aria-pressed="true">
+        <div><input type="radio" name="sel" checked /></div>
+        <div class="meta">
+          <div class="name-row"><span class="name">이소신</span><span class="badge-new">NEW</span></div>
+          <div class="email">test@naver.com</div>
+          <div class="last">치와와 입양하고 싶습니다. 간단한 문의 내용 예시입니다…</div>
+        </div>
+        <div class="date-col">'25.7.14</div>
+        <div style="text-align:right;color:var(--muted);font-size:12px;">조회</div>
+      </div>
+
+      <div class="list-item" data-id="2" tabindex="0" aria-pressed="false">
+        <div><input type="radio" name="sel" /></div>
+        <div class="meta">
+          <div class="name-row"><span class="name">이 황</span></div>
+          <div class="email">test2@hanmail.net</div>
+          <div class="last">어떠어떠한 일로 어떤 상태이며 어떤 문제가 있는지 어떤 말로 해주시…</div>
+        </div>
+        <div class="date-col">'25.7.14</div>
+        <div style="text-align:right;color:var(--muted);font-size:12px;">-</div>
+      </div>
+
+      <!-- 더 많은 항목은 동적으로 추가 -->
+    </div>
+  </aside>
+
+  <main class="chat-panel" aria-live="polite">
+    <div class="chat-header">
+      <div class="user-info">
+        <div class="title">이소신 <span style="font-weight:600;color:var(--muted);font-size:13px;">test@naver.com</span></div>
+        <div class="sub">마지막 채팅: '25.7.14</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="btnDelete" title="삭제" style="padding:8px 10px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer">삭제</button>
+        <button id="btnClose" title="닫기" style="padding:8px 10px;border-radius:6px;border:1px solid #ddd;background:#fff;cursor:pointer">닫기</button>
+      </div>
+    </div>
+
+    <div class="chat-body">
+      <section class="history" aria-label="채팅 내역">
+        <div class="date-line">'25.7.14</div>
+        <p>상대 : 11:14 // 치와와 입양하고 싶습니다</p>
+        <p>나 : 13:05 // 해당견의 상태 .. etc</p>
+        <p>상대 : 13:12 // 감사합니다.</p>
+        <!-- 긴 내역 영역 -->
+      </section>
+
+      <aside class="chat-box" aria-label="대화">
+        <div class="box-header">사용자 명</div>
+        <div class="notice">상대방에 대한 비하, 폭언 발언은 주의해주세요</div>
+
+        <div class="messages" id="messages" aria-live="polite" aria-atomic="false">
+          <!-- 샘플 메시지 -->
+          <div class="msg user"><strong>상대</strong><br/>치와와 입양하고 싶습니다.<small>11:14</small></div>
+          <div class="msg admin"><strong>관리자</strong><br/>해당 건의 상태 .. etc<small>13:05</small></div>
+          <div class="msg user"><strong>상대</strong><br/>감사합니다.<small>13:12</small></div>
+        </div>
+
+        <div class="input-area">
+          <textarea id="inputMsg" aria-label="메시지 입력" placeholder="메시지를 입력하세요"></textarea>
+          <button id="sendBtn" title="전송">전송</button>
+        </div>
+      </aside>
+    </div>
+  </main>
+</div>
+
+<script>
+  // 간단 동작용 JS: 목록 클릭 시 활성화, NEW 제거, 메시지 전송(임시 로컬)
+  (function(){
+    const listScroll = document.getElementById('listScroll');
+    const items = Array.from(listScroll.querySelectorAll('.list-item'));
+    const messagesEl = document.getElementById('messages');
+    const input = document.getElementById('inputMsg');
+    const sendBtn = document.getElementById('sendBtn');
+
+    function activateItem(el){
+      items.forEach(i=>{ i.classList.remove('active'); i.querySelector('input[type=radio]').checked=false; i.setAttribute('aria-pressed','false') });
+      el.classList.add('active');
+      el.querySelector('input[type=radio]').checked = true;
+      el.setAttribute('aria-pressed','true');
+      // NEW 배지 제거(읽음 처리)
+      const badge = el.querySelector('.badge-new');
+      if(badge) badge.remove();
+
+      // TODO: 실제 백엔드 연동 시 여기서 API 호출하여 해당 채팅 내역 불러오기
+    }
+
+    items.forEach(it=>{
+      it.addEventListener('click',()=>activateItem(it));
+      it.addEventListener('keydown',(e)=>{ if(e.key === 'Enter' || e.key === ' ') { e.preventDefault(); activateItem(it); }});
+    });
+
+    function appendAdminMessage(text){
+      const wrapper = document.createElement('div');
+      wrapper.className = 'msg admin';
+      wrapper.innerHTML = '<strong>관리자</strong><br/>' + escapeHtml(text) + '<small>' + timeNow() + '</small>';
+      messagesEl.appendChild(wrapper);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+    function escapeHtml(s){ return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function timeNow(){
+      const d = new Date();
+      return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
+    }
+
+    sendBtn.addEventListener('click',()=>{
+      const v = input.value.trim();
+      if(!v) return;
+      // 화면에 바로 추가 (임시)
+      appendAdminMessage(v);
+      input.value = '';
+      input.focus();
+
+      // 실제 구현: 여기에 fetch로 POST 요청 (Authorization: Bearer <JWT_RS256>) 하여 메시지 전송
+      // 예:
+      // fetch('/api/chat/send', {
+      //   method:'POST',
+      //   headers: {
+      //     'Content-Type':'application/json',
+      //     'Authorization':'Bearer ' + token // token: RS256 서명 JWT
+      //   },
+      //   body: JSON.stringify({ chatId: currentChatId, message: v })
+      // })
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if(e.key === 'Enter' && !e.shiftKey){
+        e.preventDefault();
+        sendBtn.click();
+      }
+    });
+
+    // 초 기 스크롤
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+
+    // Placeholder: 카카오맵을 우측 또는 다른 영역에 렌더링할 경우, map container를 만들어 아래 주석 처리된 초기화 코드를 사용하세요.
+    // <div id="kakaoMap" style="width:100%;height:300px;"></div>
+    // 카카오맵 라이브러리 추가 후:
+    // kakao.maps.load(function() {
+    //   const map = new kakao.maps.Map(document.getElementById('kakaoMap'), { center: new kakao.maps.LatLng(37.5665,126.9780), level: 3 });
+    // });
+
+  })();
+</script>
+</body>
+</html>

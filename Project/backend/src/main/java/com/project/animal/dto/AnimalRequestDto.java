@@ -1,23 +1,22 @@
-package com.project.adopt.dto;
+package com.project.animal.dto;
 
 import com.project.common.enums.AnimalSex;
 import com.project.common.enums.AnimalState;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
 import java.time.LocalDate;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class AnimalListDto {
+public class AnimalRequestDto {
     private Long animalId;
     private String animalName;
     private String animalBreed;
     private AnimalSex animalSex;
-    private AnimalState animalState;
     private LocalDate animalDate;
+    private String animalContent;
+    private AnimalState animalState;
+    private LocalDate adoptDate;
 }

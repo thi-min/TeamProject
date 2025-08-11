@@ -1,44 +1,52 @@
 package com.project.mapdata.controller;
 
+import com.project.mapdata.dto.MapDataRequestDto;
+import com.project.mapdata.dto.MapDataResponseDto;
 import com.project.mapdata.entity.MapDataEntity;
+import com.project.mapdata.mapper.MapDataMapper;
 import com.project.mapdata.service.MapDataService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/mapdata")
 @RequiredArgsConstructor
 public class MapDataController {
     private final MapDataService mapDataService;
+    private final MapDataMapper mapDataMapper;
 
     @GetMapping
-    public ResponseEntity<List<MapDataEntity>> listAll() {
-        return ResponseEntity.ok(mapDataService.findAll());
+    public ResponseEntity<List<MapDataResponseDto>> listAll() {
+        return ResponseEntity.ok(mapDataService.findAll().stream().map(mapDataMapper::toDto).collect(Collectors.toList()));
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<MapDataEntity>> searchByPlace(@RequestParam("place") String place) {
-        return ResponseEntity.ok(mapDataService.findByPlace(place));
+    public ResponseEntity<List<MapDataResponseDto>> searchByPlace(@RequestParam("place") String place) {
+        return ResponseEntity.ok(mapDataService.findByPlace(place).stream().map(mapDataMapper::toDto).collect(Collectors.toList()));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MapDataEntity> get(@PathVariable Long id) {
+    public ResponseEntity<MapDataResponseDto> get(@PathVariable Long id) {
         MapDataEntity e = mapDataService.get(id);
         if (e == null) return ResponseEntity.notFound().build();
-        return ResponseEntity.ok(e);
+        return ResponseEntity.ok(mapDataMapper.toDto(e));
     }
 
     @PostMapping
-    public ResponseEntity<MapDataEntity> create(@RequestBody MapDataEntity payload) {
-        return ResponseEntity.ok(mapDataService.create(payload));
+    public ResponseEntity<MapDataResponseDto> create(@RequestBody MapDataRequestDto req) {
+        MapDataEntity entity = mapDataMapper.toEntity(req);
+        return ResponseEntity.ok(mapDataMapper.toDto(mapDataService.create(entity)));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MapDataEntity> update(@PathVariable Long id, @RequestBody MapDataEntity payload) {
-        if (payload.getMapdataNum() == null) payload.setMapdataNum(id);
-        return ResponseEntity.ok(mapDataService.update(payload));
+    public ResponseEntity<MapDataResponseDto> update(@PathVariable Long id, @RequestBody MapDataRequestDto req) {
+        MapDataEntity exist = mapDataService.get(id);
+        if (exist == null) return ResponseEntity.notFound().build();
+        MapDataEntity entity = mapDataMapper.toEntity(req);
+        entity.setMapdataNum(id);
+        return ResponseEntity.ok(mapDataMapper.toDto(mapDataService.update(entity)));
     }
 }

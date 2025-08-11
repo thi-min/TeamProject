@@ -1,19 +1,16 @@
-package com.project.adopt.dto;
+package com.project.alarm.dto;
 
-import com.project.common.enums.CheckState;
 import com.project.common.enums.AlarmType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import com.project.common.enums.CheckState;
+import lombok.*;
 import java.time.LocalDateTime;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class AlarmDto {
+public class AlarmResponseDto {
     private Long alarmId;
     private Long memberNum;
     private AlarmType alarmType;

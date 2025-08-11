@@ -28,13 +28,13 @@ public class AnimalService {
     }
 
     @Transactional
-    public AnimalEntity create(AnimalEntity e) {
-        return animalRepository.save(e);
+    public AnimalEntity create(AnimalEntity entity) {
+        return animalRepository.save(entity);
     }
 
     @Transactional
-    public AnimalEntity update(AnimalEntity e) {
-        return animalRepository.save(e);
+    public AnimalEntity update(AnimalEntity entity) {
+        return animalRepository.save(entity);
     }
 
     @Transactional
@@ -45,8 +45,6 @@ public class AnimalService {
     @Transactional(readOnly = true)
     public Set<Long> findFileIds(Long animalId) {
         return animalFileRepository.findByAnimalAnimalId(animalId)
-                .stream()
-                .map(f -> f.getAnimalFileId())
-                .collect(Collectors.toSet());
+                .stream().map(f -> f.getAnimalFileId()).collect(Collectors.toSet());
     }
 }

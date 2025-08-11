@@ -1,20 +1,17 @@
-package com.project.adopt.dto;
+package com.project.animal.dto;
 
 import com.project.common.enums.AnimalSex;
 import com.project.common.enums.AnimalState;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
+import lombok.*;
 import java.time.LocalDate;
 import java.util.Set;
 
-@Data
-@AllArgsConstructor
+@Getter
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public class AnimalDetailDto {
+public class AnimalResponseDto {
     private Long animalId;
     private String animalName;
     private String animalBreed;
@@ -23,5 +20,5 @@ public class AnimalDetailDto {
     private LocalDate animalDate;
     private LocalDate adoptDate;
     private String animalContent;
-    private Set<Long> fileIds; // AnimalFileEntity.fileNum 또는 animalFileId 목록
+    private Set<Long> fileIds;
 }
