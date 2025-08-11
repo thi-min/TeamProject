@@ -1,36 +1,32 @@
 import axios from "axios";
 
-const BASE_URL = "/api/reserve";
+// .env.development 에 REACT_APP_API_BASE=http://localhost:8080 넣고 개발서버 재시작 권장
+const API_BASE = process.env.REACT_APP_API_BASE || "";
+const api = axios.create({ baseURL: API_BASE });
 
+/**
+ * 백엔드 매핑
+ * - GET /api/land/time-slots?date=yyyy-MM-dd&memberNum=1&landType=SMALL
+ *     -> List<LandCountDto> (timeSlotId, label, landType, reservedCount, capacity)
+ * - GET /api/time-slots/land
+ *     -> List<TimeSlotDto> (id, label, startTime, endTime, capacity, enabled)
+ * - POST /api/reserve
+ *     -> 예약 생성 (사용 중이던 엔드포인트 유지)
+ */
 const LandReserveService = {
-  /**
-   * 놀이터 예약 생성 (POST /api/reserve)
-   * @param {Object} fullReserveRequestDto - 통합 DTO
-   * @returns {Promise}
-   */
-  createReserve: (fullReserveRequestDto) => {
-    return axios.post(BASE_URL, fullReserveRequestDto);
-  },
+  // 날짜+유형별 시간대 현황(우선 사용)
+fetchReservationStatus(landDate, memberNum, landType) {
+  return api.get("/api/land/time-slots", {
+    params: { date: landDate, memberNum, landType }
+  });
+},
+fetchTimeSlots() {
+  return api.get("/api/time-slots/LAND");
+},
 
-  /**
-   * 놀이터 시간대 리스트 조회 (GET /api/timeslot?type=LAND)
-   * @returns {Promise}
-   */
-  fetchTimeSlots: () => {
-    return axios.get("/api/timeslot", {
-      params: { type: "LAND" }
-    });
-  },
-
-  /**
-   * 날짜별 시간대 예약 현황 조회 (GET /api/land/count?date=yyyy-MM-dd)
-   * @param {String} landDate
-   * @returns {Promise}
-   */
-  fetchReservationStatus: (landDate) => {
-    return axios.get("/api/land/count", {
-      params: { date: landDate }
-    });
+  // 예약 생성 (기존 유지)
+  createReserve(fullReserveRequestDto) {
+    return api.post("/api/reserve", fullReserveRequestDto);
   },
 };
 
