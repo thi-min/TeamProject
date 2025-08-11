@@ -80,51 +80,64 @@ export default function Signup() {
     const { name, value, type, checked } = e.target;
 
     if (name === "memberId") {
-      setIdCheck({ loading: false, done: false, available: false, message: "" });
+      setIdCheck({
+        loading: false,
+        done: false,
+        available: false,
+        message: "",
+      });
     }
 
     // ✅ type별 값 결정: checkbox / radio / 그 외
     const nextValue =
-        type === "checkbox" ? checked :
-        type === "radio"    ? value   :
-        value;
+      type === "checkbox" ? checked : type === "radio" ? value : value;
 
     setFormData((prev) => {
-        const next = { ...prev, [name]: nextValue };
+      const next = { ...prev, [name]: nextValue };
 
-        // ✅ 비번/확인은 정책 재계산
-        if (name === "memberPw" || name === "memberPwCheck") {
+      // ✅ 비번/확인은 정책 재계산
+      if (name === "memberPw" || name === "memberPwCheck") {
         const memberPw = name === "memberPw" ? next.memberPw : prev.memberPw;
-        const memberPwCheck = name === "memberPwCheck" ? next.memberPwCheck : prev.memberPwCheck;
+        const memberPwCheck =
+          name === "memberPwCheck" ? next.memberPwCheck : prev.memberPwCheck;
         setPwState(evaluatePassword(memberPw, memberPwCheck));
-        }
-        return next;
+      }
+      return next;
     });
 
     //핸드폰번호 숫자만
     if (name === "memberPhone") {
-        // 숫자만 남기기
-        const onlyNums = value.replace(/[^0-9]/g, "");
-        setFormData((prev) => ({ ...prev, [name]: onlyNums }));
-        return; // 아래 로직은 건너뜀
+      // 숫자만 남기기
+      const onlyNums = value.replace(/[^0-9]/g, "");
+      setFormData((prev) => ({ ...prev, [name]: onlyNums }));
+      return; // 아래 로직은 건너뜀
     }
   };
 
-        
   // ---------- 중복 체크 ----------
   const handleCheckDuplicateId = async () => {
     const email = formData.memberId.trim();
 
     if (!email) {
       const msg = "아이디(이메일)를 입력하세요.";
-      setIdCheck({ loading: false, done: true, available: false, message: msg });
+      setIdCheck({
+        loading: false,
+        done: true,
+        available: false,
+        message: msg,
+      });
       alert(msg);
       refs.memberId.current?.focus();
       return;
     }
     if (!isEmailValid) {
       const msg = "아이디(이메일) 형식이 올바르지 않습니다.";
-      setIdCheck({ loading: false, done: true, available: false, message: msg });
+      setIdCheck({
+        loading: false,
+        done: true,
+        available: false,
+        message: msg,
+      });
       alert(msg);
       refs.memberId.current?.focus();
       return;
@@ -139,20 +152,35 @@ export default function Signup() {
 
       if (res.status === 200) {
         const msg = res.data?.message ?? "사용 가능한 아이디입니다.";
-        setIdCheck({ loading: false, done: true, available: true, message: msg });
+        setIdCheck({
+          loading: false,
+          done: true,
+          available: true,
+          message: msg,
+        });
         alert(msg);
         return;
       }
       if (res.status === 409) {
         const msg = res.data?.message ?? "이미 사용 중인 아이디입니다.";
-        setIdCheck({ loading: false, done: true, available: false, message: msg });
+        setIdCheck({
+          loading: false,
+          done: true,
+          available: false,
+          message: msg,
+        });
         alert(msg);
         refs.memberId.current?.focus();
         return;
       }
       if (res.status === 400) {
         const msg = res.data?.message ?? "아이디(이메일)를 입력하세요.";
-        setIdCheck({ loading: false, done: true, available: false, message: msg });
+        setIdCheck({
+          loading: false,
+          done: true,
+          available: false,
+          message: msg,
+        });
         alert(msg);
         refs.memberId.current?.focus();
         return;
@@ -162,7 +190,12 @@ export default function Signup() {
         err?.response?.data?.message ||
         err?.message ||
         "아이디 확인 중 오류가 발생했습니다.";
-      setIdCheck({ loading: false, done: true, available: false, message: msg });
+      setIdCheck({
+        loading: false,
+        done: true,
+        available: false,
+        message: msg,
+      });
       alert(msg);
       refs.memberId.current?.focus();
     }
@@ -179,7 +212,7 @@ export default function Signup() {
       { name: "memberPwCheck", label: "비밀번호 확인" },
       { name: "memberName", label: "이름" },
       { name: "memberBirth", label: "생년월일" },
-      { name: "memberSex", label: "성별" },              // 라디오
+      { name: "memberSex", label: "성별" }, // 라디오
       { name: "memberPhone", label: "전화번호" },
       { name: "memberAddress", label: "주소" },
     ];
@@ -187,9 +220,10 @@ export default function Signup() {
     // 2) 첫 번째 누락 항목을 찾아 알림 + 포커스
     for (const f of required) {
       // 성별은 라디오 특성상 빈 문자열이 유지될 수 있으니 별도 체크
-      const value = f.name === "memberSex"
-        ? formData.memberSex
-        : String(formData[f.name] ?? "").trim();
+      const value =
+        f.name === "memberSex"
+          ? formData.memberSex
+          : String(formData[f.name] ?? "").trim();
 
       if (!value) {
         alert(`${f.label}을(를) 입력하지 않으셨습니다.`);
@@ -247,187 +281,217 @@ export default function Signup() {
 
   return (
     <div className="signup-container">
-      <h3>회원가입</h3>
-
       {/* ✅ 브라우저 기본 검증 끔 */}
       <form noValidate onSubmit={handleSubmit}>
-        <table className="table type2 responsive">
-          <tbody>
-            <tr>
-              <th scope="row">아이디</th>
-              <td>
-                <span className="temp_form md">
-                  <input
-                    ref={refs.memberId}                 // ✅ 포커스 대상
-                    type="email"
-                    name="memberId"
-                    className="temp_input"
-                    value={formData.memberId}
-                    onChange={handleChange}
-                    placeholder="예: user@example.com"
-                  />
-                </span>
-                <span className="temp_btn md id_check_btn">
-                  <button
-                    type="button"
-                    className="btn"
-                    onClick={handleCheckDuplicateId}
-                    disabled={idCheck.loading || !formData.memberId.trim()}
-                  >
-                    {idCheck.loading ? "확인 중..." : "중복체크"}
-                  </button>
-                </span>
-                {idCheck.message && (
-                  <div
-                    className={`hint ${idCheck.done ? (idCheck.available ? "ok" : "warn") : ""}`}
-                    style={{ marginTop: 8 }}
-                  >
-                    {idCheck.message}
+        <div className="form_top_box">
+          <div className="form_top_item">
+            <div className="form_icon type2"></div>
+            <div className="form_title">회원가입</div>
+            <div className="form_desc">
+              <p>회원가입을 환영합니다.</p>
+              <p>아래의 입력칸을 모두 입력해주시기 바랍니다.</p>
+            </div>
+          </div>
+        </div>
+        <div className="form_wrap">
+          <table className="table type2 responsive">
+            <tbody>
+              <tr>
+                <th scope="row">아이디</th>
+                <td>
+                  <span className="temp_form md">
+                    <input
+                      ref={refs.memberId} // ✅ 포커스 대상
+                      type="email"
+                      name="memberId"
+                      className="temp_input"
+                      value={formData.memberId}
+                      onChange={handleChange}
+                      placeholder="예: user@example.com"
+                    />
+                  </span>
+                  <span className="temp_btn md id_check_btn">
+                    <button
+                      type="button"
+                      className="btn"
+                      onClick={handleCheckDuplicateId}
+                      disabled={idCheck.loading || !formData.memberId.trim()}
+                    >
+                      {idCheck.loading ? "확인 중..." : "중복체크"}
+                    </button>
+                  </span>
+                  {idCheck.message && (
+                    <div
+                      className={`hint ${
+                        idCheck.done ? (idCheck.available ? "ok" : "warn") : ""
+                      }`}
+                      style={{ marginTop: 8 }}
+                    >
+                      {idCheck.message}
+                    </div>
+                  )}
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">비밀번호</th>
+                <td>
+                  <div className="temp_form md w40p">
+                    <input
+                      ref={refs.memberPw} // ✅ 포커스 대상
+                      className="temp_input"
+                      type="password"
+                      name="memberPw"
+                      value={formData.memberPw}
+                      onChange={handleChange}
+                    />
                   </div>
-                )}
-              </td>
-            </tr>
+                  <span className="form_winning">
+                    비밀번호는 8~20자 영문, 숫자로 구성되어있어야 합니다.
+                  </span>
+                </td>
+              </tr>
 
-            <tr>
-              <th scope="row">비밀번호</th>
-              <td>
-                <div className="temp_form md">
-                  <input
-                    ref={refs.memberPw}                 // ✅ 포커스 대상
-                    className="temp_input"
-                    type="password"
-                    name="memberPw"
-                    value={formData.memberPw}
-                    onChange={handleChange}
-                  />
-                </div>
-                <span className="form_winning">비밀번호는 8~20자 영문, 숫자로 구성되어있어야 합니다.</span>
-              </td>
-            </tr>
-
-            <tr>
-              <th scope="row">비밀번호 확인</th>
-              <td>
-                <div className="temp_form md">
-                  <input
-                    ref={refs.memberPwCheck}            // ✅ 포커스 대상
-                    className="temp_input"
-                    type="password"
-                    name="memberPwCheck"
-                    value={formData.memberPwCheck}
-                    onChange={handleChange}
-                  />
-                </div>
-                {formData.memberPwCheck && (
-                  <div className={`hint ${pwState.matched ? "ok" : "error"}`} style={{ marginTop: 8 }}>
-                    {pwState.matched ? "비밀번호가 일치합니다." : "비밀번호가 일치하지 않습니다."}
+              <tr>
+                <th scope="row">비밀번호 확인</th>
+                <td>
+                  <div className="temp_form md w40p">
+                    <input
+                      ref={refs.memberPwCheck}
+                      className="temp_input"
+                      type="password"
+                      name="memberPwCheck"
+                      value={formData.memberPwCheck}
+                      onChange={handleChange}
+                    />
                   </div>
-                )}
-              </td>
-            </tr>
+                  {formData.memberPwCheck && (
+                    <div
+                      className={`hint ${pwState.matched ? "ok" : "error"}`}
+                      style={{ marginTop: 8 }}
+                    >
+                      {pwState.matched
+                        ? "비밀번호가 일치합니다."
+                        : "비밀번호가 일치하지 않습니다."}
+                    </div>
+                  )}
+                </td>
+              </tr>
 
-            <tr>
-              <th scope="row">이름</th>
-              <td>
-                <div className="temp_form md">
-                  <input
-                    ref={refs.memberName}
-                    className="temp_input"
-                    type="text"
-                    name="memberName"
-                    value={formData.memberName}
-                    onChange={handleChange}
-                    placeholder="이름 입력"
-                  />
-                </div>
-              </td>
-            </tr>
+              <tr>
+                <th scope="row">이름</th>
+                <td>
+                  <div className="temp_form md w40p">
+                    <input
+                      ref={refs.memberName}
+                      className="temp_input"
+                      type="text"
+                      name="memberName"
+                      value={formData.memberName}
+                      onChange={handleChange}
+                      placeholder="이름 입력"
+                    />
+                  </div>
+                </td>
+              </tr>
 
-            <tr>
-              <th scope="row">생년월일</th>
-              <td>
-                <div className="temp_form md">
-                  <input
-                    ref={refs.memberBirth}
-                    className="temp_input"
-                    type="date"
-                    name="memberBirth"
-                    value={formData.memberBirth}
-                    onChange={handleChange}
-                  />
-                </div>
-              </td>
-            </tr>
+              <tr>
+                <th scope="row">생년월일</th>
+                <td>
+                  <div className="temp_form md w40p">
+                    <input
+                      ref={refs.memberBirth}
+                      className="temp_input"
+                      type="date"
+                      name="memberBirth"
+                      value={formData.memberBirth}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </td>
+              </tr>
 
-            <tr>
-              <th scope="row">성별</th>
-              <td>
-                <span className="temp_form md">
-                  <input
-                    type="radio"
-                    id="sex-man"
-                    name="memberSex"
-                    value="MAN"
-                    className="temp_radio"
-                    checked={formData.memberSex === "MAN"}
-                    onChange={handleChange}
-                    ref={formData.memberSex === "" ? refs.memberSex : null} // 선택 전엔 그룹 포커스용
-                  />
-                  <label htmlFor="sex-man">남</label>
-                </span>
-                <span className="temp_form md" style={{ marginLeft: 12 }}>
-                  <input
-                    type="radio"
-                    id="sex-woman"
-                    name="memberSex"
-                    value="WOMAN"
-                    className="temp_radio"
-                    checked={formData.memberSex === "WOMAN"}
-                    onChange={handleChange}
-                  />
-                  <label htmlFor="sex-woman">여</label>
-                </span>
-              </td>
-            </tr>
+              <tr>
+                <th scope="row">성별</th>
+                <td>
+                  <span className="temp_form md">
+                    <input
+                      type="radio"
+                      id="sex-man"
+                      name="memberSex"
+                      value="MAN"
+                      className="temp_radio"
+                      checked={formData.memberSex === "MAN"}
+                      onChange={handleChange}
+                      ref={formData.memberSex === "" ? refs.memberSex : null} // 선택 전엔 그룹 포커스용
+                    />
+                    <label htmlFor="sex-man">남</label>
+                  </span>
+                  <span className="temp_form md">
+                    <input
+                      type="radio"
+                      id="sex-woman"
+                      name="memberSex"
+                      value="WOMAN"
+                      className="temp_radio"
+                      checked={formData.memberSex === "WOMAN"}
+                      onChange={handleChange}
+                    />
+                    <label htmlFor="sex-woman">여</label>
+                  </span>
+                </td>
+              </tr>
 
-            <tr>
-              <th scope="row">전화번호</th>
-              <td>
-                <div className="temp_form md">
-                  <input
-                    ref={refs.memberPhone}
-                    className="temp_input"
-                    type="tel"
-                    name="memberPhone"
-                    value={formData.memberPhone}
-                    onChange={handleChange}
-                    placeholder="숫자만 입력"
-                  />
-                </div>
-              </td>
-            </tr>
-
-            <tr>
-              <th scope="row">주소</th>
-              <td>
-                <div className="temp_form md">
-                  <input
-                    ref={refs.memberAddress}
-                    className="temp_input"
-                    type="text"
-                    name="memberAddress"
-                    value={formData.memberAddress}
-                    onChange={handleChange}
-                  />
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div className="form_btn_box">
-          <div className="temp_btn md">
-            <button type="submit" className="btn">회원가입</button>
+              <tr>
+                <th scope="row">전화번호</th>
+                <td className="form_flex">
+                  <div className="temp_form md w40p">
+                    <input
+                      ref={refs.memberPhone}
+                      className="temp_input"
+                      type="tel"
+                      name="memberPhone"
+                      value={formData.memberPhone}
+                      onChange={handleChange}
+                      placeholder="숫자만 입력"
+                    />
+                  </div>
+                  <span class="temp_form">
+                    <input
+                      type="checkbox"
+                      id="smsYn"
+                      name="smsAgree"
+                      className="temp_check"
+                      checked={formData.smsAgree}
+                      onChange={handleChange}
+                    />
+                    <label for="smsYn">수신동의</label>
+                  </span>
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">주소</th>
+                <td>
+                  <div className="temp_form md">
+                    <input
+                      ref={refs.memberAddress}
+                      className="temp_input"
+                      type="text"
+                      name="memberAddress"
+                      value={formData.memberAddress}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div className="form_btn_box">
+            <div className="temp_btn md">
+              <button type="submit" className="btn">
+                회원가입
+              </button>
+            </div>
           </div>
         </div>
       </form>
