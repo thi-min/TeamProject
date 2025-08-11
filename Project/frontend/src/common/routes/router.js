@@ -51,15 +51,25 @@ const routes = {
     dashboard: { path: "/admin/dashboard", label: "관리자 홈" },
     members: { path: "/admin/members", label: "회원 관리" },
     memberDetail: (id) => `/admin/members/${id}`,
+    timeSlotManage: { path: "/admin/timeslots", label: "시간대 관리" }, 
   },
 
-  // 예약
-  reservation: {
-    list: { path: "/reservation/list", label: "예약 목록" },
-    create: { path: "/reservation/create", label: "예약 생성" },
-    detail: (id) => `/reservation/${id}`,
+  //예약
+  reserve: {
+    root:   { path: "/reserve", label: "예약하기" },
+    land: {
+      date:    { path: "/reserve/land/date",    label: "날짜/시간 선택" }, 
+      form:    { path: "/reserve/land/form",    label: "놀이터 예약" },
+      confirm: { path: "/reserve/land/confirm", label: "예약 확인" },
+      success: { path: "/reserve/land/success", label: "예약 완료" },
+    },
+    volunteer: {
+      date:    { path: "/reserve/volunteer/date",    label: "날짜/시간 선택" },
+      form:    { path: "/reserve/volunteer/form",    label: "봉사 신청" },
+      confirm: { path: "/reserve/volunteer/confirm", label: "신청 확인" },
+      success: { path: "/reserve/volunteer/success", label: "신청 완료" },
+    },
   },
-
   // 봉사활동
   volunteer: {
     list: { path: "/volunteer/list", label: "봉사 목록" },
