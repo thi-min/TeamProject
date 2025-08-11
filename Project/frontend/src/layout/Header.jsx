@@ -22,7 +22,7 @@ const Header = () => {
                 <div className="weather_inner">
                     <span className="icon"></span>
                     <span className="temperature">
-                        <span className="ondo">33
+                        <span className="">33
                             <span>℃</span>
                         </span>
                     </span>

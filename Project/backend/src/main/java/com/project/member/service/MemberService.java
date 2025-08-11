@@ -25,7 +25,7 @@ public interface MemberService {
     
     //아이디 중복체크
     MemberIdCheckResponseDto checkDuplicateMemberId(String memberId);
-    
+    boolean isDuplicatedMemberId(String memberId);
     //로그인
     //@param - 로그인요청 - MemberLoginRequestDto
     //@return - 로그인응답 - MemberLoginResponseDto
@@ -62,4 +62,5 @@ public interface MemberService {
     MemberEntity kakaoSignUp(KakaoSignUpRequestDto dto);
 	//MemberSignUpResponseDto kakaoSignup(KakaoSignUpRequestDto dto);
 
+    
 }

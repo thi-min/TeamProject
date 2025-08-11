@@ -6,7 +6,7 @@ const routes = {
 
   // 센터 소개
   about: {
-    root: { path: "/about", label: "센터소개" },
+    root: { path: "/about/signup", label: "센터소개" },
     greeting: { path: "/about/greeting", label: "인사말" },
     facility: { path: "/about/facility", label: "시설 소개" },
     location: { path: "/about/location", label: "오시는 길" },
@@ -37,7 +37,7 @@ const routes = {
 
   // 회원 관련
   member: {
-    signup: { path: "/member/signup", label: "회원가입" },
+    signup: { path: "/signup", label: "회원가입" },
     login: { path: "/login", label: "로그인" },
     logout: { path: "/logout", label: "로그아웃" },
     mypage: { path: "/mypage", label: "마이페이지" }, // USER 전용

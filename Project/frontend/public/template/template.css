@@ -332,9 +332,12 @@ a.tel:focus{outline:2px solid rgba(36, 107, 235, 0.8);outline-offset:-1px;}
 .em_m_blue, .em_m_red, .em_m_yellow, .em_m_green, .em_m_black{font-weight:500;}
 .em_b_blue, .em_b_red, .em_b_yellow, .em_b_green, .em_b_black{font-weight:600;}
 .em_s_blue, .em_s_red, .em_s_yellow, .em_s_green, .em_s_black{font-weight:700;}
+
+.form_winning{display:inline-block;position:relative;box-sizing:border-box;padding-left:26px;font-size:16px;line-height:20px;color:red;}.form_winning:before{display:block;position:absolute;top:0;left:0;width:20px;height:20px;background-image:url('/template/images/ico_check_message2.svg');content:'';}
 /* --------- 강조(컬러) 끝 --------- */
 /* --------- 목록 시작 ---------*/
 /* 단일 목록 */
+
 .blt{display:block;position:relative;padding-left:13px;font-size:18px;color:#555;line-height:26px;letter-spacing:-0.02em;font-weight:400;font-family:'PretendardGOV';word-break:keep-all;box-sizing:border-box;}
 .blt:before{display:block;position:absolute;top:10px;left:0;width:4px;height:4px;border-radius:100%;background-color:#555;content:'';}
 .blt2{display:block;position:relative;padding-left:13px;font-size:17px;color:#555;line-height:26px;letter-spacing:-0.02em;font-weight:400;font-family:'PretendardGOV';box-sizing:border-box;}
