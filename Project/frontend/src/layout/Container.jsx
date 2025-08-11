@@ -1,9 +1,11 @@
-import React from 'react';
-
-import { Link } from 'react-router-dom'; // 페이지 이동용
+import React from "react";
 
 const Container = ({ children }) => {
-  return <div id="container">{children}</div>;
+  return (
+    <div id="container">
+      <div className="wrap">{children}</div>
+    </div>
+  );
 };
 
 export default Container;
