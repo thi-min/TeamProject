@@ -10,7 +10,7 @@ import lombok.Data;
 public class AdminLoginRequestDto {
 	//관리자 아이디
 	@NotBlank(message = "아이디는 필수입니다.")
-	private String adminId;
+	private String adminId;//아디디는
 	
 	@NotBlank(message = "비밀번호는 필수입니다.")
 	private String adminPw;
