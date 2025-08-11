@@ -442,55 +442,57 @@ export default function Signup() {
                 </td>
               </tr>
 
-            <tr>
-              <th scope="row">전화번호</th>
-              <td className="form_flex">
-                <div className="temp_form md form_4">
-                  <input
-                    ref={refs.memberPhone}
-                    className="temp_input"
-                    type="tel"
-                    name="memberPhone"
-                    value={formData.memberPhone}
-                    onChange={handleChange}
-                    placeholder="숫자만 입력"
-                  />
-                </div>
-				<span class="temp_form">
-				                    <input
-				                      type="checkbox"
-				                      id="smsYn"
-				                      name="smsAgree"
-				                      className="temp_check"
-				                      checked={formData.smsAgree}
-				                      onChange={handleChange}
-				                    />
-				                    <label for="smsYn">수신동의</label>
-				                  </span>
-              </td>
-            </tr>
+              <tr>
+                <th scope="row">전화번호</th>
+                <td className="form_flex">
+                  <div className="temp_form md form_4">
+                    <input
+                      ref={refs.memberPhone}
+                      className="temp_input"
+                      type="tel"
+                      name="memberPhone"
+                      value={formData.memberPhone}
+                      onChange={handleChange}
+                      placeholder="숫자만 입력"
+                    />
+                  </div>
+                  <span class="temp_form">
+                    <input
+                      type="checkbox"
+                      id="smsYn"
+                      name="smsAgree"
+                      className="temp_check"
+                      checked={formData.smsAgree}
+                      onChange={handleChange}
+                    />
+                    <label for="smsYn">수신동의</label>
+                  </span>
+                </td>
+              </tr>
 
-            <tr>
-              <th scope="row">주소</th>
-              <td>
-                <div className="temp_form md">
-                  <input
-                    ref={refs.memberAddress}
-                    className="temp_input"
-                    type="text"
-                    name="memberAddress"
-                    value={formData.memberAddress}
-                    onChange={handleChange}
-                  />
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-
-        <div className="form_btn_box">
-          <div className="temp_btn md">
-            <button type="submit" className="btn">회원가입</button>
+              <tr>
+                <th scope="row">주소</th>
+                <td>
+                  <div className="temp_form md">
+                    <input
+                      ref={refs.memberAddress}
+                      className="temp_input"
+                      type="text"
+                      name="memberAddress"
+                      value={formData.memberAddress}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <div className="form_btn_box">
+            <div className="temp_btn md">
+              <button type="submit" className="btn">
+                회원가입
+              </button>
+            </div>
           </div>
         </div>
       </form>
