@@ -1,5 +1,7 @@
 package com.project.board.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.board.BoardType;
 import com.project.board.dto.*;
 import com.project.board.service.BbsService;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -69,16 +72,23 @@ public class BbsAdminController {
         return ResponseEntity.noContent().build();
     }
 
-    // 관리자 본인 게시글 수정
-    @PutMapping("/{id}")
-    public ResponseEntity<BbsDto> updateBbs(
+ // 관리자 게시글 수정
+    @PutMapping("/admin/{id}")
+    public ResponseEntity<BbsDto> updateAdminBbs(
             @PathVariable Long id,
-            @RequestParam Long adminId,
-            @RequestBody BbsDto dto) {
+            @RequestParam Long adminId, // 관리자 ID
+            @RequestPart("bbsDto") BbsDto dto,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestParam(required = false) String deletedFileIds
+    ) {
+        List<Long> deleteIds = parseDeleteIds(deletedFileIds);
 
-        BbsDto updated = bbsService.updateBbs(id, dto, null);
+        BbsDto updated = bbsService.updateBbs(
+                id, dto, adminId, files, deleteIds, true // isAdmin = true
+        );
         return ResponseEntity.ok(updated);
     }
+
 
     // 관리자 게시글 첨부파일 수정 및 삭제
     @PutMapping("/file/{fileId}")
@@ -89,6 +99,16 @@ public class BbsAdminController {
 
         FileUpLoadDto updatedFile = bbsService.updateFile(fileId, dto, file);
         return ResponseEntity.ok(updatedFile);
+    }
+
+ // QnA 답변 삭제 (관리자)
+    @DeleteMapping("/qna/{qnaId}")
+    public ResponseEntity<Void> deleteQnaAnswer(
+            @PathVariable Long qnaId,
+            @RequestParam Long adminId) {
+
+        bbsService.deleteQna(qnaId, adminId);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/bbslist")
@@ -102,4 +122,16 @@ public class BbsAdminController {
         Page<BbsDto> result = bbsService.searchPosts(searchType, bbstitle, bbscontent, type, pageable);
         return ResponseEntity.ok(result);
     }
+    private List<Long> parseDeleteIds(String deletedFileIds) {
+        if (deletedFileIds != null && !deletedFileIds.isEmpty()) {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                return mapper.readValue(deletedFileIds, new TypeReference<List<Long>>() {});
+            } catch (Exception e) {
+                throw new RuntimeException("삭제할 파일 ID 파싱 오류");
+            }
+        }
+        return new ArrayList<>();
+    }
+
 }

@@ -15,7 +15,7 @@ public interface BbsService {
     
     BbsDto createBbsWithFiles(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files); // 생성된 게시글 + 파일첨부 (회원 또는 관리자)
     
-    BbsDto updateBbs(Long id, BbsDto dto, Long memberNum); // 게시글 수정 (작성자 본인만 가능)
+    BbsDto updateBbs(Long id, BbsDto dto, Long userId, List<MultipartFile> newFiles, List<Long> deleteFileIds, boolean isAdmin); // 게시글 수정 (작성자 본인만 가능)
     
     void deleteBbs(Long id, Long requesterMemberNum, Long requesterAdminId);  // 게시글 단건 삭제 (작성자 본인 또는 관리자)
     
@@ -32,6 +32,8 @@ public interface BbsService {
     QandADto saveQna(Long bbsId, QandADto dto, String requesterAdminId); // QnA 답변 저장 (관리자만 가능)
     
     QandADto getQna(Long bbsId);  // 특정 게시글에 대한 QnA 답변 조회
+    
+    void deleteQna(Long qnaId, Long adminId); //특정 게시글의 답변 삭제
     
     QandADto updateQna(Long qnaId, QandADto dto); // QnA 답변 수정
     

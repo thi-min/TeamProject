@@ -1,5 +1,7 @@
 package com.project.board.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.board.BoardType;
 import com.project.board.dto.*;
 import com.project.board.service.BbsService;
@@ -12,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -39,15 +42,23 @@ public class MemberBbsController {
 
 
     // 게시글 수정 (본인만)
-    @PutMapping("/{id}")//게시글번호
-    public ResponseEntity<BbsDto> updateBbs(
+ // 회원 게시글 수정 (본인만 가능)
+    @PutMapping("/member/{id}")
+    public ResponseEntity<BbsDto> updateMemberBbs(
             @PathVariable Long id,
-            @RequestParam Long memberNum,
-            @RequestPart("bbsDto") BbsDto dto) {
+            @RequestParam Long memberNum, // 회원 번호
+            @RequestPart("bbsDto") BbsDto dto,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestParam(required = false) String deletedFileIds
+    ) {
+        List<Long> deleteIds = parseDeleteIds(deletedFileIds);
 
-        BbsDto updated = bbsService.updateBbs(id, dto, memberNum);
+        BbsDto updated = bbsService.updateBbs(
+                id, dto, memberNum, files, deleteIds, false // isAdmin = false
+        );
         return ResponseEntity.ok(updated);
     }
+
 
     // 게시글 삭제 (본인만)
     @DeleteMapping("/{id}")	//게시글번호
@@ -99,5 +110,18 @@ public class MemberBbsController {
         Page<BbsDto> result = bbsService.searchPosts(searchType, bbstitle, bbscontent, type, pageable);
         return ResponseEntity.ok(result);
     }
+    
+    private List<Long> parseDeleteIds(String deletedFileIds) {
+        if (deletedFileIds != null && !deletedFileIds.isEmpty()) {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                return mapper.readValue(deletedFileIds, new TypeReference<List<Long>>() {});
+            } catch (Exception e) {
+                throw new RuntimeException("삭제할 파일 ID 파싱 오류");
+            }
+        }
+        return new ArrayList<>();
+    }
+
 
 }

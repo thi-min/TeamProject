@@ -128,7 +128,7 @@ function QnaBbs() {
 
       {/* 글쓰기 버튼 */}
       <div className="bbs-actions">
-        <button onClick={() => navigate("/qnabbs/write")}>질문 작성</button>
+        <button onClick={() => navigate("write")}>질문 작성</button>
       </div>
     </div>
   );

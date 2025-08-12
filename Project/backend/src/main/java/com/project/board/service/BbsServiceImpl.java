@@ -232,18 +232,44 @@ public class BbsServiceImpl implements BbsService {
 
     @Transactional
     @Override
-    public BbsDto updateBbs(Long id, BbsDto dto, Long memberNum) {
+    public BbsDto updateBbs(Long id, BbsDto dto, Long userId, List<MultipartFile> newFiles, List<Long> deleteFileIds, boolean isAdmin) {
         BbsEntity bbs = bbsRepository.findById(id)
             .orElseThrow(() -> new BbsException("게시글 없음: " + id));
-        if (!bbs.getMemberNum().getMemberNum().equals(memberNum)) {
-            throw new BbsException("본인이 작성한 글만 수정할 수 있습니다.");
+        
+        if (isAdmin) {
+            // 관리자라면, 관리자 아이디가 맞는지 확인 (필요하다면)
+            if (bbs.getAdminId() == null || !bbs.getAdminId().getAdminId().equals(userId)) {
+                throw new BbsException("관리자 권한이 없습니다.");
+            }
+        } else {
+            // 회원이라면 본인 확인
+            if (bbs.getMemberNum() == null || !bbs.getMemberNum().getMemberNum().equals(userId)) {
+                throw new BbsException("본인이 작성한 글만 수정할 수 있습니다.");
+            }
         }
 
+        // 게시글 업데이트
         bbs.setBbstitle(dto.getBbsTitle());
         bbs.setBbscontent(dto.getBbsContent());
         bbs.setRevisiondate(dto.getRevisionDate());
+
+        // 삭제할 파일 처리
+        if (deleteFileIds != null && !deleteFileIds.isEmpty()) {
+            for (Long fileId : deleteFileIds) {
+                this.deleteFileById(fileId);
+            }
+        }
+
+        // 새 파일 업로드 처리
+        if (newFiles != null && !newFiles.isEmpty()) {
+            this.saveFileList(bbs.getBulletinNum(), newFiles, bbs.getBulletinType());
+        }
+
         return convertToDto(bbsRepository.save(bbs));
     }
+
+
+
 
     @Override
     @Transactional
@@ -523,6 +549,21 @@ public class BbsServiceImpl implements BbsService {
             .answer(qna.getAnswer())
             .build();
     }
+    
+    @Override
+    public void deleteQna(Long qnaId, Long adminId) {
+        QandAEntity qna = qandARepository.findById(qnaId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 QnA 답변이 존재하지 않습니다."));
+
+        // 관리자 권한 체크 (필요하면 로직 추가)
+        // 예: adminId가 null이거나, 권한 없는 경우 예외 처리
+        if (adminId == null) {
+            throw new IllegalArgumentException("관리자 ID가 필요합니다.");
+        }
+
+        qandARepository.delete(qna);
+    }
+
     @Override
     public QandADto updateQna(Long qnaId, QandADto dto) {
         QandAEntity qna = qandARepository.findById(qnaId)
@@ -784,4 +825,15 @@ public class BbsServiceImpl implements BbsService {
             .extension(file.getExtension())
             .build();
     }
+    @Transactional
+    public void deleteFileById(Long fileId) {
+        FileUpLoadEntity file = fileUploadRepository.findById(fileId)
+            .orElseThrow(() -> new BbsException("삭제할 파일이 존재하지 않습니다: " + fileId));
+
+        // 실제 저장소 파일 삭제 로직이 있다면 추가 (예: 파일 시스템에서 삭제)
+        // 예) Files.deleteIfExists(Paths.get(file.getPath(), file.getSavedName()));
+
+        fileUploadRepository.delete(file);
+    }
+
 }
