@@ -41,7 +41,7 @@ const routes = {
 
     // 1:1 채팅 관련 경로 추가
     chatList: { path: "/member/chat", label: "1:1 채팅 목록" },
-    chatDetail: { path: "/member/chat/:id", label: "1:1 채팅" },
+    chatPage: { path: "/member/chat/:id", label: "1:1 채팅" },
   },
 
   admin: {
