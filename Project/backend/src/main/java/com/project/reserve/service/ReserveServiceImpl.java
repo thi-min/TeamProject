@@ -17,6 +17,7 @@ import com.project.volunteer.repository.VolunteerRepository;
 import com.project.volunteer.service.VolunteerService;
 import com.project.member.repository.MemberRepository;
 import com.project.common.entity.TimeSlot;
+import com.project.common.entity.TimeType;
 import com.project.common.repository.TimeSlotRepository;
 import com.project.land.dto.LandDetailDto;
 import com.project.land.dto.LandRequestDto;
@@ -80,7 +81,12 @@ public class ReserveServiceImpl implements ReserveService {
             Long timeSlotId = landDto.getTimeSlotId();
 
             // ✅ 시간대 유효성 검사
-            if (!landRepository.existsByTimeSlot_Id(timeSlotId)) {
+            boolean validSlot = timeSlotRepository.existsByIdAndTimeTypeAndEnabled(
+                    timeSlotId,
+                    TimeType.LAND,
+                    true
+            );
+            if (!validSlot) {
                 throw new IllegalArgumentException("선택한 시간대는 놀이터 예약에 유효하지 않습니다.");
             }
 
