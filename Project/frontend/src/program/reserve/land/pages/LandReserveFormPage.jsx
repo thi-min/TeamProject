@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 import LandReserveService from "../services/LandReserveService";
 import "./../style/LandReserveStyle.css";
 
@@ -17,25 +18,61 @@ const LandReserveFormPage = () => {
     ? toDateStr(location.state.selectedDate)
     : "";
 
-  // TODO: 실제 로그인 사용자 memberNum로 교체
-  const memberNum = 1;
+  const memberNum = 1; // TODO: 실제 로그인 사용자 memberNum로 교체
 
-  const [timeSlots, setTimeSlots] = useState([]); // 서버 응답 표준화 배열
-  const [displaySlots, setDisplaySlots] = useState([]); // 화면 표시용 슬롯
+  const [timeSlots, setTimeSlots] = useState([]);
+  const [displaySlots, setDisplaySlots] = useState([]);
   const [selectedSlotId, setSelectedSlotId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
   const [formData, setFormData] = useState({
+  name: "",
+  phone: "",
+  landType: "",
+  animalNumber: "",
+  guardianNumber: "",
+  note: "",
+});
+
+  // 로그인 회원 정보
+  const [memberInfo, setMemberInfo] = useState({
     name: "",
-    phone1: "010",
-    phone2: "",
-    phone3: "",
-    landType: "", // "SMALL" | "LARGE"
-    animalNumber: "",
-    guardianNumber: "",
-    note: "",
+    phone: "",
+    memberNum: null,
   });
+  // 🔹 로그인 사용자 정보 불러오기
+  useEffect(() => {
+  const fetchMemberInfo = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        alert("로그인이 필요합니다.");
+        navigate("/login");
+        return;
+      }
+
+      const res = await axios.get("/auth/mypage", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      // formData 바로 세팅
+      setFormData((prev) => ({
+        ...prev,
+        name: res.data.memberName,
+        phone: res.data.memberPhone,
+      }));
+    } catch (err) {
+      console.error("회원정보 불러오기 실패:", err);
+      alert("회원정보를 불러올 수 없습니다. 다시 로그인해주세요.");
+      navigate("/login");
+    }
+  };
+
+  fetchMemberInfo();
+}, [navigate]);
 
   /** LandCountDto -> 표준형 변환 */
   const normalizeCountDto = (arr = []) =>
@@ -47,7 +84,7 @@ const LandReserveFormPage = () => {
       enabled: true,
     }));
 
-  /** TimeSlotDto -> 표준형 변환(폴백) */
+  /** TimeSlotDto -> 표준형 변환 */
   const normalizeSlotDto = (arr = []) =>
     arr.map((s) => ({
       timeSlotId: s.id,
@@ -59,58 +96,51 @@ const LandReserveFormPage = () => {
 
   /** 시간대 데이터 로드 */
   useEffect(() => {
-  let mounted = true;
-
-  const loadSlots = async () => {
-    if (!selectedDate) {
-      setDisplaySlots([]);
-      return;
-    }
-
-    try {
-      setLoading(true);
-      setErrorMsg("");
-
-      // landType 선택된 경우에만 예약 현황 API 호출
-      if (formData.landType) {
-        try {
-          const res = await LandReserveService.fetchReservationStatus(
-            selectedDate,
-            memberNum,
-            formData.landType
-          );
-          if (mounted) {
-            const data = normalizeCountDto(res.data);
-            setTimeSlots(data);
-            setDisplaySlots(data);
-            setLoading(false);
-            return;
+    let mounted = true;
+    const loadSlots = async () => {
+      if (!selectedDate) {
+        setDisplaySlots([]);
+        return;
+      }
+      try {
+        setLoading(true);
+        setErrorMsg("");
+        if (formData.landType) {
+          try {
+            const res = await LandReserveService.fetchReservationStatus(
+              selectedDate,
+              memberNum,
+              formData.landType
+            );
+            if (mounted) {
+              const data = normalizeCountDto(res.data);
+              setTimeSlots(data);
+              setDisplaySlots(data);
+              setLoading(false);
+              return;
+            }
+          } catch (err) {
+            console.error("예약 현황 API 실패:", err);
           }
-        } catch (err) {
-          console.error("예약 현황 API 실패:", err);
         }
+        const res2 = await LandReserveService.fetchTimeSlots();
+        if (mounted) {
+          const data = normalizeSlotDto(res2.data);
+          setTimeSlots(data);
+          setDisplaySlots(data);
+        }
+      } catch (err2) {
+        console.error("시간대 목록 API 실패:", err2);
+        if (mounted) setErrorMsg("시간대 목록을 불러오지 못했습니다.");
+      } finally {
+        if (mounted) setLoading(false);
       }
-
-      // 폴백 - 전체 시간대 호출
-      const res2 = await LandReserveService.fetchTimeSlots();
-      if (mounted) {
-        const data = normalizeSlotDto(res2.data);
-        setTimeSlots(data);
-        setDisplaySlots(data);
-      }
-    } catch (err2) {
-      console.error("시간대 목록 API 실패:", err2);
-      if (mounted) setErrorMsg("시간대 목록을 불러오지 못했습니다.");
-    } finally {
-      if (mounted) setLoading(false); // 로딩 해제
-    }
-  };
-
-  loadSlots();
-  return () => {
-    mounted = false;
-  };
-}, [selectedDate, formData.landType, memberNum]);
+    };
+    loadSlots();
+    return () => {
+      mounted = false;
+    };
+  }, [selectedDate, formData.landType, memberNum]);
 
   /** 입력 변경 핸들러 */
   const handleChange = (e) => {
@@ -124,36 +154,31 @@ const LandReserveFormPage = () => {
   /** 제출 처리 */
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    // 유효성 검사
-    if (!formData.name.trim()) return alert("신청자명을 입력해 주세요.");
-    if (!formData.phone2.trim() || !formData.phone3.trim())
-      return alert("연락처를 모두 입력해 주세요.");
     if (!formData.landType) return alert("놀이터 유형을 선택해 주세요.");
     if (!formData.animalNumber) return alert("반려견 수를 입력해 주세요.");
     if (!selectedDate) return alert("예약 날짜를 선택해 주세요.");
     if (!selectedSlotId) return alert("시간대를 선택해 주세요.");
 
-    // 확인 페이지로 이동
     navigate("/reserve/land/confirm", {
-      state: {
-        ...formData,
-        phone: `${formData.phone1}-${formData.phone2}-${formData.phone3}`,
-        selectedDate,
-        selectedSlotId,
-        timeSlots: displaySlots,
-      },
-    });
-  };
+    state: {
+      ...formData,
+      memberNum: memberInfo.memberNum,
+      selectedDate,
+      selectedSlotId,
+      timeSlots: displaySlots,
+    },
+  });
+};
 
   const filteredSlots = React.useMemo(() => {
-    if (!formData.landType) return [];      // 미선택 시 안 보이게
+    if (!formData.landType) return [];
     const allow = TYPE_LABELS[formData.landType] ?? [];
-    return displaySlots.filter(s => allow.includes((s.label || "").trim()));
+    return displaySlots.filter((s) => allow.includes((s.label || "").trim()));
   }, [displaySlots, formData.landType]);
 
   if (loading) return <div className="land-form-page">시간대를 불러오는 중입니다…</div>;
   if (errorMsg) return <div className="land-form-page">{errorMsg}</div>;
+
   return (
     <div className="land-form-page">
       <h2 className="form-title">놀이터 예약신청</h2>
@@ -167,54 +192,17 @@ const LandReserveFormPage = () => {
             선택한 날짜: <strong>{selectedDate || "-"}</strong>
           </p>
 
-          {/* 신청자명 */}
+          {/* 🔹 신청자명 (읽기전용) */}
           <div className="form-section">
             <div className="form-row">
-              <label htmlFor="name">
-                신청자명 <span className="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-              />
+              <label>신청자명</label>
+              <p>{formData.name || "-"}</p>
             </div>
 
-            {/* 연락처 */}
-            <div className="form-row">
-              <label>연락처 <span className="required">*</span></label>
-              <div className="phone-input-wrapper">
-                <select
-                  id="phone1"
-                  name="phone1"
-                  value={formData.phone1}
-                  onChange={handleChange}
-                >
-                  <option value="010">010</option>
-                  <option value="011">011</option>
-                </select>
-                <span>-</span>
-                <input
-                  type="text"
-                  name="phone2"
-                  value={formData.phone2}
-                  onChange={handleChange}
-                  maxLength={4}
-                  required
-                />
-                <span>-</span>
-                <input
-                  type="text"
-                  name="phone3"
-                  value={formData.phone3}
-                  onChange={handleChange}
-                  maxLength={4}
-                  required
-                />
-              </div>
+            {/* 🔹 연락처 (읽기전용) */}
+           <div className="form-row">
+              <label>연락처</label>
+              <p>{formData.phone || "--"}</p>   {/* ✅ 한 줄로 표시 */}
             </div>
 
             {/* 놀이터 유형 */}
@@ -278,48 +266,45 @@ const LandReserveFormPage = () => {
             </div>
           </div>
 
-          
           {/* 시간대 선택 */}
           <div className="form-section">
-          <div className="form-row">
-            <label>
-              시간대 선택 <span className="required">*</span>
-            </label>
+            <div className="form-row">
+              <label>
+                시간대 선택 <span className="required">*</span>
+              </label>
+              <div className="time-slot-group">
+                {displaySlots.map((slot) => {
+                  const allow = TYPE_LABELS[formData.landType] ?? [];
+                  const enabledForType = formData.landType
+                    ? allow.includes((slot.label || "").trim())
+                    : false;
+                  const full = (slot.reservedCount ?? 0) >= (slot.capacity ?? 0);
+                  const disabled = full || !enabledForType;
 
-            <div className="time-slot-group">
-              {displaySlots.map((slot) => {
-                const allow = TYPE_LABELS[formData.landType] ?? [];
-                // landType이 없으면 전부 disabled
-                const enabledForType = formData.landType
-                  ? allow.includes((slot.label || "").trim())
-                  : false;
-                const full = (slot.reservedCount ?? 0) >= (slot.capacity ?? 0);
-                const disabled = full || !enabledForType;
-
-                return (
-                  <button
-                    key={slot.timeSlotId}
-                    type="button"
-                    onClick={() => handleTimeSelect(slot.timeSlotId)}
-                    disabled={disabled}
-                    className={`time-slot-button ${
-                      selectedSlotId === slot.timeSlotId ? "selected" : ""
-                    }`}
-                  >
-                    {slot.label}
-                    {(slot.capacity ?? 0) > 0 && (
-                      <>
-                        <br />정원: {slot.reservedCount ?? 0}/{slot.capacity}
-                      </>
-                    )}
-                    {disabled && !full && " - 선택불가"}
-                    {full && " - 마감"}
-                  </button>
-                );
-              })}
+                  return (
+                    <button
+                      key={slot.timeSlotId}
+                      type="button"
+                      onClick={() => handleTimeSelect(slot.timeSlotId)}
+                      disabled={disabled}
+                      className={`time-slot-button ${
+                        selectedSlotId === slot.timeSlotId ? "selected" : ""
+                      }`}
+                    >
+                      {slot.label}
+                      {(slot.capacity ?? 0) > 0 && (
+                        <>
+                          <br />정원: {slot.reservedCount ?? 0}/{slot.capacity}
+                        </>
+                      )}
+                      {disabled && !full && " - 선택불가"}
+                      {full && " - 마감"}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           </div>
-        </div>
 
           {/* 비고 */}
           <div className="form-section">

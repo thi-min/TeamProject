@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.project.land.dto.LandCountDto;
+import com.project.land.dto.LandDetailDto;
 import com.project.land.entity.LandType;
 import com.project.land.service.LandService;
 
@@ -29,5 +30,13 @@ public class LandController {
             @RequestParam("landType") LandType landType) {
         List<LandCountDto> result = landService.getLandTimeSlotsWithCount(landDate, memberNum, landType);
         return ResponseEntity.ok(result);
+    }
+    
+    // 놀이터상세정보에서 결제금액 조회
+    @GetMapping("/detail/{reserveCode}")
+    public ResponseEntity<LandDetailDto> getLandDetail(
+            @PathVariable Long reserveCode) {
+        LandDetailDto dto = landService.getLandDetailByReserveCode(reserveCode);
+        return ResponseEntity.ok(dto);
     }
 }

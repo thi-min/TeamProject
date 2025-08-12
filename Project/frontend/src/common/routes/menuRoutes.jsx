@@ -26,7 +26,7 @@ const menuRoutes = [
     children: [
       { title: "놀이터 소개", path: "/land/info", access: "ALL" },
       { title: "놀이터 둘러보기", path: "/land/gallery", access: "ALL" },
-      { title: "예약하기", path: "/land/reserve", access: "USER" },
+      { title: "예약하기", path: "/reserve/land/date", access: "USER" },
     ],
   },
   {
