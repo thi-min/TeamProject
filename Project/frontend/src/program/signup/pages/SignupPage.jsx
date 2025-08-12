@@ -7,6 +7,7 @@
 import React, { useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { serachAddress } from "../services/address";
 import "../style/signup.css";
 
 const api = axios.create({
@@ -26,6 +27,7 @@ export default function Signup() {
     memberBirth: "",
     memberPhone: "",
     memberAddress: "",
+    memberDetailAddress: "",
     memberSex: "",
     smsAgree: false,
   });
