@@ -1,15 +1,17 @@
 package com.project.animal.service;
 
-import com.project.animal.entity.AnimalEntity;
-import com.project.animal.repository.AnimalFileRepository;
-import com.project.animal.repository.AnimalRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.project.animal.entity.AnimalEntity;
+import com.project.animal.repository.AnimalFileRepository;
+import com.project.animal.repository.AnimalRepository;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor

@@ -1,9 +1,15 @@
 package com.project.alarm.dto;
 
-import com.project.common.enums.AlarmType;
-import com.project.common.enums.CheckState;
-import lombok.*;
 import java.time.LocalDateTime;
+
+import com.project.alarm.entity.AlarmType;
+import com.project.alarm.entity.CheckState;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter

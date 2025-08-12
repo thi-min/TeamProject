@@ -1,15 +1,16 @@
 package com.project.animal.mapper;
 
-import com.project.animal.dto.AnimalRequestDto;
-import com.project.animal.dto.AnimalResponseDto;
-import com.project.animal.entity.AnimalEntity;
-import com.project.animal.entity.AnimalFileEntity;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.project.animal.dto.AnimalRequestDto;
+import com.project.animal.dto.AnimalResponseDto;
+import com.project.animal.entity.AnimalEntity;
+import com.project.animal.entity.AnimalFileEntity;
 
 @Mapper(componentModel = "spring")
 public interface AnimalMapper {

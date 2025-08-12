@@ -1,9 +1,15 @@
 package com.project.adopt.dto;
 
-import com.project.common.enums.AdoptState;
-import lombok.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.project.adopt.entity.AdoptState;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter

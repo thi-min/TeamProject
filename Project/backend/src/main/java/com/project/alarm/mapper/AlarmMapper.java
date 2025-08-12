@@ -1,10 +1,13 @@
 package com.project.alarm.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
 import com.project.alarm.dto.AlarmRequestDto;
 import com.project.alarm.dto.AlarmResponseDto;
 import com.project.alarm.entity.AlarmEntity;
 import com.project.member.entity.MemberEntity;
-import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface AlarmMapper {
