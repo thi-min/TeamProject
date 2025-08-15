@@ -80,51 +80,64 @@ export default function Signup() {
     const { name, value, type, checked } = e.target;
 
     if (name === "memberId") {
-      setIdCheck({ loading: false, done: false, available: false, message: "" });
+      setIdCheck({
+        loading: false,
+        done: false,
+        available: false,
+        message: "",
+      });
     }
 
     // ✅ type별 값 결정: checkbox / radio / 그 외
     const nextValue =
-        type === "checkbox" ? checked :
-        type === "radio"    ? value   :
-        value;
+      type === "checkbox" ? checked : type === "radio" ? value : value;
 
     setFormData((prev) => {
-        const next = { ...prev, [name]: nextValue };
+      const next = { ...prev, [name]: nextValue };
 
-        // ✅ 비번/확인은 정책 재계산
-        if (name === "memberPw" || name === "memberPwCheck") {
+      // ✅ 비번/확인은 정책 재계산
+      if (name === "memberPw" || name === "memberPwCheck") {
         const memberPw = name === "memberPw" ? next.memberPw : prev.memberPw;
-        const memberPwCheck = name === "memberPwCheck" ? next.memberPwCheck : prev.memberPwCheck;
+        const memberPwCheck =
+          name === "memberPwCheck" ? next.memberPwCheck : prev.memberPwCheck;
         setPwState(evaluatePassword(memberPw, memberPwCheck));
-        }
-        return next;
+      }
+      return next;
     });
 
     //핸드폰번호 숫자만
     if (name === "memberPhone") {
-        // 숫자만 남기기
-        const onlyNums = value.replace(/[^0-9]/g, "");
-        setFormData((prev) => ({ ...prev, [name]: onlyNums }));
-        return; // 아래 로직은 건너뜀
+      // 숫자만 남기기
+      const onlyNums = value.replace(/[^0-9]/g, "");
+      setFormData((prev) => ({ ...prev, [name]: onlyNums }));
+      return; // 아래 로직은 건너뜀
     }
   };
 
-        
   // ---------- 중복 체크 ----------
   const handleCheckDuplicateId = async () => {
     const email = formData.memberId.trim();
 
     if (!email) {
       const msg = "아이디(이메일)를 입력하세요.";
-      setIdCheck({ loading: false, done: true, available: false, message: msg });
+      setIdCheck({
+        loading: false,
+        done: true,
+        available: false,
+        message: msg,
+      });
       alert(msg);
       refs.memberId.current?.focus();
       return;
     }
     if (!isEmailValid) {
       const msg = "아이디(이메일) 형식이 올바르지 않습니다.";
-      setIdCheck({ loading: false, done: true, available: false, message: msg });
+      setIdCheck({
+        loading: false,
+        done: true,
+        available: false,
+        message: msg,
+      });
       alert(msg);
       refs.memberId.current?.focus();
       return;
@@ -139,20 +152,35 @@ export default function Signup() {
 
       if (res.status === 200) {
         const msg = res.data?.message ?? "사용 가능한 아이디입니다.";
-        setIdCheck({ loading: false, done: true, available: true, message: msg });
+        setIdCheck({
+          loading: false,
+          done: true,
+          available: true,
+          message: msg,
+        });
         alert(msg);
         return;
       }
       if (res.status === 409) {
         const msg = res.data?.message ?? "이미 사용 중인 아이디입니다.";
-        setIdCheck({ loading: false, done: true, available: false, message: msg });
+        setIdCheck({
+          loading: false,
+          done: true,
+          available: false,
+          message: msg,
+        });
         alert(msg);
         refs.memberId.current?.focus();
         return;
       }
       if (res.status === 400) {
         const msg = res.data?.message ?? "아이디(이메일)를 입력하세요.";
-        setIdCheck({ loading: false, done: true, available: false, message: msg });
+        setIdCheck({
+          loading: false,
+          done: true,
+          available: false,
+          message: msg,
+        });
         alert(msg);
         refs.memberId.current?.focus();
         return;
@@ -162,7 +190,12 @@ export default function Signup() {
         err?.response?.data?.message ||
         err?.message ||
         "아이디 확인 중 오류가 발생했습니다.";
-      setIdCheck({ loading: false, done: true, available: false, message: msg });
+      setIdCheck({
+        loading: false,
+        done: true,
+        available: false,
+        message: msg,
+      });
       alert(msg);
       refs.memberId.current?.focus();
     }
@@ -179,7 +212,7 @@ export default function Signup() {
       { name: "memberPwCheck", label: "비밀번호 확인" },
       { name: "memberName", label: "이름" },
       { name: "memberBirth", label: "생년월일" },
-      { name: "memberSex", label: "성별" },              // 라디오
+      { name: "memberSex", label: "성별" }, // 라디오
       { name: "memberPhone", label: "전화번호" },
       { name: "memberAddress", label: "주소" },
     ];
@@ -187,9 +220,10 @@ export default function Signup() {
     // 2) 첫 번째 누락 항목을 찾아 알림 + 포커스
     for (const f of required) {
       // 성별은 라디오 특성상 빈 문자열이 유지될 수 있으니 별도 체크
-      const value = f.name === "memberSex"
-        ? formData.memberSex
-        : String(formData[f.name] ?? "").trim();
+      const value =
+        f.name === "memberSex"
+          ? formData.memberSex
+          : String(formData[f.name] ?? "").trim();
 
       if (!value) {
         alert(`${f.label}을(를) 입력하지 않으셨습니다.`);
@@ -258,7 +292,7 @@ export default function Signup() {
               <td>
                 <span className="temp_form md">
                   <input
-                    ref={refs.memberId}                 // ✅ 포커스 대상
+                    ref={refs.memberId} // ✅ 포커스 대상
                     type="email"
                     name="memberId"
                     className="temp_input"
@@ -279,7 +313,9 @@ export default function Signup() {
                 </span>
                 {idCheck.message && (
                   <div
-                    className={`hint ${idCheck.done ? (idCheck.available ? "ok" : "warn") : ""}`}
+                    className={`hint ${
+                      idCheck.done ? (idCheck.available ? "ok" : "warn") : ""
+                    }`}
                     style={{ marginTop: 8 }}
                   >
                     {idCheck.message}
@@ -293,7 +329,7 @@ export default function Signup() {
               <td>
                 <div className="temp_form md">
                   <input
-                    ref={refs.memberPw}                 // ✅ 포커스 대상
+                    ref={refs.memberPw} // ✅ 포커스 대상
                     className="temp_input"
                     type="password"
                     name="memberPw"
@@ -301,7 +337,9 @@ export default function Signup() {
                     onChange={handleChange}
                   />
                 </div>
-                <span className="form_winning">비밀번호는 8~20자 영문, 숫자로 구성되어있어야 합니다.</span>
+                <span className="form_winning">
+                  비밀번호는 8~20자 영문, 숫자로 구성되어있어야 합니다.
+                </span>
               </td>
             </tr>
 
@@ -310,7 +348,7 @@ export default function Signup() {
               <td>
                 <div className="temp_form md">
                   <input
-                    ref={refs.memberPwCheck}            // ✅ 포커스 대상
+                    ref={refs.memberPwCheck} // ✅ 포커스 대상
                     className="temp_input"
                     type="password"
                     name="memberPwCheck"
@@ -319,8 +357,13 @@ export default function Signup() {
                   />
                 </div>
                 {formData.memberPwCheck && (
-                  <div className={`hint ${pwState.matched ? "ok" : "error"}`} style={{ marginTop: 8 }}>
-                    {pwState.matched ? "비밀번호가 일치합니다." : "비밀번호가 일치하지 않습니다."}
+                  <div
+                    className={`hint ${pwState.matched ? "ok" : "error"}`}
+                    style={{ marginTop: 8 }}
+                  >
+                    {pwState.matched
+                      ? "비밀번호가 일치합니다."
+                      : "비밀번호가 일치하지 않습니다."}
                   </div>
                 )}
               </td>
@@ -427,7 +470,9 @@ export default function Signup() {
 
         <div className="form_btn_box">
           <div className="temp_btn md">
-            <button type="submit" className="btn">회원가입</button>
+            <button type="submit" className="btn">
+              회원가입
+            </button>
           </div>
         </div>
       </form>
