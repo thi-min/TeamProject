@@ -1,6 +1,8 @@
 // src/program/signup/pages/SignupPage.jsx
 import React, { useCallback, useMemo, useState, useRef } from "react";
 import "../style/signup.css";
+// ✅ 백엔드로 요청을 보내는 axios 인스턴스 (baseURL: http://localhost:8090)
+import api from "../../../common/api/axios";
 
 /** 비밀번호 유효성 검사 함수 */
 function evaluatePassword(password, passwordCheck) {
@@ -191,23 +193,23 @@ export default function SignupPage() {
       };
 
       try {
-        const res = await fetch("/signup", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        });
+        // ✅ 변경 포인트: fetch → axios 인스턴스(api)
+        //    최종 요청 = http://localhost:8090/signup
+        //    (만약 컨트롤러 클래스에 @RequestMapping("/auth")가 있다면 "/auth/signup"으로 변경)
+        const res = await api.post("/signup", payload);
 
-        if (!res.ok) {
-          const errMsg = await res.text();
-          throw new Error(errMsg || "회원가입 요청 실패");
-        }
-
+        // axios는 4xx/5xx면 자동 throw → 여기 도달하면 성공
         alert("회원가입이 완료되었습니다.");
-        // 가입 완료 후 로그인 페이지로 이동 예시
         window.location.href = "/login";
       } catch (err) {
+        // 서버에서 {message: "..."} 내려주면 우선 표시
+        const serverMsg =
+          err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          err?.message ||
+          "회원가입 요청 실패";
         console.error(err);
-        alert(`회원가입 실패: ${err.message}`);
+        alert(`회원가입 실패: ${serverMsg}`);
       }
     },
     [formData, pwState]
