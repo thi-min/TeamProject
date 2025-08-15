@@ -44,6 +44,14 @@ public class TimeSlotServiceImpl implements TimeSlotService {
                 .toList();
     }
     
+    // 전체 시간대 조회
+    public List<TimeSlotDto> getAllTimeSlots() {
+        return timeSlotRepository.findAll()
+                .stream()
+                .map(TimeSlotDto::fromEntity)
+                .collect(Collectors.toList());
+    }
+    
     // 시간대 추가
     @Override
     @Transactional

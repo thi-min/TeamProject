@@ -16,12 +16,12 @@ const api = axios.create({ baseURL: API_BASE });
 const LandReserveService = {
   // 날짜+유형별 시간대 현황(우선 사용)
 fetchReservationStatus(landDate, memberNum, landType) {
-  return api.get("/api/land/time-slots", {
+  return api.get("/api/land/timeslots", {
     params: { date: landDate, memberNum, landType }
   });
 },
 fetchTimeSlots() {
-  return api.get("/api/time-slots/LAND");
+  return api.get("/api/timeslots/LAND");
 },
 
   // 예약 생성 (기존 유지)

@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
+import "../style/TimeSlotManage.css";
 import {
-  fetchLandTimeSlots,
+  fetchTimeSlotsByType,
   createTimeSlot,
   updateTimeSlot,
   deleteTimeSlot,
@@ -8,7 +9,6 @@ import {
 
 const STORAGE_KEY = "landTypeRules"; // { SMALL: number[], LARGE: number[] }
 
-// "HH:mm" -> "HH:mm:ss" 로 맞춰줌
 const toHHMMSS = (v) => {
   if (!v) return "";
   const [h, m] = v.split(":");
@@ -21,17 +21,15 @@ const TimeSlotManagePage = () => {
   const [loading, setLoading] = useState(true);
   const [savingRules, setSavingRules] = useState(false);
   const [error, setError] = useState("");
+  const [selectedType, setSelectedType] = useState("LAND"); // LAND or VOL
 
-  // 새 시간대 추가용
   const [newForm, setNewForm] = useState({
     startTime: "",
     endTime: "",
     capacity: 10,
     enabled: true,
-    timeType: "LAND", // 반드시 LAND로 생성
   });
 
-  // 수정 모드
   const [editSlotId, setEditSlotId] = useState(null);
   const [editForm, setEditForm] = useState({
     label: "",
@@ -39,16 +37,29 @@ const TimeSlotManagePage = () => {
     enabled: true,
   });
 
+  // 데이터 로드
   useEffect(() => {
-    load();
-  }, []);
+    setLoading(true);
+    fetchTimeSlotsByType(selectedType)
+      .then(res => {
+        setSlots(res.data || []); // ✅ slots로 통일
+        setError(false);
+      })
+      .catch(() => {
+        setSlots([]); // ✅ slots로 통일
+        setError(false);
+      })
+      .finally(() => {
+        setLoading(false);
+      });
+  }, [selectedType]);
 
-  const load = async () => {
+  const load = async (type) => {
     try {
       setLoading(true);
       setError("");
-      const res = await fetchLandTimeSlots();
-      setSlots(res.data || []);
+      const res = await fetchTimeSlotsByType(type);
+      setSlots(res.data || []); // ✅ slots로 통일
 
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
@@ -71,7 +82,7 @@ const TimeSlotManagePage = () => {
 
   const allIds = useMemo(() => slots.map((s) => s.id), [slots]);
 
-  // 규칙 토글
+  // 규칙 관련
   const toggleRule = (type, slotId, checked) => {
     setRules((prev) => {
       const set = new Set(prev[type] || []);
@@ -92,7 +103,7 @@ const TimeSlotManagePage = () => {
     }, 200);
   };
 
-  // ===== 추가(Create) =====
+  // 추가
   const handleNewChange = (e) => {
     const { name, type, checked, value } = e.target;
     setNewForm((prev) => ({
@@ -113,18 +124,18 @@ const TimeSlotManagePage = () => {
         endTime: toHHMMSS(newForm.endTime),
         capacity: Number(newForm.capacity),
         enabled: !!newForm.enabled,
-        timeType: "LAND",
+        timeType: selectedType,
       };
       await createTimeSlot(dto);
       alert("추가되었습니다.");
-      setNewForm({ startTime: "", endTime: "", capacity: 10, enabled: true, timeType: "LAND" });
-      load();
-    } catch (err) {
+      setNewForm({ startTime: "", endTime: "", capacity: 10, enabled: true });
+      load(selectedType);
+    } catch {
       alert("추가 실패");
     }
   };
 
-  // ===== 수정(Update) =====
+  // 수정
   const startEdit = (slot) => {
     setEditSlotId(slot.id);
     setEditForm({
@@ -146,30 +157,34 @@ const TimeSlotManagePage = () => {
 
   const saveEdit = async (id) => {
     try {
+      const original = slots.find((s) => s.id === id);
+
       const dto = {
-        // label은 서버에서 start/end 기반으로 갱신되지만
-        // 현재 구조에서는 label, capacity, enabled만 수정
-        label: editForm.label, // 서버가 label을 무시/재생성해도 무방
+        startTime: original.startTime,
+        endTime: original.endTime,
         capacity: Number(editForm.capacity),
         enabled: !!editForm.enabled,
+        timeType: selectedType,
       };
+
       await updateTimeSlot(id, dto);
       alert("수정되었습니다.");
       cancelEdit();
-      load();
+      load(selectedType);
     } catch (e) {
+      console.error(e);
       alert("수정 실패");
     }
   };
 
-  // ===== 삭제(Delete) =====
+  // 삭제
   const remove = async (id) => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     try {
       await deleteTimeSlot(id);
       alert("삭제되었습니다.");
-      load();
-    } catch (e) {
+      load(selectedType);
+    } catch {
       alert("삭제 실패");
     }
   };
@@ -178,13 +193,30 @@ const TimeSlotManagePage = () => {
   if (error) return <div>{error}</div>;
 
   return (
-    <div>
-      <h2>시간대 운영 관리 (놀이터)</h2>
+    <div className="tspage">
+      <h2 className="ts-title">시간대 운영 관리</h2>
+
+      {/* 탭 */}
+      <div className="ts-tabs" style={{ marginBottom: "1rem" }}>
+        <button
+          className={`btn ${selectedType === "LAND" ? "btn-primary" : ""}`}
+          onClick={() => setSelectedType("LAND")}
+        >
+          놀이터
+        </button>
+        <button
+          className={`btn ${selectedType === "VOL" ? "btn-primary" : ""}`}
+          onClick={() => setSelectedType("VOL")}
+          style={{ marginLeft: "6px" }}
+        >
+          봉사
+        </button>
+      </div>
 
       {/* 새 시간대 추가 */}
-      <form onSubmit={submitNew} style={{ margin: "1rem 0", padding: "0.75rem", border: "1px solid #ddd" }}>
+      <div className="ts-card" style={{ marginBottom: "1rem" }}>
         <strong>새 시간대 추가</strong>
-        <div style={{ display: "flex", gap: "0.5rem", alignItems: "center", marginTop: "0.5rem" }}>
+        <form onSubmit={submitNew} className="ts-form" style={{ marginTop: "0.5rem" }}>
           <label>시작</label>
           <input type="time" name="startTime" value={newForm.startTime} onChange={handleNewChange} required />
           <label>종료</label>
@@ -193,107 +225,127 @@ const TimeSlotManagePage = () => {
           <input type="number" name="capacity" value={newForm.capacity} min={1} onChange={handleNewChange} />
           <label>활성</label>
           <input type="checkbox" name="enabled" checked={newForm.enabled} onChange={handleNewChange} />
-          <button type="submit">추가</button>
-        </div>
-      </form>
-
-      <div style={{ marginBottom: "1rem" }}>
-        <button onClick={() => selectAll("SMALL")}>소형견 전체 허용</button>{" "}
-        <button onClick={() => clearAll("SMALL")}>소형견 전체 해제</button>{" "}
-        <button onClick={() => selectAll("LARGE")}>대형견 전체 허용</button>{" "}
-        <button onClick={() => clearAll("LARGE")}>대형견 전체 해제</button>{" "}
-        <button onClick={saveRules} disabled={savingRules}>
-          {savingRules ? "저장 중…" : "규칙 저장"}
-        </button>
+          <button type="submit" className="btn btn-primary">추가</button>
+        </form>
       </div>
 
-      <table border="1" cellPadding="6" style={{ width: "100%", borderCollapse: "collapse" }}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>라벨</th>
-            <th>정원</th>
-            <th>활성</th>
-            <th>소형 허용</th>
-            <th>대형 허용</th>
-            <th>관리</th>
-          </tr>
-        </thead>
-        <tbody>
-          {slots.map((s) => (
-            <tr key={s.id}>
-              <td>{s.id}</td>
-              <td>
-                {editSlotId === s.id ? (
-                  <input
-                    type="text"
-                    name="label"
-                    value={editForm.label}
-                    onChange={handleEditChange}
-                  />
-                ) : (
-                  s.label
-                )}
-              </td>
-              <td>
-                {editSlotId === s.id ? (
-                  <input
-                    type="number"
-                    name="capacity"
-                    value={editForm.capacity}
-                    onChange={handleEditChange}
-                    min={1}
-                  />
-                ) : (
-                  s.capacity ?? "-"
-                )}
-              </td>
-              <td>
-                {editSlotId === s.id ? (
-                  <input
-                    type="checkbox"
-                    name="enabled"
-                    checked={editForm.enabled}
-                    onChange={handleEditChange}
-                  />
-                ) : s.enabled ? "Y" : "N"}
-              </td>
-              <td>
-                <input
-                  type="checkbox"
-                  checked={(rules.SMALL || []).includes(s.id)}
-                  onChange={(e) => toggleRule("SMALL", s.id, e.target.checked)}
-                />
-              </td>
-              <td>
-                <input
-                  type="checkbox"
-                  checked={(rules.LARGE || []).includes(s.id)}
-                  onChange={(e) => toggleRule("LARGE", s.id, e.target.checked)}
-                />
-              </td>
-              <td>
-                {editSlotId === s.id ? (
-                  <>
-                    <button onClick={() => saveEdit(s.id)}>저장</button>{" "}
-                    <button onClick={cancelEdit}>취소</button>
-                  </>
-                ) : (
-                  <>
-                    <button onClick={() => startEdit(s)}>수정</button>{" "}
-                    <button onClick={() => remove(s.id)}>삭제</button>
-                  </>
-                )}
-              </td>
-            </tr>
-          ))}
-          {slots.length === 0 && (
+      {/* 규칙 버튼 */}
+      {selectedType === "LAND" && (
+        <div className="ts-actions">
+          <button className="btn" onClick={() => selectAll("SMALL")}>소형견 전체 허용</button>
+          <button className="btn" onClick={() => clearAll("SMALL")}>소형견 전체 해제</button>
+          <button className="btn" onClick={() => selectAll("LARGE")}>대형견 전체 허용</button>
+          <button className="btn" onClick={() => clearAll("LARGE")}>대형견 전체 해제</button>
+          <button className="btn btn-primary" onClick={saveRules} disabled={savingRules}>
+            {savingRules ? "저장 중…" : "규칙 저장"}
+          </button>
+        </div>
+      )}
+
+      {/* 테이블 */}
+      <div className="ts-tablewrap">
+        <table className={`ts-table ${selectedType === "LAND" ? "land" : "vol"}`}>
+          <thead>
             <tr>
-              <td colSpan={7}>표시할 시간대가 없습니다.</td>
+              <th>ID</th>
+              <th>라벨</th>
+              <th>정원</th>
+              <th>활성</th>
+              {selectedType === "LAND" && <th>소형 허용</th>}
+              {selectedType === "LAND" && <th>대형 허용</th>}
+              <th>관리</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {slots.map((s) => (
+              <tr key={s.id}>
+                <td>{s.id}</td>
+                <td>
+                  {editSlotId === s.id ? (
+                    <input
+                      className="ts-edit-input"
+                      type="text"
+                      name="label"
+                      value={editForm.label}
+                      onChange={handleEditChange}
+                    />
+                  ) : (
+                    s.label
+                  )}
+                </td>
+                <td>
+                  {editSlotId === s.id ? (
+                    <input
+                      className="ts-edit-input"
+                      type="number"
+                      name="capacity"
+                      value={editForm.capacity}
+                      onChange={handleEditChange}
+                      min={1}
+                    />
+                  ) : (
+                    s.capacity ?? "-"
+                  )}
+                </td>
+                <td>
+                  {editSlotId === s.id ? (
+                    <input
+                      type="checkbox"
+                      name="enabled"
+                      checked={editForm.enabled}
+                      onChange={handleEditChange}
+                    />
+                  ) : (
+                    s.enabled ? <span className="badge-yes">Y</span> : <span className="badge-no">N</span>
+                  )}
+                </td>
+                
+                {selectedType === "LAND" && (
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={(rules.SMALL || []).includes(s.id)}
+                      onChange={(e) => toggleRule("SMALL", s.id, e.target.checked)}
+                    />
+                  </td>
+                )}
+
+                {selectedType === "LAND" && (
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={(rules.LARGE || []).includes(s.id)}
+                      onChange={(e) => toggleRule("LARGE", s.id, e.target.checked)}
+                    />
+                  </td>
+                )}
+
+                <td>
+                  {editSlotId === s.id ? (
+                    <>
+                      <button className="btn btn-primary" onClick={() => saveEdit(s.id)}>저장</button>
+                      <button className="btn" onClick={cancelEdit}>취소</button>
+                    </>
+                  ) : (
+                    <>
+                      <button className="btn" onClick={() => startEdit(s)}>수정</button>
+                      <button className="btn btn-danger" onClick={() => remove(s.id)}>삭제</button>
+                    </>
+                  )}
+                </td>
+              </tr>
+            ))}
+
+            {slots.length === 0 && (
+              <tr>
+                <td colSpan={selectedType === "LAND" ? 7 : 5} style={{ textAlign: "center", padding: "12px" }}>
+                  표시할 시간대가 없습니다.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

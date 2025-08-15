@@ -21,4 +21,8 @@ public interface TimeSlotService {
     
     // 타입별 시간대 조회
     List<TimeSlotDto> getTimeSlotsByType(TimeType timeType);
+    
+    // 전체 시간대 조회
+    List<TimeSlotDto> getAllTimeSlots();
+    
 }

@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/time-slots")  // 사용자용 prefix
+@RequestMapping("/api/timeslots")
 @RequiredArgsConstructor
-public class TimeSlotController { // 사용자용이므로 클래스명도 구분 추천
+public class TimeSlotController {
 
     private final TimeSlotService timeSlotService;
 
@@ -20,11 +20,19 @@ public class TimeSlotController { // 사용자용이므로 클래스명도 구�
     @GetMapping("/{type}")
     public ResponseEntity<List<TimeSlotDto>> getTimeSlotsByType(@PathVariable String type) {
         try {
-            TimeType timeType = TimeType.valueOf(type.toUpperCase()); // enum 변환
-            List<TimeSlotDto> result = timeSlotService.getTimeSlotsByType(timeType);
+            List<TimeSlotDto> result;
+            
+            if ("ALL".equalsIgnoreCase(type)) {
+                result = timeSlotService.getAllTimeSlots();
+            } else {
+                TimeType timeType = TimeType.valueOf(type.toUpperCase());
+                result = timeSlotService.getTimeSlotsByType(timeType);
+            }
+
             return ResponseEntity.ok(result);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build(); // 잘못된 type 값 ㅇㅇ
+            return ResponseEntity.badRequest().build();
         }
     }
+    
 }

@@ -6,14 +6,14 @@ const api = axios.create({
 
 // 관리(ADMIN)
 export const createTimeSlot = (dto) =>
-  api.post("/api/admin/time-slots", dto);
+  api.post("/api/admin/timeslots", dto);
 
 export const updateTimeSlot = (id, dto) =>
-  api.put(`/api/admin/time-slots/${id}`, dto);
+  api.put(`/api/admin/timeslots/${id}`, dto);
 
 export const deleteTimeSlot = (id) =>
-  api.delete(`/api/admin/time-slots/${id}`);
+  api.delete(`/api/admin/timeslots/${id}`);
 
 // 조회(공용)
-export const fetchLandTimeSlots = () =>
-  api.get("/api/time-slots/LAND");
+export const fetchTimeSlotsByType = (timeType) =>
+  api.get(`/api/admin/timeslots/${timeType}`);
