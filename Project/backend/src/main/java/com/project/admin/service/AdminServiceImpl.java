@@ -42,47 +42,87 @@ public class AdminServiceImpl implements AdminService {
     static {
         System.setProperty("JASYPT_ENCRYPTOR_PASSWORD", "test-key");
     }
-	@Override
-	//관리자 로그인
-	public AdminLoginResponseDto login(AdminLoginRequestDto dto) {
-		
-//		//관리자 정보 조회 (비밀번호 평문 비교 중이면 암호화 적용 필요)
-//		AdminEntity admin = adminRepository.findByAdminIdAndAdminPw(dto.getAdminId(), dto.getPw())
-//				.orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
-//				
-		//관리자 계정 ID 고정: "admin"만 허용
-	    if (!dto.getAdminId().equals("admin")) {
-	        throw new AccessDeniedException("지정된 관리자 계정만 로그인할 수 있습니다.");
-	    }
-	    
-	    //관리자 ID 기준으로 먼저 조회
-	    AdminEntity admin = adminRepository.findFirstByAdminId(dto.getAdminId())
-	        .orElseThrow(() -> new IllegalArgumentException("아이디가 일치하지 않습니다."));
-	    
-		//암호화된 비밀번호 비교
-		if(!passwordEncoder.matches(dto.getAdminPw(), admin.getAdminPw())){
-			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
-		}
-		
-		//역할: ADMIN 고정
-	    String accessToken = jwtTokenProvider.generateAccessToken(admin.getAdminId(), "ADMIN");
-	    String refreshToken = jwtTokenProvider.generateRefreshToken(admin.getAdminId());
+    
+    @Override
+    @Transactional
+    // 관리자 로그인: ID 고정(옵션), 비밀번호 매칭, 토큰 발급/저장, 응답 DTO 구성
+    public AdminLoginResponseDto login(AdminLoginRequestDto dto) {
 
-	    //Refresh 토큰 DB 저장
-	    admin.setRefreshToken(refreshToken);
-	    adminRepository.save(admin);
-	    
-		//로그인 성공 시 필요한 정보 dto 반환
-		return AdminLoginResponseDto.builder()
-				.adminId(admin.getAdminId())
-				.adminEmail(admin.getAdminEmail()) 	//관리자 이메일
-				.adminPhone(admin.getAdminPhone())	//관리자 전화번호
-				.connectData(admin.getConnectData())	//접속시간
-				.message("관리자 로그인 성공")
-				.accessToken("정상 토큰")
-				.refreshToken("재발급 토큰")
-				.build();
-	}
+        // (옵션) 관리자 계정 고정: admin만 허용
+        if (!"admin".equals(dto.getAdminId())) {
+            throw new AccessDeniedException("지정된 관리자 계정만 로그인할 수 있습니다.");
+        }
+
+        // 1) 아이디로 관리자 조회 (없으면 400/404 계열 예외)
+        AdminEntity admin = adminRepository.findFirstByAdminId(dto.getAdminId())
+            .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
+
+        // 2) 비밀번호 매칭(암호화 비교)
+        if (!passwordEncoder.matches(dto.getAdminPw(), admin.getAdminPw())) {
+            throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 3) 토큰 발급 (role: ADMIN 명시)
+        String accessToken  = jwtTokenProvider.generateAccessToken(admin.getAdminId(), "ADMIN");
+        String refreshToken = jwtTokenProvider.generateRefreshToken(admin.getAdminId());
+
+        // 4) Refresh 토큰 저장 + 접속시간 갱신 등 부가정보 업데이트
+        admin.setRefreshToken(refreshToken);
+        admin.setConnectData(LocalDateTime.now()); // 엔티티에 필드가 있다면
+        adminRepository.save(admin);
+
+        // 5) 응답 DTO 구성 (✅ “정상 토큰/재발급 토큰” 같은 placeholder 사용 금지)
+        return AdminLoginResponseDto.builder()
+            .adminId(admin.getAdminId())
+            .adminEmail(admin.getAdminEmail())
+            .adminPhone(admin.getAdminPhone())
+            .connectData(admin.getConnectData())
+            .message("관리자 로그인 성공")
+            .accessToken(accessToken)     // 실제 발급 토큰
+            .refreshToken(refreshToken)   // 실제 발급 토큰
+            .build();
+    }
+//	@Override
+//	//관리자 로그인
+//	public AdminLoginResponseDto login(AdminLoginRequestDto dto) {
+//		
+////		//관리자 정보 조회 (비밀번호 평문 비교 중이면 암호화 적용 필요)
+////		AdminEntity admin = adminRepository.findByAdminIdAndAdminPw(dto.getAdminId(), dto.getPw())
+////				.orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
+////				
+//		//관리자 계정 ID 고정: "admin"만 허용
+//	    if (!dto.getAdminId().equals("admin")) {
+//	        throw new AccessDeniedException("지정된 관리자 계정만 로그인할 수 있습니다.");
+//	    }
+//	    
+//	    //관리자 ID 기준으로 먼저 조회
+//	    AdminEntity admin = adminRepository.findFirstByAdminId(dto.getAdminId())
+//	        .orElseThrow(() -> new IllegalArgumentException("아이디가 일치하지 않습니다."));
+//	    
+//		//암호화된 비밀번호 비교
+//		if(!passwordEncoder.matches(dto.getAdminPw(), admin.getAdminPw())){
+//			throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+//		}
+//		
+//		//역할: ADMIN 고정
+//	    String accessToken = jwtTokenProvider.generateAccessToken(admin.getAdminId(), "ADMIN");
+//	    String refreshToken = jwtTokenProvider.generateRefreshToken(admin.getAdminId());
+//
+//	    //Refresh 토큰 DB 저장
+//	    admin.setRefreshToken(refreshToken);
+//	    adminRepository.save(admin);
+//	    
+//		//로그인 성공 시 필요한 정보 dto 반환
+//		return AdminLoginResponseDto.builder()
+//				.adminId(admin.getAdminId())
+//				.adminEmail(admin.getAdminEmail()) 	//관리자 이메일
+//				.adminPhone(admin.getAdminPhone())	//관리자 전화번호
+//				.connectData(admin.getConnectData())	//접속시간
+//				.message("관리자 로그인 성공")
+//				.accessToken("정상 토큰")
+//				.refreshToken("재발급 토큰")
+//				.build();
+//	}
 
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override

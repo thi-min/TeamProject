@@ -14,6 +14,9 @@ const Header = () => {
     <header id="header">
         {/* 헤더 상단 로그인/회원가입 링크 */}
         <div className="header_top_box">
+            <div className="admin_box">
+                <Link to="/admin/login" className="admin_link">관리자</Link>
+            </div>
             <div className="info_box">
                 {/* 날짜 */}
                 <div className="today_box">

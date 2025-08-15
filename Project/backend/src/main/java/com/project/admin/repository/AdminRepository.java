@@ -21,5 +21,7 @@ public interface AdminRepository extends JpaRepository<AdminEntity, Long>{
 	//예시: adminId로 해당 관리자 조회
 	//Optional<AdminEntity> findByAdminId(String adminId);
 	Optional<AdminEntity> findFirstByAdminId(String adminId);
+	
+    Optional<AdminEntity> findFirstByAdminEmail(String adminEmail);
 
 }
