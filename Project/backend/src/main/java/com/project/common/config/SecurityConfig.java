@@ -41,15 +41,9 @@ public class SecurityConfig {
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .authorizeHttpRequests(auth -> auth
-            		// ⛳ 초대 생성은 슈퍼관리자만 허용(예시)
-            		.requestMatchers("/admin/invites").hasRole("SUPER_ADMIN")
-            	    // ⛳ 검증/수락은 공개(토큰으로 제어)
-            	    .requestMatchers("/admin/invites/*", "/admin/invites/accept").permitAll()
-                // ⛔️ "/**" 전체 허용은 지양. 필요한 공개 엔드포인트만 지정
-                .requestMatchers(
-                    "/**",         // 로그인, 회원가입, 아이디체크 등
-                    "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
-                ).permitAll()
+            	    .requestMatchers("/auth/login").permitAll()
+            	    .requestMatchers("/admin/**").hasRole("ADMIN")   // ROLE_ADMIN 필요
+            	    .requestMatchers("/**").permitAll()	//임시 접근 허용
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),

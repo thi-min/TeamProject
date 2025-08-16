@@ -1,7 +1,6 @@
 package com.project.admin.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,11 +40,11 @@ public class AdminController {
 	//param : dto 관리자 로그인 요청 정보(아이디, 비밀번호)
 	//return : 관리자 정보 + 로그인 성공 메시지 + 토큰
 	// ✅ 컨트롤러는 DTO 수신 → 서비스 위임 → 결과만 반환(얇게 유지)
-    @PostMapping("/login")
-    public ResponseEntity<AdminLoginResponseDto> login(@RequestBody AdminLoginRequestDto dto) {
-        AdminLoginResponseDto result = adminService.login(dto);
-        return ResponseEntity.ok(result);
-    }
+//    @PostMapping("/login")
+//    public ResponseEntity<AdminLoginResponseDto> login(@RequestBody AdminLoginRequestDto dto) {
+//        AdminLoginResponseDto result = adminService.login(dto);
+//        return ResponseEntity.ok(result);
+//    }
 //	@PostMapping("login")
 //	public AdminLoginResponseDto login(@RequestBody AdminLoginRequestDto dto) {
 //		
