@@ -12,6 +12,7 @@ import "../style/login.css";
 // (선택) 디버깅용 로깅
 // console.log('[LoginPage] sees AuthContext id =', window.__AUTH_CTX_ID__);
 
+
 const LoginPage = () => {
   // ✅ 폼 상태
   const [form, setForm] = useState({ memberId: "", memberPw: "" });
@@ -21,7 +22,7 @@ const LoginPage = () => {
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
-  const { login } = useAuth(); // 전역 로그인 처리 (토큰 저장 등)
+  const { login } = useAuth(); // ✅ 전역 로그인 처리 (토큰 저장 등)
 
   // ✅ 입력 변경 핸들러 (name으로 분기)
   const handleChange = (e) => {
@@ -37,17 +38,38 @@ const LoginPage = () => {
     setLoading(true);
 
     try {
-      // ⛳ 로그인 API 호출
-      const result = await loginUser(form);
-
-      // ⛳ 전역 로그인 처리 (컨텍스트에 토큰 전달)
-      login({
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken, // 응답에 있으면 함께 저장
+      // ⛳ 공용 로그인 API 호출 (/auth/login)
+      //  - loginUser가 axios로 호출하여 { data } 반환한다고 가정
+      //  - data에는 백엔드 응답 바디 전체가 들어있음({ member, role, isPasswordExpired } ...)
+      const result = await loginUser({
+        memberId: form.memberId,
+        memberPw: form.memberPw,
       });
+      const responseData = result?.data ?? result; // axios 구조 안전 처리
+
+      // 응답에서 토큰 꺼내기
+      const accessToken =
+        responseData?.member?.accessToken ??
+        responseData?.accessToken ??
+        null;
+
+      const refreshToken =
+        responseData?.member?.refreshToken ??
+        responseData?.refreshToken ??
+        null;
+
+      // 전역 로그인 상태 저장 (컨텍스트/스토어 등)
+      login({ accessToken, refreshToken });
+
+      // ✅ role은 응답 바디에서만 가져오기 (JWT 디코딩 불필요)
+      const role = responseData?.role ?? responseData?.member?.role ?? "USER";
 
       alert("로그인 성공");
-      navigate("/"); // 메인 페이지로 이동
+
+      // ✅ role 기반 라우팅: 관리자면 /admin, 아니면 /
+      if (role === "ADMIN") navigate("/admin");
+      else navigate("/");
+
     } catch (err) {
       console.error("❌ 로그인 실패:", err);
       setError("로그인 실패: 아이디 또는 비밀번호를 확인하세요.");
@@ -57,13 +79,14 @@ const LoginPage = () => {
     }
   };
 
+
   return (
     <form className="login_wrap" onSubmit={handleSubmit}>
-      <div class="form_top_box">
-        <div class="form_top_item">
-          <i class="form_icon type1"></i>
-          <div class="form_title">로그인</div>
-          <div class="form_desc">
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <i className="form_icon type1"></i>
+          <div className="form_title">로그인</div>
+          <div className="form_desc">
             <p>함께마당에 오신것을 환영합니다.</p>
             <p>로그인 하셔서 다양한 서비스를 이용하세요!</p>
           </div>
@@ -122,7 +145,7 @@ const LoginPage = () => {
               </div>
               <div className="pw_find bth_item">
                 <Link
-                  href="./findUserPswd.do?key=284"
+                  href="/findPassword"
                   className="login_btn type1"
                 >
                   <span>비밀번호 찾기</span>
@@ -130,7 +153,7 @@ const LoginPage = () => {
               </div>
               <div className="signup bth_item">
                 <a
-                  href="./joinStep1Form.do?key=285"
+                  href="/signup"
                   className="login_btn type2"
                 >
                   <span>회원가입</span>
