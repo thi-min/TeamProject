@@ -1,12 +1,12 @@
 package com.project.adopt.repository;
 
-import com.project.adopt.entity.AdoptEntity;
-import com.project.common.enums.AdoptState;
-import org.springframework.data.jpa.repository.JpaRepository;
+import java.util.List;
 
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
+import com.project.adopt.entity.AdoptEntity;
+import com.project.adopt.entity.AdoptState;
 
 @Repository
 public interface AdoptRepository extends JpaRepository<AdoptEntity, Long> {

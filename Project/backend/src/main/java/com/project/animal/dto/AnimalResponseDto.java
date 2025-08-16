@@ -1,10 +1,16 @@
 package com.project.animal.dto;
 
-import com.project.common.enums.AnimalSex;
-import com.project.common.enums.AnimalState;
-import lombok.*;
 import java.time.LocalDate;
 import java.util.Set;
+
+import com.project.animal.entity.AnimalSex;
+import com.project.animal.entity.AnimalState;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @Setter

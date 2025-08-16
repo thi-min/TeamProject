@@ -1,11 +1,14 @@
 package com.project.adopt.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
 import com.project.adopt.dto.AdoptRequestDto;
 import com.project.adopt.dto.AdoptResponseDto;
 import com.project.adopt.entity.AdoptEntity;
 import com.project.animal.entity.AnimalEntity;
 import com.project.member.entity.MemberEntity;
-import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
 public interface AdoptMapper {

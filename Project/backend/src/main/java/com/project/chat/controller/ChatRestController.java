@@ -1,16 +1,25 @@
 package com.project.chat.controller;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.project.chat.dto.ChatMessageRequestDto;
 import com.project.chat.dto.ChatMessageResponseDto;
 import com.project.chat.entity.ChatMessageEntity;
 import com.project.chat.entity.ChatRoomEntity;
 import com.project.chat.mapper.ChatMapper;
 import com.project.chat.service.ChatService;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/chat")

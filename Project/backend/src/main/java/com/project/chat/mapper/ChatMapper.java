@@ -1,12 +1,15 @@
 package com.project.chat.mapper;
 
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
+
+import com.project.admin.entity.AdminEntity;
 import com.project.chat.dto.ChatMessageRequestDto;
 import com.project.chat.dto.ChatMessageResponseDto;
 import com.project.chat.entity.ChatMessageEntity;
-import com.project.member.entity.MemberEntity;
-import com.project.admin.entity.AdminEntity;
 import com.project.chat.entity.ChatRoomEntity;
-import org.mapstruct.*;
+import com.project.member.entity.MemberEntity;
 
 @Mapper(componentModel = "spring")
 public interface ChatMapper {
