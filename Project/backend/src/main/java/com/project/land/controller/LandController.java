@@ -23,7 +23,7 @@ public class LandController {
     
     
     // 사용자용 - 시간대 전체 조회 + 예약 마리수 포함
-    @GetMapping("/time-slots")
+    @GetMapping("/timeslots")
     public ResponseEntity<List<LandCountDto>> getLandTimeSlotsWithCount(
             @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate landDate,
             @RequestParam("memberNum") Long memberNum,
@@ -32,7 +32,7 @@ public class LandController {
         return ResponseEntity.ok(result);
     }
     
-    // 놀이터상세정보에서 결제금액 조회
+    // 놀이터상세정보 보기 (+결제금액)
     @GetMapping("/detail/{reserveCode}")
     public ResponseEntity<LandDetailDto> getLandDetail(
             @PathVariable Long reserveCode) {

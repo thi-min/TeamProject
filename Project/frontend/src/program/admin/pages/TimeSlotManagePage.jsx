@@ -7,7 +7,7 @@ import {
   deleteTimeSlot,
 } from "../services/TimeSlotService";
 
-const STORAGE_KEY = "landTypeRules"; // { SMALL: number[], LARGE: number[] }
+const STORAGE_KEY = "landRules"; // { SMALL: number[], LARGE: number[] }
 
 const toHHMMSS = (v) => {
   if (!v) return "";
@@ -37,30 +37,15 @@ const TimeSlotManagePage = () => {
     enabled: true,
   });
 
-  // 데이터 로드
-  useEffect(() => {
-    setLoading(true);
-    fetchTimeSlotsByType(selectedType)
-      .then(res => {
-        setSlots(res.data || []); // ✅ slots로 통일
-        setError(false);
-      })
-      .catch(() => {
-        setSlots([]); // ✅ slots로 통일
-        setError(false);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
-  }, [selectedType]);
-
+  // ✅ 데이터 로드 함수 (fetch + localStorage 규칙 불러오기)
   const load = async (type) => {
     try {
       setLoading(true);
       setError("");
       const res = await fetchTimeSlotsByType(type);
-      setSlots(res.data || []); // ✅ slots로 통일
+      setSlots(res.data || []);
 
+      // localStorage 규칙 불러오기
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         try {
@@ -74,11 +59,18 @@ const TimeSlotManagePage = () => {
         }
       }
     } catch (e) {
+      console.error(e);
       setError("시간대 목록을 불러오지 못했습니다.");
+      setSlots([]);
     } finally {
       setLoading(false);
     }
   };
+
+  // ✅ selectedType 변경될 때마다 load 실행
+  useEffect(() => {
+    load(selectedType);
+  }, [selectedType]);
 
   const allIds = useMemo(() => slots.map((s) => s.id), [slots]);
 
@@ -129,7 +121,7 @@ const TimeSlotManagePage = () => {
       await createTimeSlot(dto);
       alert("추가되었습니다.");
       setNewForm({ startTime: "", endTime: "", capacity: 10, enabled: true });
-      load(selectedType);
+      load(selectedType); // ✅ 새로고침
     } catch {
       alert("추가 실패");
     }
@@ -170,7 +162,7 @@ const TimeSlotManagePage = () => {
       await updateTimeSlot(id, dto);
       alert("수정되었습니다.");
       cancelEdit();
-      load(selectedType);
+      load(selectedType); // ✅ 새로고침
     } catch (e) {
       console.error(e);
       alert("수정 실패");
@@ -183,7 +175,7 @@ const TimeSlotManagePage = () => {
     try {
       await deleteTimeSlot(id);
       alert("삭제되었습니다.");
-      load(selectedType);
+      load(selectedType); // ✅ 새로고침
     } catch {
       alert("삭제 실패");
     }

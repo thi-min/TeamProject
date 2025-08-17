@@ -91,18 +91,17 @@ public class VolunteerServiceImpl implements VolunteerService {
                 .build();
     }
     
+    // 사용자용 - 봉사 시간대 조회
     @Override
     @Transactional(readOnly = true)
     public List<VolunteerCountDto> getVolunteerTimeSlotsWithCount(LocalDate volDate, Long memberNum) {
-
-        // 1) 봉사 타입(VOL) 활성 슬롯만 정렬 조회
+        // 봉사 타입 슬롯 전부 가져오기
         List<TimeSlot> timeSlots =
             timeSlotRepository.findByTimeTypeAndEnabledTrueOrderByStartTimeAsc(TimeType.VOL);
 
-        // 2) 슬롯별 예약 인원 집계 후 DTO 매핑
         return timeSlots.stream()
                 .map(slot -> {
-                    Integer reserved = volunteerRepository.countByDateAndTimeSlot(volDate, slot); // ✅ 아래 리포지토리 메서드 참고
+                    Integer reserved = volunteerRepository.countByDateAndTimeSlot(volDate, slot);
                     int reservedCount = reserved != null ? reserved : 0;
 
                     return VolunteerCountDto.builder()

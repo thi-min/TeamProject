@@ -6,9 +6,9 @@ const api = axios.create({ baseURL: API_BASE });
 
 /**
  * 백엔드 매핑
- * - GET /api/land/time-slots?date=yyyy-MM-dd&memberNum=1&landType=SMALL
+ * - GET /api/land/timeslots?date=yyyy-MM-dd&memberNum=1&landType=SMALL
  *     -> List<LandCountDto> (timeSlotId, label, landType, reservedCount, capacity)
- * - GET /api/time-slots/land
+ * - GET /api/timeslots/land
  *     -> List<TimeSlotDto> (id, label, startTime, endTime, capacity, enabled)
  * - POST /api/reserve
  *     -> 예약 생성 (사용 중이던 엔드포인트 유지)

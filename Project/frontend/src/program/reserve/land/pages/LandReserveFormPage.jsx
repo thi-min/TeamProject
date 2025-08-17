@@ -96,7 +96,10 @@ const LandReserveFormPage = () => {
         setLoading(true);
         setErrorMsg("");
 
-        if (formData.landType) {
+        let slotsData = null;
+
+        // 예약 현황 api
+        if (formData.landType && formData.memberNum) {
           try {
             const res = await LandReserveService.fetchReservationStatus(
               selectedDate,
@@ -114,23 +117,42 @@ const LandReserveFormPage = () => {
         }
 
         // 전체 시간대 불러오기
+        if (!slotsData) {
         const res2 = await LandReserveService.fetchTimeSlots();
-        if (mounted) {
-          setDisplaySlots(normalizeSlotDto(res2.data));
-        }
-      } catch (err) {
-        console.error("시간대 목록 API 실패:", err);
-        if (mounted) setErrorMsg("시간대 목록을 불러오지 못했습니다.");
-      } finally {
-        if (mounted) setLoading(false);
+        slotsData = normalizeSlotDto(res2.data);
       }
-    };
 
-    loadSlots();
-    return () => {
-      mounted = false;
-    };
-  }, [selectedDate, formData.landType, formData.memberNum]);
+      // ✅ localStorage 규칙 적용
+      const saved = localStorage.getItem("landRules");
+      if (saved) {
+        const rules = JSON.parse(saved);
+        slotsData = slotsData.map(s => ({
+          ...s,
+          allowSmall: rules.SMALL.includes(s.id),
+          allowLarge: rules.LARGE.includes(s.id),
+
+          disabled:
+          (formData.landType === "SMALL" && !rules.SMALL.includes(s.id)) ||
+          (formData.landType === "LARGE" && !rules.LARGE.includes(s.id)),
+          
+        }));
+      }
+
+      if (mounted) setDisplaySlots(slotsData);
+
+    } catch (err) {
+      console.error("시간대 목록 API 실패:", err);
+      if (mounted) setErrorMsg("시간대 목록을 불러오지 못했습니다.");
+    } finally {
+      if (mounted) setLoading(false);
+    }
+  };
+
+  loadSlots();
+  return () => {
+    mounted = false;
+  };
+}, [selectedDate, formData.landType, formData.memberNum]);
 
   /** 입력 변경 핸들러 */
   const handleChange = (e) => {
@@ -163,23 +185,40 @@ const LandReserveFormPage = () => {
   };
 
   /** 선택한 유형의 시간대만 필터링 */
-const filteredSlots = useMemo(() => {
-  if (!formData.landType) {
-    // 유형 선택 전 → 전체 시간대 (단, 선택 비활성화)
-    return displaySlots.map(slot => ({
-      ...slot,
-      disabled: true
-    }));
-  }
+  const filteredSlots = useMemo(() => {
+    console.log("규칙:", localStorage.getItem("landRules"));
+  console.log("displaySlots:", displaySlots);
+    if (!formData.landType) {
+      // 유형 선택 전 → 전체 시간대 보이되 선택 불가
+      return displaySlots.map(slot => ({
+        ...slot,
+        disabled: true
+      }));
+    }
 
-  // 유형 선택 후 → 해당 타입만 필터링 + 활성화
-  return displaySlots
-    .filter(slot => (slot.type || "").toUpperCase() === formData.landType.toUpperCase())
-    .map(slot => ({
-      ...slot,
-      disabled: false
-    }));
-}, [displaySlots, formData.landType]);
+    return displaySlots.map(slot => {
+      const full = (slot.reservedCount ?? 0) >= (slot.capacity ?? 0);
+
+      // localStorage 규칙 기반 허용 여부 확인
+      const rules = JSON.parse(localStorage.getItem("landRules") || "{}");
+      const allowSmall = rules.SMALL?.includes(slot.timeSlotId) ?? true;
+      const allowLarge = rules.LARGE?.includes(slot.timeSlotId) ?? true;
+
+      let disabled = full || !slot.enabled;
+
+      if (formData.landType === "SMALL" && !allowSmall) {
+        disabled = true;
+      }
+      if (formData.landType === "LARGE" && !allowLarge) {
+        disabled = true;
+      }
+
+      return {
+        ...slot,
+        disabled
+      };
+    });
+  }, [displaySlots, formData.landType]);
 
   if (loading) return <div className="land-form-page">시간대를 불러오는 중입니다…</div>;
   if (errorMsg) return <div className="land-form-page">{errorMsg}</div>;
@@ -250,7 +289,7 @@ const filteredSlots = useMemo(() => {
             />
           </div>
           <div className="form-row">
-            <label htmlFor="guardianNumber">보호자 수</label>
+            <label htmlFor="guardianNumber">보호자 수 <span className="required">*</span></label>
             <input
               type="number"
               id="guardianNumber"
@@ -289,7 +328,7 @@ const filteredSlots = useMemo(() => {
                         <br />정원: {slot.reservedCount ?? 0}/{slot.capacity}
                       </>
                     )}
-                    {slot.disabled && " - 유형 선택 필요"}
+                    {slot.disabled && ""}
                     {(slot.reservedCount ?? 0) >= (slot.capacity ?? 0) && " - 마감"}
                   </button>
                 );
