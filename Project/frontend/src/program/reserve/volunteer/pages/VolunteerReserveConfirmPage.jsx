@@ -61,7 +61,8 @@ const VolunteerReserveConfirmPage = () => {
             <tr><th>연락처</th><td>{phone}</td></tr>
             <tr><th>생년월일</th><td>{birth}</td></tr>
             <tr><th>신청 인원 수</th><td>{reserveNumber}</td></tr>
-            <tr><th>봉사 시간</th><td>{selectedDate} {timeLabel}</td></tr>
+            <tr><th>봉사 날짜</th><td>{selectedDate}</td></tr>
+            <tr><th>봉사 시간</th><td>{timeLabel}</td></tr>
             <tr><th>비고</th><td>{note || "-"}</td></tr>
           </tbody>
         </table>
