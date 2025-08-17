@@ -47,7 +47,8 @@ const routes = {
 
   // 관리자
   admin: {
-    login: { path: "/admin/login", label: "관리자 로그인" },
+    admin: { path: "/admin", label: "관리자 페이지" },
+    password: { path: "/admin/updatePw", label: "관리자 비밀번호 변경" },
     dashboard: { path: "/admin/dashboard", label: "관리자 홈" },
     members: { path: "/admin/members", label: "회원 관리" },
     memberDetail: (id) => `/admin/members/${id}`,
