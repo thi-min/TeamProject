@@ -139,16 +139,14 @@ public class JwtTokenProvider {
             return false;
         }
     }
-
-    // ==============================
-    // (선택) 만료시각 추출 - 블랙리스트 TTL 산정 등에 사용
-    // ==============================
-    public Date getExpiration(String token) {
+    
+    //토큰에서 Claims 전부 꺼내기
+    public Claims getClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
                 .parseClaimsJws(token)
-                .getBody()
-                .getExpiration();
+                .getBody();
     }
+
 }
