@@ -1,7 +1,11 @@
-// 📁 src/admin/AdminQnaBbs.js
+// 📁 src/admin/AdminQnaBbs.jsx
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./qnabbs.css";
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+
 
 function AdminQnaBbs() {
   const [posts, setPosts] = useState([]);
@@ -9,22 +13,18 @@ function AdminQnaBbs() {
   const [totalPages, setTotalPages] = useState(0);
   const [searchType, setSearchType] = useState("all");
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [expandedRow, setExpandedRow] = useState(null);
-  const [answerText, setAnswerText] = useState("");
+  const [expandedRow, setExpandedRow] = useState(null); // toggle 상태
+  const [selectedPosts, setSelectedPosts] = useState([]);
+  const navigate = useNavigate();
 
+  // 게시글 불러오기
   const fetchPosts = async (pageNumber = 0) => {
     try {
-      const params = {
-        type: "FAQ",
-        page: pageNumber,
-        size: 10,
-      };
-
+      const params = { type: "FAQ", page: pageNumber, size: 10 };
       if (searchType !== "all" && searchKeyword.trim() !== "") {
         params.searchType = searchType;
         params.keyword = searchKeyword.trim();
       }
-
       const response = await axios.get("/bbs/bbslist", { params });
       setPosts(response.data.content);
       setTotalPages(response.data.totalPages);
@@ -44,56 +44,36 @@ function AdminQnaBbs() {
     fetchPosts(0);
   };
 
-  const toggleRow = (id, existingAnswer) => {
-    if (expandedRow === id) {
-      setExpandedRow(null);
-    } else {
-      setExpandedRow(id);
-      setAnswerText(existingAnswer || "");
-    }
+  const handleCheckboxChange = (id) => {
+    setSelectedPosts(prev =>
+      prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]
+    );
   };
 
-  const handleSaveAnswer = async (bbsId) => {
+  const handleDeleteSelected = async () => {
+    if (selectedPosts.length === 0) {
+      alert("삭제할 게시글을 선택하세요.");
+      return;
+    }
+    if (!window.confirm("선택한 게시글을 정말 삭제하시겠습니까?")) return;
+
     try {
-      await axios.post(`/admin/bbs/qna/${bbsId}/answer`, {
-        content: answerText
-      }, {
-        params: { adminId: 1 } // 관리자 ID 필요
+      await axios.delete("/admin/bbs/delete-multiple", {
+        data: { ids: selectedPosts },
+        params: { adminId: 1 }
       });
-      alert("답변이 저장되었습니다.");
+      alert("선택한 게시글이 삭제되었습니다.");
+      setSelectedPosts([]);
       fetchPosts(page);
-      setExpandedRow(null);
     } catch (err) {
       console.error(err);
-      alert("답변 저장 실패");
+      alert("삭제 실패");
     }
   };
 
-  const handleUpdateAnswer = async (qnaId) => {
-    try {
-      await axios.put(`/admin/bbs/qna/${qnaId}`, {
-        content: answerText
-      });
-      alert("답변이 수정되었습니다.");
-      fetchPosts(page);
-      setExpandedRow(null);
-    } catch (err) {
-      console.error(err);
-      alert("답변 수정 실패");
-    }
-  };
-
-  const handleDeleteAnswer = async (qnaId) => {
-    if (!window.confirm("정말 삭제하시겠습니까?")) return;
-    try {
-      await axios.delete(`/admin/bbs/qna/${qnaId}`);
-      alert("답변이 삭제되었습니다.");
-      fetchPosts(page);
-      setExpandedRow(null);
-    } catch (err) {
-      console.error(err);
-      alert("답변 삭제 실패");
-    }
+  // 답변 펼치기 toggle
+  const toggleRow = (id) => {
+    setExpandedRow(expandedRow === id ? null : id);
   };
 
   return (
@@ -116,14 +96,21 @@ function AdminQnaBbs() {
         <button onClick={handleSearch}>조회</button>
       </div>
 
+      {/* 다중 삭제 버튼 */}
+      <div style={{ margin: "10px 0" }}>
+        <button onClick={handleDeleteSelected}>선택 삭제</button>
+      </div>
+
+      {/* 게시글 테이블 */}
       <table className="bbs-table">
         <thead>
           <tr>
+            <th style={{ width: "3%" }}>선택</th>
             <th style={{ width: "5%" }}>번호</th>
-            <th style={{ width: "65%" }}>제목</th>
+            <th style={{ width: "60%" }}>제목</th>
             <th style={{ width: "15%" }}>작성자</th>
             <th style={{ width: "10%" }}>작성일</th>
-            <th style={{ width: "5%" }}>답변</th>
+            <th style={{ width: "7%" }}>답변</th>
           </tr>
         </thead>
         <tbody>
@@ -131,43 +118,37 @@ function AdminQnaBbs() {
             posts.map((post) => (
               <React.Fragment key={post.bulletinNum}>
                 <tr>
+                  <td>
+                    <input
+                      type="checkbox"
+                      checked={selectedPosts.includes(post.bulletinNum)}
+                      onChange={() => handleCheckboxChange(post.bulletinNum)}
+                    />
+                  </td>
                   <td>{post.bulletinNum}</td>
-                  <td>{post.bbsTitle}</td>
+                  {/* 제목 클릭 시 상세보기 페이지로 이동 */}
+                  <td
+                    style={{ cursor: "pointer", color: "blue" }}
+                    onClick={() => navigate(`bbs/admin/qna/view/${post.bulletinNum}`)}
+                  >
+                    {post.bbsTitle}
+                  </td>
                   <td>{post.memberName || "익명"}</td>
                   <td>{new Date(post.registDate).toLocaleDateString()}</td>
                   <td>
-                    <button onClick={() => toggleRow(post.bulletinNum, post.answerContent)}>V</button>
+                    {post.answerContent && (
+                      <button onClick={() => toggleRow(post.bulletinNum)}>
+                        {expandedRow === post.bulletinNum ? "접기" : "보기"}
+                      </button>
+                    )}
                   </td>
                 </tr>
-                {expandedRow === post.bulletinNum && (
+                {expandedRow === post.bulletinNum && post.answerContent && (
                   <tr>
-                    <td colSpan="5">
+                    <td colSpan="6">
                       <div className="answer-section">
-                        {post.answerContent ? (
-                          <>
-                            <textarea
-                              value={answerText}
-                              onChange={(e) => setAnswerText(e.target.value)}
-                              rows={4}
-                            />
-                            <div>
-                              <button onClick={() => handleUpdateAnswer(post.qnaId)}>수정</button>
-                              <button onClick={() => handleDeleteAnswer(post.qnaId)}>삭제</button>
-                            </div>
-                          </>
-                        ) : (
-                          <>
-                            <textarea
-                              value={answerText}
-                              onChange={(e) => setAnswerText(e.target.value)}
-                              placeholder="답변을 입력하세요"
-                              rows={4}
-                            />
-                            <div>
-                              <button onClick={() => handleSaveAnswer(post.bulletinNum)}>저장</button>
-                            </div>
-                          </>
-                        )}
+                        <strong>답변:</strong>
+                        <p>{post.answerContent}</p>
                       </div>
                     </td>
                   </tr>
@@ -176,7 +157,7 @@ function AdminQnaBbs() {
             ))
           ) : (
             <tr>
-              <td colSpan="5">등록된 질문이 없습니다.</td>
+              <td colSpan="6">등록된 질문이 없습니다.</td>
             </tr>
           )}
         </tbody>
@@ -184,14 +165,25 @@ function AdminQnaBbs() {
 
       {/* 페이지네이션 */}
       <div className="pagination">
-        <button disabled={page === 0} onClick={() => setPage(page - 1)}>«</button>
-        {Array.from({ length: totalPages }, (_, i) => (
-          <button key={i} className={page === i ? "active" : ""} onClick={() => setPage(i)}>
-            {i + 1}
-          </button>
-        ))}
-        <button disabled={page === totalPages - 1} onClick={() => setPage(page + 1)}>»</button>
+        <button disabled={page === 0} onClick={() => setPage(page - 1)}>
+        <FontAwesomeIcon icon={faChevronLeft} />
+      </button>
+
+      {Array.from({ length: Math.max(totalPages, 1) }, (_, i) => (
+        <button
+        key={i}
+        className={page === i ? "active" : ""}
+        onClick={() => setPage(i)}
+        >
+          {i + 1}
+        </button>
+      ))}
+
+      <button disabled={page === Math.max(totalPages, 1) - 1} onClick={() => setPage(page + 1)}>
+        <FontAwesomeIcon icon={faChevronRight} />
+        </button>
       </div>
+
     </div>
   );
 }

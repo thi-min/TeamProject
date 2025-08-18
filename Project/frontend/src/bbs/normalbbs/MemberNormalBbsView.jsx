@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import axios from "axios";
 
-function NormalBbsView() {
-  const { id } = useParams(); // 공지사항 게시글 번호
+function MemberNormalBbsView() {
+  const { id } = useParams(); // 게시글 번호
   const [post, setPost] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchPost();
@@ -13,30 +12,11 @@ function NormalBbsView() {
 
   const fetchPost = async () => {
     try {
-      const res = await axios.get(`/admin/bbs/${id}`); // API 주소는 백엔드에 맞게 조정하세요
+      const res = await axios.get(`/bbs/${id}`); // 회원용 API
       setPost(res.data);
     } catch (error) {
-      console.error("공지사항 조회 오류:", error);
-      alert("공지사항 조회 실패");
-    }
-  };
-
-  const handleDelete = async () => {
-    const adminId = localStorage.getItem("adminId");
-    if (!adminId) {
-      alert("관리자 로그인 후 이용해주세요.");
-      return;
-    }
-
-    if (!window.confirm("정말 삭제하시겠습니까?")) return;
-
-    try {
-      await axios.delete(`/admin/bbs/${id}?adminId=${adminId}`);
-      alert("삭제되었습니다.");
-      navigate("/admin/notice"); // 목록 페이지 경로에 맞게 수정하세요
-    } catch (error) {
-      console.error("삭제 오류:", error);
-      alert("삭제 실패");
+      console.error("게시글 조회 오류:", error);
+      alert("게시글 조회 실패");
     }
   };
 
@@ -74,15 +54,8 @@ function NormalBbsView() {
           </ul>
         </div>
       )}
-
-      <button onClick={handleDelete}>삭제</button>
-
-      {/* 수정 버튼 추가 */}
-      <button onClick={() => navigate(`/admin/notice/edit/${id}`)} style={{ marginLeft: "10px" }}>
-        수정
-      </button>
     </div>
   );
 }
 
-export default NormalBbsView;
+export default MemberNormalBbsView;

@@ -1,20 +1,18 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from "react-router-dom";
-import "./normalbbs.css"; // 스타일 따로 관리
+import "./normalbbs.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
-function NoticeBbs() {
+
+function MemberNormalBbs() {
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-  const [isAdmin, setIsAdmin] = useState(true); // 관리자 여부 (임시)
 
+  // 검색 상태
   const [searchType, setSearchType] = useState("all");
   const [searchKeyword, setSearchKeyword] = useState("");
-
-  const navigate = useNavigate();
 
   // 게시판 목록 불러오기
   const fetchNotices = async (pageNumber = 0) => {
@@ -30,7 +28,8 @@ function NoticeBbs() {
         params.keyword = searchKeyword.trim();
       }
 
-      const response = await axios.get("/admin/bbs/bbslist", { params });
+      const response = await axios.get("/bbs/bbslist", { params });
+
       setPosts(response.data.content);
       setTotalPages(response.data.totalPages);
       setPage(response.data.number);
@@ -48,11 +47,6 @@ function NoticeBbs() {
     fetchNotices(newPage);
   };
 
-  // 글쓰기 버튼 클릭
-  const handleWrite = () => {
-    navigate("/bbs/normal/write"); // SPA 방식으로 이동
-  };
-
   // 검색 실행
   const handleSearch = () => {
     fetchNotices(0);
@@ -65,7 +59,10 @@ function NoticeBbs() {
       {/* 검색창 */}
       <div className="search-bar">
         <div className="temp_form_box lg">
-          <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+          <select
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
             <option value="all">전체</option>
             <option value="title">제목</option>
             <option value="writer">작성자</option>
@@ -80,18 +77,8 @@ function NoticeBbs() {
         <button onClick={handleSearch}>조회</button>
       </div>
 
-      {/* 글쓰기 버튼 */}
-      {isAdmin && (
-        <div className="top-bar" style={{ margin: "10px 0" }}>
-          <button className="write-btn" onClick={handleWrite}>
-            글쓰기
-          </button>
-        </div>
-      )}
-
-      {/* 게시판 테이블 */}
-      <table className="bbs-table">
-        <div className="table responsive">
+        <table className="bbs-table">
+         <div className="table responsive">        
           <colgroup>
             <col style={{ width: "10%" }} />
             <col style={{ width: "70%" }} />
@@ -111,7 +98,9 @@ function NoticeBbs() {
               posts.map((post) => (
                 <tr
                   key={post.bulletinNum}
-                  onClick={() => navigate(`/admin/notice/view/${post.bulletinNum}`)}
+                  onClick={() =>
+                    (window.location.href = `/notice/view/${post.bulletinNum}`)
+                  }
                   style={{ cursor: "pointer" }}
                 >
                   <td>{post.bulletinNum}</td>
@@ -122,37 +111,41 @@ function NoticeBbs() {
               ))
             ) : (
               <tr>
-                <td colSpan={4} style={{ textAlign: "center", padding: "90px 0" }}>
-                  등록된 공지가 없습니다.
+                <td
+                 colSpan={4}
+                 style={{ textAlign: "center", padding: "90px 0" }}
+                >
+                등록된 질문이 없습니다.
                 </td>
               </tr>
             )}
           </tbody>
-        </div>
-      </table>
+          </div>
+        </table>
+      
 
       {/* 페이지네이션 */}
       <div className="pagination">
         <button disabled={page === 0} onClick={() => setPage(page - 1)}>
-          <FontAwesomeIcon icon={faChevronLeft} />
+        <FontAwesomeIcon icon={faChevronLeft} />
         </button>
 
-        {Array.from({ length: Math.max(totalPages, 1) }, (_, i) => (
-          <button
-            key={i}
-            className={page === i ? "active" : ""}
-            onClick={() => setPage(i)}
-          >
-            {i + 1}
-          </button>
-        ))}
+      {Array.from({ length: Math.max(totalPages, 1) }, (_, i) => (
+        <button
+          key={i}
+          className={page === i ? "active" : ""}
+          onClick={() => setPage(i)}
+        >
+      {i + 1}
+      </button>
+    ))}
 
-        <button disabled={page === Math.max(totalPages, 1) - 1} onClick={() => setPage(page + 1)}>
-          <FontAwesomeIcon icon={faChevronRight} />
+      <button disabled={page === Math.max(totalPages, 1) - 1} onClick={() => setPage(page + 1)}>
+        <FontAwesomeIcon icon={faChevronRight} />
         </button>
       </div>
     </div>
   );
 }
 
-export default NoticeBbs;
+export default MemberNormalBbs;

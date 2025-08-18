@@ -40,7 +40,6 @@ public class BbsAdminController {
         return ResponseEntity.ok(created);
     }
 
-
     // QnA 답변 저장 (관리자)
     @PostMapping("/qna/{bbsId}/answer")
     public ResponseEntity<QandADto> saveQnaAnswer(
@@ -62,7 +61,7 @@ public class BbsAdminController {
         return ResponseEntity.ok(updated);
     }
 
-    // 게시글 삭제 (관리자는 회원글 및 관리자글 모두 삭제 가능)
+    // 게시글 삭제 (단일)
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBbs(
             @PathVariable Long id,
@@ -72,7 +71,7 @@ public class BbsAdminController {
         return ResponseEntity.noContent().build();
     }
 
- // 관리자 게시글 수정
+    // 관리자 게시글 수정
     @PutMapping("/admin/{id}")
     public ResponseEntity<BbsDto> updateAdminBbs(
             @PathVariable Long id,
@@ -89,7 +88,6 @@ public class BbsAdminController {
         return ResponseEntity.ok(updated);
     }
 
-
     // 관리자 게시글 첨부파일 수정 및 삭제
     @PutMapping("/file/{fileId}")
     public ResponseEntity<FileUpLoadDto> updateFile(
@@ -101,7 +99,7 @@ public class BbsAdminController {
         return ResponseEntity.ok(updatedFile);
     }
 
- // QnA 답변 삭제 (관리자)
+    // QnA 답변 삭제 (관리자)
     @DeleteMapping("/qna/{qnaId}")
     public ResponseEntity<Void> deleteQnaAnswer(
             @PathVariable Long qnaId,
@@ -111,6 +109,7 @@ public class BbsAdminController {
         return ResponseEntity.noContent().build();
     }
 
+    // 게시글 리스트 조회
     @GetMapping("/bbslist")
     public ResponseEntity<Page<BbsDto>> getBbsList(
             @RequestParam(required = false) String searchType,
@@ -122,6 +121,18 @@ public class BbsAdminController {
         Page<BbsDto> result = bbsService.searchPosts(searchType, bbstitle, bbscontent, type, pageable);
         return ResponseEntity.ok(result);
     }
+
+    // 다중 삭제 (관리자)
+    @DeleteMapping("/delete-multiple")
+    public ResponseEntity<Void> deleteMultipleBbs(
+            @RequestParam Long adminId,
+            @RequestBody List<Long> ids) {
+
+        bbsService.deleteBbsMultiple(ids, null, adminId);
+        return ResponseEntity.noContent().build();
+    }
+
+    // 파일 ID 파싱
     private List<Long> parseDeleteIds(String deletedFileIds) {
         if (deletedFileIds != null && !deletedFileIds.isEmpty()) {
             ObjectMapper mapper = new ObjectMapper();
@@ -135,3 +146,4 @@ public class BbsAdminController {
     }
 
 }
+
