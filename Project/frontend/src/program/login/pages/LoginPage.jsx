@@ -7,9 +7,9 @@
 
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { loginUser } from "../services/auth";                  // 로그인 API (백엔드: /auth/login)
+import { loginUser } from "../services/auth"; // 로그인 API (백엔드: /auth/login)
 import { useAuth } from "../../../common/context/AuthContext"; // 전역 로그인 상태
-import { jwtDecode } from "jwt-decode";                        // role fallback 용
+import { jwtDecode } from "jwt-decode"; // role fallback 용
 import "../style/login.css";
 
 const LoginPage = () => {
@@ -40,8 +40,8 @@ const LoginPage = () => {
       // ⛳ 공용 로그인 API 호출 (/auth/login)
       //  - loginUser가 axios로 호출하여 { data } 형태를 반환한다고 가정
       const result = await loginUser({
-        memberId: form.memberId,   // ⚠️ 서버 DTO 키명과 반드시 일치
-        memberPw: form.memberPw,   // 예: username/password 라면 여기도 맞춰 변경
+        memberId: form.memberId, // ⚠️ 서버 DTO 키명과 반드시 일치
+        memberPw: form.memberPw, // 예: username/password 라면 여기도 맞춰 변경
       });
 
       // axios 응답 안전 처리
@@ -49,15 +49,10 @@ const LoginPage = () => {
 
       // ✅ 다양한 응답 포맷을 대비하여 토큰을 안전하게 추출
       const accessToken =
-        data.accessToken ??
-        data.token ??
-        data.member?.accessToken ??
-        null;
+        data.accessToken ?? data.token ?? data.member?.accessToken ?? null;
 
       const refreshToken =
-        data.refreshToken ??
-        data.member?.refreshToken ??
-        null;
+        data.refreshToken ?? data.member?.refreshToken ?? null;
 
       if (!accessToken) {
         // 토큰이 없다면 인증 실패로 처리
@@ -84,9 +79,15 @@ const LoginPage = () => {
       localStorage.setItem("accessToken", accessToken);
       if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
 
+      // + memberNum 불러와서 로컬 스트로지에 저장
+      if (data.memberNum) {
+        localStorage.setItem("memberNum", data.memberNum);
+      }
       // 📌 호환용: 예전 코드가 adminAccessToken을 참조할 수 있어 ADMIN이면 같이 저장
       if (upperRole === "ADMIN" || upperRole === "ROLE_ADMIN") {
         localStorage.setItem("adminAccessToken", accessToken);
+      } else {
+        localStorage.removeItem("adminAccessToken");
       }
 
       // ✅ 전역 컨텍스트에도 반영 (컨텍스트 구현에 맞춰 전달)
@@ -113,7 +114,6 @@ const LoginPage = () => {
       setLoading(false);
     }
   };
-
 
   return (
     <form className="login_wrap" onSubmit={handleSubmit}>
@@ -179,18 +179,12 @@ const LoginPage = () => {
                 </Link>
               </div>
               <div className="pw_find bth_item">
-                <Link
-                  href="/findPassword"
-                  className="login_btn type1"
-                >
+                <Link href="/findPassword" className="login_btn type1">
                   <span>비밀번호 찾기</span>
                 </Link>
               </div>
               <div className="signup bth_item">
-                <a
-                  href="/signup"
-                  className="login_btn type2"
-                >
+                <a href="/signup" className="login_btn type2">
                   <span>회원가입</span>
                 </a>
               </div>

@@ -36,8 +36,13 @@ export default function AdminPasswordUpdatePage() {
         newPassword,
         newPasswordCheck,
       });
-      setFeedback({ type: "success", text: msg || "비밀번호가 성공적으로 변경되었습니다." });
-      setCurrentPassword(""); setNewPassword(""); setNewPasswordCheck("");
+      setFeedback({
+        type: "success",
+        text: msg || "비밀번호가 성공적으로 변경되었습니다.",
+      });
+      setCurrentPassword("");
+      setNewPassword("");
+      setNewPasswordCheck("");
     } catch (err) {
       setFeedback({ type: "error", text: err.message || "실패했습니다." });
     } finally {
@@ -46,8 +51,8 @@ export default function AdminPasswordUpdatePage() {
   };
 
   return (
-    <div className="admin-password-update-page">
-      <h2>관리자 비밀번호 변경</h2>
+    <div>
+      <h3>관리자 비밀번호 변경</h3>
 
       <form onSubmit={handleSubmit} noValidate>
         <div className="form_row">
@@ -94,9 +99,7 @@ export default function AdminPasswordUpdatePage() {
       {/* ✅ 항상 문자열만 렌더링 */}
       {feedback.type && (
         <p
-          className={
-            feedback.type === "success" ? "msg_success" : "msg_error"
-          }
+          className={feedback.type === "success" ? "msg_success" : "msg_error"}
           // 절대 객체를 넣지 말고, 문자열만!
         >
           {feedback.text}

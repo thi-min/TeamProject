@@ -61,9 +61,6 @@ public class SecurityConfig {
             		.accessDeniedHandler(jwtAccessDeniedHandler))        // ✅ 403 처리 추가
             // ✅ 요청별 인가 규칙
             .authorizeHttpRequests(auth -> auth
-                // Preflight
-																											                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-
                 // 공개 엔드포인트 (로그인/재발급)
                 .requestMatchers("/auth/login", "/auth/reissue").permitAll()
 
@@ -71,7 +68,7 @@ public class SecurityConfig {
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
 
                 // 관리자 전용
-                .requestMatchers("/admin/**").hasAuthority("ADMIN") // 토큰에 "ADMIN" 권한 필요
+                .requestMatchers("/admin/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
                 // 나머지는 필요에 따라 조정
                 .anyRequest().permitAll()
             )
