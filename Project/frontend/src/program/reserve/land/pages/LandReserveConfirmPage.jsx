@@ -29,12 +29,15 @@ const LandReserveConfirmPage = () => {
 
   const handleConfirm = async () => {
   try {
+    const memberNum = localStorage.getItem("memberNum");
+    if (!memberNum) return alert("로그인이 필요합니다.");
+
+    // ✅ 토큰도 같이 가져오기
+    const token = localStorage.getItem("accessToken");
+
     // 1) 프론트에서 한번 더 유효성 체크
-    if (!formData.memberNum) return alert("로그인이 필요합니다.");
     if (!selectedSlotId) return alert("시간대를 선택해 주세요.");
     if (!Number(formData.reserveNumber)) return alert("보호자 수를 입력해 주세요.");
-
-    const token = localStorage.getItem("accessToken");
 
     // 2) 서버에 보낼 payload (로그로 확인)
     const payload = {
@@ -103,6 +106,10 @@ const LandReserveConfirmPage = () => {
       <section className="payment-section">
         <h3>결제 정보</h3>
         <table className="table type2 responsive border">
+          <colgroup>
+            <col className="w30p" />
+            <col />
+          </colgroup>
           <tbody>
             <tr><th>기본금액</th><td>{basePriceDetail}</td></tr>
             <tr><th>추가금액</th><td>{extraPriceDetail} → {additionalPrice}원</td></tr>
