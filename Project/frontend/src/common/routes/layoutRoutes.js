@@ -9,9 +9,32 @@ import LogoutLink from "../../program/login/pages/LogoutLink";
 import AdminLogin from "../../program/admin/pages/AdminLoginPage";
 import Signup from "../../program/signup/pages/SignupPage";
 
-// 1:1 채팅 페이지 import
+
+// FundPage.js에서 기본 내보내기가 없으므로, FundMainPage를 이름으로 불러옵니다.
+// 이제 FundPage.js에서 내보내는 모든 컴포넌트를 불러옵니다.
+import {
+  FundApplicationDetails,
+  FundApplicationForm,
+  FundMainPage,
+  GoodsApplicationDetails,
+  GoodsApplicationForm,
+  RecurringApplicationDetails,
+  RecurringApplicationForm
+} from "../../program/fund/services/FundPage";
+
+// 1:1 채팅 컴포넌트 import
 import ChatList from "../../program/chat/services/ChatList";
-import ChatPage from "../../program/chat/services/ChatPage";
+import ChatRoom from "../../program/chat/services/ChatRoom";
+
+// 입양 신청서 컴포넌트 import
+import AdoptApplicationForm from "../../program/adopt/services/AdoptApplicationForm";
+
+// AnimalForm 컴포넌트 import
+import AnimalForm from "../../program/animal/services/AnimalForm";
+
+// mapdata 컴포넌트
+import MapForm from "../../program/mapdata/services/MapForm";
+import MapPage from "../../program/mapdata/services/MapPage";
 
 // 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
@@ -19,10 +42,33 @@ const layoutRoutes = [
   <Route key="login" path={routes.admin.login.path} element={<AdminLogin />} />,
   <Route key="logout" path={routes.member.logout.path} element={<LogoutLink />} />,
   <Route key="signup" path={routes.member.signup.path} element={<Signup />} />,
+  
 
-  // 1:1 채팅 route
-  <Route key="chatList" path={routes.member.chatList.path} element={<ChatList />} />,
-  <Route key="chatPage" path={routes.member.chatPage.path} element={<ChatPage />} />,
+
+  // 후원 route
+  // 각 후원 페이지를 별도의 경로로 라우팅합니다.
+  <Route key="fundMainPage" path={routes.fund.root.path} element={<FundMainPage />} />,
+  <Route key="fundForm" path={routes.fund.fundForm.path} element={<FundApplicationForm />} />,
+  <Route key="goodsForm" path={routes.fund.goodsForm.path} element={<GoodsApplicationForm />} />,
+  <Route key="recurringForm" path={routes.fund.recurringForm.path} element={<RecurringApplicationForm />} />,
+  <Route key="fundDetails" path={routes.fund.fundDetails.path} element={<FundApplicationDetails />} />,
+  <Route key="goodsDetails" path={routes.fund.goodsDetails.path} element={<GoodsApplicationDetails />} />,
+  <Route key="recurringDetails" path={routes.fund.recurringDetails.path} element={<RecurringApplicationDetails />} />,
+
+  // 1:1 채팅 route 추가
+  <Route key="chatList" path={routes.admin.chat.list.path} element={<ChatList />} />,
+  <Route key="chatRoom" path={routes.admin.chat.room(':roomId')} element={<ChatRoom />} />,
+
+  // 입양 신청서 route 추가
+    <Route key="adoptForm" path={routes.admin.adopt.form(':memberNum')} element={<AdoptApplicationForm />} />,
+  // 동물 정보 기입 route 추가
+    <Route key="animalRegister" path={routes.admin.animal.register.path} element={<AnimalForm />} />,
+
+  // 맵 관련 route 추가
+    <Route key="mapPage" path={routes.mapdata.map.path} element={<MapPage />} />,
+    <Route key="mapRegister" path={routes.mapdata.register.path} element={<MapForm />} />,
+
+    
 ];
 
 export default layoutRoutes;

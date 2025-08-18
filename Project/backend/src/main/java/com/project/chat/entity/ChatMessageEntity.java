@@ -3,7 +3,6 @@ package com.project.chat.entity;
 import java.time.LocalDateTime;
 
 import com.project.admin.entity.AdminEntity;
-import com.project.alarm.entity.CheckState;
 import com.project.member.entity.MemberEntity;
 
 import jakarta.persistence.Column;

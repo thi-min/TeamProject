@@ -44,7 +44,7 @@ public class ChatService {
     @Transactional
     public ChatMessageEntity saveMessage(ChatMessageEntity msg) {
         if (msg.getSendTime() == null) msg.setSendTime(LocalDateTime.now());
-        if (msg.getChatCheck() == null) msg.setChatCheck(com.project.common.enums.CheckState.N);
+        if (msg.getChatCheck() == null) msg.setChatCheck(com.project.chat.entity.CheckState.N);
         ChatMessageEntity saved = chatMessageRepository.save(msg);
 
         // broadcast to topic

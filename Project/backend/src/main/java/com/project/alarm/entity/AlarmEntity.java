@@ -2,6 +2,7 @@ package com.project.alarm.entity;
 
 import java.time.LocalDateTime;
 
+import com.project.chat.entity.CheckState;
 import com.project.member.entity.MemberEntity;
 
 import jakarta.persistence.Column;
