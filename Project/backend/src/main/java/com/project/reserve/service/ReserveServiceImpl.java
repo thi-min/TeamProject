@@ -113,7 +113,12 @@ public class ReserveServiceImpl implements ReserveService {
             Long timeSlotId = volunteerDto.getTimeSlotId();
 
             // ✅ 시간대 유효성 검사
-            if (!volunteerRepository.existsByTimeSlot_Id(timeSlotId)) {
+            boolean validSlot = timeSlotRepository.existsByIdAndTimeTypeAndEnabled(
+                    timeSlotId,
+                    TimeType.VOL,
+                    true
+            );
+            if (!validSlot) {
                 throw new IllegalArgumentException("선택한 시간대는 봉사 예약에 유효하지 않습니다.");
             }
 

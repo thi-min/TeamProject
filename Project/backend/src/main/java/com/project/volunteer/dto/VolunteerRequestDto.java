@@ -10,8 +10,6 @@ import lombok.*;
 @Setter
 @Builder
 public class VolunteerRequestDto {
-	private Long memberNum;
-
     private LocalDate volDate;	//일정
     private Long timeSlotId; // 선택된 타임슬롯의 ID
 }

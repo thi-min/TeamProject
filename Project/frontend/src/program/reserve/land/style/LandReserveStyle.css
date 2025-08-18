@@ -62,6 +62,7 @@ body {
   justify-content: flex-start;
   width: 100%; 
   gap: 10px;
+  margin-top: 20px;
 }
 
 .form-action-buttons .prev-button,
@@ -275,4 +276,59 @@ textarea {
 .total-row td {
   font-weight: bold;
   font-size: 18px;
+}
+
+/*---------------놀이터예약성공페이지----------------*/
+.reserve_box {
+  margin: 30px auto;
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  background: #fff;
+  text-align: center;
+}
+
+/* 상단 제목 */
+.reserve_header {
+  background-color: #f2f6fa;   /* 은은한 배경 */
+  padding: 12px;
+  border-radius: 6px;
+  margin-bottom: 20px;
+  text-align: left;
+}
+.reserve_header h2 {
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0;
+  color: #333;
+}
+
+/* 예약번호 */
+.reserve_code {
+  background-color: #f9fafc;
+  border: 1px solid #e0e0e0;
+  padding: 10px 20px;
+  max-width: 500px;
+  border-radius: 6px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin: 0 auto 20px;
+}
+
+/* 안내문 */
+.reserve_body {
+  margin-bottom: 20px;
+  color: #444;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* 버튼 그룹 */
+.btn_group {
+  display: flex;
+  justify-content: center; /* 중앙 정렬 */
+  gap: 10px;               /* 버튼 간격 */
+}
+.btn_group .btn:hover {
+  background: #f0f0f0;
 }

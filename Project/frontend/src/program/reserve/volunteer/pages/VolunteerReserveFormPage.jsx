@@ -44,26 +44,13 @@ const VolunteerReserveFormPage = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      // 🔍 응답 데이터 확인
-      console.log("마이페이지 응답 데이터:", res.data);
-
-      setFormData((prev) => {
-        console.log("formData 세팅 전 값:", prev);
-        console.log("formData 세팅할 값:", {
-          name: res.data.memberName,
-          phone: res.data.memberPhone,
-          birth: res.data.memberBirth,
-          memberNum: res.data.memberNum,
-        });
-
-        return {
-          ...prev,
-          name: res.data.memberName,
-          phone: res.data.memberPhone,
-          birth: res.data.memberBirth,
-          memberNum: res.data.memberNum,
-        };
-      });
+      setFormData((prev) => ({
+        ...prev,
+        name: res.data.memberName,
+        phone: res.data.memberPhone,
+        birth: res.data.memberBirth,
+        memberNum: res.data.memberNum,
+      }));
     } catch (err) {
       console.error("회원정보 불러오기 실패:", err);
       alert("회원정보를 불러올 수 없습니다. 다시 로그인해주세요.");
@@ -72,7 +59,7 @@ const VolunteerReserveFormPage = () => {
   };
 
   fetchMemberInfo();
-}, []);
+}, [navigate]);
 
   /** VolunteerCountDto -> 표준형 변환 */
   const normalizeCountDto = (arr = []) =>
@@ -174,7 +161,7 @@ const VolunteerReserveFormPage = () => {
 
     navigate("/reserve/volunteer/confirm", {
       state: {
-        ...formData,
+        formData,
         selectedDate,
         selectedSlotId,
         timeSlots: displaySlots,
@@ -259,7 +246,7 @@ const VolunteerReserveFormPage = () => {
                         정원: {slot.reservedCount ?? 0}/{slot.capacity}
                       </>
                     )}
-                    {full && " - 마감"}
+                    {(slot.reservedCount ?? 0) >= (slot.capacity ?? 0) && " - 마감"}
                   </button>
                 );
               })}

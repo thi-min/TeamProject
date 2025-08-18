@@ -42,7 +42,7 @@ const LandReserveConfirmPage = () => {
     // 2) 서버에 보낼 payload (로그로 확인)
     const payload = {
       reserveDto: {
-        memberNum: formData.memberNum,         // 회원번호
+        memberNum: Number(memberNum),         // 회원번호
         reserveType: 1,                        // LAND
         reserveNumber: Number(formData.reserveNumber), // 보호자 수
         note: formData.note || "",
@@ -120,20 +120,8 @@ const LandReserveConfirmPage = () => {
 
       {/* 버튼 */}
       <div className="form-action-buttons">
-        <button
-          className="prev-button"
-          type="button"
-          onClick={() => navigate(-1)}
-        >
-          이전
-        </button>
-        <button
-          className="next-button"
-          type="button"
-          onClick={handleConfirm}
-        >
-          예약하기
-        </button>
+        <button className="prev-button" type="button" onClick={() => navigate(-1)}>이전</button>
+        <button className="next-button" type="button" onClick={handleConfirm}>예약하기</button>
       </div>
     </div>
   );
