@@ -3,7 +3,7 @@ package com.project.alarm.dto;
 import java.time.LocalDateTime;
 
 import com.project.alarm.entity.AlarmType;
-import com.project.alarm.entity.CheckState;
+import com.project.chat.entity.CheckState;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

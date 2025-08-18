@@ -1,11 +1,5 @@
 package com.project.fund.controller;
 
-import com.project.fund.dto.FundRequestDto;
-import com.project.fund.dto.FundResponseDto;
-import com.project.fund.service.FundService;
-
-import jakarta.validation.Valid;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +7,23 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.project.fund.dto.FundRequestDto;
+import com.project.fund.dto.FundResponseDto;
+import com.project.fund.entity.FundEntity;
+import com.project.fund.service.FundService;
+import com.project.member.entity.MemberEntity;
+
+import jakarta.validation.Valid;
 
 /**
  * Fund API Controller
@@ -31,6 +41,48 @@ public class FundController {
         this.fundService = fundService;
     }
 
+    // DTO를 Entity로 변환하는 메서드
+    private FundEntity toEntity(FundRequestDto dto) {
+        return FundEntity.builder()
+                .member(dto.getMemberId() != null ? new MemberEntity(dto.getMemberId()) : null)
+                .fundSponsor(dto.getFundSponsor())
+                .fundPhone(dto.getFundPhone())
+                .fundBirth(dto.getFundBirth())
+                .fundType(dto.getFundType())
+                .fundMoney(dto.getFundMoney())
+                .fundTime(dto.getFundTime())
+                .fundItem(dto.getFundItem())
+                .fundNote(dto.getFundNote())
+                .fundBank(dto.getFundBank())
+                .fundAccountNum(dto.getFundAccountNum())
+                .fundDepositor(dto.getFundDepositor())
+                .fundDrawlDate(dto.getFundDrawlDate())
+                .fundCheck(dto.getFundCheck())
+                .build();
+    }
+
+    // Entity를 DTO로 변환하는 메서드
+    private FundResponseDto toDto(FundEntity entity) {
+        return FundResponseDto.builder()
+                .fundId(entity.getFundId())
+                .memberId(entity.getMember() != null ? entity.getMember().getMemberNum() : null)
+                .fundSponsor(entity.getFundSponsor())
+                .fundPhone(entity.getFundPhone())
+                .fundBirth(entity.getFundBirth())
+                .fundType(entity.getFundType())
+                .fundMoney(entity.getFundMoney())
+                .fundTime(entity.getFundTime())
+                .fundItem(entity.getFundItem())
+                .fundNote(entity.getFundNote())
+                .fundBank(entity.getFundBank())
+                .fundAccountNum(entity.getFundAccountNum())
+                .fundDepositor(entity.getFundDepositor())
+                .fundDrawlDate(entity.getFundDrawlDate())
+                .fundCheck(entity.getFundCheck())
+                .build();
+    }
+
+
     // 생성
     @PostMapping
     public ResponseEntity<FundResponseDto> createFund(@Valid @RequestBody FundRequestDto dto) {
@@ -45,14 +97,12 @@ public class FundController {
         return ResponseEntity.ok(dto);
     }
 
-    // 전체 페이징 조회 (관리자용)
+    // 전체 조회 (페이징, 정렬)
     @GetMapping
-    public ResponseEntity<Page<FundResponseDto>> getFunds(
+    public ResponseEntity<Page<FundResponseDto>> listFunds(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size,
             @RequestParam(value = "sort", defaultValue = "fundTime,desc") String sort) {
-
-        // sort 파싱: "field,dir"
         String[] sortParts = sort.split(",");
         Sort s;
         if (sortParts.length == 2) {

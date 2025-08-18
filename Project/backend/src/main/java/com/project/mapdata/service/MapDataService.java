@@ -39,4 +39,9 @@ public class MapDataService {
     public MapDataEntity update(MapDataEntity e) {
         return mapDataRepository.save(e);
     }
+    
+    @Transactional
+    public void delete(Long id) {
+        mapDataRepository.deleteById(id);
+    }
 }

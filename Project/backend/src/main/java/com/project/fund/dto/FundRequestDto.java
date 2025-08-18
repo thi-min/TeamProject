@@ -4,7 +4,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.project.alarm.entity.CheckState;
+import com.project.chat.entity.CheckState;
 import com.project.fund.entity.FundType;
 
 import jakarta.validation.constraints.NotBlank;
