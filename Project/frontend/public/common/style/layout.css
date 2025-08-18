@@ -25,6 +25,8 @@ body{font-size:16px;line-height:28px;letter-spacing:0;font-weight:400;font-famil
 .header_inner .nav_box .depth_area .depth_list .depth1_item:hover .depth2_item{visibility:visible;opacity:1;}
 .header_inner .nav_box .depth_area .depth_list .depth1_item .depth2_item a{padding:6px 0;font-size:20px;line-height:28px;}
 
+.admin_box .admin_link{line-height:30px;color:#333;}
+
 .info_box{display:inline-block;position:relative;vertical-align:top;box-sizing:border-box;}
 .info_box .today_box{display:inline-block;margin-right:12px;vertical-align:top;box-sizing:border-box;}
 .info_box .today_box .today{font-size:16px;line-height:30px;font-weight:400;color:#333;}
