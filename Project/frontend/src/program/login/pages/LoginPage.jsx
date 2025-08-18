@@ -79,6 +79,10 @@ const LoginPage = () => {
       localStorage.setItem("accessToken", accessToken);
       if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
 
+      // + memberNum 불러와서 로컬 스트로지에 저장
+      if (data.memberNum) {
+        localStorage.setItem("memberNum", data.memberNum);
+      }
       // 📌 호환용: 예전 코드가 adminAccessToken을 참조할 수 있어 ADMIN이면 같이 저장
       if (upperRole === "ADMIN" || upperRole === "ROLE_ADMIN") {
         localStorage.setItem("adminAccessToken", accessToken);

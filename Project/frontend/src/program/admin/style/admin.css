@@ -1,0 +1,10 @@
+.admin_page{display:block;position:relative;box-sizing:border-box;}
+.admin_page .title_box{display:block;position:relative;margin-bottom:60px;text-align:center;box-sizing:border-box;}
+.admin_page .title_box .title{font-size:42px;line-height:54px;letter-spacing:0;color:#333;font-family:'NotoKr';font-weight:600;}
+
+.admin_page .admin_area{}
+.admin_page .admin_area .admin_menu{display:flex;width:100%;gap:30px;}
+.admin_page .admin_area .admin_menu .link_item{display:inline-block;flex:1;vertical-align:top;position:relative;border:1px solid #333;border-radius:12px;}
+.admin_page .admin_area .admin_menu .link_item a{position:relative;width:100%;padding:30px;text-align:center;}
+.admin_page .admin_area .admin_menu .link_item a:before{display:block;position:absolute;top:0;left:calc(50% - 15px);width:30px;height:30px;background-color:aqua;content:'';}
+
