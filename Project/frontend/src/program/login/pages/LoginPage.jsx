@@ -131,8 +131,8 @@ const LoginPage = () => {
         <div className="form_login_wrap">
           <div className="float_box clearfix">
             <div className="left_box">
-              <div className="id_pw_form">
-                <div className="id_pw_text">아이디</div>
+              <div className="left_from">
+                <div className="from_text">아이디</div>
                 <input
                   className="id_color form_input"
                   type="text"
@@ -144,8 +144,8 @@ const LoginPage = () => {
                   required // ✅ 빈값 제출 방지
                 />
               </div>
-              <div className="id_pw_form">
-                <span className="id_pw_text">비밀번호</span>
+              <div className="left_from">
+                <span className="from_text">비밀번호</span>
                 <input
                   id="userPasswd"
                   className="form_input"
