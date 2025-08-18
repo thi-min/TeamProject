@@ -56,6 +56,7 @@ function QnaBbs() {
       <div className="search-bar">
         <div className="temp_form_box lg">
           <select
+            className="temp_select"
             value={searchType}
             onChange={(e) => setSearchType(e.target.value)}
           >
@@ -64,12 +65,15 @@ function QnaBbs() {
             <option value="writer">작성자</option>
           </select>
         </div>
+        <div class ="temp_form_box lg">
         <input
           type="text"
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
           placeholder="검색어를 입력하세요"
+          style={{ height: "100%" }}
         />
+        </div>
         <button onClick={handleSearch}>조회</button>
       </div>
 
