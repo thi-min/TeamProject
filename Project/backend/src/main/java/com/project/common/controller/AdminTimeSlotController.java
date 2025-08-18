@@ -36,17 +36,17 @@ public class AdminTimeSlotController {
     }
 
     // 시간대 수정
-    @PutMapping("/{id}")
-    public ResponseEntity<Void> updateTimeSlot(@PathVariable Long id,
+    @PutMapping("/{timeSlotId}")
+    public ResponseEntity<Void> updateTimeSlot(@PathVariable Long timeSlotId,
                                                @RequestBody TimeSlotDto dto) {
-        timeSlotService.updateTimeSlot(id, dto);
+        timeSlotService.updateTimeSlot(timeSlotId, dto);
         return ResponseEntity.ok().build();
     }
 
     // 시간대 삭제
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTimeSlot(@PathVariable Long id) {
-        timeSlotService.deleteTimeSlot(id);
+    @DeleteMapping("/{timeSlotId}")
+    public ResponseEntity<Void> deleteTimeSlot(@PathVariable Long timeSlotId) {
+        timeSlotService.deleteTimeSlot(timeSlotId);
         return ResponseEntity.ok().build();
     }
 

@@ -25,7 +25,7 @@ const LandReserveFormPage = () => {
     phone: "",
     landType: "",
     animalNumber: "",
-    guardianNumber: "",
+    reserveNumber: "",
     note: "",
     memberNum: null,
   });
@@ -74,7 +74,7 @@ const LandReserveFormPage = () => {
   /** TimeSlotDto -> 표준형 변환 */
   const normalizeSlotDto = (arr = []) =>
     arr.map((s) => ({
-      timeSlotId: s.id,
+      timeSlotId: s.timeSlotId,
       label: s.label,
       capacity: s.capacity ?? 0,
       reservedCount: 0,
@@ -128,8 +128,8 @@ const LandReserveFormPage = () => {
         const rules = JSON.parse(saved);
         slotsData = slotsData.map(s => ({
           ...s,
-          allowSmall: rules.SMALL.includes(s.id),
-          allowLarge: rules.LARGE.includes(s.id),
+          allowSmall: rules.SMALL.includes(s.timeSlotId),
+          allowLarge: rules.LARGE.includes(s.timeSlotId),
 
           disabled:
           (formData.landType === "SMALL" && !rules.SMALL.includes(s.id)) ||
@@ -176,7 +176,7 @@ const LandReserveFormPage = () => {
 
     navigate("/reserve/land/confirm", {
       state: {
-        ...formData,
+        formData,
         selectedDate,
         selectedSlotId,
         timeSlots: displaySlots,
@@ -289,12 +289,12 @@ const LandReserveFormPage = () => {
             />
           </div>
           <div className="form-row">
-            <label htmlFor="guardianNumber">보호자 수 <span className="required">*</span></label>
+            <label htmlFor="reserveNumber">보호자 수 <span className="required">*</span></label>
             <input
               type="number"
-              id="guardianNumber"
-              name="guardianNumber"
-              value={formData.guardianNumber}
+              id="reserveNumber"
+              name="reserveNumber"
+              value={formData.reserveNumber}
               onChange={handleChange}
               min={1}
             />

@@ -37,7 +37,7 @@ const TimeSlotManagePage = () => {
     enabled: true,
   });
 
-  // ✅ 데이터 로드 함수 (fetch + localStorage 규칙 불러오기)
+  // ✅ 데이터 로드 함수
   const load = async (type) => {
     try {
       setLoading(true);
@@ -67,12 +67,11 @@ const TimeSlotManagePage = () => {
     }
   };
 
-  // ✅ selectedType 변경될 때마다 load 실행
   useEffect(() => {
     load(selectedType);
   }, [selectedType]);
 
-  const allIds = useMemo(() => slots.map((s) => s.id), [slots]);
+  const allIds = useMemo(() => slots.map((s) => s.timeSlotId), [slots]);
 
   // 규칙 관련
   const toggleRule = (type, slotId, checked) => {
@@ -121,7 +120,7 @@ const TimeSlotManagePage = () => {
       await createTimeSlot(dto);
       alert("추가되었습니다.");
       setNewForm({ startTime: "", endTime: "", capacity: 10, enabled: true });
-      load(selectedType); // ✅ 새로고침
+      load(selectedType);
     } catch {
       alert("추가 실패");
     }
@@ -129,7 +128,7 @@ const TimeSlotManagePage = () => {
 
   // 수정
   const startEdit = (slot) => {
-    setEditSlotId(slot.id);
+    setEditSlotId(slot.timeSlotId);
     setEditForm({
       label: slot.label,
       capacity: slot.capacity,
@@ -149,7 +148,7 @@ const TimeSlotManagePage = () => {
 
   const saveEdit = async (id) => {
     try {
-      const original = slots.find((s) => s.id === id);
+      const original = slots.find((s) => s.timeSlotId === id);
 
       const dto = {
         startTime: original.startTime,
@@ -162,7 +161,7 @@ const TimeSlotManagePage = () => {
       await updateTimeSlot(id, dto);
       alert("수정되었습니다.");
       cancelEdit();
-      load(selectedType); // ✅ 새로고침
+      load(selectedType);
     } catch (e) {
       console.error(e);
       alert("수정 실패");
@@ -175,7 +174,7 @@ const TimeSlotManagePage = () => {
     try {
       await deleteTimeSlot(id);
       alert("삭제되었습니다.");
-      load(selectedType); // ✅ 새로고침
+      load(selectedType);
     } catch {
       alert("삭제 실패");
     }
@@ -250,10 +249,10 @@ const TimeSlotManagePage = () => {
           </thead>
           <tbody>
             {slots.map((s) => (
-              <tr key={s.id}>
-                <td>{s.id}</td>
+              <tr key={s.timeSlotId}>
+                <td>{s.timeSlotId}</td>
                 <td>
-                  {editSlotId === s.id ? (
+                  {editSlotId === s.timeSlotId ? (
                     <input
                       className="ts-edit-input"
                       type="text"
@@ -266,7 +265,7 @@ const TimeSlotManagePage = () => {
                   )}
                 </td>
                 <td>
-                  {editSlotId === s.id ? (
+                  {editSlotId === s.timeSlotId ? (
                     <input
                       className="ts-edit-input"
                       type="number"
@@ -280,7 +279,7 @@ const TimeSlotManagePage = () => {
                   )}
                 </td>
                 <td>
-                  {editSlotId === s.id ? (
+                  {editSlotId === s.timeSlotId ? (
                     <input
                       type="checkbox"
                       name="enabled"
@@ -296,8 +295,8 @@ const TimeSlotManagePage = () => {
                   <td>
                     <input
                       type="checkbox"
-                      checked={(rules.SMALL || []).includes(s.id)}
-                      onChange={(e) => toggleRule("SMALL", s.id, e.target.checked)}
+                      checked={(rules.SMALL || []).includes(s.timeSlotId)}
+                      onChange={(e) => toggleRule("SMALL", s.timeSlotId, e.target.checked)}
                     />
                   </td>
                 )}
@@ -306,22 +305,22 @@ const TimeSlotManagePage = () => {
                   <td>
                     <input
                       type="checkbox"
-                      checked={(rules.LARGE || []).includes(s.id)}
-                      onChange={(e) => toggleRule("LARGE", s.id, e.target.checked)}
+                      checked={(rules.LARGE || []).includes(s.timeSlotId)}
+                      onChange={(e) => toggleRule("LARGE", s.timeSlotId, e.target.checked)}
                     />
                   </td>
                 )}
 
                 <td>
-                  {editSlotId === s.id ? (
+                  {editSlotId === s.timeSlotId ? (
                     <>
-                      <button className="btn btn-primary" onClick={() => saveEdit(s.id)}>저장</button>
+                      <button className="btn btn-primary" onClick={() => saveEdit(s.timeSlotId)}>저장</button>
                       <button className="btn" onClick={cancelEdit}>취소</button>
                     </>
                   ) : (
                     <>
                       <button className="btn" onClick={() => startEdit(s)}>수정</button>
-                      <button className="btn btn-danger" onClick={() => remove(s.id)}>삭제</button>
+                      <button className="btn btn-danger" onClick={() => remove(s.timeSlotId)}>삭제</button>
                     </>
                   )}
                 </td>

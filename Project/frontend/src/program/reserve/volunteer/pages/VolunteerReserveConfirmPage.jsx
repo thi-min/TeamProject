@@ -50,12 +50,16 @@ const VolunteerReserveConfirmPage = () => {
   };
 
   return (
-    <div className="volunteer-confirm-page">
-      <h2 className="page-title">봉사활동 신청서</h2>
+    <div>
+      <h3 className="page-title">봉사활동 신청서</h3>
 
       <section className="info-section">
-        <h3>예약 신청서</h3>
-        <table className="info-table">
+        <h3>봉사 신청서</h3>
+        <table className="table type2 responsive border">
+          <colgroup>
+            <col className="w30p" />
+            <col />
+          </colgroup>
           <tbody>
             <tr><th>신청자명</th><td>{name}</td></tr>
             <tr><th>연락처</th><td>{phone}</td></tr>

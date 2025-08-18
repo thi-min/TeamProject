@@ -16,7 +16,7 @@ public interface TimeSlotRepository extends JpaRepository<TimeSlot, Long> {
     boolean existsByLabel(String label);
 
     // 시간순 정렬 (startTime 기준 추천)
-    List<TimeSlot> findByTimeTypeAndEnabledTrueOrderByStartTimeAsc(TimeType timeType);
+    List<TimeSlot> findByTimeTypeOrderByStartTimeAsc(TimeType timeType);
     
     // 시간대 유효성
     boolean existsByIdAndTimeTypeAndEnabled(Long id, TimeType timeType, boolean enabled);

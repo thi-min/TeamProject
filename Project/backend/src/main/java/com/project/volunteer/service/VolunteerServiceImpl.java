@@ -97,7 +97,7 @@ public class VolunteerServiceImpl implements VolunteerService {
     public List<VolunteerCountDto> getVolunteerTimeSlotsWithCount(LocalDate volDate, Long memberNum) {
         // 봉사 타입 슬롯 전부 가져오기
         List<TimeSlot> timeSlots =
-            timeSlotRepository.findByTimeTypeAndEnabledTrueOrderByStartTimeAsc(TimeType.VOL);
+            timeSlotRepository.findByTimeTypeOrderByStartTimeAsc(TimeType.VOL);
 
         return timeSlots.stream()
                 .map(slot -> {

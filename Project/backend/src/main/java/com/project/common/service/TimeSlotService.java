@@ -11,10 +11,10 @@ public interface TimeSlotService {
     void addTimeSlot(TimeSlotDto dto);
 
     // 관리자 - 시간대 수정
-    void updateTimeSlot(Long id, TimeSlotDto dto);
+    void updateTimeSlot(Long timeSlotID, TimeSlotDto dto);
 
     // 시간대 삭제
-    void deleteTimeSlot(Long id);
+    void deleteTimeSlot(Long timeSlotId);
 
     // 중복 여부 확인 (label 기준만)
     boolean isDuplicateLabel(String label);

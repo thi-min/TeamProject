@@ -87,7 +87,7 @@ const VolunteerReserveFormPage = () => {
   /** TimeSlotDto -> 표준형 변환 */
   const normalizeSlotDto = (arr = []) =>
     arr.map((s) => ({
-      timeSlotId: s.id,
+      timeSlotId: s.timeSlotId,
       label: s.label,
       capacity: s.capacity ?? 0,
       reservedCount: 0,           

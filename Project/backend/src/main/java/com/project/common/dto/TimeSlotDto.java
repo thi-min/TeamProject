@@ -15,7 +15,7 @@ import java.time.format.DateTimeFormatter;
 @Builder
 public class TimeSlotDto {
 
-    private Long id;
+    private Long timeSlotId;
     private String label; // 예: "09:00 ~ 11:00" — 출력용
     private LocalTime startTime;
     private LocalTime endTime;
@@ -32,7 +32,7 @@ public class TimeSlotDto {
     // Entity → DTO 변환
     public static TimeSlotDto fromEntity(TimeSlot entity) {
         return TimeSlotDto.builder()
-                .id(entity.getId())
+        		.timeSlotId(entity.getId())
                 .label(entity.getLabel())  // 엔티티에 자동 생성된 label 사용
                 .startTime(entity.getStartTime())
                 .endTime(entity.getEndTime())
@@ -45,7 +45,7 @@ public class TimeSlotDto {
     // DTO → Entity 변환 (label은 생략, 엔티티에서 자동 생성됨)
     public TimeSlot toEntity() {
         return TimeSlot.builder()
-                .id(id)
+        		.id(timeSlotId)
                 .startTime(startTime)
                 .endTime(endTime)
                 .capacity(capacity)

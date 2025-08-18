@@ -38,7 +38,7 @@ public class TimeSlotServiceImpl implements TimeSlotService {
     @Transactional(readOnly = true)
     public List<TimeSlotDto> getTimeSlotsByType(TimeType timeType) {
         return timeSlotRepository
-                .findByTimeTypeAndEnabledTrueOrderByStartTimeAsc(timeType)
+                .findByTimeTypeOrderByStartTimeAsc(timeType)
                 .stream()
                 .map(TimeSlotDto::fromEntity)
                 .toList();
@@ -64,8 +64,8 @@ public class TimeSlotServiceImpl implements TimeSlotService {
     // 시간대 수정
     @Override
     @Transactional
-    public void updateTimeSlot(Long id, TimeSlotDto dto) {
-        TimeSlot existing = timeSlotRepository.findById(id)
+    public void updateTimeSlot(Long timeSlotId, TimeSlotDto dto) {
+        TimeSlot existing = timeSlotRepository.findById(timeSlotId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 시간대가 존재하지 않습니다."));
 
         existing.setStartTime(dto.getStartTime());
@@ -78,11 +78,11 @@ public class TimeSlotServiceImpl implements TimeSlotService {
     // 시간대 삭제
     @Override
     @Transactional
-    public void deleteTimeSlot(Long id) {
-        if (!timeSlotRepository.existsById(id)) {
+    public void deleteTimeSlot(Long timeSlotId) {
+        if (!timeSlotRepository.existsById(timeSlotId)) {
             throw new IllegalArgumentException("존재하지 않는 시간대입니다.");
         }
-        timeSlotRepository.deleteById(id);
+        timeSlotRepository.deleteById(timeSlotId);
     }
 
     // 중복 여부 확인
