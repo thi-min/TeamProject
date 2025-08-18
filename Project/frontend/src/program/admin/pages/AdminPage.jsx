@@ -15,23 +15,23 @@ export default function AdminPage() {
       </div>
       <div className="admin_area">
         <ul className="admin_menu">
-          <li className="link_item">
+          <li className="link_item type1">
             <Link to="/admin/updatePw">비밀번호 변경</Link>
           </li>
-          <li className="link_item">
+          <li className="link_item type2">
             <Link to="/admin/memberList">회원 관리</Link>
           </li>
-          <li className="link_item">
+          <li className="link_item type3">
             <Link to="/admin/">놀이터 관리</Link>
           </li>
-          <li className="link_item">
+          <li className="link_item type4">
             <Link to="/admin/">봉사 관리</Link>
           </li>
-          <li className="link_item">
-            <Link to="">게시판관리</Link>
+          <li className="link_item type5">
+            <Link to="">게시판 관리</Link>
           </li>
-          <li className="link_item">
-            <Link to="">시간대관리</Link>
+          <li className="link_item type6">
+            <Link to="">예약 시간대 관리</Link>
           </li>
         </ul>
       </div>
