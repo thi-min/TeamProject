@@ -1,10 +1,7 @@
-<<<<<<< HEAD
-import React from "react";
-=======
-//import React from 'react';
+import React from 'react';
 
-// import { Link } from 'react-router-dom'; // 페이지 이동용
->>>>>>> refs/heads/bok2
+import { Link } from 'react-router-dom'; // 페이지 이동용
+
 
 const Container = ({ children }) => {
   return (

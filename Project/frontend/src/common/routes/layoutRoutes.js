@@ -99,17 +99,17 @@ const layoutRoutes = [
   <Route key="recurringDetails" path={routes.fund.recurringDetails.path} element={<RecurringApplicationDetails />} />,
 
   // 1:1 채팅 route 추가
-  <Route key="chatList" path={routes.admin.chat.list.path} element={<ChatList />} />,
-  <Route key="chatRoom" path={routes.admin.chat.room(':roomId')} element={<ChatRoom />} />,
+  //<Route key="chatList" path={routes.admin.chat.list.path} element={<ChatList />} />,
+  //<Route key="chatRoom" path={routes.admin.chat.room(':roomId')} element={<ChatRoom />} />,
 
   // 입양 신청서 route 추가
-    <Route key="adoptForm" path={routes.admin.adopt.form(':memberNum')} element={<AdoptApplicationForm />} />,
+    //<Route key="adoptForm" path={routes.admin.adopt.form(':memberNum')} element={<AdoptApplicationForm />} />,
   // 동물 정보 기입 route 추가
-    <Route key="animalRegister" path={routes.admin.animal.register.path} element={<AnimalForm />} />,
+    //<Route key="animalRegister" path={routes.admin.animal.register.path} element={<AnimalForm />} />,
 
   // 맵 관련 route 추가
-    <Route key="mapPage" path={routes.mapdata.map.path} element={<MapPage />} />,
-    <Route key="mapRegister" path={routes.mapdata.register.path} element={<MapForm />} />,
+    //<Route key="mapPage" path={routes.mapdata.map.path} element={<MapPage />} />,
+   // <Route key="mapRegister" path={routes.mapdata.register.path} element={<MapForm />} />,
 
 ];
 
