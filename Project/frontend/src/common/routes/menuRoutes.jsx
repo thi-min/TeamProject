@@ -30,6 +30,14 @@ const menuRoutes = [
     ],
   },
   {
+    title: "봉사활동",
+    access: "ALL",
+    children: [
+      { title: "봉사 프로그램 소개", path: "/volunteer/info", access: "ALL" },
+      { title: "봉사 신청하기", path: "/volunteer/reserve", access: "USER" },
+    ],
+  },
+  {
     title: "게시판",
     access: "ALL",
     children: [
