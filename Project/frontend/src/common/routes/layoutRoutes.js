@@ -6,7 +6,23 @@ import routes from "./router";
 // 📌 각 페이지 컴포넌트
 import LoginPage from "../../program/login/pages/LoginPage";
 import LogoutLink from "../../program/login/pages/LogoutLink";
+import AdminLogin from "../../program/admin/pages/AdminLoginPage";
 import Signup from "../../program/signup/pages/SignupPage";
+
+// 📌 layoutRoutes 정의
+
+// FundPage.js에서 기본 내보내기가 없으므로, FundMainPage를 이름으로 불러옵니다.
+// 이제 FundPage.js에서 내보내는 모든 컴포넌트를 불러옵니다.
+import {
+  FundApplicationDetails,
+  FundApplicationForm,
+  FundMainPage,
+  GoodsApplicationDetails,
+  GoodsApplicationForm,
+  RecurringApplicationDetails,
+  RecurringApplicationForm
+} from "../../program/fund/services/FundPage";
+
 
 // 게시판 관련
 import Normal from "../../bbs/normalbbs/Normal";
@@ -35,10 +51,11 @@ import AdminImgBoard from "../../bbs/imagebbs/AdminImgBoard";
 import AdminImgDetail from "../../bbs/imagebbs/AdminImgDetail";
 import ImgBoardDummy from "../../bbs/imagebbs/ImgBoardDummy";
 
-// 📌 layoutRoutes 정의
+// 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
   // 로그인/회원 관련
   <Route key="login" path={routes.member.login.path} element={<LoginPage />} />,
+  <Route key="login" path={routes.admin.login.path} element={<AdminLogin />} />,
   <Route key="logout" path={routes.member.logout.path} element={<LogoutLink />} />,
   <Route key="signup" path={routes.member.signup.path} element={<Signup />} />,
 
@@ -71,6 +88,28 @@ const layoutRoutes = [
   <Route key="img-Admin-ImgDetail" path="/bbs/admin/image/Detail" element={<AdminImgDetail />} />,
   <Route key="img-Admin-ImgDummy" path="/bbs/admin/image/Dummy" element={<ImgBoardDummy />} />,
 
+  // 후원 route
+  // 각 후원 페이지를 별도의 경로로 라우팅합니다.
+  <Route key="fundMainPage" path={routes.fund.root.path} element={<FundMainPage />} />,
+  <Route key="fundForm" path={routes.fund.fundForm.path} element={<FundApplicationForm />} />,
+  <Route key="goodsForm" path={routes.fund.goodsForm.path} element={<GoodsApplicationForm />} />,
+  <Route key="recurringForm" path={routes.fund.recurringForm.path} element={<RecurringApplicationForm />} />,
+  <Route key="fundDetails" path={routes.fund.fundDetails.path} element={<FundApplicationDetails />} />,
+  <Route key="goodsDetails" path={routes.fund.goodsDetails.path} element={<GoodsApplicationDetails />} />,
+  <Route key="recurringDetails" path={routes.fund.recurringDetails.path} element={<RecurringApplicationDetails />} />,
+
+  // 1:1 채팅 route 추가
+  <Route key="chatList" path={routes.admin.chat.list.path} element={<ChatList />} />,
+  <Route key="chatRoom" path={routes.admin.chat.room(':roomId')} element={<ChatRoom />} />,
+
+  // 입양 신청서 route 추가
+    <Route key="adoptForm" path={routes.admin.adopt.form(':memberNum')} element={<AdoptApplicationForm />} />,
+  // 동물 정보 기입 route 추가
+    <Route key="animalRegister" path={routes.admin.animal.register.path} element={<AnimalForm />} />,
+
+  // 맵 관련 route 추가
+    <Route key="mapPage" path={routes.mapdata.map.path} element={<MapPage />} />,
+    <Route key="mapRegister" path={routes.mapdata.register.path} element={<MapForm />} />,
 
 ];
 

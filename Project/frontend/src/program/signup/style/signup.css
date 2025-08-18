@@ -1,3 +1,4 @@
 .form_btn_box{display:block;position:relative;box-sizing:border-box;text-align:right;}
 .id_check_btn{margin-left:16px;}
+.address_form{display:flex;flex-direction:column;gap:10px;}
 

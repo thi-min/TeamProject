@@ -3,6 +3,7 @@ package com.project.admin.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
@@ -28,6 +29,7 @@ import com.project.member.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
+
 @Service //tjqltmrPcmd(spring bean)으로 등록
 @Transactional
 @RequiredArgsConstructor //final로 선언된 memberRepository를 자동으로 생성자 주입 시켜줌
@@ -42,15 +44,12 @@ public class AdminServiceImpl implements AdminService {
     static {
         System.setProperty("JASYPT_ENCRYPTOR_PASSWORD", "test-key");
     }
-	@Override
-	//관리자 로그인
+    
+    @Transactional
+    @Override
+    // 관리자 로그인: ID 고정(옵션), 비밀번호 매칭, 토큰 발급/저장, 응답 DTO 구성
 	public AdminLoginResponseDto login(AdminLoginRequestDto dto) {
 		
-//		//관리자 정보 조회 (비밀번호 평문 비교 중이면 암호화 적용 필요)
-//		AdminEntity admin = adminRepository.findByAdminIdAndAdminPw(dto.getAdminId(), dto.getPw())
-//				.orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
-//				
-		//관리자 계정 ID 고정: "admin"만 허용
 	    if (!dto.getAdminId().equals("admin")) {
 	        throw new AccessDeniedException("지정된 관리자 계정만 로그인할 수 있습니다.");
 	    }
@@ -75,7 +74,6 @@ public class AdminServiceImpl implements AdminService {
 		//로그인 성공 시 필요한 정보 dto 반환
 		return AdminLoginResponseDto.builder()
 				.adminId(admin.getAdminId())
-				.adminEmail(admin.getAdminEmail()) 	//관리자 이메일
 				.adminPhone(admin.getAdminPhone())	//관리자 전화번호
 				.connectData(admin.getConnectData())	//접속시간
 				.message("관리자 로그인 성공")
@@ -83,6 +81,7 @@ public class AdminServiceImpl implements AdminService {
 				.refreshToken("재발급 토큰")
 				.build();
 	}
+	
 
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
