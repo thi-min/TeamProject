@@ -22,6 +22,8 @@ import VolunteerReserveSuccessPage from "../../program/reserve/volunteer/pages/V
 import LoginPage from "../../program/login/pages/LoginPage";
 import LogoutLink from "../../program/login/pages/LogoutLink";
 import Signup from "../../program/signup/pages/SignupPage";
+import Admin from "../../program/admin/pages/AdminPage";
+import AdminPw from "../../program/admin/pages/AdminPasswordUpdatePage";
 
 // 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
@@ -43,6 +45,9 @@ const layoutRoutes = [
 
   // 🔹 관리자 페이지 - 시간대 관리
   <Route key="admin-timeslot-manage" path={routes.admin.timeSlotManage.path} element={<TimeSlotManagePage />} />,
+  <Route key="admin" path={routes.admin.admin.path} element={<Admin />} />,
+  <Route key="updatePw" path={routes.admin.password.path} element={<AdminPw />} />,
+
 ];
 
 export default layoutRoutes;

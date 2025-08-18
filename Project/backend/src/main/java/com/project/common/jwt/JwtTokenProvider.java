@@ -1,8 +1,10 @@
 package com.project.common.jwt;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import io.jsonwebtoken.Claims;
@@ -12,65 +14,85 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 
+/**
+ * JWT 발급/검증 유틸리티
+ * - AccessToken: 30분(기본), RefreshToken: 7일(기본)
+ * - subject에는 "이메일(=ID)"를 넣는 것을 전제로 함 (회원/관리자 공통)
+ * - role 클레임: "USER" or "ADMIN" (서버에서 판단하여 발급)
+ */
 @Component
 public class JwtTokenProvider {
 
-    // JWT 비밀키
-    private String secretKey = "VerySecretKeyForJwtSigningThatIsSecureAndLongEnough";
-    private Key key;
+    // =====================================
+    // 🔐 비밀키 설정
+    //  - 운영 환경에서는 application.yml or 환경변수로 주입 권장
+    //  - HS256 사용 시, 최소 256bit(32바이트) 이상의 키 권장
+    // =====================================
+    @Value("${jwt.secret:VerySecretKeyForJwtSigningThatIsSecureAndLongEnough}")
+    private String secretKeyRaw;
 
-    // 토큰 유효 시간 (단위: ms)
-    private final long accessTokenValidity = 1000 * 60 * 30;     // 30분
-    private final long refreshTokenValidity = 1000 * 60 * 60 * 24 * 7; // 7일
+    private Key key; // 서명키 (HMAC)
+
+    // =====================================
+    // ⏱️ 토큰 유효 시간 (ms)
+    // =====================================
+    @Value("${jwt.access-validity-ms:1800000}")      // 기본 30분
+    private long accessTokenValidityMs;
+
+    @Value("${jwt.refresh-validity-ms:604800000}")   // 기본 7일
+    private long refreshTokenValidityMs;
 
     // 🔐 key 초기화
     @PostConstruct
     protected void init() {
-        key = Keys.hmacShaKeyFor(secretKey.getBytes());
+        // 문자열 키를 그대로 바이트로 사용 (운영에서는 Base64 디코딩 등 사용 고려)
+        byte[] keyBytes = secretKeyRaw.getBytes(StandardCharsets.UTF_8);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     // ==============================
-    // ✅ [1] 회원용 Access Token 생성
+    // ✅ [1] 회원용 Access Token 생성(기본 role=USER)
     // ==============================
-    // param : memberId - 사용자 식별자
-    // return : JWT 문자열 (role은 기본값 USER)
-    public String generateAccessToken(String memberId) {
-        return generateAccessToken(memberId, "USER"); // 기본은 USER 역할
+    // param : subject - 사용자 식별자(이메일=ID)
+    // return: JWT 문자열
+    public String generateAccessToken(String subject) {
+        return generateAccessToken(subject, "USER"); // 기본은 USER 역할
     }
 
     // ==============================
-    // ✅ [2] 역할 지정용 Access Token 생성 (관리자용 포함)
+    // ✅ [2] 역할 지정용 Access Token 생성 (관리자 포함)
     // ==============================
-    // param : id - 사용자 또는 관리자 식별자
-    // param : role - 역할 (ex: "USER", "ADMIN")
-    // return : JWT 문자열
-    public String generateAccessToken(String id, String role) {
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + accessTokenValidity); // 유효 시간 설정
+    // param : subject - 사용자/관리자 식별자(이메일=ID)
+    // param : role    - "USER" or "ADMIN"
+    // return: JWT 문자열
+    public String generateAccessToken(String subject, String role) {
+        final Date now = new Date();
+        final Date expiry = new Date(now.getTime() + accessTokenValidityMs);
 
-        // JWT Claims 설정
-        Claims claims = Jwts.claims().setSubject(id); // 필수: 식별자
-        claims.put("role", role); // ✅ 역할 정보 포함
+        // 🎯 클레임 구성
+        Claims claims = Jwts.claims().setSubject(subject); // sub = 이메일(=ID)
+        claims.put("role", role);                          // ✅ 역할 정보 포함
 
+        // ⚠️ 기존 코드에서는 claims를 만들고 빌더에 set하지 않았음 → 아래에서 setClaims로 반영
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(now) // 발급 시간
-                .setExpiration(expiry) // 만료 시간
+                .setClaims(claims)                 // ← 반드시 claims 반영
+                .setIssuedAt(now)                  // 발급 시간
+                .setExpiration(expiry)             // 만료 시간
                 .signWith(key, SignatureAlgorithm.HS256) // 서명
-                .compact(); // 최종 토큰 문자열 생성
+                .compact();                        // 최종 토큰
     }
 
     // ==============================
     // ✅ [3] Refresh Token 생성 (공통)
     // ==============================
-    // param : id - 사용자 또는 관리자 식별자
-    // return : 서명된 JWT 문자열
-    public String generateRefreshToken(String id) {
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + refreshTokenValidity); // 유효 시간 설정
+    // param : subject - 사용자/관리자 식별자(이메일=ID)
+    // return: JWT 문자열
+    public String generateRefreshToken(String subject) {
+        final Date now = new Date();
+        final Date expiry = new Date(now.getTime() + refreshTokenValidityMs);
 
         return Jwts.builder()
-                .setSubject(id)
+                .setSubject(subject)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -78,30 +100,55 @@ public class JwtTokenProvider {
     }
 
     // ==============================
-    // ✅ [4] 토큰에서 사용자 ID 추출
+    // ✅ [4] 토큰에서 사용자 ID(subject) 추출
     // ==============================
     public String getMemberIdFromToken(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build()
-                .parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
     // ==============================
     // ✅ [5] 토큰에서 역할(Role) 추출
     // ==============================
     public String getRoleFromToken(String token) {
-        return (String) Jwts.parserBuilder().setSigningKey(key).build()
-                .parseClaimsJws(token).getBody().get("role");
+        Object role = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role");
+        return role == null ? null : role.toString();
     }
 
     // ==============================
-    // ✅ [6] 토큰 유효성 검증
+    // ✅ [6] 토큰 유효성 검증(서명/만료)
     // ==============================
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token);
             return true;
         } catch (JwtException | IllegalArgumentException e) {
-            return false; // 유효하지 않은 토큰
+            // 로그를 남기고 false 반환 (서명 위변조/만료/형식 오류 등)
+            return false;
         }
+    }
+
+    // ==============================
+    // (선택) 만료시각 추출 - 블랙리스트 TTL 산정 등에 사용
+    // ==============================
+    public Date getExpiration(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getExpiration();
     }
 }
