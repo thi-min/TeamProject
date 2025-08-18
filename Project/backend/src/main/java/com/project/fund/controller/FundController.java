@@ -41,10 +41,17 @@ public class FundController {
         this.fundService = fundService;
     }
 
-    // DTO를 Entity로 변환하는 메서드
+    /**
+     * DTO를 Entity로 변환하는 메서드
+     * @param dto FundRequestDto
+     * @return FundEntity
+     */
     private FundEntity toEntity(FundRequestDto dto) {
-        return FundEntity.builder()
-                .member(dto.getMemberId() != null ? new MemberEntity(dto.getMemberId()) : null)
+        if (dto == null) {
+            return null;
+        }
+
+        FundEntity.FundEntityBuilder builder = FundEntity.builder()
                 .fundSponsor(dto.getFundSponsor())
                 .fundPhone(dto.getFundPhone())
                 .fundBirth(dto.getFundBirth())
@@ -57,12 +64,28 @@ public class FundController {
                 .fundAccountNum(dto.getFundAccountNum())
                 .fundDepositor(dto.getFundDepositor())
                 .fundDrawlDate(dto.getFundDrawlDate())
-                .fundCheck(dto.getFundCheck())
-                .build();
+                .fundCheck(dto.getFundCheck());
+
+        // MemberEntity 생성자 오류를 해결하기 위해 MemberEntity를 명확하게 설정
+        if (dto.getMemberId() != null) {
+            MemberEntity memberEntity = new MemberEntity();
+            memberEntity.setMemberNum(dto.getMemberId());
+            builder.member(memberEntity);
+        }
+
+        return builder.build();
     }
 
-    // Entity를 DTO로 변환하는 메서드
+    /**
+     * Entity를 DTO로 변환하는 메서드
+     * @param entity FundEntity
+     * @return FundResponseDto
+     */
     private FundResponseDto toDto(FundEntity entity) {
+        if (entity == null) {
+            return null;
+        }
+
         return FundResponseDto.builder()
                 .fundId(entity.getFundId())
                 .memberId(entity.getMember() != null ? entity.getMember().getMemberNum() : null)
