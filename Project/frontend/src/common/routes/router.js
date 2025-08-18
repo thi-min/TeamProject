@@ -24,11 +24,11 @@ const routes = {
     reserve: { path: "/land/reserve", label: "예약하기" },
   },
 
-  board: {
-    root: { path: "/board", label: "게시판" },
-    notice: { path: "/board/notice", label: "공지사항" },
-    qna: { path: "/board/qna", label: "질문 게시판" },
-    photo: { path: "/board/photo", label: "포토 게시판" },
+   board: {
+    root: { path: "/bbs", label: "게시판" },
+    notice: { path: "/bbs/normalbbs", label: "공지사항" },
+    qna: { path: "/bbs/questionbbs", label: "질문 게시판" },
+    photo: { path: "/bbs/imagebbs", label: "포토 게시판" },
   },
 
   member: {
