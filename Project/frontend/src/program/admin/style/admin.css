@@ -3,8 +3,16 @@
 .admin_page .title_box .title{font-size:42px;line-height:54px;letter-spacing:0;color:#333;font-family:'NotoKr';font-weight:600;}
 
 .admin_page .admin_area{}
-.admin_page .admin_area .admin_menu{display:flex;width:100%;gap:30px;}
-.admin_page .admin_area .admin_menu .link_item{display:inline-block;flex:1;vertical-align:top;position:relative;border:1px solid #333;border-radius:12px;}
-.admin_page .admin_area .admin_menu .link_item a{position:relative;width:100%;padding:30px;text-align:center;}
-.admin_page .admin_area .admin_menu .link_item a:before{display:block;position:absolute;top:0;left:calc(50% - 15px);width:30px;height:30px;background-color:aqua;content:'';}
+.admin_page .admin_area .admin_menu{display:flex;flex-wrap:wrap;width:100%;gap:30px;}
+.admin_page .admin_area .admin_menu .link_item{overflow:hidden;display:inline-block;width:calc((100% - 60px) /3);vertical-align:top;position:relative;border:1px solid #333;border-radius:12px;}
+.admin_page .admin_area .admin_menu .link_item a{position:relative;width:100%;padding:130px 30px 30px;text-align:center;font-size:20px;line-height:28px;letter-spacing:0;font-weight:400;font-family:'NotoKr';color:#333;}
+.admin_page .admin_area .admin_menu .link_item a{transition-property:all;transition-duration:0.3s;transition-timing-function:ease-in-out;}
+.admin_page .admin_area .admin_menu .link_item a:hover{background-color:#134277;color:#fff;}
+.admin_page .admin_area .admin_menu .link_item a:before{display:block;position:absolute;top:40px;left:calc(50% - 30px);width:60px;height:60px;background-size:contain;background-repeat:no-repeat;border-radius:8px;content:'';}
+.admin_page .admin_area .admin_menu .link_item.type1 a:before{background-image:url('../images/password_change.png');}
+.admin_page .admin_area .admin_menu .link_item.type2 a:before{background-image:url('../images/user_management.png');}
+.admin_page .admin_area .admin_menu .link_item.type3 a:before{background-image:url('../images/playground_management.png');}
+.admin_page .admin_area .admin_menu .link_item.type4 a:before{background-image:url('../images/volunteer_management.png');}
+.admin_page .admin_area .admin_menu .link_item.type5 a:before{background-image:url('../images/board_management.png');}
+.admin_page .admin_area .admin_menu .link_item.type6 a:before{background-image:url('../images/reservation_schedule.png');}
 

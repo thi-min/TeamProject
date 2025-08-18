@@ -80,6 +80,7 @@ public class AuthController {
 	            }
 
 	            response = MemberLoginResponseDto.builder()
+	            		.memberNum(admin.getAdminNum())
 	                    .memberId(admin.getAdminId())   // 이메일=ID
 	                    .memberName(admin.getAdminName())
 	                    .message("로그인 성공")
@@ -116,7 +117,7 @@ public class AuthController {
 	        userRes.setAccessToken(accessToken);
 	        userRes.setRefreshToken(refreshToken);
 	        userRes.setRole("USER"); // ✅ DTO에 role 채움
-
+	        
 	        // DB 저장(Refresh/Access)
 	        MemberEntity member = memberRepository.findByMemberId(userRes.getMemberId())
 	                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
@@ -125,6 +126,8 @@ public class AuthController {
 	        if (member.getPwUpdated() == null) member.setPwUpdated(LocalDateTime.now());
 	        memberRepository.save(member);
 
+	        userRes.setMemberNum(member.getMemberNum());	//강민씨 추가
+	        
 	        boolean isExpired = memberService.isPasswordExpired(member);
 
 	        return ResponseEntity.ok(Map.of(
