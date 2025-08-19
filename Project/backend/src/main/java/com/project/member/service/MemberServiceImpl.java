@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.project.common.jwt.JwtTokenProvider;
 import com.project.common.util.JasyptUtil;
+import com.project.member.dto.AddressUpdateRequestDto;
 import com.project.member.dto.KakaoSignUpRequestDto;
 import com.project.member.dto.KakaoUserInfoDto;
 import com.project.member.dto.MemberDeleteDto;
@@ -120,20 +121,23 @@ public class MemberServiceImpl implements MemberService {
 		
 		//핸드폰번호 복호화
 		String decryptedPhone = JasyptUtil.decrypt(member.getMemberPhone());
-		
-		return MemberMyPageResponseDto.builder()
+        return MemberMyPageResponseDto.builder()
 				.memberName(member.getMemberName())
 				.memberId(member.getMemberId())
 				.memberBirth(member.getMemberBirth())
 				.memberSex(member.getMemberSex()) //enum은 그대로 호출
+				// ✅ 분리 주소 그대로 제공
+                .memberPostcode(member.getMemberPostcode())
+                .memberRoadAddress(member.getMemberRoadAddress())
+                .memberDetailAddress(member.getMemberDetailAddress())
+                //합쳐진 주소
 				.memberAddress(member.getMemberAddress())
 				.memberPhone(decryptedPhone)
-//				.memberPhone(member.getMemberPhone())
+//				.memberPhone(phoneForOwner)
 				.kakaoId(member.getKakaoId())
 				.smsAgree(member.isSmsAgree()) //boolean타입은 is로 호출
 				.build();
 	}
-	
 	//마이페이지 수정 + sms 동의
 	@Transactional
 	@Override
@@ -170,7 +174,20 @@ public class MemberServiceImpl implements MemberService {
 	            .build();
 	}
 
-	
+	//주소 변경하기
+	@Transactional
+    @Override
+    public MemberMyPageResponseDto updateMyAddress(Long memberNum, AddressUpdateRequestDto dto) {
+        MemberEntity member = memberRepository.findByMemberNum(memberNum)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다"));
+
+        // ✅ 분리 주소로 갱신(+ 레거시 필드 동기화)
+        member.updateAddress(dto.getPostcode(), dto.getRoadAddress(), dto.getDetailAddress());
+        // JPA dirty checking으로 업데이트
+
+        // 갱신 후 최신 데이터로 응답
+        return myPage(memberNum);
+    }
 //	//회원 sns 동의
 //	@Transactional
 //	@Override

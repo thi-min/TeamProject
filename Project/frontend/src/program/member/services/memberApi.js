@@ -127,17 +127,32 @@ export async function updatePassword({
   );
 }
 /**
- * 🔎 마이페이지 조회
- * - GET /mypage
- * - 성공: MemberMyPageResponseDto(JSON)
- * - 실패: 401(인증 필요), 403(비번 만료), 그 외 서버 오류
+ * 마이페이지 조회
+ * GET /member/mypage
+ * 성공: MemberMyPageResponseDto
+ * 실패:
+ *  - 401: 비로그인 → 로그인 페이지로 유도
+ *  - 403: 비번 만료 → 비번 변경 페이지로 유도
+ *  - 404: 회원 없음 → 에러 표시
  */
 export async function apiGetMyPage() {
-  // axios 인스턴스(api)에 Authorization 헤더 주입(인터셉터)되어 있다고 가정
-  return api.get(`${API_PREFIX}/mypage`, {
-    // JSON 응답 기본값이므로 별도 설정 불필요
-    // withCredentials: true 가 필요한 보안 정책이면 axios 인스턴스에서 이미 설정했을 것
-  });
+  return api.get(`${API_PREFIX}/member/mypage`);
+}
+/**
+ * 마이페이지 주소 변경
+ * payload: { postcode, roadAddress, detailAddress, memberAddress } 중 하나
+ * 서버가 한 문자열(memberAddress)만 받으면 compose해서 memberAddress로 전송
+ */
+export async function apiUpdateMyAddress(payload) {
+  // 서버가 memberAddress 한 필드만 받는다고 가정
+  const { postcode = "", roadAddress = "", detailAddress = "" } = payload;
+  const memberAddress =
+    (postcode ? `[${postcode}] ` : "") +
+    (roadAddress || "").trim() +
+    (detailAddress ? ` ${detailAddress.trim()}` : "");
+
+  // 예시 엔드포인트: PUT /member/mypage/address
+  return api.put(`/member/mypage/address`, { memberAddress });
 }
 /**
  * 아이디 중복체크

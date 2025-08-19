@@ -16,10 +16,10 @@
 .admin_page .admin_area .admin_menu .link_item.type5 a:before{background-image:url('../images/board_management.png');}
 .admin_page .admin_area .admin_menu .link_item.type6 a:before{background-image:url('../images/reservation_schedule.png');}
 
-.form_item input[type="text"],
-.form_item input[type="tel"],
-.form_item input[type="email"],
-.form_item input[type="password"]{min-height:60px;border:1px solid #e1e1e1;border-radius:5px;vertical-align:top;}
+.form_item .form_login_wrap input[type="text"],
+.form_item .form_login_wrap input[type="tel"],
+.form_item .form_login_wrap input[type="email"],
+.form_item .form_login_wrap input[type="password"]{min-height:60px;border:1px solid #e1e1e1;border-radius:5px;vertical-align:top;}
 
 .form_item{padding:100px 50px;border-radius:30px;box-sizing:border-box;background-color:#fff;box-shadow: 0 0 30px 0px rgba(238,238,238,0.3);}
 .form_item .form_login_wrap{position:relative;width:615px;margin:0 auto;;box-sizing:border-box;}

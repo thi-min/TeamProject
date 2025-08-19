@@ -43,7 +43,7 @@ const routes = {
     findid: { path: "/find-id", label: "아이디 찾기" },
     findpw: { path: "/find-pw", label: "비밀번호 찾기" },
     changepw: { path: "/update-password", label: "비밀번호 변경" },
-    mypage: { path: "/mypage", label: "마이페이지" },
+    mypage: { path: "/member/mypage", label: "마이페이지" },
     update: { path: "/mypage/update", label: "회원정보 수정" },
     delete: { path: "/mypage/update/delete", label: "회원 탈퇴" },
   },

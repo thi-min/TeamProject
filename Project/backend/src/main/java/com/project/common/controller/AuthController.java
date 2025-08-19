@@ -172,57 +172,35 @@ public class AuthController {
 	//인증된 마이페이지 조회
 	//현재 로그인한 사용자의 마이페이지를 조회합니다.
 	//인증정보에서 사용자의 ID를 추출해 memberNum기반으로 조회
-	@GetMapping("/mypage")
-	public ResponseEntity<MemberMyPageResponseDto> myPage(){
-		//현재 인증 정보 가져오기
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		
-		//인증이 안된경우
-		if(auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-		}
-		
-		//인증된 사용자 ID 추출
-		String memberId = auth.getName();	//principal로 전달된 memberId
-		
-		//사용자 정보 조회(memberNum 얻기 위함)
-		MemberEntity member = memberRepository.findByMemberId(memberId)
-	            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-		
-		// ✅ 비밀번호 만료 시 403(FORBIDDEN)로 명확히 내려줌 (프론트에서 분기 처리 용이)
-	    if (memberService.isPasswordExpired(member)) {
-	        throw new ResponseStatusException(
-	            HttpStatus.FORBIDDEN,
-	            "비밀번호가 만료되어 마이페이지 접근이 제한됩니다."
-	        );
-	    }
-		//마이페이지 정보 반환
-		return ResponseEntity.ok(memberService.myPage(member.getMemberNum()));
-	}
+//	@GetMapping("/member/mypage")
+//	public ResponseEntity<MemberMyPageResponseDto> myPage(){
+//		//현재 인증 정보 가져오기
+//		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//		
+//		//인증이 안된경우
+//		if(auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+//			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+//		}
+//		
+//		//인증된 사용자 ID 추출
+//		String memberId = auth.getName();	//principal로 전달된 memberId
+//		
+//		//사용자 정보 조회(memberNum 얻기 위함)
+//		MemberEntity member = memberRepository.findByMemberId(memberId)
+//	            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+//		
+//		// ✅ 비밀번호 만료 시 403(FORBIDDEN)로 명확히 내려줌 (프론트에서 분기 처리 용이)
+//	    if (memberService.isPasswordExpired(member)) {
+//	        throw new ResponseStatusException(
+//	            HttpStatus.FORBIDDEN,
+//	            "비밀번호가 만료되어 마이페이지 접근이 제한됩니다."
+//	        );
+//	    }
+//		//마이페이지 정보 반환
+//		return ResponseEntity.ok(memberService.myPage(member.getMemberNum()));
+//	}
 	
-	//인증된 마이페이지 수정(토큰으로 본인확인)
-	//현재 로그인한 사용자의 마이페이지 정보를 수정합니다.
-	//인증 정보를 기반으로 해당 사용자만 수정 가능하도록 합니다.
-	@PutMapping("/mypage")
-	public ResponseEntity<MemberMyPageResponseDto> updateMyPage(@RequestBody MemberMyPageUpdateRequestDto dto){
-		//현재 인증 정보 가져오기
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		
-		//인증이 안된경우
-		if(auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-		}
-		
-		//인증된 사용자 ID 추출
-		String memberId = auth.getName();	//principal로 전달된 memberId
-		
-		//사용자 정보 조회(memberNum 얻기 위함)
-		MemberEntity member = memberRepository.findByMemberId(memberId)
-	            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-				
-		//마이페이지 수정 로직 호출 및 결과 반환
-		return ResponseEntity.ok(memberService.updateMyPage(member.getMemberNum(), dto));
-	}
+	
 	
 	//토큰재발급 추가
 	@PostMapping("/reissue")

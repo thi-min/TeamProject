@@ -73,7 +73,7 @@ const Header = () => {
             {/* 로그인 했을때 표출 */}
             {isLogin && (
               <div className="link_item">
-                <Link to="/mypage">마이페이지</Link>
+                <Link to="/member/mypage">마이페이지</Link>
               </div>
             )}
           </div>
