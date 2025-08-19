@@ -358,5 +358,19 @@ public class ReserveServiceImpl implements ReserveService {
                 .map(ReserveResponseDto::from)
                 .collect(Collectors.toList());
     }
+    // 놀이터 예약 중복검사(formpage->confirmpage넘어갈때)
+    @Override
+    public boolean existsLandDuplicate(Long memberNum, LocalDate date, Long timeSlotId) {
+        return reserveRepository.existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_TimeSlot_Id(
+                memberNum, date, timeSlotId
+        );
+    }
+    // 봉사 예약 중복검사(formpage->confirmpage넘어갈때)
+    @Override
+    public boolean existsVolunteerDuplicate(Long memberNum, LocalDate date, Long timeSlotId) {
+        return reserveRepository.existsByMember_MemberNumAndVolunteerDetail_VolDateAndVolunteerDetail_TimeSlot_Id(
+                memberNum, date, timeSlotId
+        );
+    }
   
 }

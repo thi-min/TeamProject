@@ -43,7 +43,10 @@ public interface ReserveService {
 	 VolunteerDetailDto getAdminVolunteerReserveDetail(Long reserveCode); //관리자 - 봉사 예약 상세보기
 	 
 	 void updateReserveStateByAdmin(Long reserveCode, ReserveState newState); //관리자 - 예약 상태 변경
-
+	 
+	 boolean existsLandDuplicate(Long memberNum, LocalDate date, Long timeSlotId); //사용자 - 놀이터예약 중복검사
+	 
+	 boolean existsVolunteerDuplicate(Long memberNum, LocalDate date, Long timeSlotId); //사용자 -봉사예약 중복검사
 
 	 
 	 
