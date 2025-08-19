@@ -31,7 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController	//JSON 응답 전용 컨트롤러
 @RequiredArgsConstructor	//생성자주입
-@RequestMapping//클래스/메서드에 공통 URL 설정
+//@RequestMapping//클래스/메서드에 공통 URL 설정
 @Slf4j
 //요청수신, 로직호출, 결과응답
 public class MemberController {

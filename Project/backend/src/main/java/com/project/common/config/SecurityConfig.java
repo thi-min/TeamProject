@@ -3,26 +3,30 @@
 
 package com.project.common.config;
 
-import com.project.common.jwt.JwtAuthenticationEntryPoint;
-import com.project.common.jwt.JwtAuthenticationFilter;
-import com.project.common.jwt.JwtTokenProvider;
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 // ⬇️ CORS 관련 import 추가
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.List;
+import com.project.common.jwt.JwtAccessDeniedHandler;
+import com.project.common.jwt.JwtAuthenticationEntryPoint;
+import com.project.common.jwt.JwtAuthenticationFilter;
+import com.project.common.jwt.JwtTokenProvider;
+
+import lombok.RequiredArgsConstructor;
 
 @Configuration
 @EnableWebSecurity
@@ -31,25 +35,45 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
-
+    private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
+    
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        // 필터가 JwtTokenProvider를 생성자에서 받는다고 가정
+        return new JwtAuthenticationFilter(jwtTokenProvider);
+    }
+    
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // ✅ CORS 활성화 (아래 corsConfigurationSource() 사용)
+            // ✅ CORS 활성화 (아래 corsConfigurationSource() Bean 사용)
             .cors(Customizer.withDefaults())
+
+            // ✅ JWT 사용 시 CSRF 비활성화 (중복 설정 제거)
             .csrf(AbstractHttpConfigurer::disable)
+
+            // ✅ 세션 미사용
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .exceptionHandling(e -> e.authenticationEntryPoint(jwtAuthenticationEntryPoint))
+
+            // ✅ 인증 실패(401) 응답 포맷 커스터마이징
+            .exceptionHandling(e -> e
+            		.authenticationEntryPoint(jwtAuthenticationEntryPoint)	//401 처리
+            		.accessDeniedHandler(jwtAccessDeniedHandler))        // ✅ 403 처리 추가
+            // ✅ 요청별 인가 규칙
             .authorizeHttpRequests(auth -> auth
-                // ⛔️ "/**" 전체 허용은 지양. 필요한 공개 엔드포인트만 지정
-                .requestMatchers(
-                    "/**",         // 로그인, 회원가입, 아이디체크 등
-                    "/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**", "/webjars/**"
-                ).permitAll()
-                .anyRequest().authenticated()
+                // 공개 엔드포인트 (로그인/재발급)
+                .requestMatchers("/auth/login", "/auth/reissue").permitAll()
+
+                // (선택) 스웨거 열어두기
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+
+                // 관리자 전용
+                .requestMatchers("/admin/**").hasAnyAuthority("ADMIN", "ROLE_ADMIN")
+                // 나머지는 필요에 따라 조정
+                .anyRequest().permitAll()
             )
-            .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider),
-                org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class)
+
+            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
             .httpBasic(AbstractHttpConfigurer::disable)
             .formLogin(AbstractHttpConfigurer::disable);
 
@@ -68,7 +92,7 @@ public class SecurityConfig {
         // 모든 헤더 허용
         config.setAllowedHeaders(List.of("*"));
         // 인증 쿠키/헤더를 쓸 경우 true (지금은 false로도 OK)
-        config.setAllowCredentials(false);
+        config.setAllowCredentials(true);
         // (선택) 프론트에서 읽어야 하는 커스텀 헤더가 있다면 노출
         // config.setExposedHeaders(List.of("Authorization"));
 

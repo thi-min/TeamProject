@@ -1,15 +1,13 @@
 package com.project.admin.dto;
 
-import java.time.LocalDateTime;
-
-import com.project.member.entity.MemberEntity;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 
+@Getter
+@Setter
 @Data
 //비밀번호 변경
 public class AdminPasswordUpdateRequestDto {

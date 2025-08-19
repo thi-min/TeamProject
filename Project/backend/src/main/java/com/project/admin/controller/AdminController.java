@@ -1,7 +1,7 @@
 package com.project.admin.controller;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -40,34 +40,40 @@ public class AdminController {
 	//관리자 로그인
 	//param : dto 관리자 로그인 요청 정보(아이디, 비밀번호)
 	//return : 관리자 정보 + 로그인 성공 메시지 + 토큰
-	@PostMapping("login")
-	public AdminLoginResponseDto login(@RequestBody AdminLoginRequestDto dto) {
-		
-		//1. 아이디로 관리자 먼저 조회
-	    AdminEntity admin = adminRepository.findFirstByAdminId(dto.getAdminId())
-	        .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
-	    
-	    //2. 비밀번호는 passwordEncoder로 암호화 매칭
-	    if (!new BCryptPasswordEncoder().matches(dto.getAdminPw(), admin.getAdminPw())) {
-	        throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
-	    }
-	    
-	    // ✅ role: ADMIN 포함한 토큰 발급
-	    String accessToken = jwtTokenProvider.generateAccessToken(admin.getAdminId(), "ADMIN");
-	    String refreshToken = jwtTokenProvider.generateRefreshToken(admin.getAdminId());
-
-	    // ✅ refreshToken 저장
-	    admin.setRefreshToken(refreshToken);
-	    adminRepository.save(admin);
-
-	    return AdminLoginResponseDto.builder()
-	            .adminId(admin.getAdminId())
-	            .adminEmail(admin.getAdminEmail())
-	            .accessToken(accessToken)	// ⬅️ 발급한 토큰 포함
-	            .refreshToken(refreshToken)
-	            .message("관리자 로그인 성공")
-	            .build();
-	}
+	// ✅ 컨트롤러는 DTO 수신 → 서비스 위임 → 결과만 반환(얇게 유지)
+//    @PostMapping("/login")
+//    public ResponseEntity<AdminLoginResponseDto> login(@RequestBody AdminLoginRequestDto dto) {
+//        AdminLoginResponseDto result = adminService.login(dto);
+//        return ResponseEntity.ok(result);
+//    }
+//	@PostMapping("login")
+//	public AdminLoginResponseDto login(@RequestBody AdminLoginRequestDto dto) {
+//		
+//		//1. 아이디로 관리자 먼저 조회
+//	    AdminEntity admin = adminRepository.findFirstByAdminId(dto.getAdminId())
+//	        .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
+//	    
+//	    //2. 비밀번호는 passwordEncoder로 암호화 매칭
+//	    if (!new BCryptPasswordEncoder().matches(dto.getAdminPw(), admin.getAdminPw())) {
+//	        throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
+//	    }
+//	    
+//	    // ✅ role: ADMIN 포함한 토큰 발급
+//	    String accessToken = jwtTokenProvider.generateAccessToken(admin.getAdminId(), "ADMIN");
+//	    String refreshToken = jwtTokenProvider.generateRefreshToken(admin.getAdminId());
+//
+//	    // ✅ refreshToken 저장
+//	    admin.setRefreshToken(refreshToken);
+//	    adminRepository.save(admin);
+//
+//	    return AdminLoginResponseDto.builder()
+//	            .adminId(admin.getAdminId())
+//	            .adminEmail(admin.getAdminEmail())
+//	            .accessToken(accessToken)	// ⬅️ 발급한 토큰 포함
+//	            .refreshToken(refreshToken)
+//	            .message("관리자 로그인 성공")
+//	            .build();
+//	}
 
 	
 	//관리자 로그아웃
@@ -95,12 +101,19 @@ public class AdminController {
 	//관리자 비밀번호 변경
 	//param dto 비밀번호 변경 요청 정보(아이디, 현재 비밀번호, 새 비밀번호)
 	//return 성공 메시지
-	@PutMapping("/update-password")
-	public ResponseEntity<String> updatePassword(@RequestBody AdminPasswordUpdateRequestDto dto){
-		adminService.updatePassword(dto.getAdminId(), dto);
-		return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+//	@PutMapping("/updatePw")
+//	public ResponseEntity<String> updatePassword(@RequestBody AdminPasswordUpdateRequestDto dto){
+//		adminService.updatePassword(dto.getAdminId(), dto);
+//		return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+//	}
+	@PutMapping("/updatePw")
+	public ResponseEntity<String> updatePassword(@RequestBody AdminPasswordUpdateRequestDto dto,
+	                                             Authentication authentication) {
+	    String adminId = authentication.getName(); // ✅ 토큰 subject 사용
+	    adminService.updatePassword(adminId, dto);
+	    return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
 	}
-	
+
 	//전체 회원목록 조회(페이징 + 검색 포함)
 	//param pageRequestDto 페이지번호, 크기, 검색키워드
 	//return pageResponseDto 형태로 페이지 정보 + 회원 목록 반환
