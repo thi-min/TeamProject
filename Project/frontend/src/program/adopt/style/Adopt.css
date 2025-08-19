@@ -19,13 +19,17 @@
 }
 
 .application-form-title {
-    font-size: 2rem;
+    /* font-size: 2rem;
     font-weight: bold;
     color: #0d47a1;
     text-align: center;
     margin-bottom: 2rem;
     padding-bottom: 1rem;
-    border-bottom: 2px solid #0d47a1;
+    border-bottom: 2px solid #0d47a1; */
+    margin-top:44px;
+    margin-bottom:22px;
+    font-size:23px;
+    line-height:36px;
 }
 
 /* 폼 입력 그룹 및 아이템 */
@@ -52,10 +56,21 @@
 }
 
 .form-label {
-    font-size: 1rem;
+    /* font-size: 1rem;
     color: #555;
     margin-bottom: 0.5rem;
-    font-weight: 500;
+    font-weight: 500; */
+
+    display:block;
+    margin-top:29px;
+    margin-bottom:16px;
+    font-size:20px;
+    color:#1d1d1d;
+    line-height:30px;
+    letter-spacing:0;
+    font-weight:600;
+    font-family:'PretendardGOV';
+    word-break:keep-all;
 }
 
 .form-label.required::after {
@@ -67,13 +82,18 @@
 .form-input,
 .form-select,
 .form-textarea {
-    width: 100%;
+    /* width: 100%;
     padding: 0.8rem;
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 1rem;
     transition: border-color 0.2s, box-shadow 0.2s;
-    box-sizing: border-box;
+    box-sizing: border-box; */
+    height:40px;
+    padding:0 16px;
+    border-radius:6px;
+    font-size:15px;
+    line-height:38px;
 }
 
 .form-input:focus,
