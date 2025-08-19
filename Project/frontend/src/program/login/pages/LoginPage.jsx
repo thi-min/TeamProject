@@ -80,8 +80,8 @@ const LoginPage = () => {
       if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
 
       // + memberNum 불러와서 로컬 스트로지에 저장
-      if (data.memberNum) {
-        localStorage.setItem("memberNum", data.memberNum);
+      if (data.member?.memberNum) {
+        localStorage.setItem("memberNum", data.member.memberNum);
       }
       // 📌 호환용: 예전 코드가 adminAccessToken을 참조할 수 있어 ADMIN이면 같이 저장
       if (upperRole === "ADMIN" || upperRole === "ROLE_ADMIN") {
@@ -174,19 +174,19 @@ const LoginPage = () => {
           <div className="form_btn_box">
             <div className="login_more">
               <div className="id_find bth_item">
-                <Link href="" className="login_btn type1">
+                <Link to="/find-id" className="login_btn type1">
                   <span>아이디 찾기</span>
                 </Link>
               </div>
               <div className="pw_find bth_item">
-                <Link href="/findPassword" className="login_btn type1">
+                <Link to="/find-pw" className="login_btn type1">
                   <span>비밀번호 찾기</span>
                 </Link>
               </div>
               <div className="signup bth_item">
-                <a href="/signup" className="login_btn type2">
+                <Link to="/signup" className="login_btn type2">
                   <span>회원가입</span>
-                </a>
+                </Link>
               </div>
             </div>
           </div>

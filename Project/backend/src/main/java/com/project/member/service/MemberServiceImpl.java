@@ -51,6 +51,7 @@ public class MemberServiceImpl implements MemberService {
 		
 		//비밀번호 암호화
 		String encodedPw = passwordEncoder.encode(dto.getMemberPw());
+		
 		//핸드폰번호 암호화
 		String encryptedPhone = JasyptUtil.encrypt(dto.getMemberPhone());
 		
@@ -58,9 +59,11 @@ public class MemberServiceImpl implements MemberService {
 		MemberEntity newMember = MemberEntity.builder()
 				.memberId(dto.getMemberId())
 				.memberPw(encodedPw)
+//				.memberPw(dto.getMemberPw())
 				.memberName(dto.getMemberName())
 				.memberBirth(dto.getMemberBirth())
 				.memberPhone(encryptedPhone)
+//				.memberPhone(dto.getMemberPhone())
 				.memberAddress(dto.getMemberAddress())
 				.memberDay(LocalDate.now()) 
 				.memberSex(dto.getMemberSex())
@@ -108,31 +111,6 @@ public class MemberServiceImpl implements MemberService {
 	        .build();
 	}
 	
-	//로그인
-//	public MemberLoginResponseDto login(MemberLoginRequestDto dto) {
-////		//아이디와 비밀번호로 회원 정보 조회
-////		MemberEntity member = memberRepository
-////			.findByMemberIdAndMemberPw(dto.getMemberId(), dto.getMemberPw())
-////			.orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
-////		
-//		// 아이디 기준으로 회원 찾기
-//	    MemberEntity member = memberRepository.findByMemberId(dto.getMemberId())
-//	        .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
-//
-//	    // 비밀번호 비교 (암호화된 비밀번호와 비교)
-//	    if (!passwordEncoder.matches(dto.getMemberPw(), member.getMemberPw())) {
-//	        throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
-//	    }
-//		//로그인 성공 시 필요한 정보 dto 반환
-//		return MemberLoginResponseDto.builder()
-//				.memberId(member.getMemberId())
-//				.memberName(member.getMemberName())
-//				.message("로그인 성공")
-//				.accessToken("정상 토큰")
-//				.refreshToken("재발급 토큰")
-//				.build();
-//	}
-	
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
 	//마이페이지
@@ -150,6 +128,7 @@ public class MemberServiceImpl implements MemberService {
 				.memberSex(member.getMemberSex()) //enum은 그대로 호출
 				.memberAddress(member.getMemberAddress())
 				.memberPhone(decryptedPhone)
+//				.memberPhone(member.getMemberPhone())
 				.kakaoId(member.getKakaoId())
 				.smsAgree(member.isSmsAgree()) //boolean타입은 is로 호출
 				.build();
