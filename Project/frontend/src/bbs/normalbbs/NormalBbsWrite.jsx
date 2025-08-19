@@ -6,24 +6,49 @@ import "./normalbbs.css";
 function NormalBbsWrite() {
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
-  const [files, setFiles] = useState([{ id: Date.now(), file: null }]); // 기본 1개 첨부
+  const [files, setFiles] = useState([{ id: Date.now(), file: null, insertOption: "no-insert" }]);
   const navigate = useNavigate();
 
   // 파일 변경
   const handleFileChange = (id, newFile) => {
-    setFiles((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, file: newFile } : f))
+    setFiles(prev =>
+      prev.map(f => (f.id === id ? { ...f, file: newFile } : f))
+    );
+
+    // 이미지 파일이 아니면 insertOption 초기화
+    if (newFile && !["image/jpeg", "image/jpg"].includes(newFile.type)) {
+      setFiles(prev =>
+        prev.map(f => (f.id === id ? { ...f, insertOption: "no-insert" } : f))
+      );
+    }
+  };
+
+  // 본문 삽입 옵션 변경
+  const handleInsertOptionChange = (id, option) => {
+    const file = files.find(f => f.id === id)?.file;
+    if (option === "insert") {
+      if (!file) {
+        alert("먼저 파일을 선택해주세요.");
+        return;
+      }
+      if (!["image/jpeg", "image/jpg"].includes(file.type)) {
+        alert("본문 삽입은 jpg/jpeg 이미지 파일만 가능합니다.");
+        return;
+      }
+    }
+    setFiles(prev =>
+      prev.map(f => (f.id === id ? { ...f, insertOption: option } : f))
     );
   };
 
   // 파일 입력창 추가
   const addFileInput = () => {
-    setFiles((prev) => [...prev, { id: Date.now(), file: null }]);
+    setFiles(prev => [...prev, { id: Date.now(), file: null, insertOption: "no-insert" }]);
   };
 
   // 파일 입력창 삭제
   const removeFileInput = (id) => {
-    setFiles((prev) => prev.filter((f) => f.id !== id));
+    setFiles(prev => prev.filter(f => f.id !== id));
   };
 
   // 저장
@@ -41,13 +66,15 @@ function NormalBbsWrite() {
     formData.append("type", "NORMAL");
     formData.append(
       "bbsDto",
-      new Blob([JSON.stringify({ bbstitle: title, bbscontent: content })], {
-        type: "application/json",
-      })
+      new Blob([JSON.stringify({ bbstitle: title, bbscontent: content })], { type: "application/json" })
     );
 
-    files.forEach((f) => {
-      if (f.file) formData.append("files", f.file);
+    // 파일 + 본문 삽입 옵션 전송
+    files.forEach((f, index) => {
+      if (f.file) {
+        formData.append("files", f.file);
+        formData.append(`insertOptions[${index}]`, f.insertOption);
+      }
     });
 
     try {
@@ -92,14 +119,27 @@ function NormalBbsWrite() {
               <div className="bbs-file-row" key={f.id}>
                 <input
                   type="file"
+                  accept=".jpg,.jpeg"
                   onChange={(e) => handleFileChange(f.id, e.target.files[0])}
                 />
                 <div className="bbs-file-options">
                   <label>
-                   <input type="radio" name={`insertOption-${f.id}`} value="insert" /> 본문 삽입
+                    <input
+                      type="radio"
+                      name={`insertOption-${f.id}`}
+                      value="insert"
+                      checked={f.insertOption === "insert"}
+                      onChange={() => handleInsertOptionChange(f.id, "insert")}
+                    /> 본문 삽입
                   </label>
                   <label>
-                    <input type="radio" name={`insertOption-${f.id}`} value="no-insert" /> 본문 미삽입
+                    <input
+                      type="radio"
+                      name={`insertOption-${f.id}`}
+                      value="no-insert"
+                      checked={f.insertOption === "no-insert"}
+                      onChange={() => handleInsertOptionChange(f.id, "no-insert")}
+                    /> 본문 미삽입
                   </label>
                 </div>
                 {files.length > 1 && (
@@ -113,11 +153,7 @@ function NormalBbsWrite() {
                 )}
               </div>
             ))}
-            <button
-              type="button"
-              className="bbs-file-add"
-              onClick={addFileInput}
-            >
+            <button type="button" className="bbs-file-add" onClick={addFileInput}>
               ➕
             </button>
           </div>
@@ -132,9 +168,7 @@ function NormalBbsWrite() {
           >
             취소
           </button>
-          <button type="submit" className="bbs-save-btn">
-            저장
-          </button>
+          <button type="submit" className="bbs-save-btn">저장</button>
         </div>
       </form>
     </div>

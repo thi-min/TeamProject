@@ -6,18 +6,16 @@ import "./qnabbs.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
 
-
 function AdminQnaBbs() {
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [searchType, setSearchType] = useState("all");
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [expandedRow, setExpandedRow] = useState(null); // toggle 상태
+  const [expandedRow, setExpandedRow] = useState(null);
   const [selectedPosts, setSelectedPosts] = useState([]);
   const navigate = useNavigate();
 
-  // 게시글 불러오기
   const fetchPosts = async (pageNumber = 0) => {
     try {
       const params = { type: "FAQ", page: pageNumber, size: 10 };
@@ -35,9 +33,10 @@ function AdminQnaBbs() {
     }
   };
 
+  // 페이지 번호 변경 시만 fetch 호출
   useEffect(() => {
     fetchPosts(page);
-  }, [page, searchType, searchKeyword]);
+  }, [page]);
 
   const handleSearch = () => {
     setPage(0);
@@ -71,9 +70,14 @@ function AdminQnaBbs() {
     }
   };
 
-  // 답변 펼치기 toggle
   const toggleRow = (id) => {
     setExpandedRow(expandedRow === id ? null : id);
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setPage(newPage);
+    }
   };
 
   return (
@@ -126,7 +130,6 @@ function AdminQnaBbs() {
                     />
                   </td>
                   <td>{post.bulletinNum}</td>
-                  {/* 제목 클릭 시 상세보기 페이지로 이동 */}
                   <td
                     style={{ cursor: "pointer", color: "blue" }}
                     onClick={() => navigate(`bbs/admin/qna/view/${post.bulletinNum}`)}
@@ -165,25 +168,24 @@ function AdminQnaBbs() {
 
       {/* 페이지네이션 */}
       <div className="pagination">
-        <button disabled={page === 0} onClick={() => setPage(page - 1)}>
-        <FontAwesomeIcon icon={faChevronLeft} />
-      </button>
-
-      {Array.from({ length: Math.max(totalPages, 1) }, (_, i) => (
-        <button
-        key={i}
-        className={page === i ? "active" : ""}
-        onClick={() => setPage(i)}
-        >
-          {i + 1}
+        <button disabled={page === 0} onClick={() => handlePageChange(page - 1)}>
+          <FontAwesomeIcon icon={faChevronLeft} />
         </button>
-      ))}
 
-      <button disabled={page === Math.max(totalPages, 1) - 1} onClick={() => setPage(page + 1)}>
-        <FontAwesomeIcon icon={faChevronRight} />
+        {Array.from({ length: Math.max(totalPages, 1) }, (_, i) => (
+          <button
+            key={i}
+            className={page === i ? "active" : ""}
+            onClick={() => handlePageChange(i)}
+          >
+            {i + 1}
+          </button>
+        ))}
+
+        <button disabled={page === Math.max(totalPages, 1) - 1} onClick={() => handlePageChange(page + 1)}>
+          <FontAwesomeIcon icon={faChevronRight} />
         </button>
       </div>
-
     </div>
   );
 }

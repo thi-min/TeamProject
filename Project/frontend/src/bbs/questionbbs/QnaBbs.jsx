@@ -9,7 +9,6 @@ function QnaBbs() {
   const [posts, setPosts] = useState([]);
   const [page, setPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
-
   const [searchType, setSearchType] = useState("all");
   const [searchKeyword, setSearchKeyword] = useState("");
 
@@ -17,19 +16,21 @@ function QnaBbs() {
 
   const fetchPosts = async (pageNumber = 0) => {
     try {
-      const params = {
-        type: "FAQ",
-        page: pageNumber,
-        size: 10,
-      };
+      const params = { type: "FAQ", page: pageNumber, size: 10 };
 
+      // ✅ 백엔드 파라미터 이름과 맞춤
       if (searchType !== "all" && searchKeyword.trim() !== "") {
         params.searchType = searchType;
-        params.keyword = searchKeyword.trim();
+        if (searchType === "title") {
+          params.bbstitle = searchKeyword.trim();     // 제목 검색
+        } else if (searchType === "content") {
+          params.bbscontent = searchKeyword.trim();   // 내용 검색
+        } else if (searchType === "writer") {
+          params.memberName = searchKeyword.trim();   // 작성자 검색
+        }
       }
 
       const response = await axios.get("/bbs/bbslist", { params });
-
       setPosts(response.data.content);
       setTotalPages(response.data.totalPages);
       setPage(response.data.number);
@@ -39,13 +40,20 @@ function QnaBbs() {
     }
   };
 
+  // 초기 목록 불러오기
   useEffect(() => {
     fetchPosts(page);
-  }, [page, searchType, searchKeyword]);
+  }, [page]); // page가 바뀔 때만 호출
 
   const handleSearch = () => {
-    setPage(0); // 검색 버튼 누르면 1페이지부터 조회
+    setPage(0);
     fetchPosts(0);
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setPage(newPage);
+    }
   };
 
   return (
@@ -55,34 +63,27 @@ function QnaBbs() {
       {/* 검색창 */}
       <div className="search-bar">
         <div className="temp_form_box lg">
-          <select
-            className="temp_select"
-            value={searchType}
-            onChange={(e) => setSearchType(e.target.value)}
-          >
+          <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
             <option value="all">전체</option>
             <option value="title">제목</option>
+            <option value="content">내용</option>
             <option value="writer">작성자</option>
           </select>
         </div>
-        <div class ="temp_form_box lg">
-        <input
-          type="text"
-          value={searchKeyword}
-          onChange={(e) => setSearchKeyword(e.target.value)}
-          placeholder="검색어를 입력하세요"
-          style={{ height: "100%" }}
-        />
+        <div className="temp_form_box lg">
+          <input
+            type="text"
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            placeholder="검색어를 입력하세요"
+          />
         </div>
         <button onClick={handleSearch}>조회</button>
       </div>
 
       {/* 글쓰기 버튼 */}
       <div className="top-bar" style={{ margin: "10px 0" }}>
-        <button
-          className="write-btn"
-          onClick={() => navigate("/bbs/qna/write")}
-        >
+        <button className="write-btn" onClick={() => navigate("/bbs/qna/write")}>
           글쓰기
         </button>
       </div>
@@ -110,22 +111,15 @@ function QnaBbs() {
                 <tr key={post.bulletinNum}>
                   <td>{post.bulletinNum}</td>
                   <td>
-                    <Link to={`/qnabbs/view/${post.bulletinNum}`}>
-                      {post.bbsTitle}
-                    </Link>
+                    <Link to={`/qnabbs/view/${post.bulletinNum}`}>{post.bbsTitle}</Link>
                   </td>
                   <td>{post.memberName || "익명"}</td>
-                  <td>
-                    {new Date(post.registDate).toLocaleDateString()}
-                  </td>
+                  <td>{new Date(post.registDate).toLocaleDateString()}</td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td
-                  colSpan={4}
-                  style={{ textAlign: "center", padding: "90px 0" }}
-                >
+                <td colSpan={4} style={{ textAlign: "center", padding: "90px 0" }}>
                   등록된 질문이 없습니다.
                 </td>
               </tr>
@@ -136,10 +130,7 @@ function QnaBbs() {
 
       {/* 페이지네이션 */}
       <div className="pagination">
-        <button
-          disabled={page === 0}
-          onClick={() => setPage(page - 1)}
-        >
+        <button disabled={page === 0} onClick={() => handlePageChange(page - 1)}>
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
 
@@ -147,7 +138,7 @@ function QnaBbs() {
           <button
             key={i}
             className={page === i ? "active" : ""}
-            onClick={() => setPage(i)}
+            onClick={() => handlePageChange(i)}
           >
             {i + 1}
           </button>
@@ -155,7 +146,7 @@ function QnaBbs() {
 
         <button
           disabled={page === Math.max(totalPages, 1) - 1}
-          onClick={() => setPage(page + 1)}
+          onClick={() => handlePageChange(page + 1)}
         >
           <FontAwesomeIcon icon={faChevronRight} />
         </button>

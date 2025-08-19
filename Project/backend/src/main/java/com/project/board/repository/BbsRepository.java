@@ -26,7 +26,7 @@ public interface BbsRepository extends JpaRepository<BbsEntity, Long> {
     
     Page<BbsEntity> findByBbstitleContaining(String bbstitle, Pageable pageable); // 제목에 키워드가 포함된 게시글을 페이지 단위로 조회 (제목 검색)
     
-   // Page<BbsEntity> findByMember_MemberNameContaining(String bbstitle, Pageable pageable);  // 작성자 이름에 키워드가 포함된 게시글을 페이지 단위로 조회
+    Page<BbsEntity> findByMemberNum_MemberNameContaining(String bbstitle, Pageable pageable);  // 작성자 이름에 키워드가 포함된 게시글을 페이지 단위로 조회
     
     Page<BbsEntity> findByBbscontentContaining(String bbscontent, Pageable pageable);  // 게시글 내용에 키워드가 포함된 게시글을 페이지 단위로 조회 (내용 검색)
     

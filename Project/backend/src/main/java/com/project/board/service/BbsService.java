@@ -9,13 +9,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface BbsService {
 	
-    BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files); // 게시글 생성 (회원 또는 관리자)
+    BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files, List<String> insertOptions); // 게시글 생성 (회원 또는 관리자)
     
     BbsDto createPotoBbs(BbsDto dto, Long requesterMemberNum, List<MultipartFile> files);
     
-    BbsDto createBbsWithFiles(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files); // 생성된 게시글 + 파일첨부 (회원 또는 관리자)
+    BbsDto createBbsWithFiles(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files,  List<String> insertOptions); // 생성된 게시글 + 파일첨부 (회원 또는 관리자)
     
-    BbsDto updateBbs(Long id, BbsDto dto, Long userId, List<MultipartFile> newFiles, List<Long> deleteFileIds, boolean isAdmin); // 게시글 수정 (작성자 본인만 가능)
+    BbsDto updateBbs(Long id, BbsDto dto, Long userId, List<MultipartFile> newFiles, List<Long> deleteFileIds, boolean isAdmin, List<String> insertOptions); // 게시글 수정 (작성자 본인만 가능)
     
     void deleteBbs(Long id, Long requesterMemberNum, Long requesterAdminId);  // 게시글 단건 삭제 (작성자 본인 또는 관리자)
     
@@ -27,7 +27,7 @@ public interface BbsService {
     
     Page<BbsDto> getPagedPosts(BoardType type, String sort, Pageable pageable); // 게시판 타입 + 정렬 조건으로 페이징된 게시글 조회
     
-    Page<BbsDto> searchPosts(String searchType, String bbstitle, String bbscontent, BoardType type, Pageable pageable); // 게시판 타입 + 검색 조건으로 페이징된 게시글 조회
+    Page<BbsDto> searchPosts(String searchType, String bbstitle, String bbscontent, String memberName, BoardType type, Pageable pageable); // 게시판 타입 + 검색 조건으로 페이징된 게시글 조회
     
     QandADto saveQna(Long bbsId, QandADto dto, String requesterAdminId); // QnA 답변 저장 (관리자만 가능)
     
