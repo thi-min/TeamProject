@@ -29,6 +29,16 @@ const LandReserveFormPage = () => {
     note: "",
     memberNum: null,
   });
+  // memberNum 주입
+  useEffect(() => {
+  const memberNum = localStorage.getItem("memberNum");
+  if (memberNum) {
+    setFormData((prev) => ({
+      ...prev,
+      memberNum: Number(memberNum),
+    }));
+  }
+}, []);
 
   // 🔹 로그인 사용자 정보 불러오기
   useEffect(() => {
@@ -49,7 +59,7 @@ const LandReserveFormPage = () => {
           ...prev,
           name: res.data.memberName,
           phone: res.data.memberPhone,
-          memberNum: res.data.memberNum,
+          memberNum: res.data.memberNum ?? prev.memberNum,
         }));
       } catch (err) {
         console.error("회원정보 불러오기 실패:", err);
@@ -63,31 +73,35 @@ const LandReserveFormPage = () => {
 
   /** LandCountDto -> 표준형 변환 */
   const normalizeCountDto = (arr = []) =>
-    arr.map((s) => ({
+    arr.map((s) => {
+    const full = (s.reservedCount ?? 0) >= (s.capacity ?? 0);
+    return {
       timeSlotId: s.timeSlotId,
       label: s.label,
       capacity: s.capacity ?? 0,
       reservedCount: s.reservedCount ?? 0,
       enabled: true,
-    }));
+      disabled: full,   // ✅ 마감 상태 반영
+    };
+  });
 
   /** TimeSlotDto -> 표준형 변환 */
   const normalizeSlotDto = (arr = []) =>
-    arr.map((s) => ({
-      timeSlotId: s.timeSlotId,
-      label: s.label,
-      capacity: s.capacity ?? 0,
-      reservedCount: 0,
-      enabled: s.enabled ?? true,
-      type: s.type,
-    }));
+  arr.map((s) => ({
+    timeSlotId: s.timeSlotId,
+    label: s.label,
+    capacity: s.capacity ?? 0,
+    reservedCount: s.reservedCount ?? 0,   // ✅ API 값 그대로 반영
+    enabled: s.enabled ?? true,
+    type: s.type,
+  }));
 
   /** 시간대 데이터 로드 */
   useEffect(() => {
     let mounted = true;
 
     const loadSlots = async () => {
-      if (!selectedDate) {
+       if (!selectedDate) {
         setDisplaySlots([]);
         return;
       }
@@ -97,47 +111,52 @@ const LandReserveFormPage = () => {
         setErrorMsg("");
 
         let slotsData = null;
-
+        console.log("조건체크:", {
+          memberNum: formData.memberNum,
+          landType: formData.landType,
+          selectedDate,
+        });
         // 예약 현황 api
-        if (formData.landType && formData.memberNum) {
+        if (formData.memberNum && formData.landType) {
           try {
             const res = await LandReserveService.fetchReservationStatus(
               selectedDate,
               formData.memberNum,
               formData.landType
             );
-            if (mounted) {
-              setDisplaySlots(normalizeCountDto(res.data));
-              setLoading(false);
-              return;
-            }
+            console.log("1️⃣ 예약 현황 API 응답:", res.data);
+            slotsData = normalizeCountDto(res.data);
+            
           } catch (err) {
             console.error("예약 현황 API 실패:", err);
           }
         }
 
-        // 전체 시간대 불러오기
+        //2 fall back 전체 시간대 불러오기
         if (!slotsData) {
         const res2 = await LandReserveService.fetchTimeSlots();
         slotsData = normalizeSlotDto(res2.data);
+        console.log("2️⃣기본 전체 슬롯:", slotsData);
       }
 
-      // ✅ localStorage 규칙 적용
+      //3 localStorage 규칙 적용
       const saved = localStorage.getItem("landRules");
       if (saved) {
         const rules = JSON.parse(saved);
+        console.log("3️⃣ 규칙 적용 전 slotsData:", slotsData);
         slotsData = slotsData.map(s => ({
           ...s,
-          allowSmall: rules.SMALL.includes(s.timeSlotId),
-          allowLarge: rules.LARGE.includes(s.timeSlotId),
+          allowSmall: rules.SMALL?.includes(s.timeSlotId) ?? true,
+          allowLarge: rules.LARGE?.includes(s.timeSlotId) ?? true,
 
-          disabled:
-          (formData.landType === "SMALL" && !rules.SMALL.includes(s.id)) ||
-          (formData.landType === "LARGE" && !rules.LARGE.includes(s.id)),
-          
+        disabled:
+        s.disabled || // 기존 full 여부 유지
+          (formData.landType === "SMALL" && !rules.SMALL?.includes(s.timeSlotId)) ||
+          (formData.landType === "LARGE" && !rules.LARGE?.includes(s.timeSlotId)),
         }));
+        console.log("4️⃣ 규칙 적용 후 slotsData:", slotsData);
       }
-
+      console.log("5️⃣ 최종 setDisplaySlots:", slotsData);
       if (mounted) setDisplaySlots(slotsData);
 
     } catch (err) {
@@ -173,7 +192,19 @@ const LandReserveFormPage = () => {
     if (!formData.animalNumber) return alert("반려견 수를 입력해 주세요.");
     if (!selectedDate) return alert("예약 날짜를 선택해 주세요.");
     if (!selectedSlotId) return alert("시간대를 선택해 주세요.");
-
+    // 선택한 시간대 db에존재하는지
+    const selectedSlot = displaySlots.find(s => s.timeSlotId === selectedSlotId);
+    if (!selectedSlot) {
+      return alert("선택한 시간대 정보를 불러올 수 없습니다.");
+    }
+    // 정원 검사 
+    const total = (selectedSlot.reservedCount ?? 0) + Number(formData.animalNumber ?? 0);
+    if (total > (selectedSlot.capacity ?? 0)) {
+      return alert(
+        `선택한 반려견 수가 남은 정원을 초과했습니다.\n` +
+        `현재 예약 가능 마리 수: ${selectedSlot.reservedCount ?? 0} / 최대 ${selectedSlot.capacity}`
+      );
+    }
     navigate("/reserve/land/confirm", {
       state: {
         formData,
@@ -227,7 +258,7 @@ const LandReserveFormPage = () => {
     <div className="land-form-page">
       <h2 className="form-title">놀이터 예약신청</h2>
       <div className="required-info">
-        <span className="required">*</span>표시는 필수 입력항목입니다.
+        <span className="required">*</span> 표시는 필수 입력항목입니다.
       </div>
 
       <form className="form-container" onSubmit={handleSubmit}>
@@ -278,29 +309,40 @@ const LandReserveFormPage = () => {
             <label htmlFor="animalNumber">
               반려견 수 <span className="required">*</span>
             </label>
-            <input
-              type="number"
-              id="animalNumber"
+            <select
               name="animalNumber"
               value={formData.animalNumber}
               onChange={handleChange}
-              min={1}
               required
-            />
+            >
+              <option value="">선택</option>
+              {[...Array(10)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1}마리
+                </option>
+              ))}
+            </select>
           </div>
           <div className="form-row">
             <label htmlFor="reserveNumber">보호자 수 <span className="required">*</span></label>
-            <input
-              type="number"
-              id="reserveNumber"
+            <select
               name="reserveNumber"
               value={formData.reserveNumber}
               onChange={handleChange}
-              min={1}
-            />
+              required
+            >
+              <option value="">선택</option>
+              {[...Array(10)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1}명
+                </option>
+              ))}
+            </select>
           </div>
         </div>
-
+        <div className="required-info">
+          ※ 정원은 반려견 기준입니다.
+         </div>
         {/* 시간대 선택 */}
         <div className="form-section">
           <div className="form-row">
@@ -317,19 +359,19 @@ const LandReserveFormPage = () => {
                     key={slot.timeSlotId}
                     type="button"
                     onClick={() => handleTimeSelect(slot.timeSlotId)}
-                    disabled={slot.disabled || (slot.reservedCount ?? 0) >= (slot.capacity ?? 0)}
-                    className={`time-slot-button ${
-                      selectedSlotId === slot.timeSlotId ? "selected" : ""
-                    }`}
+                    disabled={slot.disabled}
+                    className={`time-slot-button ${selectedSlotId === slot.timeSlotId ? "selected" : ""}`}
                   >
                     {slot.label}
                     {(slot.capacity ?? 0) > 0 && (
                       <>
-                        <br />정원: {slot.reservedCount ?? 0}/{slot.capacity}
+                        <br />
+                        {formData.landType
+                          ? `정원: ${slot.reservedCount ?? 0}/${slot.capacity}`
+                          : `정원: ${slot.capacity}`}
                       </>
                     )}
-                    {slot.disabled && ""}
-                    {(slot.reservedCount ?? 0) >= (slot.capacity ?? 0) && " - 마감"}
+                     {(slot.reservedCount ?? 0) >= (slot.capacity ?? 0) && " - 마감"}
                   </button>
                 );
               })}

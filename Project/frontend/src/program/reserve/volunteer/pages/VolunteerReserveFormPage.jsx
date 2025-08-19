@@ -29,6 +29,17 @@ const VolunteerReserveFormPage = () => {
     memberNum: null,
   });
 
+  // membernum 주입
+  useEffect(() => {
+    const memberNum = localStorage.getItem("memberNum");
+    if (memberNum) {
+      setFormData((prev) => ({
+        ...prev,
+        memberNum: Number(memberNum),
+      }));
+    }
+  }, []);
+
   /** 🔹 로그인 사용자 정보 불러오기 */
   useEffect(() => {
   const fetchMemberInfo = async () => {
@@ -49,7 +60,7 @@ const VolunteerReserveFormPage = () => {
         name: res.data.memberName,
         phone: res.data.memberPhone,
         birth: res.data.memberBirth,
-        memberNum: res.data.memberNum,
+        memberNum: res.data.memberNum ?? prev.memberNum,
       }));
     } catch (err) {
       console.error("회원정보 불러오기 실패:", err);
@@ -63,13 +74,17 @@ const VolunteerReserveFormPage = () => {
 
   /** VolunteerCountDto -> 표준형 변환 */
   const normalizeCountDto = (arr = []) =>
-    arr.map((s) => ({
+    arr.map((s) => {
+      const full = (s.reservedCount ?? 0) >= (s.capacity ?? 0);
+      return {
       timeSlotId: s.timeSlotId,
       label: s.label,
       capacity: s.capacity ?? 0,
       reservedCount: s.reservedCount ?? 0,
-      enabled: s.enabled ?? true,
-    }));
+      enabled: true,
+      disabled: full, 
+      };
+    });
 
   /** TimeSlotDto -> 표준형 변환 */
   const normalizeSlotDto = (arr = []) =>
@@ -77,7 +92,7 @@ const VolunteerReserveFormPage = () => {
       timeSlotId: s.timeSlotId,
       label: s.label,
       capacity: s.capacity ?? 0,
-      reservedCount: 0,           
+      reservedCount: s.reservedCount ?? 0,          
       enabled: s.enabled ?? true,
       type: s.type,           
     }));
@@ -159,6 +174,19 @@ const VolunteerReserveFormPage = () => {
     if (!selectedDate) return alert("예약 날짜를 선택해 주세요.");
     if (!selectedSlotId) return alert("시간대를 선택해 주세요.");
 
+    // 선택한 시간대 db에 존재하는지
+    const selectedSlot = displaySlots.find(s => s.timeSlotId === selectedSlotId);
+    if (!selectedSlot) {
+      return alert("선택한 시간대 정보를 불러올 수 없습니다.");
+    }
+    //정원 검사
+    const total = (selectedSlot.reservedCount ?? 0) + Number(formData.reserveNumber ?? 0);
+    if (total > (selectedSlot.capacity ?? 0)) {
+      return alert(
+        `선택한 인원이 남은 정원을 초과했습니다.\n` +
+        `현재 신청 인원: ${selectedSlot.reservedCount ?? 0} / 최대 ${selectedSlot.capacity}`
+      );
+    }
     navigate("/reserve/volunteer/confirm", {
       state: {
         formData,
@@ -169,8 +197,7 @@ const VolunteerReserveFormPage = () => {
     });
   };
 
-  if (loading)
-    return <div className="volunteer-form-page">시간대를 불러오는 중입니다…</div>;
+  if (loading)return <div className="volunteer-form-page">시간대를 불러오는 중입니다…</div>;
   if (errorMsg) return <div className="volunteer-form-page">{errorMsg}</div>;
 
   return (
@@ -243,7 +270,7 @@ const VolunteerReserveFormPage = () => {
                     {(slot.capacity ?? 0) > 0 && (
                       <>
                         <br />
-                        정원: {slot.reservedCount ?? 0}/{slot.capacity}
+                        {`정원: ${slot.reservedCount ?? 0}/${slot.capacity}`}
                       </>
                     )}
                     {(slot.reservedCount ?? 0) >= (slot.capacity ?? 0) && " - 마감"}

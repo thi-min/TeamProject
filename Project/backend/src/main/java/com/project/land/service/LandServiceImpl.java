@@ -2,6 +2,7 @@ package com.project.land.service;
 
 import com.project.common.dto.TimeSlotDto;
 import com.project.common.entity.TimeSlot;
+import com.project.common.entity.TimeType;
 import com.project.common.repository.TimeSlotRepository;
 import com.project.land.dto.LandCountDto;
 import com.project.land.dto.LandDetailDto;
@@ -127,7 +128,8 @@ public class LandServiceImpl implements LandService {
     // 사용자용 - 프론트에서 시간대 선택 ui 구성때 사용
     @Override
     public List<LandCountDto> getLandTimeSlotsWithCount(LocalDate landDate, Long memberNum, LandType landType) {
-        List<TimeSlot> timeSlots = timeSlotRepository.findAll(); // 필터링 필요시 LAND 전용만
+        List<TimeSlot> timeSlots = 
+        		timeSlotRepository.findByTimeTypeOrderByStartTimeAsc(TimeType.LAND);
 
         return timeSlots.stream()
                 .map(timeSlot -> {
