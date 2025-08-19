@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import '../style/Adopt.css'; // 관리자 페이지용 스타일 파일 (가정)
 
+
 const AdoptApplicationForm = () => {
     const navigate = useNavigate();
     const { memberNum } = useParams(); // URL에서 회원 번호를 가져옵니다.
@@ -50,29 +51,29 @@ const AdoptApplicationForm = () => {
                 <h2 className="application-form-title">입양 신청서 작성</h2>
                 <form onSubmit={handleSubmit}>
                     <div className="form-input-group">
-                        <div className="form-input-item">
-                            <label htmlFor="adopt_name" className="form-label required">입양 희망자 이름</label>
-                            <input type="text" id="adopt_name" name="adopt_name" value={formData.adopt_name} onChange={handleChange} className="form-input" />
+                        <div className="temp_form md">
+                            <label htmlFor="adopt_name" className="form-label required">입양 희망자 이름</label>   
+                            <input type="text" id="adopt_name" name="adopt_name" value={formData.adopt_name} onChange={handleChange} class="temp_input" placeholder="이름"/>
                         </div>
                         
-                        <div className="form-input-item">
+                        <div className="temp_form md">
                             <label htmlFor="adopt_phone" className="form-label required">연락처</label>
-                            <input type="text" id="adopt_phone" name="adopt_phone" value={formData.adopt_phone} onChange={handleChange} className="form-input" />
+                            <input type="text" id="adopt_phone" name="adopt_phone" value={formData.adopt_phone} onChange={handleChange} class="temp_input" placeholder="연락처"/>
                         </div>
 
-                        <div className="form-input-item">
+                        <div className="temp_form md">
                             <label htmlFor="adopt_addr" className="form-label">주소</label>
-                            <input type="text" id="adopt_addr" name="adopt_addr" value={formData.adopt_addr} onChange={handleChange} className="form-input" />
+                            <input type="text" id="adopt_addr" name="adopt_addr" value={formData.adopt_addr} onChange={handleChange} class="temp_input" placeholder="주소"/>
                         </div>
 
-                        <div className="form-input-item">
+                        <div className="temp_form md">
                             <label htmlFor="adopted_dog_name" className="form-label required">입양하는 동물 이름</label>
-                            <input type="text" id="adopted_dog_name" name="adopted_dog_name" value={formData.adopted_dog_name} onChange={handleChange} className="form-input" />
+                            <input type="text" id="adopted_dog_name" name="adopted_dog_name" value={formData.adopted_dog_name} onChange={handleChange} class="temp_input" placeholder="동물 이름"/>
                         </div>
 
-                        <div className="form-input-item">
+                        <div className="temp_form md">
                             <label htmlFor="adopted_dog_num" className="form-label">입양하는 동물 번호</label>
-                            <input type="number" id="adopted_dog_num" name="adopted_dog_num" value={formData.adopted_dog_num} onChange={handleChange} className="form-input" />
+                            <input type="number" id="adopted_dog_num" name="adopted_dog_num" value={formData.adopted_dog_num} onChange={handleChange} class="temp_input" placeholder="동물 번호"/>
                         </div>
                         
                         <div className="form-input-item-textarea">
@@ -89,6 +90,7 @@ const AdoptApplicationForm = () => {
                         >
                             이전
                         </button>
+                        
                         <button
                             type="submit"
                             className="form-button-primary"
