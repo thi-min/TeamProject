@@ -75,4 +75,23 @@ public class ReserveController {
         return ResponseEntity.ok(list);
     }
     
+    // formpage -> confirmpage 넘어갈때 예약 중복검사
+    @GetMapping("/check-duplicate")
+    public ResponseEntity<Boolean> checkDuplicate(
+            @RequestParam Long memberNum,
+            @RequestParam LocalDate date,
+            @RequestParam Long timeSlotId,
+            @RequestParam String type // "LAND" or "VOLUNTEER"
+    ) {
+        boolean exists;
+        if ("LAND".equalsIgnoreCase(type)) {
+            exists = reserveService.existsLandDuplicate(memberNum, date, timeSlotId);
+        } else if ("VOLUNTEER".equalsIgnoreCase(type)) {
+            exists = reserveService.existsVolunteerDuplicate(memberNum, date, timeSlotId);
+        } else {
+            throw new IllegalArgumentException("예약 유형이 잘못되었습니다.");
+        }
+        return ResponseEntity.ok(exists);
+    }
+    
 }

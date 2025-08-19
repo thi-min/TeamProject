@@ -10,7 +10,8 @@ const toDateStr = (d) =>
 const VolunteerReserveFormPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-
+  const memberNum = localStorage.getItem("memberNum");
+  
   const selectedDate = location.state?.selectedDate
     ? toDateStr(location.state.selectedDate)
     : "";
@@ -31,7 +32,6 @@ const VolunteerReserveFormPage = () => {
 
   // membernum 주입
   useEffect(() => {
-    const memberNum = localStorage.getItem("memberNum");
     if (memberNum) {
       setFormData((prev) => ({
         ...prev,
@@ -168,7 +168,7 @@ const VolunteerReserveFormPage = () => {
   const handleTimeSelect = (slotId) => setSelectedSlotId(slotId);
 
   /** 제출 처리 */
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.reserveNumber) return alert("신청 인원 수를 선택해 주세요.");
     if (!selectedDate) return alert("예약 날짜를 선택해 주세요.");
@@ -186,6 +186,17 @@ const VolunteerReserveFormPage = () => {
         `선택한 인원이 남은 정원을 초과했습니다.\n` +
         `현재 신청 인원: ${selectedSlot.reservedCount ?? 0} / 최대 ${selectedSlot.capacity}`
       );
+    }
+    try {
+    const { data: exists } = await axios.get("/api/reserve/check-duplicate", {
+      params: { memberNum, date: selectedDate, timeSlotId: selectedSlotId, type: "VOLUNTEER" },
+      });
+      if (exists) {
+        return alert("이미 해당 시간대에 예약이 존재합니다.");
+      }
+    } catch (err) {
+      console.error("중복 검사 실패:", err);
+      return alert("중복 검사 중 오류가 발생했습니다.");
     }
     navigate("/reserve/volunteer/confirm", {
       state: {
