@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 public class MemberLoginResponseDto {
 	private Long memberNum;		   // 회원 번호
     // ✅ 공통 로그인 정보
+	private Long memberNum;	   // 회원번호
     private String memberId;       // 로그인 ID (일반: 이메일, 카카오: kakaoId)
     private String memberName;     // 이름
     private String message;        // 응답 메시지 (선택)

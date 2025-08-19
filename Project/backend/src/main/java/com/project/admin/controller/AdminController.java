@@ -1,6 +1,7 @@
 package com.project.admin.controller;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -100,12 +101,19 @@ public class AdminController {
 	//관리자 비밀번호 변경
 	//param dto 비밀번호 변경 요청 정보(아이디, 현재 비밀번호, 새 비밀번호)
 	//return 성공 메시지
-	@PutMapping("/update-password")
-	public ResponseEntity<String> updatePassword(@RequestBody AdminPasswordUpdateRequestDto dto){
-		adminService.updatePassword(dto.getAdminId(), dto);
-		return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+//	@PutMapping("/updatePw")
+//	public ResponseEntity<String> updatePassword(@RequestBody AdminPasswordUpdateRequestDto dto){
+//		adminService.updatePassword(dto.getAdminId(), dto);
+//		return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+//	}
+	@PutMapping("/updatePw")
+	public ResponseEntity<String> updatePassword(@RequestBody AdminPasswordUpdateRequestDto dto,
+	                                             Authentication authentication) {
+	    String adminId = authentication.getName(); // ✅ 토큰 subject 사용
+	    adminService.updatePassword(adminId, dto);
+	    return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
 	}
-	
+
 	//전체 회원목록 조회(페이징 + 검색 포함)
 	//param pageRequestDto 페이지번호, 크기, 검색키워드
 	//return pageResponseDto 형태로 페이지 정보 + 회원 목록 반환

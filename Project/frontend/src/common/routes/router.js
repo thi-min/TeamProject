@@ -36,6 +36,9 @@ const routes = {
     signup: { path: "/signup", label: "회원가입" },
     login: { path: "/login", label: "로그인" },
     logout: { path: "/logout", label: "로그아웃" },
+    findid: { path: "/find-id", label: "아이디 찾기" },
+    findpw: { path: "/find-pw", label: "비밀번호 찾기" },
+    changepw: { path: "/update-password", label: "비밀번호 변경" },
     mypage: { path: "/mypage", label: "마이페이지" },
     update: { path: "/mypage/update", label: "회원정보 수정" },
     delete: { path: "/mypage/update/delete", label: "회원 탈퇴" },
@@ -52,7 +55,8 @@ const routes = {
   },
 
   admin: {
-    login: { path: "/admin/login", label: "관리자 로그인" },
+    admin: { path: "/admin", label: "관리자 페이지" },
+    password: { path: "/admin/updatePw", label: "관리자 비밀번호 변경" },
     dashboard: { path: "/admin/dashboard", label: "관리자 홈" },
     members: { path: "/admin/members", label: "회원 관리" },
     memberDetail: (id) => `/admin/members/${id}`,

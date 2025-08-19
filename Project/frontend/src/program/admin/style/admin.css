@@ -1,0 +1,36 @@
+.admin_page{display:block;position:relative;box-sizing:border-box;}
+.admin_page .title_box{display:block;position:relative;margin-bottom:80px;text-align:center;box-sizing:border-box;}
+.admin_page .title_box .title{font-size:42px;line-height:54px;letter-spacing:0;color:#333;font-family:'NotoKr';font-weight:600;}
+
+.admin_page .admin_area{}
+.admin_page .admin_area .admin_menu{display:flex;flex-wrap:wrap;width:100%;gap:30px;}
+.admin_page .admin_area .admin_menu .link_item{overflow:hidden;display:inline-block;width:calc((100% - 60px) /3);vertical-align:top;position:relative;border:1px solid #333;border-radius:12px;}
+.admin_page .admin_area .admin_menu .link_item a{position:relative;width:100%;padding:130px 30px 30px;text-align:center;font-size:20px;line-height:28px;letter-spacing:0;font-weight:400;font-family:'NotoKr';color:#333;}
+.admin_page .admin_area .admin_menu .link_item a{transition-property:all;transition-duration:0.3s;transition-timing-function:ease-in-out;}
+.admin_page .admin_area .admin_menu .link_item a:hover{background-color:#134277;color:#fff;}
+.admin_page .admin_area .admin_menu .link_item a:before{display:block;position:absolute;top:40px;left:calc(50% - 30px);width:60px;height:60px;background-size:contain;background-repeat:no-repeat;border-radius:8px;content:'';}
+.admin_page .admin_area .admin_menu .link_item.type1 a:before{background-image:url('../images/password_change.png');}
+.admin_page .admin_area .admin_menu .link_item.type2 a:before{background-image:url('../images/user_management.png');}
+.admin_page .admin_area .admin_menu .link_item.type3 a:before{background-image:url('../images/playground_management.png');}
+.admin_page .admin_area .admin_menu .link_item.type4 a:before{background-image:url('../images/volunteer_management.png');}
+.admin_page .admin_area .admin_menu .link_item.type5 a:before{background-image:url('../images/board_management.png');}
+.admin_page .admin_area .admin_menu .link_item.type6 a:before{background-image:url('../images/reservation_schedule.png');}
+
+.form_item input[type="text"],
+.form_item input[type="tel"],
+.form_item input[type="email"],
+.form_item input[type="password"]{min-height:60px;border:1px solid #e1e1e1;border-radius:5px;vertical-align:top;}
+
+.form_item{padding:100px 50px;border-radius:30px;box-sizing:border-box;background-color:#fff;box-shadow: 0 0 30px 0px rgba(238,238,238,0.3);}
+.form_item .form_login_wrap{position:relative;width:615px;margin:0 auto;;box-sizing:border-box;}
+.form_item .form_login_wrap .float_box{position:relative;box-sizing:border-box;font-size:0;line-height:0;}
+.form_item .form_login_wrap .float_box .form_item_box{display:flex;gap:10px;flex-direction:column;width:100%;box-sizing:border-box;vertical-align:top;}
+.form_item .form_login_wrap .float_box .form_item_box .input_item{display:flex;width:100%;gap:10px;box-sizing:border-box;}
+.form_item .form_login_wrap .float_box .form_item_box .input_item .from_text{min-width:130px;padding-top:16px;padding-bottom:16px;box-sizing:border-box;color:#464646;font-size:18px;font-weight:400;line-height:28px;letter-spacing:-0.02em;}
+.form_item .form_login_wrap .float_box .form_item_box .input_item .form_input{display:block;padding:0 16px;width:100%;font-size:19px;color:#1d1d1d;line-height:54px;font-weight:400;font-family:'PretendardGOV';word-break:keep-all;}
+.form_item .form_login_wrap .float_box .save_check{margin-top:25px;margin-left:85px;box-sizing:border-box;font-size:0;line-height:0;text-align:left;}
+.form_item .form_login_wrap .form_btn_box{display:block;margin-left:85px;box-sizing:border-box;}
+.form_item .form_login_wrap .form_btn_box .login_more{display:block;margin-top:40px;box-sizing:border-box;font-size:0;line-height:0;}
+.form_item .form_login_wrap .form_btn_box .login_more .bth_item{display:inline-block;width:calc((100% - 20px) / 3);box-sizing:border-box;}
+
+.form_center_box{display:flex;margin-top:50px;position:relative;box-sizing:border-box;justify-content:space-between;}

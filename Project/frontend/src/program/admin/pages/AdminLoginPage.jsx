@@ -1,31 +1,25 @@
-// frontend/src/program/admin/pages/AdminLoginPage.jsx
-// ✅ 관리자 로그인 페이지 (일반 로그인 페이지와 동일한 구조/스타일/동작)
-// - 순수 input 태그 사용 + 기존 클래스명 유지(login_wrap, form_input 등)
-// - 에러 메시지/로딩 상태 처리 동일
-// - axios 인스턴스(api) 직접 사용 (요청대로 통일)
-// - 성공 시 토큰 저장 후 관리자 대시보드로 이동
-
+//기존 관리자, 회원 로그인 분리 합병으로 변경
+// 프론트: 관리자 로그인 페이지도 /login 으로 요청 보냄 → 토큰은 accessToken 하나만 저장
+// 인터셉터: /admin/** 라고 해서 별도 키(adminAccessToken) 찾지 않고 항상 accessToken만 붙임
+// 백엔드: /login은 permitAll, /admin/**는 ADMIN 권한 필요(기존과 동일). 토큰 role이 ADMIN(또는 ROLE_ADMIN) 이어야 통과
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import api from "../../../common/api/axios"; // ✅ 공통 axios 인스턴스
+import api from "../../../common/api/axios";
+import { jwtDecode } from "jwt-decode"; // 역할 분기용(리다이렉트 판단)
 
 const AdminLoginPage = () => {
-  // ✅ 폼 상태 (사용자 페이지와 동일한 패턴)
   const [form, setForm] = useState({ adminId: "", adminPw: "" });
-  // ✅ 에러 메시지 상태 (상단/아래 노출)
   const [error, setError] = useState("");
-  // ✅ 로딩 상태 (중복 제출 방지 및 버튼 비활성화)
   const [loading, setLoading] = useState(false);
-
   const navigate = useNavigate();
 
-  // ✅ 입력 변경 핸들러 (name으로 값 바인딩)
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ 제출 핸들러 (사용자 로그인 페이지와 동일한 흐름)
+  // ✅ 핵심: /admin/login → /login 으로 통합
+  //  - 백엔드는 관리자 계정이면 role=ADMIN(또는 ROLE_ADMIN)으로 토큰 발급
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
@@ -33,44 +27,40 @@ const AdminLoginPage = () => {
     setLoading(true);
 
     try {
-      // ⛳ 관리자 로그인 API 호출 (axios 인스턴스 통일)
-      //    최종 요청: http://localhost:8090/admin/login
-      const res = await api.post("/admin/login", {
-        adminId: form.adminId,
-        adminPw: form.adminPw,
+      const res = await api.post("/login", {
+        // 백엔드 파라미터명이 userId/password 라면 맞춰주세요.
+        // 여기선 기존 관리자 폼 이름을 그대로 보내지만, 서버쪽 DTO와 일치해야 합니다.
+        memberId: form.adminId,   // ⬅ 서버가 adminId를 받는다면 adminId로 바꾸세요
+        memberPw: form.adminPw,   // ⬅ 서버가 password를 받는다면 password로 바꾸세요
       });
 
-      // 서버 응답(JSON)에서 토큰 꺼내기
       const data = res.data || {};
       const accessToken = data.accessToken ?? null;
       const refreshToken = data.refreshToken ?? null;
 
-      // (선택) 헤더 기반 토큰도 지원하려면 아래처럼 병합 가능
-      // const authHeader = res.headers?.authorization;
-      // const headerAccess = authHeader?.startsWith("Bearer ")
-      //   ? authHeader.replace(/^Bearer\s+/i, "")
-      //   : null;
-      // const headerRefresh = res.headers?.["x-refresh-token"];
-      // const finalAccess = headerAccess ?? accessToken;
-      // const finalRefresh = headerRefresh ?? refreshToken;
+      if (!accessToken) {
+        setError("토큰이 응답에 없습니다.");
+        return;
+      }
 
-      // ⛳ 토큰 저장 (전역 컨텍스트가 있다면 거기에 위임해도 됨)
-      if (accessToken) localStorage.setItem("accessToken", accessToken);
+      // ✅ 통합: 하나의 키로만 저장
+      localStorage.setItem("accessToken", accessToken);
       if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
 
-      alert("관리자 로그인 성공");
-
-      // ⛳ 관리자 대시보드로 이동 (경로는 프로젝트에 맞게 조정)
-      navigate("/admin/dashboard");
+      // 역할에 따라 이동 (ADMIN이면 관리자 대시보드로)
+      const payload = jwtDecode(accessToken);
+      const role = payload?.role; // 서버가 넣어주는 클레임 이름에 맞추세요
+      if (role === "ADMIN" || role === "ROLE_ADMIN") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/"); // 일반 사용자 홈 등
+      }
     } catch (err) {
-      console.error("❌ 관리자 로그인 실패:", err);
-      // 서버 메시지가 있으면 우선 표시
       const msg =
         err?.response?.data?.message ||
         err?.message ||
-        "로그인 실패: 아이디 또는 비밀번호를 확인하세요.";
+        "로그인 실패: 아이디/비밀번호를 확인하세요.";
       setError(msg);
-      alert("로그인 실패");
     } finally {
       setLoading(false);
     }
