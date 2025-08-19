@@ -3,6 +3,8 @@ import React, { useCallback, useMemo, useState, useRef } from "react";
 import "../style/signup.css";
 // ✅ 백엔드로 요청을 보내는 axios 인스턴스 (baseURL: http://localhost:8090)
 import api from "../../../common/api/axios";
+// ✅ 아이디 중복체크 API (서버 응답을 표준화해서 available 여부/메시지 반환)
+import { apiCheckDuplicateId } from "../../member/services/memberApi";
 
 /** 비밀번호 유효성 검사 함수 */
 function evaluatePassword(password, passwordCheck) {
@@ -58,22 +60,33 @@ export default function SignupPage() {
     memberSex: "MAN",
   });
 
-  /** 아이디 중복체크 상태 */
+  /**
+   * 아이디 중복체크 상태
+   * - lastCheckedId: "검사 당시" 아이디(소문자/trim 정규화된 값). 입력값이 바뀌면 검사 무효화
+   */
   const [idCheck, setIdCheck] = useState({
     loading: false,
     done: false,
     available: false,
     message: "",
+    lastCheckedId: "", // ✅ 추가: 검사 당시 아이디 저장
   });
 
   /** 비밀번호 유효성 상태 */
   const [pwState, setPwState] = useState(() => evaluatePassword("", ""));
+
+  /** 현재 입력된 아이디(이메일)를 소문자/trim으로 정규화 */
+  const normalizedId = useMemo(
+    () => (formData.memberId || "").trim().toLowerCase(),
+    [formData.memberId]
+  );
 
   /** input 값 변경 핸들러 */
   const handleChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
 
     if (name === "memberPhone") {
+      // 숫자만 유지
       const onlyNums = (value || "").replace(/[^0-9]/g, "");
       setFormData((prev) => ({ ...prev, memberPhone: onlyNums }));
       return;
@@ -84,15 +97,18 @@ export default function SignupPage() {
     setFormData((prev) => {
       const next = { ...prev, [name]: nextValue };
 
+      // 아이디가 바뀌면 → 중복체크 결과 무효화
       if (name === "memberId") {
         setIdCheck({
           loading: false,
           done: false,
           available: false,
           message: "",
+          lastCheckedId: "",
         });
       }
 
+      // 비밀번호 유효성 재평가
       if (name === "memberPw" || name === "memberPwCheck") {
         setPwState(evaluatePassword(next.memberPw, next.memberPwCheck));
       }
@@ -102,7 +118,7 @@ export default function SignupPage() {
 
   /** 아이디 중복체크 실행 */
   const handleCheckDuplicateId = useCallback(async () => {
-    const email = formData.memberId.trim();
+    const email = normalizedId; // 이메일은 보통 대소문자 구분 X → 소문자 정규화
 
     if (!email) {
       refs.memberId.current?.focus();
@@ -111,6 +127,7 @@ export default function SignupPage() {
         done: true,
         available: false,
         message: "아이디(이메일)를 입력해주세요.",
+        lastCheckedId: "",
       });
     }
     if (!isEmail(email)) {
@@ -120,67 +137,105 @@ export default function SignupPage() {
         done: true,
         available: false,
         message: "올바른 이메일 형식이 아닙니다.",
+        lastCheckedId: "",
       });
     }
 
     try {
-      setIdCheck((s) => ({ ...s, loading: true }));
-      await new Promise((r) => setTimeout(r, 500));
-      const available = !email.includes("taken");
+      setIdCheck((s) => ({ ...s, loading: true, message: "" }));
+      // ✅ 실제 API 호출 (서버 응답 포맷은 apiCheckDuplicateId에서 표준화)
+      const { available, message } = await apiCheckDuplicateId(email);
 
       setIdCheck({
         loading: false,
         done: true,
         available,
-        message: available
-          ? "사용 가능한 아이디입니다."
-          : "이미 사용 중인 아이디입니다.",
+        message:
+          message ||
+          (available
+            ? "사용 가능한 아이디입니다."
+            : "이미 사용 중인 아이디입니다."),
+        lastCheckedId: email, // ✅ 검사 당시 아이디 저장
       });
+
+      // 즉시 사용자 알림
+      alert(
+        message ||
+          (available
+            ? "사용 가능한 아이디입니다."
+            : "이미 사용 중인 아이디입니다.")
+      );
     } catch (err) {
       console.error(err);
       setIdCheck({
         loading: false,
         done: true,
         available: false,
-        message: "아이디 확인 중 오류가 발생했습니다.",
+        message: err.message || "아이디 확인 중 오류가 발생했습니다.",
+        lastCheckedId: email,
       });
+      alert(err.message || "아이디 확인 중 오류가 발생했습니다.");
     }
-  }, [formData.memberId]);
+  }, [normalizedId]);
 
   /** 회원가입 폼 제출 */
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
 
-      // 입력값 순서대로 하나씩 검증
+      // 0) 아이디 형식/중복체크 선검증
       if (!formData.memberId || !isEmail(formData.memberId)) {
         alert("이메일을 입력해주세요.");
+        refs.memberId.current?.focus();
         return;
       }
+      // - 중복체크가 아직 안 되었거나( done=false )
+      // - 검사 결과가 '사용 불가'이거나
+      // - 검사 이후에 아이디가 변경됨(lastCheckedId !== normalizedId)
+      if (!idCheck.done) {
+        alert("아이디 중복체크를 완료해 주세요.");
+        return;
+      }
+      if (!idCheck.available) {
+        alert(idCheck.message || "이미 사용 중인 아이디입니다.");
+        return;
+      }
+      if (idCheck.lastCheckedId !== normalizedId) {
+        alert("아이디가 변경되었습니다. 다시 중복체크를 진행해 주세요.");
+        return;
+      }
+
+      // 1) 기본 입력값 검증
       if (!formData.memberName) {
         alert("이름을 입력해주세요.");
+        refs.memberName.current?.focus();
         return;
       }
       if (!formData.memberBirth) {
         alert("생년월일을 입력해주세요.");
+        refs.memberBirth.current?.focus();
         return;
       }
       if (!formData.memberPhone) {
         alert("전화번호를 입력해주세요.");
+        refs.memberPhone.current?.focus();
         return;
       }
       if (!formData.memberAddress) {
         alert("주소를 입력해주세요.");
         return;
       }
+
+      // 2) 비밀번호 유효성
       if (!pwState.valid) {
         alert(pwState.issues[0]); // 첫 번째 비밀번호 오류만 표시
+        refs.memberPw.current?.focus();
         return;
       }
 
-      // 전송 데이터
+      // 3) 전송 데이터 (아이디는 서버 대소문자 무시 정책이라면 소문자 전송 권장)
       const payload = {
-        memberId: formData.memberId,
+        memberId: normalizedId, // ← 서버가 대소문자 구분하지 않는다면 소문자로 통일 전송
         memberPw: formData.memberPw,
         memberName: formData.memberName,
         memberBirth: formData.memberBirth,
@@ -193,12 +248,10 @@ export default function SignupPage() {
       };
 
       try {
-        // ✅ 변경 포인트: fetch → axios 인스턴스(api)
-        //    최종 요청 = http://localhost:8090/signup
-        //    (만약 컨트롤러 클래스에 @RequestMapping("/auth")가 있다면 "/auth/signup"으로 변경)
-        const res = await api.post("/signup", payload);
+        // 최종 요청 = http://localhost:8090/signup
+        // (컨트롤러에 @RequestMapping("/auth")가 있다면 "/auth/signup"으로 변경)
+        await api.post("/signup", payload);
 
-        // axios는 4xx/5xx면 자동 throw → 여기 도달하면 성공
         alert("회원가입이 완료되었습니다.");
         window.location.href = "/login";
       } catch (err) {
@@ -212,7 +265,7 @@ export default function SignupPage() {
         alert(`회원가입 실패: ${serverMsg}`);
       }
     },
-    [formData, pwState]
+    [formData, pwState, idCheck, normalizedId]
   );
 
   /** 카카오 주소 API 스크립트 로드 */
@@ -307,14 +360,20 @@ export default function SignupPage() {
                       {idCheck.loading ? "확인 중..." : "중복체크"}
                     </button>
                   </span>
-                  {idCheck.message && (
+                  {/* 검사 결과/안내 */}
+                  {idCheck.done && (
                     <div
-                      className={`hint ${
-                        idCheck.done ? (idCheck.available ? "ok" : "warn") : ""
-                      }`}
+                      className={`hint ${idCheck.available ? "ok" : "warn"}`}
                       style={{ marginTop: 8 }}
                     >
                       {idCheck.message}
+                      {/* 아이디가 검사 이후에 변경되었으면 재검사 안내 */}
+                      {/* {idCheck.lastCheckedId !== normalizedId && (
+                        <span>
+                          {" "}
+                          (아이디가 변경되어 다시 중복체크가 필요합니다.)
+                        </span>
+                      )} */}
                     </div>
                   )}
                 </td>
