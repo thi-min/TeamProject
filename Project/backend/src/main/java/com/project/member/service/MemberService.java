@@ -2,6 +2,7 @@ package com.project.member.service;
 
 import org.springframework.stereotype.Service;
 
+import com.project.member.dto.AddressUpdateRequestDto;
 import com.project.member.dto.KakaoSignUpRequestDto;
 import com.project.member.dto.MemberDeleteDto;
 import com.project.member.dto.MemberIdCheckResponseDto;
@@ -33,7 +34,8 @@ public interface MemberService {
     
     //마이페이지
     MemberMyPageResponseDto myPage(Long memberNum);
-    
+    //분리한 주소
+    MemberMyPageResponseDto updateMyAddress(Long memberNum, AddressUpdateRequestDto dto);
     //마이페이지 수정
     MemberMyPageResponseDto updateMyPage(Long memberNum, MemberMyPageUpdateRequestDto dto);
 

@@ -2,6 +2,9 @@
 
 import React, { useState } from "react";
 import { updateAdminPassword } from "../services/adminPwService";
+import "../style/admin.css";
+
+import BackButton from "../../../common/BackButton";
 
 /**
  * 관리자 비밀번호 변경 페이지
@@ -51,60 +54,79 @@ export default function AdminPasswordUpdatePage() {
   };
 
   return (
-    <div>
-      <h3>관리자 비밀번호 변경</h3>
-
-      <form onSubmit={handleSubmit} noValidate>
-        <div className="form_row">
-          <label htmlFor="currentPassword">현재 비밀번호</label>
-          <input
-            id="currentPassword"
-            type="password"
-            className="temp_input"
-            value={currentPassword}
-            onChange={(e) => setCurrentPassword(e.target.value)}
-            autoComplete="current-password"
-          />
+    <form onSubmit={handleSubmit} noValidate>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <i className="form_icon type1"></i>
+          <div className="form_title">관리자 비밀번호 변경</div>
+          <div className="form_desc">
+            <p>비밀번호를 변경해주세요.</p>
+          </div>
         </div>
+      </div>
+      <div className="form_item type2">
+        <div className="form_login_wrap">
+          <div className="float_box clearfix">
+            <div className="form_item_box">
+              <div className="input_item">
+                <div className="from_text">현재 비밀번호</div>
+                <input
+                  id="currentPassword"
+                  type="password"
+                  className="form_input"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  autoComplete="current-password"
+                />
+              </div>
+              <div className="input_item">
+                <div className="from_text">새 비밀번호</div>
+                <input
+                  id="newPassword"
+                  type="password"
+                  className="form_input"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  autoComplete="new-password"
+                />
+              </div>
+              <div className="input_item">
+                <div className="from_text">새 비밀번호 확인</div>
+                <input
+                  id="newPasswordCheck"
+                  type="password"
+                  className="form_input"
+                  value={newPasswordCheck}
+                  onChange={(e) => setNewPasswordCheck(e.target.value)}
+                  autoComplete="new-password"
+                />
+              </div>
+              <div className="form_center_box">
+                <div className="temp_btn white md">
+                  <BackButton label="이전" className="btn white" />
+                </div>
+                <div class="temp_btn md ">
+                  <button type="submit" className="btn" disabled={loading}>
+                    {loading ? "변경 중..." : "비밀번호 변경"}
+                  </button>
+                </div>
+              </div>
 
-        <div className="form_row">
-          <label htmlFor="newPassword">새 비밀번호</label>
-          <input
-            id="newPassword"
-            type="password"
-            className="temp_input"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-            autoComplete="new-password"
-          />
+              {/* ✅ 항상 문자열만 렌더링 */}
+              {feedback.type && (
+                <p
+                  className={
+                    feedback.type === "success" ? "msg_success" : "msg_error"
+                  }
+                  // 절대 객체를 넣지 말고, 문자열만!
+                >
+                  {feedback.text}
+                </p>
+              )}
+            </div>
+          </div>
         </div>
-
-        <div className="form_row">
-          <label htmlFor="newPasswordCheck">새 비밀번호 확인</label>
-          <input
-            id="newPasswordCheck"
-            type="password"
-            className="temp_input"
-            value={newPasswordCheck}
-            onChange={(e) => setNewPasswordCheck(e.target.value)}
-            autoComplete="new-password"
-          />
-        </div>
-
-        <button type="submit" className="btn_primary" disabled={loading}>
-          {loading ? "변경 중..." : "비밀번호 변경"}
-        </button>
-      </form>
-
-      {/* ✅ 항상 문자열만 렌더링 */}
-      {feedback.type && (
-        <p
-          className={feedback.type === "success" ? "msg_success" : "msg_error"}
-          // 절대 객체를 넣지 말고, 문자열만!
-        >
-          {feedback.text}
-        </p>
-      )}
-    </div>
+      </div>
+    </form>
   );
 }

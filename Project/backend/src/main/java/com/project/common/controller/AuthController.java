@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.project.admin.entity.AdminEntity;
 import com.project.admin.repository.AdminRepository;
@@ -30,6 +31,7 @@ import com.project.member.repository.MemberRepository;
 import com.project.member.service.MemberService;
 
 import lombok.RequiredArgsConstructor;
+
 
 //인증 전용 컨트롤러
 //JWT 토큰 발급
@@ -136,59 +138,6 @@ public class AuthController {
 	        ));
 	    }
 	 
-//	@PostMapping("/login")
-//	public ResponseEntity<?> login(@RequestBody MemberLoginRequestDto loginDto) {
-//	    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-//	    if (authentication != null && authentication.isAuthenticated() &&
-//	        !(authentication instanceof AnonymousAuthenticationToken)) {
-//	        return ResponseEntity.status(HttpStatus.FORBIDDEN).body("이미 로그인된 사용자입니다.");
-//	    }
-//	
-//	    // 1) 사용자 인증 (아이디/비번 검증) → 기존 로직 유지
-//	    MemberLoginResponseDto response = memberService.login(loginDto);
-//	
-//	    // 2) 관리자 여부 판정: 설정된 관리자 이메일과 일치하면 ADMIN, 아니면 USER
-//	    final boolean isAdmin = response.getMemberId().equalsIgnoreCase(adminEmailConfig);
-//	    final String role = isAdmin ? "ADMIN" : "USER";
-//	
-//	    // 3) 토큰 발급 (role 포함 버전 사용 권장)
-//	    //jwtTokenProvider.generateAccessToken(String subject, String role) 형태가 없다면 오버로드 추가 필요
-//	    String accessToken = jwtTokenProvider.generateAccessToken(response.getMemberId(), role);
-//	    String refreshToken = jwtTokenProvider.generateRefreshToken(response.getMemberId());
-//
-//	    // 4) 응답 DTO에 토큰 + 역할 세팅
-//	    response.setAccessToken(accessToken);
-//	    response.setRefreshToken(refreshToken);
-//	    response.setRole(role); // ✅ 여기서 세팅 → 프론트가 response.member.role 사용
-//
-//	
-//	    // 5) Refresh 토큰 저장 및 기타 업데이트(기존 로직)
-//	    MemberEntity member = memberRepository.findByMemberId(response.getMemberId())
-//	            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-//	    member.setAccessToken(accessToken);
-//	    member.setRefreshToken(refreshToken);
-//	    if (member.getPwUpdated() == null) {
-//	        member.setPwUpdated(LocalDateTime.now());
-//	    }
-//	    memberRepository.save(member);
-//	    
-//	    // 6) 비밀번호 만료 체크
-//	    boolean isPasswordExpired = memberService.isPasswordExpired(member);
-//
-//	    // 7) 최종 응답: role은 member DTO 안에 포함돼 있으므로 Map에 따로 넣을 필요 없음
-//	    return ResponseEntity.ok(Map.of(
-//	        "member", response,
-//	        "isPasswordExpired", isPasswordExpired
-//	    ));
-//	}
-
-	// ✅ 공용 로그아웃 (회원/관리자 공통)
-	// - Authorization: Bearer <accessToken> 헤더 필수
-	// - 1) 토큰 형식 점검 → 2) 토큰 유효성 검사 → 3) subject(memberId) 추출
-	// - 4) DB의 RefreshToken(및 저장해둔 AccessToken) 제거 → 5) 200 OK
-	// - 주의: JWT는 stateless라 AccessToken은 서버상 즉시 "무효화"가 불가.
-//	         운영 시에는 AccessToken 블랙리스트(예: Redis)로 보조 무효화를 권장.
-
     @PostMapping("/logout")
     public ResponseEntity<?> logout(
             @RequestHeader(value = "Authorization", required = false) String tokenHeader) {
@@ -220,84 +169,38 @@ public class AuthController {
         return ResponseEntity.ok("로그아웃 완료");
     }
 
-	//로그아웃 요청 처리
-	//저장된 RefreshToken을 삭제하여 재발급 방지
-	//클라이언트는 토큰 삭제
-//	@PostMapping("/logout")
-//	public ResponseEntity<?> logout(@RequestHeader("Authorization") String tokenHeader){
-//		if (tokenHeader == null || !tokenHeader.toLowerCase().startsWith("bearer ")) {
-//		    return ResponseEntity.badRequest().body("잘못된 토큰 형식입니다.");
-//		}
-//		
-//		String token = tokenHeader.substring(7);
-//		
-//		if(!jwtTokenProvider.validateToken(token)) {
-//			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("유효하지 않는 토큰입니다.");
-//		}
-//		
-//		String memberId = jwtTokenProvider.getMemberIdFromToken(token);
-//		
-//		MemberEntity member = memberRepository.findByMemberId(memberId)
-//		           .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
-//		
-//		//refresh token 제거
-//		member.setRefreshToken(null);
-//		memberRepository.save(member);
-//		
-//		return ResponseEntity.ok("로그아웃 완료");
-//	}
-	
 	//인증된 마이페이지 조회
 	//현재 로그인한 사용자의 마이페이지를 조회합니다.
 	//인증정보에서 사용자의 ID를 추출해 memberNum기반으로 조회
-	@GetMapping("/mypage")
-	public ResponseEntity<MemberMyPageResponseDto> myPage(){
-		//현재 인증 정보 가져오기
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		
-		//인증이 안된경우
-		if(auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-		}
-		
-		//인증된 사용자 ID 추출
-		String memberId = auth.getName();	//principal로 전달된 memberId
-		
-		//사용자 정보 조회(memberNum 얻기 위함)
-		MemberEntity member = memberRepository.findByMemberId(memberId)
-	            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-		
-	    if(memberService.isPasswordExpired(member)) {
-	        throw new IllegalStateException("비밀번호가 만료되어 마이페이지 접근이 제한됩니다.");
-	    }
-	    
-		//마이페이지 정보 반환
-		return ResponseEntity.ok(memberService.myPage(member.getMemberNum()));
-	}
+//	@GetMapping("/member/mypage")
+//	public ResponseEntity<MemberMyPageResponseDto> myPage(){
+//		//현재 인증 정보 가져오기
+//		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+//		
+//		//인증이 안된경우
+//		if(auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+//			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+//		}
+//		
+//		//인증된 사용자 ID 추출
+//		String memberId = auth.getName();	//principal로 전달된 memberId
+//		
+//		//사용자 정보 조회(memberNum 얻기 위함)
+//		MemberEntity member = memberRepository.findByMemberId(memberId)
+//	            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
+//		
+//		// ✅ 비밀번호 만료 시 403(FORBIDDEN)로 명확히 내려줌 (프론트에서 분기 처리 용이)
+//	    if (memberService.isPasswordExpired(member)) {
+//	        throw new ResponseStatusException(
+//	            HttpStatus.FORBIDDEN,
+//	            "비밀번호가 만료되어 마이페이지 접근이 제한됩니다."
+//	        );
+//	    }
+//		//마이페이지 정보 반환
+//		return ResponseEntity.ok(memberService.myPage(member.getMemberNum()));
+//	}
 	
-	//인증된 마이페이지 수정(토큰으로 본인확인)
-	//현재 로그인한 사용자의 마이페이지 정보를 수정합니다.
-	//인증 정보를 기반으로 해당 사용자만 수정 가능하도록 합니다.
-	@PutMapping("/mypage")
-	public ResponseEntity<MemberMyPageResponseDto> updateMyPage(@RequestBody MemberMyPageUpdateRequestDto dto){
-		//현재 인증 정보 가져오기
-		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-		
-		//인증이 안된경우
-		if(auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-		}
-		
-		//인증된 사용자 ID 추출
-		String memberId = auth.getName();	//principal로 전달된 memberId
-		
-		//사용자 정보 조회(memberNum 얻기 위함)
-		MemberEntity member = memberRepository.findByMemberId(memberId)
-	            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-				
-		//마이페이지 수정 로직 호출 및 결과 반환
-		return ResponseEntity.ok(memberService.updateMyPage(member.getMemberNum(), dto));
-	}
+	
 	
 	//토큰재발급 추가
 	@PostMapping("/reissue")
