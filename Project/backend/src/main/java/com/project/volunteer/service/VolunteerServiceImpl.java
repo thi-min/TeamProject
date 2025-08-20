@@ -11,10 +11,12 @@ import com.project.member.entity.MemberEntity;
 import com.project.common.entity.TimeSlot;
 import com.project.common.entity.TimeType;
 import com.project.common.repository.TimeSlotRepository;
+import com.project.common.util.JasyptUtil;
 
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -28,28 +30,35 @@ public class VolunteerServiceImpl implements VolunteerService {
     private final ReserveRepository reserveRepository;
     private final TimeSlotRepository timeSlotRepository;
     
-    //봉사 상세내용 조회
+    //봉사 상세보기 화면
     @Override
     @Transactional(readOnly = true)
     public VolunteerDetailDto getVolunteerDetailByReserveCode(Long reserveCode) {
         // 1. Volunteer 조회
-        Volunteer volunteer = volunteerRepository.findByReserveCode(reserveCode)
-                .orElseThrow(() -> new IllegalArgumentException("해당 예약에 대한 봉사 정보를 찾을 수 없습니다."));
+        Volunteer volunteer = volunteerRepository.findById(reserveCode)
+                .orElseThrow(() -> new IllegalArgumentException("봉사 예약 정보를 찾을 수 없습니다."));
 
         // 2. Reserve 조회
         Reserve reserve = volunteer.getReserve();
 
         // 3. 회원 정보 조회
         MemberEntity member = reserve.getMember();
-
+        
+        // 전화번호 복호화
+        String decryptedPhone = JasyptUtil.decrypt(member.getMemberPhone());
+        
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        
         // 4. DTO 생성 및 반환
         return VolunteerDetailDto.builder()
                 .reserveCode(reserve.getReserveCode())
                 .memberName(member.getMemberName())
-                .phone(member.getMemberPhone())
+                .memberPhone(decryptedPhone)
                 .memberBirth(member.getMemberBirth())
                 .reserveState(reserve.getReserveState())
                 .volDate(volunteer.getVolDate())
+                .applyDate(reserve.getApplyDate())  
                 .label(volunteer.getTimeSlot().getLabel())
                 .note(reserve.getNote())
                 .reserveNumber(reserve.getReserveNumber())

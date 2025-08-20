@@ -19,9 +19,11 @@ import com.project.member.repository.MemberRepository;
 import com.project.common.entity.TimeSlot;
 import com.project.common.entity.TimeType;
 import com.project.common.repository.TimeSlotRepository;
+import com.project.common.util.JasyptUtil;
 import com.project.land.dto.LandDetailDto;
 import com.project.land.dto.LandRequestDto;
 import com.project.land.entity.Land;
+import com.project.land.entity.LandType;
 import com.project.land.repository.LandRepository;
 import com.project.land.service.LandService;
 import com.project.member.entity.MemberEntity;
@@ -210,7 +212,10 @@ public class ReserveServiceImpl implements ReserveService {
         if (!reserve.getMember().getMemberNum().equals(memberNum)) {
             throw new SecurityException("본인의 예약만 조회할 수 있습니다.");
         }
-
+        
+        Land land = landRepository.findById(reserveCode)
+                .orElseThrow(() -> new IllegalArgumentException("놀이터 예약 정보를 찾을 수 없습니다."));
+        
         return landService.getLandDetailByReserveCode(reserveCode);
     }
     // 사용자 - 봉사예약 상세페이지
@@ -237,19 +242,34 @@ public class ReserveServiceImpl implements ReserveService {
         MemberEntity member = reserve.getMember();
         Land land = reserve.getLandDetail();
         
-        // 결제금액 계산
-        int basePrice = 2000;	//기본금(반려견 1마리)
-        int animalNumber = land.getAnimalNumber();	//반려견수
-        int reserveNumber = reserve.getReserveNumber();	//보호자수
+        // 요금 계산 (표시용)
+        final int basePrice = 2000;
+        int animalNumber   = land.getAnimalNumber();
+        int guardianNumber = reserve.getReserveNumber();
 
-        int additionalPrice = (animalNumber > 1 ? (animalNumber - 1) * 1000 : 0) + reserveNumber * 1000;
-        int totalPrice = basePrice + additionalPrice;
+        int addDogCnt        = Math.max(animalNumber - 1, 0);
+        int additionalDogPrice = addDogCnt * 1000;
+        int guardianPrice      = guardianNumber * 1000;
+        int additionalPrice    = additionalDogPrice + guardianPrice;
+        int totalPrice         = basePrice + additionalPrice;
 
+        // 3) 설명 문자열
+        String basePriceDetail = String.format(
+                "기본 (%s x 1마리)",
+                land.getLandType() == LandType.SMALL ? "소형견" : "대형견"
+        );
+        String extraPriceDetail = String.format(
+                "추가반려견 %d마리 × 1,000원 → %,d원, 보호자 %d명 × 1,000원 → %,d원",
+                addDogCnt, additionalDogPrice, guardianNumber, guardianPrice
+        );
+        
+        // 전화번호 복호화
+        String decryptedPhone = JasyptUtil.decrypt(member.getMemberPhone());
         
         return LandDetailDto.builder()
         	    .reserveCode(reserve.getReserveCode())
         	    .memberName(member.getMemberName())
-        	    .phone(member.getMemberPhone())
+        	    .memberPhone(decryptedPhone) 
         	    .reserveState(reserve.getReserveState())
         	    .landDate(land.getLandDate())
         	    .label(land.getTimeSlot().getLabel())
@@ -261,8 +281,8 @@ public class ReserveServiceImpl implements ReserveService {
         	    .basePrice(basePrice)
         	    .additionalPrice(additionalPrice)
         	    .totalPrice(totalPrice)
-        	    .basePriceDetail("반려견 x " + animalNumber + "마리")
-        	    .extraPriceDetail(" 추가 인원 x" + reserveNumber + "명")
+        	    .basePriceDetail(basePriceDetail)
+                .extraPriceDetail(extraPriceDetail)
         	    .build();
 
     }
@@ -276,14 +296,18 @@ public class ReserveServiceImpl implements ReserveService {
 
         MemberEntity member = reserve.getMember();
         Volunteer volunteer = reserve.getVolunteerDetail();
-
+        
+        // 전화번호 복호화
+        String decryptedPhone = JasyptUtil.decrypt(member.getMemberPhone());
+        
         return VolunteerDetailDto.builder()
                 .reserveCode(reserve.getReserveCode())
                 .memberName(member.getMemberName())
-                .phone(member.getMemberPhone())
+                .memberPhone(decryptedPhone) 
                 .memberBirth(member.getMemberBirth())
                 .reserveState(reserve.getReserveState())
                 .volDate(volunteer.getVolDate())
+                .applyDate(reserve.getApplyDate())
                 .label(volunteer.getTimeSlot().getLabel())
                 .note(reserve.getNote())
                 .reserveNumber(reserve.getReserveNumber())

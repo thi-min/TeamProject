@@ -15,14 +15,17 @@ import lombok.*;
 @Builder
 public class LandDetailDto {
 
-    // 기본 예약 정보
+    // 신청자 정보 
     private Long reserveCode;
     private String memberName;		// 신청자명
-    private String phone;			// 연락처
+    private String memberPhone;			// 연락처
+    
+    // 예약 정보
     private ReserveState reserveState;
-    @JsonFormat(pattern = "yyyy/MM/dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd")
     private LocalDate landDate;	// 예: 2025/08/10
     private String label;		// 예: 11:00 ~ 13:00
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy/MM/dd HH:mm:ss")
     private LocalDateTime applyDate;      // 예: 2025/07/22 22:00:24 (신청일자)
     private String note;			//비고
 

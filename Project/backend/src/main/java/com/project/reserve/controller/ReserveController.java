@@ -1,6 +1,8 @@
 package com.project.reserve.controller;
 
 import com.project.land.dto.LandDetailDto;
+import com.project.member.entity.MemberEntity;
+import com.project.member.repository.MemberRepository;
 import com.project.reserve.dto.FullReserveRequestDto;
 import com.project.reserve.dto.ReserveCompleteResponseDto;
 import com.project.reserve.dto.ReserveRequestDto;
@@ -11,6 +13,7 @@ import com.project.volunteer.dto.VolunteerDetailDto;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -22,6 +25,7 @@ import java.util.List;
 public class ReserveController {
 
     private final ReserveService reserveService;
+    private final MemberRepository memberRepository; 
 
     //사용자 - 예약 생성
     @PostMapping
@@ -40,19 +44,28 @@ public class ReserveController {
     //사용자 - 본인 예약 취소
     @DeleteMapping("/{reserveCode}/cancel")
     public ResponseEntity<Void> cancelMyReserve(
-            @PathVariable Long reserveCode, //101/cancel
-            @RequestParam Long memberNum	//cancel?memberNum=5
+            @PathVariable Long reserveCode,
+            Authentication authentication
     ) {
-        reserveService.memberCancelReserve(reserveCode, memberNum);
+        String memberId = authentication.getName();
+        MemberEntity member = memberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
+
+        reserveService.memberCancelReserve(reserveCode, member.getMemberNum());
         return ResponseEntity.ok().build();
     }
-    //ex)DELETE /api/reserve/101/cancel?memberNum=5 
+    
 
     //사용자 - 놀이터 예약 상세조회(마이페이지)
-    @GetMapping("/land/{reserveCode}")	//LandList
+    @GetMapping("/land/{reserveCode}")
     public ResponseEntity<LandDetailDto> getMyLandReserveDetail(
             @PathVariable Long reserveCode,
-            @PathVariable Long memberNum) {
+            Authentication authentication) {
+        String memberId = authentication.getName(); // 로그인된 ID
+        MemberEntity member = memberRepository.findByMemberId(memberId)
+        		.orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
+        Long memberNum = member.getMemberNum();
+
         LandDetailDto detail = reserveService.getMemberLandReserveDetail(reserveCode, memberNum);
         return ResponseEntity.ok(detail);
     }
@@ -61,7 +74,13 @@ public class ReserveController {
     @GetMapping("/volunteer/{reserveCode}")
     public ResponseEntity<VolunteerDetailDto> getMyVolunteerReserveDetail(
             @PathVariable Long reserveCode,
-            @PathVariable Long memberNum) {
+            Authentication authentication) {   	
+    	String memberId = authentication.getName(); // 로그인된 ID
+ 
+        MemberEntity member = memberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
+        Long memberNum = member.getMemberNum();
+
         VolunteerDetailDto detail = reserveService.getMemberVolunteerReserveDetail(reserveCode, memberNum);
         return ResponseEntity.ok(detail);
     }

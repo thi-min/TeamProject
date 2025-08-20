@@ -4,6 +4,7 @@ import com.project.common.dto.TimeSlotDto;
 import com.project.common.entity.TimeSlot;
 import com.project.common.entity.TimeType;
 import com.project.common.repository.TimeSlotRepository;
+import com.project.common.util.JasyptUtil;
 import com.project.land.dto.LandCountDto;
 import com.project.land.dto.LandDetailDto;
 import com.project.land.dto.LandRequestDto;
@@ -16,6 +17,7 @@ import com.project.member.entity.MemberEntity;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,8 +38,9 @@ public class LandServiceImpl implements LandService {
     @Transactional(readOnly = true) // ✅ 상세조회는 읽기 전용 권장
     public LandDetailDto getLandDetailByReserveCode(Long reserveCode) {
         // 1) 엔티티 조회
-        Land land = landRepository.findByReserveCode(reserveCode)
-                .orElseThrow(() -> new IllegalArgumentException("해당 예약에 대한 놀이터 정보를 찾을 수 없습니다."));
+    	Land land = landRepository.findById(reserveCode)
+                .orElseThrow(() -> new IllegalArgumentException("놀이터 예약 정보를 찾을 수 없습니다."));
+
         Reserve reserve = land.getReserve();
         MemberEntity member = reserve.getMember();
 
@@ -61,21 +64,26 @@ public class LandServiceImpl implements LandService {
                 "추가반려견 %d마리 × 1,000원 → %,d원, 보호자 %d명 × 1,000원 → %,d원",
                 addDogCnt, additionalDogPrice, guardianNumber, guardianPrice
         );
-
+        
+        // 전화번호 복호화
+        String decryptedPhone = JasyptUtil.decrypt(member.getMemberPhone());
+        
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+        DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        
         // 4) DTO 구성 및 반환
         return LandDetailDto.builder()
-                .reserveCode(reserve.getReserveCode())
+        		.reserveCode(reserve.getReserveCode())
                 .memberName(member.getMemberName())
-                .phone(member.getMemberPhone())
+                .memberPhone(JasyptUtil.decrypt(member.getMemberPhone()))
                 .reserveState(reserve.getReserveState())
-                .landDate(land.getLandDate())
+                .landDate(land.getLandDate())            
+                .applyDate(reserve.getApplyDate())  
                 .label(land.getTimeSlot().getLabel())
-                .applyDate(reserve.getApplyDate())
                 .note(reserve.getNote())
                 .landType(land.getLandType())
-                .animalNumber(animalNumber)
-                .reserveNumber(guardianNumber)
-
+                .animalNumber(land.getAnimalNumber())
+                .reserveNumber(reserve.getReserveNumber())
                 .basePrice(basePrice)
                 .additionalPrice(additionalPrice)
                 .totalPrice(totalPrice)
