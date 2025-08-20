@@ -46,7 +46,7 @@ const routes = {
   },
   // 후원 경로
   fund: {
-    root: { path: "/fund", label: "후원 메인" },
+    root: { path: "/fund/info", label: "후원 메인" },
     fundForm: { path: "/fund/money", label: "후원금 신청" },
     goodsForm: { path: "/fund/goods", label: "후원물품 신청" },
     recurringForm: { path: "/fund/recurring", label: "정기후원 신청" },
