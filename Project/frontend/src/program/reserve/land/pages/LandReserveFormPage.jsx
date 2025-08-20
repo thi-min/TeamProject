@@ -31,12 +31,13 @@ const LandReserveFormPage = () => {
   });
   // memberNum 주입
   useEffect(() => {
-  if (memberNum) {
-    setFormData((prev) => ({
-      ...prev,
-      memberNum: Number(memberNum),
-    }));
-  }
+    const memberNum = localStorage.getItem("memberNum");
+    if (memberNum) {
+      setFormData((prev) => ({
+        ...prev,
+        memberNum: Number(memberNum),
+      }));
+    }
 }, []);
 
   // 🔹 로그인 사용자 정보 불러오기
@@ -50,7 +51,7 @@ const LandReserveFormPage = () => {
           return;
         }
 
-        const res = await axios.get("/auth/mypage", {
+        const res = await axios.get("/member/mypage", {
           headers: { Authorization: `Bearer ${token}` },
         });
 
@@ -207,10 +208,10 @@ const LandReserveFormPage = () => {
     
     try {
       const { data: exists } = await axios.get("/api/reserve/check-duplicate", {
-        params: { memberNum, date: selectedDate, timeSlotId: selectedSlotId, type: "LAND" },
+        params: { memberNum: formData.memberNum , date: selectedDate, timeSlotId: selectedSlotId, type: "LAND" },
       });
       if (exists) {
-        return alert("이미 해당 시간대에 예약이 존재합니다.");
+        return alert("이미 예약하신 시간대입니다. 다른 시간대를 선택해 주세요.");
       }
     } catch (err) {
       console.error("중복 검사 실패:", err);

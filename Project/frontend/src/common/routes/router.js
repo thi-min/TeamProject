@@ -46,6 +46,9 @@ const routes = {
     mypage: { path: "/member/mypage", label: "마이페이지" },
     update: { path: "/mypage/update", label: "회원정보 수정" },
     delete: { path: "/mypage/update/delete", label: "회원 탈퇴" },
+    reserves: { path: "/member/mypage/reserves", label: "예약 내역 조회" },
+    landReserveDetail: { path: "/member/mypage/reserves/land/:reserveCode", label: "놀이터 예약 상세보기" },
+    volunteerReserveDetail: { path: "/member/mypage/reserves/volunteer/:reserveCode", label: "봉사 예약 상세보기"},
   },
 
   // 관리자

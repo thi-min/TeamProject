@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import MyReserveService from "../services/MyReserveService";
+import MyReserveService from "./../services/MyReserveService";
 import { useNavigate } from "react-router-dom";
 import "./../style/MyReserveStyle.css";
 
@@ -8,40 +8,6 @@ function MyReserveListPage() {
   const [reserves, setReserves] = useState([]);
   const navigate = useNavigate();
   const memberNum = localStorage.getItem("memberNum"); // 로그인된 사용자 정보
-
-  const mockLandReserves = [
-    {
-      reserveCode: "L00001",
-      applyDate: "2025-08-01",
-      reserveDate: "2025-08-15",
-      reserveTypeName: "놀이터예약",
-      reserveState: "예약완료",
-    },
-    {
-      reserveCode: "L00002",
-      applyDate: "2025-08-02",
-      reserveDate: "2025-08-20",
-      reserveTypeName: "놀이터예약",
-      reserveState: "이용완료",
-    },
-  ];
-
-  const mockVolunteerReserves = [
-    {
-      reserveCode: "V00001",
-      applyDate: "2025-08-03",
-      reserveDate: "2025-08-18",
-      reserveTypeName: "봉사예약",
-      reserveState: "예약완료",
-    },
-    {
-      reserveCode: "V00002",
-      applyDate: "2025-08-05",
-      reserveDate: "2025-08-25",
-      reserveTypeName: "봉사예약",
-      reserveState: "취소됨",
-    },
-  ];
 
   useEffect(() => {
     fetchReserves();
@@ -54,12 +20,23 @@ function MyReserveListPage() {
       setReserves(data);
     } catch (error) {
       console.error("예약 목록 조회 실패", error);
+      setReserves([]);
+    }
+  };
+
+  const handleRowClick = (reserveCode) => {
+    if (selectedType === "LAND") {
+      navigate(`/member/mypage/reserves/land/${reserveCode}`);
+    } else {
+      navigate(`/member/mypage/reserves/volunteer/${reserveCode}`);
     }
   };
 
   return (
     <div className="mypage-reserve-wrapper">
-      <h2>마이페이지 - 예약내역 조회</h2>
+      <div className="reserve-header">
+        <h2>마이페이지 - 예약내역 조회</h2>
+      </div>
       <div className="reserve-tabs">
         <button
           className={`tab-button ${selectedType === "LAND" ? "active" : ""}`}
@@ -92,7 +69,11 @@ function MyReserveListPage() {
             </tr>
           ) : (
             reserves.map((item) => (
-              <tr key={item.reserveCode}>
+              <tr
+                key={item.reserveCode}
+                onClick={() => handleRowClick(item.reserveCode)}
+                style={{ cursor: "pointer" }}
+              >
                 <td>{item.reserveCode}</td>
                 <td>{item.applyDate}</td>
                 <td>{item.reserveDate}</td>

@@ -28,6 +28,9 @@ import FindId from "../../program/member/pages/FindIdPage"; //아이디 찾기
 import FindPw from "../../program/member/pages/FindPasswordPage"; //비밀번호 찾기
 import ChangePw from "../../program/member/pages/ChangePasswordPage"; //비밀번호 변경
 import MyPage from "../../program/member/pages/Mypage"; //마이페이지
+import MyReserveListPage from "../../program/member/pages/MyReserveListPage"; //예약내역조회
+import LandReserveDetailPage from "../../program/member/pages/LandReserveDetailPage";
+import VolunteerReserveDetailPage from "../../program/member/pages/VolunteerReserveDetailPage";
 
 // 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
@@ -69,6 +72,13 @@ const layoutRoutes = [
     path={routes.member.changepw.path}
     element={<ChangePw />}
   />, //비밀번호 변경
+
+  // 마이페이지 예약내역조회
+  <Route key="mypage-reserves" path={routes.member.reserves.path} element={<MyReserveListPage />} />,
+  // 놀이터 예약 상세보기
+  <Route key="mypage-reserve-land-detail" path={routes.member.landReserveDetail.path} element={<LandReserveDetailPage />} />,
+  // 봉사 예약 상세보기
+  <Route key="mypage-reserve-volunteer-detail" path={routes.member.volunteerReserveDetail.path} element={<VolunteerReserveDetailPage />} />,
 
   //관리자
   <Route key="admin" path={routes.admin.admin.path} element={<Admin />} />, //관리자 로그인시 출력

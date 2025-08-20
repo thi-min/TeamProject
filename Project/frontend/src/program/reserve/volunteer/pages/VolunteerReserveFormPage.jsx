@@ -51,7 +51,7 @@ const VolunteerReserveFormPage = () => {
         return;
       }
 
-      const res = await axios.get("/auth/mypage", {
+      const res = await axios.get("/member/mypage", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -189,10 +189,10 @@ const VolunteerReserveFormPage = () => {
     }
     try {
     const { data: exists } = await axios.get("/api/reserve/check-duplicate", {
-      params: { memberNum, date: selectedDate, timeSlotId: selectedSlotId, type: "VOLUNTEER" },
+      params: { memberNum: formData.memberNum, date: selectedDate, timeSlotId: selectedSlotId, type: "VOLUNTEER" },
       });
       if (exists) {
-        return alert("이미 해당 시간대에 예약이 존재합니다.");
+        return alert("이미 예약하신 시간대입니다. 다른 시간대를 선택해 주세요.");
       }
     } catch (err) {
       console.error("중복 검사 실패:", err);

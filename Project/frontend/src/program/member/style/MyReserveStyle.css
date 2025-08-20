@@ -8,6 +8,14 @@
   background-color: #fff;
 }
 
+.reserve-header h2{
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin: 0;
+  color: #333;
+  margin-bottom: 50px;
+}
+
 .reserve-tabs {
   margin-bottom: 20px;
   display: flex;
@@ -35,6 +43,7 @@
   background-color: #007bff;
   color: white;
   font-weight: bold;
+  transform: none;
 }
 
 .reserve-table {
@@ -42,6 +51,7 @@
   border-collapse: collapse;
   margin-top: 20px;
   margin-bottom: 50px;
+  table-layout: fixed;
 }
 
 .reserve-table th, .reserve-table td {
@@ -50,22 +60,17 @@
   text-align: center;
 }
 
+.reserve-table th:nth-child(1),
+.reserve-table td:nth-child(1) { width: 15%; } /* 예약코드 */
 
-.reserve-tabs button.active {
-  background-color: #80858a;
-  color: white;
-  font-weight: bold;
-  transform: none;
-}
-.reserve-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 20px;
-  margin-bottom: 500px;
-}
+.reserve-table th:nth-child(2),
+.reserve-table td:nth-child(2) { width: 25%; } /* 신청일 */
 
-.reserve-table th, .reserve-table td {
-  border: 1px solid #999;
-  padding: 12px;
-  text-align: center;
-}
+.reserve-table th:nth-child(3),
+.reserve-table td:nth-child(3) { width: 20%; } /* 예약일 */
+
+.reserve-table th:nth-child(4),
+.reserve-table td:nth-child(4) { width: 20%; } /* 예약유형 */
+
+.reserve-table th:nth-child(5),
+.reserve-table td:nth-child(5) { width: 20%; } /* 예약상태 */
