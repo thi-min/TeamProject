@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.ArrayList;
 import java.util.List;
@@ -69,10 +70,10 @@ public class BbsServiceImpl implements BbsService {
                 .bulletinNum(dto.getBulletinNum())
                 .bbstitle(dto.getBbsTitle())
                 .bbscontent(dto.getBbsContent())
-                .registdate(dto.getRegistDate())
+                .registdate(LocalDateTime.now()) 
                 .revisiondate(dto.getRevisionDate())
                 .deldate(dto.getDelDate())
-                .viewers(dto.getViewers())
+                .viewers(dto.getViewers() != null ? dto.getViewers() : 0)
                 .bulletinType(dto.getBulletinType());
 
         if (member != null) {
@@ -100,6 +101,7 @@ public class BbsServiceImpl implements BbsService {
         }
 
         // 게시글 저장
+        dto.setMemberNum(requesterMemberNum);
         BbsDto savedDto = saveOnlyBbs(dto, requesterMemberNum, requesterAdminId);
 
         // POTO 게시판인지 분기
@@ -323,48 +325,31 @@ public class BbsServiceImpl implements BbsService {
     public Page<BbsDto> searchPosts(String searchType, String bbstitle, String bbscontent, String memberName, BoardType type, Pageable pageable) {
         Page<BbsEntity> result;
 
-        String typeLower = searchType == null ? "all" : searchType.toLowerCase();
+        // searchType이 null이면 전체 조회로 간주
+        String typeLower = (searchType == null || searchType.isEmpty()) ? "all" : searchType.toLowerCase();
 
         if (type != null) {
             // 게시판 타입이 지정된 경우
             result = switch (typeLower) {
-                case "title" ->
-                    bbsRepository.findByBulletinTypeAndBbstitleContaining(type, bbstitle, pageable);
-                case "content" ->
-                    bbsRepository.findByBulletinTypeAndBbscontentContaining(type, bbscontent, pageable);
-                case "title+content" -> {
-                    if (bbstitle == null || bbscontent == null) {
-                        throw new IllegalArgumentException("제목과 내용 검색어를 모두 입력하세요.");
-                    }
-                    yield bbsRepository.findByBulletinTypeAndBbstitleContainingAndBbscontentContaining(type, bbstitle, bbscontent, pageable);
-                }
-                case "all" ->
-                    bbsRepository.findByBulletinType(type, pageable);
-                default ->
-                    throw new IllegalArgumentException("Invalid search type: " + searchType);
+                case "title" -> bbsRepository.findByBulletinTypeAndBbstitleContaining(type, bbstitle, pageable);
+                case "content" -> bbsRepository.findByBulletinTypeAndBbscontentContaining(type, bbscontent, pageable);
+                case "all" -> bbsRepository.findByBulletinType(type, pageable);
+                default -> throw new IllegalArgumentException("Invalid search type: " + searchType);
             };
         } else {
             // 게시판 타입이 없는 경우
             result = switch (typeLower) {
-                case "title" ->
-                    bbsRepository.findByBbstitleContaining(bbstitle, pageable);
-                case "content" ->
-                    bbsRepository.findByBbscontentContaining(bbscontent, pageable);
-                case "title+content" -> {
-                    if (bbstitle == null || bbscontent == null) {
-                        throw new IllegalArgumentException("제목과 내용 검색어를 모두 입력하세요.");
-                    }
-                    yield bbsRepository.findByBbstitleContainingAndBbscontentContaining(bbstitle, bbscontent, pageable);
-                }
-                case "all" ->
-                    bbsRepository.findAll(pageable);
-                default ->
-                    throw new IllegalArgumentException("Invalid search type: " + searchType);
+                case "title" -> bbsRepository.findByBbstitleContaining(bbstitle, pageable);
+                case "content" -> bbsRepository.findByBbscontentContaining(bbscontent, pageable);
+                case "all" -> bbsRepository.findAll(pageable); // 전체 게시글 조회
+                default -> throw new IllegalArgumentException("Invalid search type: " + searchType);
             };
         }
 
         return result.map(this::convertToDto);
     }
+
+
 
 
     private BbsDto convertToDto(BbsEntity e) {

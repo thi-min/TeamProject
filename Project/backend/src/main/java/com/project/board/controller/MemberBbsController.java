@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.board.BoardType;
 import com.project.board.dto.BbsDto;
+import com.project.board.dto.FileUpLoadDto;
 import com.project.board.service.BbsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -121,6 +122,40 @@ public class MemberBbsController {
         return ResponseEntity.ok(result);
     }
 
+ // ---------------- 첨부파일 조회 ----------------
+    @GetMapping("/{id}/files")
+    public ResponseEntity<List<FileUpLoadDto>> getFilesByBbs(@PathVariable Long id) {
+        List<FileUpLoadDto> files = bbsService.getFilesByBbs(id);
+        return ResponseEntity.ok(files);
+    }
+
+    // ---------------- 첨부파일 업로드 ----------------
+    @PostMapping("/{id}/files")
+    public ResponseEntity<List<FileUpLoadDto>> uploadFiles(
+            @PathVariable Long id,
+            @RequestParam BoardType boardType,
+            @RequestPart("files") List<MultipartFile> files) {
+        List<FileUpLoadDto> uploaded = bbsService.saveFileList(id, files, boardType);
+        return ResponseEntity.ok(uploaded);
+    }
+
+    // ---------------- 첨부파일 수정 ----------------
+    @PutMapping("/files/{fileId}")
+    public ResponseEntity<FileUpLoadDto> updateFile(
+            @PathVariable Long fileId,
+            @RequestPart(value = "file", required = false) MultipartFile newFile,
+            @RequestPart("fileDto") FileUpLoadDto dto) {
+        FileUpLoadDto updated = bbsService.updateFile(fileId, dto, newFile);
+        return ResponseEntity.ok(updated);
+    }
+
+    // ---------------- 첨부파일 삭제 ----------------
+    @DeleteMapping("/files/{fileId}")
+    public ResponseEntity<Void> deleteFile(@PathVariable Long fileId) {
+        bbsService.deleteFileById(fileId);
+        return ResponseEntity.noContent().build();
+    }
+    
     // ---------------- deletedFileIds 문자열 → List<Long> 변환 ----------------
     private List<Long> parseDeleteIds(String deletedFileIds) {
         if (deletedFileIds != null && !deletedFileIds.isEmpty()) {

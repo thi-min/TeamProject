@@ -1,3 +1,4 @@
+// 📁 src/admin/NoticeBbs.jsx
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -15,7 +16,9 @@ function NoticeBbs() {
   const [searchKeyword, setSearchKeyword] = useState("");
 
   const navigate = useNavigate();
+  const BASE_URL = "http://127.0.0.1:8090"; // 관리자 백엔드 서버 주소
 
+  // 게시글 목록 불러오기
   const fetchNotices = async (pageNumber = 0) => {
     try {
       const params = {
@@ -25,11 +28,12 @@ function NoticeBbs() {
       };
 
       if (searchKeyword.trim() !== "" && searchType !== "all") {
-        params.searchType = searchType;  // title, writer, content
-        params.keyword = searchKeyword.trim();
+        if (searchType === "title") params.bbstitle = searchKeyword.trim();
+        else if (searchType === "writer") params.writer = searchKeyword.trim();
+        else if (searchType === "content") params.bbscontent = searchKeyword.trim();
       }
 
-      const response = await axios.get("/admin/bbs/bbslist", { params });
+      const response = await axios.get(`${BASE_URL}/admin/bbs/bbslist`, { params });
       setPosts(response.data.content);
       setTotalPages(response.data.totalPages);
       setPage(response.data.number);
@@ -44,7 +48,7 @@ function NoticeBbs() {
   }, [page]);
 
   const handleWrite = () => {
-    navigate("/bbs/normal/write");
+    navigate("/admin/bbs/write");
   };
 
   const handleSearch = () => {
@@ -52,18 +56,20 @@ function NoticeBbs() {
     fetchNotices(0);
   };
 
+  const handlePageChange = (newPage) => {
+    if (newPage >= 0 && newPage < totalPages) {
+      setPage(newPage);
+    }
+  };
+
   return (
     <div className="bbs-container">
-      <h2>📢 공지사항 게시판</h2>
+      <h2>📢 공지사항 게시판 (관리자)</h2>
 
       {/* 검색창 */}
       <div className="search-bar">
         <div className="temp_form_box lg">
-          <select
-            className="temp_select"
-            value={searchType}
-            onChange={(e) => setSearchType(e.target.value)}
-          >
+          <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
             <option value="all">전체</option>
             <option value="title">제목</option>
             <option value="content">내용</option>
@@ -76,7 +82,6 @@ function NoticeBbs() {
             value={searchKeyword}
             onChange={(e) => setSearchKeyword(e.target.value)}
             placeholder="검색어를 입력하세요"
-            style={{ height: "100%" }}
           />
         </div>
         <button onClick={handleSearch}>조회</button>
@@ -91,7 +96,7 @@ function NoticeBbs() {
         </div>
       )}
 
-      {/* 게시판 테이블 */}
+      {/* 게시글 테이블 */}
       <table className="bbs-table">
         <div className="table responsive">
           <colgroup>
@@ -135,7 +140,7 @@ function NoticeBbs() {
 
       {/* 페이지네이션 */}
       <div className="pagination">
-        <button disabled={page === 0} onClick={() => setPage(page - 1)}>
+        <button disabled={page === 0} onClick={() => handlePageChange(page - 1)}>
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
 
@@ -143,13 +148,13 @@ function NoticeBbs() {
           <button
             key={i}
             className={page === i ? "active" : ""}
-            onClick={() => setPage(i)}
+            onClick={() => handlePageChange(i)}
           >
             {i + 1}
           </button>
         ))}
 
-        <button disabled={page === Math.max(totalPages, 1) - 1} onClick={() => setPage(page + 1)}>
+        <button disabled={page === Math.max(totalPages, 1) - 1} onClick={() => handlePageChange(page + 1)}>
           <FontAwesomeIcon icon={faChevronRight} />
         </button>
       </div>

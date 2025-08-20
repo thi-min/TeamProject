@@ -46,5 +46,7 @@ public interface BbsService {
     List<FileUpLoadDto> getFilesByBbs(Long bbsId); // 특정 게시글의 첨부파일 리스트 조회
     
     FileUpLoadDto updateFile(Long fileId, FileUpLoadDto dto, MultipartFile newFile); // 첨부파일 정보 수정
+    
+    void deleteFileById(Long fileId);
 }
 

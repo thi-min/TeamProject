@@ -16,14 +16,17 @@ function AdminQnaBbs() {
   const [selectedPosts, setSelectedPosts] = useState([]);
   const navigate = useNavigate();
 
+  const BASE_URL = "http://127.0.0.1:8090"; // 백엔드 서버 주소
+
   const fetchPosts = async (pageNumber = 0) => {
     try {
       const params = { type: "FAQ", page: pageNumber, size: 10 };
       if (searchType !== "all" && searchKeyword.trim() !== "") {
-        params.searchType = searchType;
-        params.keyword = searchKeyword.trim();
+        if (searchType === "title") params.bbstitle = searchKeyword.trim();
+        else if (searchType === "writer") params.memberName = searchKeyword.trim();
+        else if (searchType === "content") params.bbscontent = searchKeyword.trim();
       }
-      const response = await axios.get("/bbs/bbslist", { params });
+      const response = await axios.get(`${BASE_URL}/bbs/bbslist`, { params });
       setPosts(response.data.content);
       setTotalPages(response.data.totalPages);
       setPage(response.data.number);
@@ -33,7 +36,6 @@ function AdminQnaBbs() {
     }
   };
 
-  // 페이지 번호 변경 시만 fetch 호출
   useEffect(() => {
     fetchPosts(page);
   }, [page]);
@@ -57,7 +59,7 @@ function AdminQnaBbs() {
     if (!window.confirm("선택한 게시글을 정말 삭제하시겠습니까?")) return;
 
     try {
-      await axios.delete("/admin/bbs/delete-multiple", {
+      await axios.delete(`${BASE_URL}/admin/bbs/delete-multiple`, {
         data: { ids: selectedPosts },
         params: { adminId: 1 }
       });
@@ -90,6 +92,7 @@ function AdminQnaBbs() {
           <option value="all">전체</option>
           <option value="title">제목</option>
           <option value="writer">작성자</option>
+          <option value="content">내용</option>
         </select>
         <input
           type="text"
@@ -160,7 +163,9 @@ function AdminQnaBbs() {
             ))
           ) : (
             <tr>
-              <td colSpan="6">등록된 질문이 없습니다.</td>
+              <td colSpan="6" style={{ textAlign: "center", padding: "50px 0" }}>
+                등록된 질문이 없습니다.
+              </td>
             </tr>
           )}
         </tbody>

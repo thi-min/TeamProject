@@ -8,13 +8,14 @@ function QnaBbsWrite() {
   const [files, setFiles] = useState([{ id: Date.now(), file: null, insertOption: "no-insert" }]);
   const navigate = useNavigate();
 
+  const baseUrl = "http://127.0.0.1:8090/bbs/bbslist/bbsadd";
+
   // 파일 선택
   const handleFileChange = (id, newFile) => {
     setFiles(prev =>
       prev.map(f => (f.id === id ? { ...f, file: newFile } : f))
     );
 
-    // 이미지가 아닌 파일이면 본문 삽입 옵션 초기화
     if (newFile && !["image/jpeg", "image/jpg"].includes(newFile.type)) {
       setFiles(prev =>
         prev.map(f => (f.id === id ? { ...f, insertOption: "no-insert" } : f))
@@ -40,12 +41,10 @@ function QnaBbsWrite() {
     );
   };
 
-  // 파일 입력 추가
   const addFileInput = () => {
     setFiles(prev => [...prev, { id: Date.now(), file: null, insertOption: "no-insert" }]);
   };
 
-  // 파일 입력 제거
   const removeFileInput = (id) => {
     setFiles(prev => prev.filter(f => f.id !== id));
   };
@@ -62,28 +61,33 @@ function QnaBbsWrite() {
     const formData = new FormData();
     formData.append("memberNum", memberNum);
     formData.append("type", "FAQ");
+
+    // DTO 필드명에 맞게 JSON Blob 생성
     formData.append(
       "bbsDto",
-      new Blob([JSON.stringify({ bbstitle, bbscontent })], { type: "application/json" })
+      new Blob(
+        [JSON.stringify({ bbsTitle: bbstitle, bbsContent: bbscontent,  bulletinType: "FAQ" })],
+        { type: "application/json" }
+      )
     );
 
-    // 파일 + 본문 삽입 옵션 전송 (1:1 매핑)
-    files.forEach((f, index) => {
+    // 파일과 insertOptions 추가
+    files.forEach(f => {
       if (f.file) {
         formData.append("files", f.file);
-        formData.append(`insertOptions[${index}]`, f.insertOption);
+        formData.append("insertOptions", f.insertOption);
       }
     });
 
     try {
-      await axios.post("/bbs/bbslist/bbsadd", formData, {
+      await axios.post(baseUrl, formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       alert("질문이 등록되었습니다.");
-      navigate("/qnabbs");
+      navigate("/bbs/qna");
     } catch (error) {
       console.error("질문 등록 오류:", error);
-      alert("등록 실패");
+      alert("등록 실패: 서버 연결이나 데이터 확인 필요");
     }
   };
 
@@ -123,7 +127,6 @@ function QnaBbsWrite() {
               <div className="bbs-file-row" key={f.id}>
                 <input
                   type="file"
-                  accept=".jpg,.jpeg"
                   onChange={(e) => handleFileChange(f.id, e.target.files[0])}
                 />
                 <div className="bbs-file-options">
@@ -161,7 +164,7 @@ function QnaBbsWrite() {
 
         {/* 버튼 */}
         <div className="bbs-btn-area">
-          <button type="button" className="bbs-cancel-btn" onClick={() => navigate("/qnabbs")}>
+          <button type="button" className="bbs-cancel-btn" onClick={() => navigate("/bbs/qna")}>
             취소
           </button>
           <button type="submit" className="bbs-save-btn">저장</button>

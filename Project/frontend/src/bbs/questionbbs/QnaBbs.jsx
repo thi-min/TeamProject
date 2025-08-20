@@ -13,24 +13,20 @@ function QnaBbs() {
   const [searchKeyword, setSearchKeyword] = useState("");
 
   const navigate = useNavigate();
+  const baseUrl = "http://127.0.0.1:8090/bbs/bbslist";
 
   const fetchPosts = async (pageNumber = 0) => {
     try {
       const params = { type: "FAQ", page: pageNumber, size: 10 };
 
-      // ✅ 백엔드 파라미터 이름과 맞춤
+      // 검색 키워드가 있을 때만 searchType과 키워드 추가
       if (searchType !== "all" && searchKeyword.trim() !== "") {
         params.searchType = searchType;
-        if (searchType === "title") {
-          params.bbstitle = searchKeyword.trim();     // 제목 검색
-        } else if (searchType === "content") {
-          params.bbscontent = searchKeyword.trim();   // 내용 검색
-        } else if (searchType === "writer") {
-          params.memberName = searchKeyword.trim();   // 작성자 검색
-        }
+        if (searchType === "title") params.bbstitle = searchKeyword.trim();
+        if (searchType === "content") params.bbscontent = searchKeyword.trim();
       }
 
-      const response = await axios.get("/bbs/bbslist", { params });
+      const response = await axios.get(baseUrl, { params });
       setPosts(response.data.content);
       setTotalPages(response.data.totalPages);
       setPage(response.data.number);
@@ -40,10 +36,9 @@ function QnaBbs() {
     }
   };
 
-  // 초기 목록 불러오기
   useEffect(() => {
     fetchPosts(page);
-  }, [page]); // page가 바뀔 때만 호출
+  }, [page]);
 
   const handleSearch = () => {
     setPage(0);
@@ -67,7 +62,6 @@ function QnaBbs() {
             <option value="all">전체</option>
             <option value="title">제목</option>
             <option value="content">내용</option>
-            <option value="writer">작성자</option>
           </select>
         </div>
         <div className="temp_form_box lg">
@@ -111,7 +105,7 @@ function QnaBbs() {
                 <tr key={post.bulletinNum}>
                   <td>{post.bulletinNum}</td>
                   <td>
-                    <Link to={`/qnabbs/view/${post.bulletinNum}`}>{post.bbsTitle}</Link>
+                    <Link to={`/bbs/qna/${post.bulletinNum}`}>{post.bbsTitle}</Link>
                   </td>
                   <td>{post.memberName || "익명"}</td>
                   <td>{new Date(post.registDate).toLocaleDateString()}</td>
