@@ -1,6 +1,7 @@
 package com.project.board.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -10,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 import com.project.admin.entity.AdminEntity;
 import com.project.board.BoardType;
+import com.project.board.dto.FileUpLoadDto;
 import com.project.board.entity.BbsEntity;
 import com.project.member.entity.MemberEntity;
 
@@ -50,6 +52,18 @@ public interface BbsRepository extends JpaRepository<BbsEntity, Long> {
     	    Pageable pageable
     	);
 
+ // 🔹 게시글 번호로 첨부파일 조회
+    @Query("SELECT new com.project.board.dto.FileUpLoadDto(" +
+           "f.filenum, f.bbs.bulletinNum, f.originalName, f.savedName, f.path, f.size, f.extension, null) " +
+           "FROM FileUpLoadEntity f WHERE f.bbs.bulletinNum = :bulletinNum " +
+           "ORDER BY f.filenum ASC")
+    List<FileUpLoadDto> findFilesByBulletinNum(@Param("bulletinNum") Long bulletinNum);
 
-    
+    // 🔹 파일 번호로 단건 조회
+    @Query("SELECT new com.project.board.dto.FileUpLoadDto(" +
+           "f.filenum, f.bbs.bulletinNum, f.originalName, f.savedName, f.path, f.size, f.extension, null) " +
+           "FROM FileUpLoadEntity f WHERE f.filenum = :fileId")
+    Optional<FileUpLoadDto> findFileById(@Param("fileId") Long fileId);
+
+
 }

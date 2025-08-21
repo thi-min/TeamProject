@@ -7,6 +7,8 @@ import com.project.board.dto.BbsDto;
 import com.project.board.dto.FileUpLoadDto;
 import com.project.board.service.BbsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
@@ -16,6 +18,13 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
 
 @RestController
 @RequestMapping("/bbs")
@@ -168,5 +177,34 @@ public class MemberBbsController {
         }
         return new ArrayList<>();
     }
+    
+    @GetMapping("/files/{fileId}/download")
+    public ResponseEntity<Resource> downloadFile(@PathVariable Long fileId) {
+        FileUpLoadDto fileDto = bbsService.getFileById(fileId);
+        Path path = Paths.get(fileDto.getPath(), fileDto.getSavedName());
+        Resource resource = new FileSystemResource(path);
+
+        if (!resource.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // jpg/jpeg만 처리
+        String ext = fileDto.getExtension();
+        MediaType mediaType;
+        if ("jpg".equalsIgnoreCase(ext) || "jpeg".equalsIgnoreCase(ext)) {
+            mediaType = MediaType.IMAGE_JPEG;
+        } else {
+            mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        }
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileDto.getOriginalName() + "\"")
+                .body(resource);
+    }
+
+
+
+
 }
 

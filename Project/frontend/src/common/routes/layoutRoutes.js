@@ -74,7 +74,7 @@ const layoutRoutes = [
   <Route key="qna-bbs" path="/bbs/qna" element={<QnaBbs />} />,
   <Route key="qna-bbs-write" path="/bbs/qna/write" element={<QnaBbsWrite />} />,
   <Route key="qna-bbs-view" path="/bbs/qna/:id" element={<QnaBbsView />} />,
-  <Route key="qna-bbs-edit" path="/bbs/qna/edit" element={<QnaBbsEdit />} />,
+  <Route key="qna-bbs-edit" path="/bbs/qna/edit/:id" element={<QnaBbsEdit />} />,
   <Route key="qna-bbs-admin" path="/bbs/admin/qna" element={<AdminQnaBbs />} />,
   <Route key="qna-bbs-admin-view" path="/bbs/admin/qna/view" element={<AdminQnaBbsView />} />,
   <Route key="qna-bbs-admin-dummy" path="/bbs/admin/qna/dummy" element={<AdminQnaBbsDummy />} />,

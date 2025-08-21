@@ -48,5 +48,8 @@ public interface BbsService {
     FileUpLoadDto updateFile(Long fileId, FileUpLoadDto dto, MultipartFile newFile); // 첨부파일 정보 수정
     
     void deleteFileById(Long fileId);
+    
+    FileUpLoadDto getFileById(Long fileId);
+
 }
 

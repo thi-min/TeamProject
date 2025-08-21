@@ -85,10 +85,13 @@ public class BbsServiceImpl implements BbsService {
 
         return convertToDto(savedEntity);
     }
+    
 
     // ---------------- 최상위 생성 메소드 ----------------
     @Override
-    public BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files, List<String> insertOptions) {
+    @Transactional
+    public BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId,
+                            List<MultipartFile> files, List<String> insertOptions) {
 
         BoardType type = dto.getBulletinType();
 
@@ -100,17 +103,50 @@ public class BbsServiceImpl implements BbsService {
             throw new BbsException("해당 게시판은 회원만 작성할 수 있습니다.");
         }
 
-        // 게시글 저장
+        // 게시글 저장 (첨부파일 제외)
         dto.setMemberNum(requesterMemberNum);
         BbsDto savedDto = saveOnlyBbs(dto, requesterMemberNum, requesterAdminId);
 
-        // POTO 게시판인지 분기
         if (type == BoardType.POTO) {
             return createPotoBbs(savedDto, requesterMemberNum, files);
         } else {
-            return createBbsWithFiles(savedDto, requesterMemberNum, requesterAdminId, files, insertOptions);
+            BbsDto result = createBbsWithFiles(savedDto, requesterMemberNum, requesterAdminId, files, insertOptions);
+
+            // 본문 삽입 이미지 처리
+            if (files != null && insertOptions != null) {
+                StringBuilder contentBuilder = new StringBuilder(
+                        result.getBbsContent() == null ? "" : result.getBbsContent()
+                );
+
+                List<FileUpLoadDto> savedFiles = getFilesByBbs(result.getBulletinNum());
+
+                int size = Math.min(savedFiles.size(), insertOptions.size());
+                for (int i = 0; i < size; i++) {
+                    String option = insertOptions.get(i);
+                    if ("insert".equals(option)) {
+                        FileUpLoadDto fileDto = savedFiles.get(i);
+                        String fileUrl = "http://127.0.0.1:8090/bbs/files/" + fileDto.getFileNum() + "/download";
+                        contentBuilder.append("<br><img src='")
+                                      .append(fileUrl)
+                                      .append("' style='max-width:600px;'/>");
+                    }
+                }
+
+                // 본문 업데이트 후 다시 저장
+                result.setBbsContent(contentBuilder.toString());
+                saveOnlyBbs(result, requesterMemberNum, requesterAdminId);
+            }
+
+            return result;
         }
     }
+    
+    @Override
+    public FileUpLoadDto getFileById(Long fileId) {
+        return bbsRepository.findFileById(fileId)
+                .orElseThrow(() -> new BbsException("해당 파일이 존재하지 않습니다. ID: " + fileId));
+    }
+   
 
     // ---------------- POTO 게시판 처리 ----------------
     @Override

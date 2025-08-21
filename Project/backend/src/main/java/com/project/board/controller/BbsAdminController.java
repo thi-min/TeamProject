@@ -2,15 +2,23 @@ package com.project.board.controller;
 
 import com.project.board.BoardType;
 import com.project.board.dto.BbsDto;
+import com.project.board.dto.FileUpLoadDto;
 import com.project.board.dto.QandADto;
 import com.project.board.service.BbsService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
 
 @RestController
 @RequestMapping("/admin/bbs")
@@ -129,4 +137,34 @@ public class BbsAdminController {
         }
         return ids;
     }
+    
+ // ---------------- 첨부파일 다운로드 ----------------
+    @GetMapping("/files/{fileId}/download")
+    public ResponseEntity<Resource> downloadFile(@PathVariable Long fileId) {
+        // Service에서 단일 파일 조회
+        FileUpLoadDto fileDto = bbsService.getFileById(fileId);
+
+        // 파일 경로 준비
+        Path path = Paths.get(fileDto.getPath(), fileDto.getSavedName());
+        Resource resource = new FileSystemResource(path);
+
+        if (!resource.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // jpg/jpeg 처리, 나머지는 일반 다운로드
+        String ext = fileDto.getExtension();
+        MediaType mediaType;
+        if ("jpg".equalsIgnoreCase(ext) || "jpeg".equalsIgnoreCase(ext)) {
+            mediaType = MediaType.IMAGE_JPEG;
+        } else {
+            mediaType = MediaType.APPLICATION_OCTET_STREAM;
+        }
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileDto.getOriginalName() + "\"")
+                .body(resource);
+    }
 }
+
