@@ -1,35 +1,77 @@
-import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import React, { Link, useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import MemberDeleteButton from "./MemberDeleteButton";
-
+import { useAuth } from "../../../common/context/AuthContext";
 import api from "../../../common/api/axios";
 
 export default function Mypage() {
-  const [myInfo, setMyInfo] = useState(null);
+  // 전역 인증 상태
+  const { isLogin } = useAuth();
+
+  // 라우팅
+  const nav = useNavigate();
+
+  // 화면 상태
+  const [myInfo, setMyInfo] = useState(null); // { memberNum, memberId, memberName, memberState }
   const [loading, setLoading] = useState(true);
 
+  /**
+   * 1) 비로그인 즉시 "/"로 이동
+   * - 버튼 로그아웃, 토큰 만료, 재발급 실패 등으로 isLogin=false가 되면 즉시 홈으로
+   * - replace:true로 히스토리에 남기지 않음
+   */
   useEffect(() => {
-    let mounted = true;
+    if (!isLogin) {
+      nav("/", { replace: true });
+    }
+  }, [isLogin, nav]);
+
+  /**
+   * 2) 로그인 상태에서만 내 정보 요청
+   * - 비로그인이라면 요청 자체를 skip (401/재시도/알림 중복 방지)
+   * - StrictMode(개발)로 인한 효과 2회 실행에 대비해 cancelled 플래그 사용
+   */
+  useEffect(() => {
+    // 로그인 아니면 네트워크 호출 생략하고 로딩 종료
+    if (!isLogin) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
+
     (async () => {
       try {
-        // Authorization 헤더는 api 인터셉터가 자동 부착
-        const res = await api.get("/member/mypage/me");
-        if (!mounted) return;
-        setMyInfo(res.data); // { memberNum, memberId, memberName, memberState }
+        const res = await api.get("/member/mypage/me"); // Authorization은 인터셉터가 자동 부착
+        if (!cancelled) setMyInfo(res.data);
       } catch (e) {
-        console.error(e);
-        alert("내 정보 조회에 실패했습니다. 다시 로그인해주세요");
+        // 401/403 → 인터셉터가 재발급 시도, 실패 시 isLogin=false가 되어 위 useEffect가 "/"로 이동 처리
+        // 여기서 알림을 띄우면 두 번 뜰 수 있으니 콘솔만.
+        console.error(
+          "[MyPage] /member/mypage/me 실패:",
+          e?.response?.status,
+          e?.message
+        );
       } finally {
-        if (mounted) setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
+    // 언마운트/재마운트 시 setState 방지
+    return () => {
+      cancelled = true;
+    };
+  }, [isLogin]);
+
+  // 로딩 중 UI
   if (loading) {
-    return <div className="member_page">로딩중...</div>;
+    return <div className="admin_page">로딩중...</div>;
+  }
+
+  // (안전) 정보 없을 때의 가드 — 보통은 isLogin 가드가 먼저 작동하여 "/"로 이동함
+  if (!myInfo) {
+    return <div className="admin_page">정보를 불러올 수 없습니다.</div>;
   }
 
   return (
