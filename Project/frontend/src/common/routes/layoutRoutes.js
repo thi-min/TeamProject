@@ -2,6 +2,7 @@
 
 import { Route } from "react-router-dom";
 import routes from "./router";
+import { RequireUserOnMember } from "./RouteGuards";
 
 // 📌 각 페이지 컴포넌트 import
 import LoginPage from "../../program/login/pages/LoginPage"; //로그인
@@ -11,8 +12,9 @@ import Admin from "../../program/admin/pages/AdminPage"; //관리자 로그인�
 import AdminPw from "../../program/admin/pages/AdminPasswordUpdatePage"; //관리자 비밀번호 변경
 import FindId from "../../program/member/pages/FindIdPage"; //아이디 찾기
 import FindPw from "../../program/member/pages/FindPasswordPage"; //비밀번호 찾기
-import ChangePw from "../../program/member/pages/ChangePasswordPage"; //비밀번호 변경
+import ChangePw from "../../program/member/pages/UpdatePasswordPage"; //비밀번호 변경
 import MyPage from "../../program/member/pages/Mypage"; //마이페이지
+import MemberPage from "../../program/member/pages/MemberData"; //회원정보
 
 // 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
@@ -24,7 +26,24 @@ const layoutRoutes = [
     element={<LogoutLink />}
   />, //로그아웃
   <Route key="signup" path={routes.member.signup.path} element={<Signup />} />, //회원가입
-  <Route key="mypage" path={routes.member.mypage.path} element={<MyPage />} />, //마이페이지
+  <Route
+    key="mypage"
+    path={routes.member.mypage.path}
+    element={
+      <RequireUserOnMember>
+        <MyPage />
+      </RequireUserOnMember>
+    }
+  />, //마이페이지
+  <Route
+    key="memberdata"
+    path={routes.member.memberdata.path}
+    element={
+      <RequireUserOnMember>
+        <MemberPage />
+      </RequireUserOnMember>
+    }
+  />, //회원정보
   <Route key="find-id" path={routes.member.findid.path} element={<FindId />} />, //아이디 찾기
   <Route key="find-pw" path={routes.member.findpw.path} element={<FindPw />} />, //비밀번호 찾기
   <Route
@@ -38,7 +57,11 @@ const layoutRoutes = [
   <Route
     key="updatePw"
     path={routes.admin.password.path}
-    element={<AdminPw />}
+    element={
+      <RequireUserOnMember>
+        <AdminPw />
+      </RequireUserOnMember>
+    }
   />, //관리자 비밀번호 변경
 ];
 

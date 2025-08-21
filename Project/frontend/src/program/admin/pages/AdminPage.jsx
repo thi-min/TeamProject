@@ -9,12 +9,12 @@ import "../style/admin.css";
 // - 회원관리, 예약관리, 비밀번호 변경 등 각 기능 페이지로 이동하는 링크 제공
 export default function AdminPage() {
   return (
-    <div className="admin_page">
+    <div className="my_page">
       <div className="title_box">
         <div className="title">관리자 페이지</div>
       </div>
       <div className="admin_area">
-        <ul className="admin_menu">
+        <ul className="my_menu">
           <li className="link_item type1">
             <Link to="/admin/updatePw">비밀번호 변경</Link>
           </li>

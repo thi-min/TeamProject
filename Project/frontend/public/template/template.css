@@ -4203,3 +4203,6 @@ span.temp_form{display:inline-block;width:auto;}
 .form_top_box .form_top_item .form_desc p{text-align:center;font-family:'NotoKr';color:#333;font-size:18px;font-weight:400;line-height:30px;letter-spacing:-0.02em;}
 
 .form_wrap{display:block;position:relative;padding:30px;border-radius:30px;box-sizing:border-box;background-color:#fff;box-shadow:0 0 30px 0px rgba(238,238,238,0.3);}
+/* 폼 버튼(이전, submit) */
+.form_center_box{display:flex;margin-top:50px;position:relative;box-sizing:border-box;justify-content:space-between;}
+.form_center_box.solo{justify-content:flex-end;}

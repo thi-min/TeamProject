@@ -94,12 +94,11 @@ const LoginPage = () => {
       login({ accessToken, refreshToken, role: upperRole });
 
       alert("로그인 성공");
-
       // ✅ role 기반 라우팅: 관리자면 /admin, 아니면 /
       if (upperRole === "ADMIN" || upperRole === "ROLE_ADMIN") {
         navigate("/admin");
       } else {
-        navigate("/");
+        navigate("/member/mypage");
       }
     } catch (err) {
       console.error("❌ 로그인 실패:", err);

@@ -42,10 +42,14 @@ const routes = {
     logout: { path: "/logout", label: "로그아웃" },
     findid: { path: "/find-id", label: "아이디 찾기" },
     findpw: { path: "/find-pw", label: "비밀번호 찾기" },
-    changepw: { path: "/update-password", label: "비밀번호 변경" },
+    changepw: { path: "/member/update-password", label: "비밀번호 변경" },
     mypage: { path: "/member/mypage", label: "마이페이지" },
-    update: { path: "/mypage/update", label: "회원정보 수정" },
-    delete: { path: "/mypage/update/delete", label: "회원 탈퇴" },
+    memberdata: { path: "/member/mypage/memberdata", label: "회원정보" },
+    update: {
+      path: "/member/mypage/memberdata/update",
+      label: "회원정보 수정",
+    },
+    delete: { path: "/member/mypage/update/delete", label: "회원 탈퇴" },
   },
 
   // 관리자
