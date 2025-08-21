@@ -1,10 +1,10 @@
 // 📁 src/router/layoutRoutes.js
-
 import { Route } from "react-router-dom";
 import routes from "./router";
 
-// 관리자 - 시간관리 페이지
+// 관리자 - 시간관리 + 휴무일 관리
 import TimeSlotManagePage from "../../program/admin/pages/TimeSlotManagePage";
+import ClosedDayManagePage from "../../program/admin/pages/ClosedDayManagePage";
 
 // ✅ Land 예약 플로우 페이지
 import LandReserveDatePage from "../../program/reserve/land/pages/LandReserveDatePage";
@@ -35,10 +35,6 @@ import VolunteerReserveDetailPage from "../../program/member/pages/VolunteerRese
 // 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
 
-  <Route key="login" path={routes.member.login.path} element={<LoginPage />} />,
-  <Route key="logout" path={routes.member.logout.path} element={<LogoutLink />} />,
-  <Route key="signup" path={routes.member.signup.path} element={<Signup />} />,
-
    // 🔹 Land 예약: 날짜 → 폼 → 확인 → 완료
   <Route key="reserve-land-date" path={routes.reserve.land.date.path} element={<LandReserveDatePage />} />,
   <Route key="reserve-land-form" path={routes.reserve.land.form.path} element={<LandReserveFormPage />} />,
@@ -51,10 +47,11 @@ const layoutRoutes = [
   <Route key="reserve-volunteer-confirm" path={routes.reserve.volunteer.confirm.path} element={<VolunteerReserveConfirmPage />} />,
   <Route key="reserve-volunteer-success" path={routes.reserve.volunteer.success.path} element={<VolunteerReserveSuccessPage />} />,
 
-  // 🔹 관리자 페이지 - 시간대 관리
+  // 🔹 관리자 페이지 - 
   <Route key="admin-timeslot-manage" path={routes.admin.timeSlotManage.path} element={<TimeSlotManagePage />} />,
   <Route key="admin" path={routes.admin.admin.path} element={<Admin />} />,
   <Route key="updatePw" path={routes.admin.password.path} element={<AdminPw />} />,
+  <Route key="admin-closedday-manage" path={routes.admin.closedDayManage.path} element={<ClosedDayManagePage />} />,
 
   //사용자
   <Route key="login" path={routes.member.login.path} element={<LoginPage />} />, //로그인

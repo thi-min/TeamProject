@@ -17,9 +17,12 @@ public interface ClosedDayService {
     //해당 날짜가 휴무일인지 여부 확인
     public boolean isClosed(LocalDate date);
     
-    //특정 기간 내 휴무일 전체 조회(달력 ui)
+    //특정 기간 내 휴무일 전체 조회
     List<ClosedDayResponseDto> getClosedDaysInPeriod(LocalDate start, LocalDate end);
     
     //명절이나 크리스마스 자동 등록
     void registerHolidays(int year);
+    
+    //특정 연/월의 휴무일 조회 (달력 UI에서 한 달 표시용)
+    List<ClosedDayResponseDto> getClosedDays(int year, int month);
 }

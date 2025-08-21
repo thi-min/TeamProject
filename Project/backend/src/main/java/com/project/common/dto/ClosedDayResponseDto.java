@@ -11,6 +11,8 @@ import java.time.LocalDate;
 @Builder
 public class ClosedDayResponseDto {
     private LocalDate closedDate;
+    private String holidayName;
     private Boolean isClosed;
+    
 }
 //달력에 휴무일 출력용

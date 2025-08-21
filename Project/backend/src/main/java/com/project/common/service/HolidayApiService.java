@@ -62,6 +62,8 @@ public class HolidayApiService {
             throw new RuntimeException("공휴일 API 호출 실패: " + response.getStatusCode());
         }
     }
+    
+    
 
     private List<HolidayDto> parse(String json) {
         List<HolidayDto> result = new ArrayList<>();
@@ -88,7 +90,11 @@ public class HolidayApiService {
         int locdate = item.path("locdate").asInt(); // 예: 20250815
         String dateName = item.path("dateName").asText(); // 예: 광복절
         String isHoliday = item.path("isHoliday").asText(); // "Y" or "N"
-
+        
+        System.out.println("공휴일 원본 데이터 → locdate=" + locdate 
+                + ", dateName=" + dateName 
+                + ", isHoliday=" + isHoliday);
+        
         LocalDate date = LocalDate.parse(String.valueOf(locdate), DateTimeFormatter.BASIC_ISO_DATE);
         return HolidayDto.builder()
                 .date(date)

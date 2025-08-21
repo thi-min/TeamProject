@@ -15,6 +15,12 @@ const toHHMMSS = (v) => {
   return `${h.padStart(2, "0")}:${m.padStart(2, "0")}:00`;
 };
 
+const isValidStep = (timeStr, stepSec) => {
+  const [h, m] = timeStr.split(":").map(Number);
+  const totalSec = h * 3600 + m * 60;
+  return totalSec % stepSec === 0;
+};
+
 const TimeSlotManagePage = () => {
   const [slots, setSlots] = useState([]);
   const [rules, setRules] = useState({ SMALL: [], LARGE: [] });
@@ -75,14 +81,25 @@ const TimeSlotManagePage = () => {
 
   // 규칙 관련
   const toggleRule = (type, slotId, checked) => {
-    setRules((prev) => {
-      const set = new Set(prev[type] || []);
-      checked ? set.add(slotId) : set.delete(slotId);
-      return { ...prev, [type]: Array.from(set) };
-    });
-  };
+  setRules((prev) => {
+    const updated = { ...prev };
 
-  const selectAll = (type) => setRules((p) => ({ ...p, [type]: allIds }));
+    if (checked) {
+      // 1. 현재 type에 slotId 추가
+      updated[type] = [...(updated[type] || []), slotId];
+
+      // 2. 반대 type에서 slotId 제거 (중복 방지)
+      const otherType = type === "SMALL" ? "LARGE" : "SMALL";
+      updated[otherType] = (updated[otherType] || []).filter((id) => id !== slotId);
+    } else {
+      // 체크 해제 → 해당 type 배열에서 제거
+      updated[type] = (updated[type] || []).filter((id) => id !== slotId);
+    }
+
+    return updated;
+  });
+};
+
   const clearAll = (type) => setRules((p) => ({ ...p, [type]: [] }));
 
   const saveRules = () => {
@@ -109,6 +126,10 @@ const TimeSlotManagePage = () => {
       return alert("시작/종료 시간을 입력하세요.");
     }
 
+    if (!isValidStep(newForm.startTime, 3600) || !isValidStep(newForm.endTime, 3600)) {
+      return alert("시간은 1시간 단위로만 설정 가능합니다.");
+    }
+
     try {
       const dto = {
         startTime: toHHMMSS(newForm.startTime),
@@ -130,7 +151,8 @@ const TimeSlotManagePage = () => {
   const startEdit = (slot) => {
     setEditSlotId(slot.timeSlotId);
     setEditForm({
-      label: slot.label,
+      startTime: slot.startTime.slice(0,5), // "09:00"
+      endTime: slot.endTime.slice(0,5),
       capacity: slot.capacity,
       enabled: !!slot.enabled,
     });
@@ -150,9 +172,13 @@ const TimeSlotManagePage = () => {
     try {
       const original = slots.find((s) => s.timeSlotId === id);
 
+      if (!isValidStep(editForm.startTime, 3600) || !isValidStep(editForm.endTime, 3600)) {
+        return alert("시간은 1시간 단위로만 설정 가능합니다.");
+      }
+
       const dto = {
-        startTime: original.startTime,
-        endTime: original.endTime,
+        startTime: toHHMMSS(editForm.startTime),
+        endTime: toHHMMSS(editForm.endTime),
         capacity: Number(editForm.capacity),
         enabled: !!editForm.enabled,
         timeType: selectedType,
@@ -209,9 +235,9 @@ const TimeSlotManagePage = () => {
         <strong>새 시간대 추가</strong>
         <form onSubmit={submitNew} className="ts-form" style={{ marginTop: "0.5rem" }}>
           <label>시작</label>
-          <input type="time" name="startTime" value={newForm.startTime} onChange={handleNewChange} required />
+          <input type="time" name="startTime" value={newForm.startTime} onChange={handleNewChange} required step="3600" />
           <label>종료</label>
-          <input type="time" name="endTime" value={newForm.endTime} onChange={handleNewChange} required />
+          <input type="time" name="endTime" value={newForm.endTime} onChange={handleNewChange} required step="3600" />
           <label>정원</label>
           <input type="number" name="capacity" value={newForm.capacity} min={1} onChange={handleNewChange} />
           <label>활성</label>
@@ -223,9 +249,7 @@ const TimeSlotManagePage = () => {
       {/* 규칙 버튼 */}
       {selectedType === "LAND" && (
         <div className="ts-actions">
-          <button className="btn" onClick={() => selectAll("SMALL")}>소형견 전체 허용</button>
           <button className="btn" onClick={() => clearAll("SMALL")}>소형견 전체 해제</button>
-          <button className="btn" onClick={() => selectAll("LARGE")}>대형견 전체 허용</button>
           <button className="btn" onClick={() => clearAll("LARGE")}>대형견 전체 해제</button>
           <button className="btn btn-primary" onClick={saveRules} disabled={savingRules}>
             {savingRules ? "저장 중…" : "규칙 저장"}
@@ -253,13 +277,23 @@ const TimeSlotManagePage = () => {
                 <td>{s.timeSlotId}</td>
                 <td>
                   {editSlotId === s.timeSlotId ? (
-                    <input
-                      className="ts-edit-input"
-                      type="text"
-                      name="label"
-                      value={editForm.label}
-                      onChange={handleEditChange}
-                    />
+                    <>
+                      <input
+                        type="time"
+                        name="startTime"
+                        value={editForm.startTime}
+                        onChange={handleEditChange}
+                        step="3600" 
+                      />
+                      ~
+                      <input
+                        type="time"
+                        name="endTime"
+                        value={editForm.endTime}
+                        onChange={handleEditChange}
+                        step="3600" 
+                      />
+                    </>
                   ) : (
                     s.label
                   )}
@@ -296,6 +330,7 @@ const TimeSlotManagePage = () => {
                     <input
                       type="checkbox"
                       checked={(rules.SMALL || []).includes(s.timeSlotId)}
+                      disabled={editSlotId === s.timeSlotId} 
                       onChange={(e) => toggleRule("SMALL", s.timeSlotId, e.target.checked)}
                     />
                   </td>
@@ -306,6 +341,7 @@ const TimeSlotManagePage = () => {
                     <input
                       type="checkbox"
                       checked={(rules.LARGE || []).includes(s.timeSlotId)}
+                      disabled={editSlotId === s.timeSlotId} 
                       onChange={(e) => toggleRule("LARGE", s.timeSlotId, e.target.checked)}
                     />
                   </td>
@@ -319,8 +355,33 @@ const TimeSlotManagePage = () => {
                     </>
                   ) : (
                     <>
-                      <button className="btn" onClick={() => startEdit(s)}>수정</button>
-                      <button className="btn btn-danger" onClick={() => remove(s.timeSlotId)}>삭제</button>
+                       <button 
+                      className="btn" 
+                      style={{ opacity: s.hasFutureReserve ? 0.5 : 1 }} // 회색 느낌만 주기
+                      onClick={() => {
+                        if (s.hasFutureReserve) {
+                          alert("이 시간대에는 이미 예약이 있어 수정할 수 없습니다.");
+                        } else {
+                          startEdit(s);
+                        }
+                      }}
+                    >
+                      수정
+                    </button>
+
+                    <button 
+                      className="btn btn-danger" 
+                      style={{ opacity: s.hasFutureReserve ? 0.5 : 1 }}
+                      onClick={() => {
+                        if (s.hasFutureReserve) {
+                          alert("이 시간대에는 이미 예약이 있어 삭제할 수 없습니다.");
+                        } else {
+                          remove(s.timeSlotId);
+                        }
+                      }}
+                    >
+                      삭제
+                    </button>
                     </>
                   )}
                 </td>

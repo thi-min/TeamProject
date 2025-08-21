@@ -21,6 +21,7 @@ public class TimeSlotDto {
     private LocalTime endTime;
     private int capacity;
     private boolean enabled;
+    private boolean hasFutureReserve; 
     private TimeType timeType;
 
     // 출력용 시간 범위 포맷
@@ -32,15 +33,16 @@ public class TimeSlotDto {
     // Entity → DTO 변환
     public static TimeSlotDto fromEntity(TimeSlot entity) {
         return TimeSlotDto.builder()
-        		.timeSlotId(entity.getId())
-                .label(entity.getLabel())  // 엔티티에 자동 생성된 label 사용
+                .timeSlotId(entity.getId())
+                .label(entity.getLabel())
                 .startTime(entity.getStartTime())
                 .endTime(entity.getEndTime())
                 .enabled(entity.isEnabled())
                 .capacity(entity.getCapacity())
-                .timeType(entity.getTimeType())   
+                .timeType(entity.getTimeType())
                 .build();
     }
+
 
     // DTO → Entity 변환 (label은 생략, 엔티티에서 자동 생성됨)
     public TimeSlot toEntity() {

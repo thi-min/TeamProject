@@ -58,7 +58,8 @@ const routes = {
     dashboard: { path: "/admin/dashboard", label: "관리자 홈" },
     members: { path: "/admin/members", label: "회원 관리" },
     memberDetail: (id) => `/admin/members/${id}`,
-    timeSlotManage: { path: "/admin/timeslots", label: "시간대 관리" }, 
+    timeSlotManage: { path: "/admin/timeslots", label: "시간대 관리" },
+    closedDayManage: { path: "/admin/closedday", label: "휴무일 관리"}, 
   },
 
   //예약

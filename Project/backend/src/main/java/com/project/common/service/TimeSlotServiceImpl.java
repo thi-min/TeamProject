@@ -4,11 +4,14 @@ import com.project.common.dto.TimeSlotDto;
 import com.project.common.entity.TimeSlot;
 import com.project.common.entity.TimeType;
 import com.project.common.repository.TimeSlotRepository;
+import com.project.reserve.entity.ReserveState;
+import com.project.reserve.repository.ReserveRepository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
@@ -19,6 +22,7 @@ import java.util.stream.Collectors;
 public class TimeSlotServiceImpl implements TimeSlotService {
 
     private final TimeSlotRepository timeSlotRepository;
+    private final ReserveRepository reserveRepository;
     
     // 유효성 검사
     private void validateTimeSlotDto(TimeSlotDto dto) {
@@ -37,11 +41,31 @@ public class TimeSlotServiceImpl implements TimeSlotService {
     @Override
     @Transactional(readOnly = true)
     public List<TimeSlotDto> getTimeSlotsByType(TimeType timeType) {
+    	LocalDate today = LocalDate.now();
+    	
         return timeSlotRepository
                 .findByTimeTypeOrderByStartTimeAsc(timeType)
                 .stream()
-                .map(TimeSlotDto::fromEntity)
-                .toList();
+                .map(slot -> {
+                	 boolean hasFutureReserve = false;
+                	 List<ReserveState> activeStates = List.of(ReserveState.ING, ReserveState.DONE);
+                	 
+                	 if (timeType == TimeType.LAND) {
+                		    hasFutureReserve = reserveRepository
+                		        .existsByLandDetail_TimeSlot_IdAndLandDetail_LandDateAfterAndReserveStateIn(
+                		            slot.getId(), today, activeStates
+                		        );
+                		} else if (timeType == TimeType.VOL) {
+                		    hasFutureReserve = reserveRepository
+                		        .existsByVolunteerDetail_TimeSlot_IdAndVolunteerDetail_VolDateAfterAndReserveStateIn(
+                		            slot.getId(), today, activeStates
+                		        );
+                		}
+                     TimeSlotDto dto = TimeSlotDto.fromEntity(slot);
+                     dto.setHasFutureReserve(hasFutureReserve); // ✅ 예약 여부 주입
+                     return dto;
+                 })
+                 .toList();
     }
     
     // 전체 시간대 조회
