@@ -75,6 +75,10 @@ export default function SignupPage() {
   /** 비밀번호 유효성 상태 */
   const [pwState, setPwState] = useState(() => evaluatePassword("", ""));
 
+  /** 휴대폰 인증 */
+  const [phoneVerifyOpen, setPhoneVerifyOpen] = useState(false);
+  const [phoneVerified, setPhoneVerified] = useState(false);
+
   /** 현재 입력된 아이디(이메일)를 소문자/trim으로 정규화 */
   const normalizedId = useMemo(
     () => (formData.memberId || "").trim().toLowerCase(),
@@ -319,6 +323,12 @@ export default function SignupPage() {
     }
   }, [loadDaumPostcodeScript]);
 
+  /** 휴대폰 인증 콜백 폼 데이터에 반영  */
+  function handlePhoneVerified({ phone }) {
+    // 예: formData.memberPhone 에 E.164(+82...) 저장하고, 표시용은 010 형태로 변환해서 보여줘도 됨
+    // setFormData((prev) => ({ ...prev, memberPhone: phone }));
+    setPhoneVerified(true);
+  }
   return (
     <div className="signup-container">
       {/* ✅ 브라우저 기본 검증 끔 */}
@@ -501,6 +511,18 @@ export default function SignupPage() {
                       onChange={handleChange}
                       placeholder="숫자만 입력"
                     />
+                  </div>
+                  <div className="temp_btn md">
+                    <button
+                      type="button"
+                      className="btn"
+                      onClick={() => setPhoneVerifyOpen(true)}
+                    >
+                      휴대폰 인증
+                    </button>
+                    {phoneVerified && (
+                      <span className="temp_help success">인증 완료</span>
+                    )}
                   </div>
                   <span className="temp_form">
                     <input

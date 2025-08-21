@@ -183,7 +183,7 @@ const LoginPage = () => {
                 </Link>
               </div>
               <div className="signup bth_item">
-                <Link to="/signup" className="login_btn type2">
+                <Link to="/join" className="login_btn type2">
                   <span>회원가입</span>
                 </Link>
               </div>

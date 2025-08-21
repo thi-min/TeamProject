@@ -37,7 +37,9 @@ const routes = {
 
   // 회원 관련
   member: {
-    signup: { path: "/signup", label: "회원가입" },
+    join: { path: "/join", label: "회원 약관" },
+    phone: { path: "/phonetest", label: "휴대폰 인증" },
+    signup: { path: "/join/signup", label: "회원가입" },
     login: { path: "/login", label: "로그인" },
     logout: { path: "/logout", label: "로그아웃" },
     findid: { path: "/find-id", label: "아이디 찾기" },

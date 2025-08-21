@@ -3,10 +3,12 @@
 import { Route } from "react-router-dom";
 import routes from "./router";
 import { RequireUserOnMember } from "./RouteGuards";
+import { LogoutLink } from "../../program/login/pages/LogoutLink"; //로그아웃
 
 // 📌 각 페이지 컴포넌트 import
 import LoginPage from "../../program/login/pages/LoginPage"; //로그인
-import LogoutLink from "../../program/login/pages/LogoutLink"; //로그아웃
+import Join from "../../program/signup/pages/JoinPage"; //회원가입 약관
+import PhoneVerifyPage from "../../program/signup/pages/PhoneVerifyPage"; //휴대폰 인증 페이지
 import Signup from "../../program/signup/pages/SignupPage"; //회원가입
 import Admin from "../../program/admin/pages/AdminPage"; //관리자 로그인시 출력
 import AdminPw from "../../program/admin/pages/AdminPasswordUpdatePage"; //관리자 비밀번호 변경
@@ -25,6 +27,12 @@ const layoutRoutes = [
     path={routes.member.logout.path}
     element={<LogoutLink />}
   />, //로그아웃
+  <Route key="join" path={routes.member.join.path} element={<Join />} />, //회원 약관
+  <Route
+    key="phonetest"
+    path={routes.member.phone.path}
+    element={<PhoneVerifyPage />}
+  />, //회원 약관
   <Route key="signup" path={routes.member.signup.path} element={<Signup />} />, //회원가입
   <Route
     key="mypage"

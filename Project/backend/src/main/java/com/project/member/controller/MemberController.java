@@ -83,7 +83,7 @@ public class MemberController {
     }
     
 	//회원가입
-	@PostMapping("/signup")
+	@PostMapping("/join/signup")
 	public ResponseEntity<MemberSignUpResponseDto> signup(@RequestBody MemberSignUpRequestDto dto){
 		return ResponseEntity.ok(memberService.sigup(dto));
 	}

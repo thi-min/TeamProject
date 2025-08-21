@@ -195,6 +195,9 @@ export default function MyPage() {
     }
     return digits;
   };
+
+  const [newPhone, setNewPhone] = useState("");
+
   const onChangePhone = (e) => {
     const digits = (e.target.value || "").replace(/[^0-9]/g, "").slice(0, 11);
     setPhone(formatPhoneDisplay(digits));
