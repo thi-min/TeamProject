@@ -378,12 +378,22 @@ const LandReserveFormPage = () => {
                     {(slot.capacity ?? 0) > 0 && (
                       <>
                         <br />
-                        {formData.landType
-                          ? `정원: ${slot.reservedCount ?? 0}/${slot.capacity}`
-                          : `정원: ${slot.capacity}`}
+                        {formData.landType ? (
+                            (slot.reservedCount ?? 0) >= (slot.capacity ?? 0) ? (
+                              // ✅ 정원 다 찬 경우
+                              `정원: ${slot.reservedCount}/${slot.capacity} - 마감`
+                            ) : slot.disabled ? (
+                              // ✅ 규칙 때문에 막힌 경우
+                              `정원: ${slot.capacity}`
+                            ) : (
+                              // ✅ 정상적으로 선택 가능
+                              `정원: ${slot.reservedCount ?? 0}/${slot.capacity}`
+                            )
+                          ) : (
+                            `정원: ${slot.capacity}`
+                          )}
                       </>
                     )}
-                     {(slot.reservedCount ?? 0) >= (slot.capacity ?? 0) && " - 마감"}
                   </button>
                 );
               })}

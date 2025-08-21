@@ -27,25 +27,38 @@ public interface LandRepository extends JpaRepository<Land, Long> {
                                       @Param("timeSlot") TimeSlot timeSlot,
                                       @Param("landType") LandType landType);
     
-    // timeslotid가 놀이터예약에 사용된적있는지 확인
+    //timeslotid가 놀이터예약에 사용된적있는지 확인
     boolean existsByTimeSlot_Id(Long timeSlotId);
     
-    // 프론트단에서 예약된 반려견 수 현황 확인
+    //프론트단에서 예약된 반려견 수 현황 확인
     @Query("""
-    		SELECT new com.project.land.dto.LandCountDto(
-    		    ts.id,
-    		    ts.label,
-    		    l.landType,
-    		    COALESCE(SUM(l.animalNumber), 0),
-    		    ts.capacity
-    		)
-    		FROM TimeSlot ts
-    		LEFT JOIN Land l ON ts.id = l.timeSlot.id
-    		WHERE (l.landDate = :date AND l.landType = :landType) OR l.landDate IS NULL
-    		GROUP BY ts.id, ts.label, ts.capacity, l.landType
-    		ORDER BY ts.startTime ASC
-    		""")
-    		List<LandCountDto> getLandCountInfo(@Param("date") LocalDate date,
-    		                                    @Param("landType") LandType landType);
+    	    SELECT new com.project.land.dto.LandCountDto(
+    	        ts.id,
+    	        ts.label,
+    	        l.landType,
+    	        COALESCE(SUM(
+    	            CASE WHEN r.reserveState IN (
+    	                com.project.reserve.entity.ReserveState.ING,
+    	                com.project.reserve.entity.ReserveState.DONE
+    	            )
+    	            THEN l.animalNumber ELSE 0 END
+    	        ), 0),
+    	        ts.capacity
+    	    )
+    	    FROM TimeSlot ts
+    	    LEFT JOIN Land l 
+    	        ON ts.id = l.timeSlot.id 
+    	       AND l.landDate = :date 
+    	       AND l.landType = :landType
+    	    LEFT JOIN Reserve r 
+    	        ON l.reserve.reserveCode = r.reserveCode
+    	    WHERE ts.timeType = com.project.common.entity.TimeType.LAND
+    	    GROUP BY ts.id, ts.label, ts.capacity, l.landType
+    	    ORDER BY ts.startTime ASC
+    	    """)
+    	List<LandCountDto> getLandCountInfo(
+    	    @Param("date") LocalDate date,
+    	    @Param("landType") LandType landType
+    	);
     
 }

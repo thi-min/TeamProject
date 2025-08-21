@@ -135,24 +135,9 @@ public class LandServiceImpl implements LandService {
     
     // 사용자용 - 프론트에서 시간대 선택 ui 구성때 사용
     @Override
+    @Transactional(readOnly = true)
     public List<LandCountDto> getLandTimeSlotsWithCount(LocalDate landDate, Long memberNum, LandType landType) {
-        List<TimeSlot> timeSlots = 
-        		timeSlotRepository.findByTimeTypeOrderByStartTimeAsc(TimeType.LAND);
-
-        return timeSlots.stream()
-                .map(timeSlot -> {
-                    Integer reserved = landRepository.countByDateAndTimeAndType(landDate, timeSlot, landType);
-                    int reservedCount = reserved != null ? reserved : 0;
-
-                    return LandCountDto.builder()
-                            .timeSlotId(timeSlot.getId())
-                            .label(timeSlot.getLabel())
-                            .landType(landType)
-                            .reservedCount(reservedCount)
-                            .capacity(timeSlot.getCapacity())
-                            .build();
-                })
-                .collect(Collectors.toList());
+        return landRepository.getLandCountInfo(landDate, landType);
     }
     
 }

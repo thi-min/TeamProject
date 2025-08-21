@@ -39,19 +39,19 @@ const VolunteerReserveDetailPage = () => {
 
   return (
     <div className="mypage-reserve-wrapper">
-      <h2>예약 정보</h2>
+      <h2>봉사 예약 정보</h2>
       <table className="reserve-table">
         <tbody>
-          <tr><th>예약코드</th><td>{detail.reserveCode}</td></tr>
+          <tr><th>예약 코드</th><td>{detail.reserveCode}</td></tr>
           <tr><th>신청자명</th><td>{detail.memberName}</td></tr>
           <tr><th>연락처</th><td>{detail.memberPhone}</td></tr>
           <tr><th>생년월일</th><td>{detail.memberBirth}</td></tr>
-          <tr><th>신청일자</th><td>{detail.applyDate}</td></tr>
           <tr><th>봉사일</th><td>{detail.volDate}</td></tr>
-          <tr><th>봉사 시간</th><td>{detail.label}</td></tr>
+          <tr><th>신청 일자</th><td>{detail.applyDate}</td></tr>
+          <tr><th>봉사시간</th><td>{detail.label}</td></tr>
           <tr><th>인원수</th><td>{detail.reserveNumber}</td></tr>
           <tr><th>예약 상태</th><td>{detail.reserveState}</td></tr>
-          <tr><th>비고</th><td>{detail.note}</td></tr>
+          <tr><th>비고</th><td>{detail.note ? detail.note : "-"}</td></tr>
         </tbody>
       </table>
 
