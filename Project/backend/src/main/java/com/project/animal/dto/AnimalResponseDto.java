@@ -18,13 +18,13 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class AnimalResponseDto {
-    private Long animalId;
-    private String animalName;
-    private String animalBreed;
-    private AnimalSex animalSex;
-    private AnimalState animalState;
-    private LocalDate animalDate;
-    private LocalDate adoptDate;
-    private String animalContent;
-    private Set<Long> fileIds;
+    private Long animalId; //동물 id
+    private String animalName; //동물 이름
+    private String animalBreed; //견종
+    private AnimalSex animalSex; // 성별
+    private AnimalState animalState; // 상태
+    private LocalDate animalDate; // 입소일
+    private LocalDate adoptDate; // 입소일 - service에서 adoptentity와 연결
+    private String animalContent; // 특이사항
+    private Set<Long> fileIds; // 첨부파일
 }

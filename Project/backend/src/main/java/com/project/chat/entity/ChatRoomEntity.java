@@ -29,19 +29,19 @@ public class ChatRoomEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "chat_room_id")
-    private Long chatRoomId;
+    private Long chatRoomId;//채팅방 번호
 
     @ManyToOne
     @JoinColumn(name = "member_num")
-    private MemberEntity member;
+    private MemberEntity member;//회원 번호
 
     @ManyToOne
     @JoinColumn(name = "admin_id")
-    private AdminEntity admin;
+    private AdminEntity admin; //관리자 id
 
     @Column(name = "create_at")
-    private LocalDateTime createAt;
+    private LocalDateTime createAt; //채팅방 생성 시간
 
     @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ChatMessageEntity> messages;
+    private Set<ChatMessageEntity> messages; //채팅messageentity 연결
 }

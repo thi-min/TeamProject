@@ -49,6 +49,7 @@ public class FundServiceImpl implements FundService {
                 .build();
     }
 
+    // 후원신청서 생성( if memberid가 없을시 예외처리
     @Override
     public FundResponseDto createFund(FundRequestDto dto) {
         MemberEntity member = memberRepository.findById(dto.getMemberId())
@@ -75,6 +76,7 @@ public class FundServiceImpl implements FundService {
         return toDto(created);
     }
 
+    // 특정 id 후원정보 조회(회원)
     @Override
     @Transactional(readOnly = true)
     public FundResponseDto getFund(Long id) {
@@ -83,18 +85,20 @@ public class FundServiceImpl implements FundService {
         return toDto(entity);
     }
     
+    // 모든 후원 정보 리스트 조회
     @Override
     @Transactional(readOnly = true)
     public Page<FundResponseDto> getFunds(Pageable pageable) {
         return fundRepository.findAll(pageable).map(this::toDto);
     }
     
+    // 후원자 명으로 후원정보 검색
     @Override
     @Transactional(readOnly = true)
     public Page<FundResponseDto> searchBySponsor(String sponsor, Pageable pageable) {
         return fundRepository.findByFundSponsorContaining(sponsor, pageable).map(this::toDto);
     }
-
+    // 특정 id에 해당하는 후원정보 수정 갱신
     @Override
     public FundResponseDto updateFund(Long id, FundRequestDto dto) {
         FundEntity exist = fundRepository.findById(id)
@@ -118,7 +122,7 @@ public class FundServiceImpl implements FundService {
         FundEntity updated = fundRepository.save(exist);
         return toDto(updated);
     }
-    
+    // 후원정보 삭제
     @Override
     public void deleteFund(Long id) {
         fundRepository.deleteById(id);

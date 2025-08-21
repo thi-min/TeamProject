@@ -7,4 +7,6 @@ import com.project.animal.entity.AnimalEntity;
 
 
 @Repository
-public interface AnimalRepository extends JpaRepository<AnimalEntity, Long> { }
+public interface AnimalRepository extends JpaRepository<AnimalEntity, Long> {
+	
+}

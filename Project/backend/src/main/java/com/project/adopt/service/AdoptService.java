@@ -15,26 +15,33 @@ import lombok.RequiredArgsConstructor;
 public class AdoptService {
     private final AdoptRepository adoptRepository;
 
+    //입양 리스트 전체 확인
     @Transactional(readOnly = true)
     public List<AdoptEntity> listAll() {
         return adoptRepository.findAll();
     }
-
+    //특정 입양 번호 조회
     @Transactional(readOnly = true)
     public AdoptEntity get(Long id) {
         return adoptRepository.findById(id).orElse(null);
     }
-
+    //client 입양 조회
+    @Transactional(readOnly = true)
+    public List<AdoptEntity> listByMemberNum(Long memberNum){
+    	return adoptRepository.findByMember_MemberNum(memberNum);
+    }
+    
+    //입양 데이터 저장
     @Transactional
     public AdoptEntity create(AdoptEntity e) {
         return adoptRepository.save(e);
     }
-
+    //입양 데이터 갱신
     @Transactional
     public AdoptEntity update(AdoptEntity e) {
         return adoptRepository.save(e);
     }
-
+    //특정 입양 번호로 입양 데이터 제거
     @Transactional
     public void delete(Long id) {
         adoptRepository.deleteById(id);

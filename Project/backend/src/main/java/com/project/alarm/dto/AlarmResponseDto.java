@@ -17,12 +17,12 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class AlarmResponseDto {
-    private Long alarmId;
-    private Long memberNum;
-    private AlarmType alarmType;
-    private String alarmTitle;
-    private String alarmContent;
-    private String alarmUrl;
-    private LocalDateTime alarmTime;
-    private CheckState alarmCheck;
+    private Long alarmId; //알림 번호
+    private Long memberNum; // 회원 번호
+    private AlarmType alarmType; //알림 유형
+    private String alarmTitle; // 알림 제목
+    private String alarmContent; // 알림 내용
+    private String alarmUrl; // 알림 링크
+    private LocalDateTime alarmTime; // 알림 시간
+    private CheckState alarmCheck; // 알림 확인
 }

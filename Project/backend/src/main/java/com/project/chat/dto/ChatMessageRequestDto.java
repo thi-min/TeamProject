@@ -12,8 +12,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class ChatMessageRequestDto {
-    private Long chatRoomId;
-    private Long memberNum;
-    private String adminId;
-    private String chatCont;
+    private Long chatRoomId; // 채팅방 id
+    private Long memberNum; // 회원 번호
+    private String adminId; // 관리자 id
+    private String chatCont; // 대화 내용 - service에서 chatmessageentity와 연결
 }

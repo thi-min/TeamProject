@@ -21,33 +21,33 @@ import lombok.NoArgsConstructor;
 @Builder
 public class FundResponseDto {
 
-    private Long fundId;
+    private Long fundId; // 후원번호
 
-    private Long memberId;
+    private Long memberId; // 회원 번호
 
-    private String fundSponsor;
+    private String fundSponsor; // 후원자명
 
-    private String fundPhone;
+    private String fundPhone;//연락처
 
-    private LocalDate fundBirth;
+    private LocalDate fundBirth;//생일
 
-    private FundType fundType;
+    private FundType fundType;//후원 종류
 
-    private BigDecimal fundMoney;
+    private BigDecimal fundMoney;//후원 금액
 
-    private LocalDateTime fundTime;
+    private LocalDateTime fundTime;//후원 일시
 
-    private String fundItem;
+    private String fundItem;//후원물품
 
-    private String fundNote;
+    private String fundNote;//비고
 
-    private String fundBank;
+    private String fundBank;// 은행
 
-    private String fundAccountNum;
+    private String fundAccountNum;//계좌
 
-    private String fundDepositor;
+    private String fundDepositor;//예금주 명
 
-    private LocalDate fundDrawlDate;
+    private LocalDate fundDrawlDate;// 출금일
 
-    private CheckState fundCheck;
+    private CheckState fundCheck;//확인상태
 }

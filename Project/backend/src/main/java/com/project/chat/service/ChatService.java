@@ -26,6 +26,7 @@ public class ChatService {
     private final AdminRepository adminRepository;
     private final SimpMessagingTemplate messagingTemplate;
 
+    // 새로운 채팅방 생성(client)
     @Transactional
     public ChatRoomEntity createRoomForMember(Long memberNum) {
         ChatRoomEntity room = new ChatRoomEntity();
@@ -34,12 +35,12 @@ public class ChatService {
         memberRepository.findByMemberNum(memberNum).ifPresent(room::setMember);
         return chatRoomRepository.save(room);
     }
-
+    // 채팅방 정보 조회
     @Transactional(readOnly = true)
     public ChatRoomEntity getRoom(Long id) {
         return chatRoomRepository.findById(id).orElse(null);
     }
-
+    //채팅 메시지 저장
     @Transactional
     public ChatMessageEntity saveMessage(ChatMessageEntity msg) {
         if (msg.getSendTime() == null) msg.setSendTime(LocalDateTime.now());
@@ -51,18 +52,18 @@ public class ChatService {
                 toDto(saved));
         return saved;
     }
-
+    // 특정 채팅방의 모든 메시지 정보 조회
     @Transactional(readOnly = true)
     public List<ChatMessageEntity> getMessages(Long chatRoomId) {
         return chatMessageRepository.findByChatRoomChatRoomIdOrderBySendTimeAsc(chatRoomId);
     }
-
+    // 모든 채팅방 목록 조회
     @Transactional(readOnly = true)
     public List<ChatRoomEntity> getAllRooms() {
         return chatRoomRepository.findAll();
     }
     
-    // Entity -> DTO 변환 메서드
+    // Entity -> DTO 변환 메서드 ( 데이터 노출 최소화 )
     private ChatMessageResponseDto toDto(ChatMessageEntity entity) {
         if (entity == null) {
             return null;

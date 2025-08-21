@@ -28,29 +28,29 @@ public class AlarmEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "alarm_id")
-    private Long alarmId;
+    private Long alarmId; //알림 번호
 
     @ManyToOne
     @JoinColumn(name = "member_num", nullable = false)
-    private MemberEntity member;
+    private MemberEntity member;//회원 번호
 
     @Enumerated(EnumType.STRING)
     @Column(name = "alarm_type", length = 20)
-    private AlarmType alarmType;
+    private AlarmType alarmType;//알림 유형
 
     @Column(name = "alarm_title")
-    private String alarmTitle;
+    private String alarmTitle;// 알림 제목
 
     @Column(name = "alarm_content", columnDefinition = "TEXT")
-    private String alarmContent;
+    private String alarmContent;// 알림 내용
 
     @Column(name = "alarm_url")
-    private String alarmUrl;
+    private String alarmUrl; // 알림 링크
 
     @Column(name = "alarm_time")
-    private LocalDateTime alarmTime;
+    private LocalDateTime alarmTime; // 알림 시간
 
     @Enumerated(EnumType.STRING)
     @Column(name = "alarm_check", length = 1)
-    private CheckState alarmCheck;
+    private CheckState alarmCheck; //알림 확인 (chatcheck enum과 동일 구조로 공유)
 }

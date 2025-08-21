@@ -33,11 +33,11 @@ public class ChatSocketSessionEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "session_id_pk")
-    private Long id;
+    private Long id; // 기본키
 
     @ManyToOne
     @JoinColumn(name = "chat_room_id", nullable = false)
-    private ChatRoomEntity chatRoom;
+    private ChatRoomEntity chatRoom; // 채팅방 번호
 
     @Column(name = "ws_session_id", nullable = false, unique = true)
     private String wsSessionId; // WebSocket 세션 아이디 (예: SimpMessageHeaderAccessor.getSessionId())
@@ -49,11 +49,11 @@ public class ChatSocketSessionEntity {
     private String principalValue; // 회원번호(memberNum) 또는 adminId 등 식별자(문자열형태)
 
     @Column(name = "connected_at")
-    private LocalDateTime connectedAt;
+    private LocalDateTime connectedAt; //세션 생성 시간
 
     @Column(name = "last_ping")
-    private LocalDateTime lastPing;
+    private LocalDateTime lastPing; // 마지막 활동 감지 (연결 정리)
 
     @Column(name = "closed")
-    private boolean closed;
+    private boolean closed; // 세션 종료 체크
 }

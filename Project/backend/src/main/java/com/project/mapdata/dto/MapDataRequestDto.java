@@ -11,10 +11,10 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class MapDataRequestDto {
-    private Long mapdataNum;
-    private String placeName;
-    private String address;
-    private Double latitude;
-    private Double longitude;
-    private String explaination;
+    private Long mapdataNum; // 지도번호
+    private String placeName; // 장소 이름
+    private String address; // 주소
+    private Double latitude; // 위도
+    private Double longitude; // 경도
+    private String explaination; // 설명
 }

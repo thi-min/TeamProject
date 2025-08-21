@@ -10,6 +10,10 @@ import com.project.adopt.entity.AdoptState;
 
 @Repository
 public interface AdoptRepository extends JpaRepository<AdoptEntity, Long> {
-    List<AdoptEntity> findByMemberMemberNum(Long memberNum);
-    List<AdoptEntity> findByAdoptState(AdoptState state);
+	
+    List<AdoptEntity> findByMemberMemberNum(Long memberNum);//회원번호로 조회
+    
+    List<AdoptEntity> findByAdoptState(AdoptState state);//입양상태로 조회
+    
+    List<AdoptEntity> findByMember_MemberNum(Long memberNum);//개인 입양 조회
 }

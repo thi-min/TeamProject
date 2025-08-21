@@ -21,11 +21,11 @@ public class AnimalFileEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "animal_file_id")
-    private Long animalFileId; // PK
+    private Long animalFileId; //동물 파일 번호
 
     @ManyToOne
     @JoinColumn(name = "animal_id", nullable = false)
-    private AnimalEntity animal;
+    private AnimalEntity animal; //동물 번호
 
     @Column(name = "file_num")
     private Long fileNum; // 실제 파일 엔티티가 있다면 ManyToOne으로 대체 가능
