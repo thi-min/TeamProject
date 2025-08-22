@@ -61,6 +61,8 @@ public class BbsServiceImpl implements BbsService {
     // ---------------- 게시글 저장 ----------------
     private BbsDto saveOnlyBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId) {
         MemberEntity member = null;
+
+        // ✅ memberNum이 null이면 엔티티에 세팅하지 않음
         if (dto.getMemberNum() != null) {
             member = memberRepository.findByMemberNum(dto.getMemberNum())
                     .orElseThrow(() -> new BbsException("회원이 존재하지 않습니다."));
@@ -70,7 +72,7 @@ public class BbsServiceImpl implements BbsService {
                 .bulletinNum(dto.getBulletinNum())
                 .bbstitle(dto.getBbsTitle())
                 .bbscontent(dto.getBbsContent())
-                .registdate(LocalDateTime.now()) 
+                .registdate(LocalDateTime.now())
                 .revisiondate(dto.getRevisionDate())
                 .deldate(dto.getDelDate())
                 .viewers(dto.getViewers() != null ? dto.getViewers() : 0)
@@ -85,6 +87,7 @@ public class BbsServiceImpl implements BbsService {
 
         return convertToDto(savedEntity);
     }
+
     
 
     // ---------------- 최상위 생성 메소드 ----------------
@@ -95,16 +98,20 @@ public class BbsServiceImpl implements BbsService {
 
         BoardType type = dto.getBulletinType();
 
-        // 권한 체크
+        // ✅ 로그인 상태 확인
+        if ((type == BoardType.FAQ || type == BoardType.POTO) && requesterMemberNum == null) {
+            throw new BbsException("로그인 후 작성 가능합니다.");
+        }
+
+        // ✅ 권한 체크 (공지사항)
         if (type == BoardType.NORMAL && requesterAdminId == null) {
             throw new BbsException("공지사항은 관리자만 작성할 수 있습니다.");
         }
-        if ((type == BoardType.FAQ || type == BoardType.POTO) && requesterMemberNum == null) {
-            throw new BbsException("해당 게시판은 회원만 작성할 수 있습니다.");
-        }
+
+        // ✅ DTO에 memberNum 안전하게 설정
+        dto.setMemberNum(requesterMemberNum);
 
         // 게시글 저장 (첨부파일 제외)
-        dto.setMemberNum(requesterMemberNum);
         BbsDto savedDto = saveOnlyBbs(dto, requesterMemberNum, requesterAdminId);
 
         if (type == BoardType.POTO) {
@@ -119,8 +126,8 @@ public class BbsServiceImpl implements BbsService {
                 );
 
                 List<FileUpLoadDto> savedFiles = getFilesByBbs(result.getBulletinNum());
-
                 int size = Math.min(savedFiles.size(), insertOptions.size());
+
                 for (int i = 0; i < size; i++) {
                     String option = insertOptions.get(i);
                     if ("insert".equals(option)) {
@@ -140,6 +147,7 @@ public class BbsServiceImpl implements BbsService {
             return result;
         }
     }
+
     
     @Override
     public FileUpLoadDto getFileById(Long fileId) {
