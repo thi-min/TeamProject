@@ -46,6 +46,8 @@ public class AdminEntity {
 	private String adminPw; //비밀번호
 	@Column(name = "admin_name",nullable = false)
 	private String adminName; //이름
+	@Column(name = "admin_email", nullable = false)
+	private String adminEmail;
 	@Column(name = "admin_phone",nullable = false)
 	private String adminPhone; //휴대폰번호
 	

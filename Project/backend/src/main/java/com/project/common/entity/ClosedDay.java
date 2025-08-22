@@ -18,8 +18,8 @@ public class ClosedDay {
     @Column(name = "closed_date")
     private LocalDate closedDate;
     
-    @Column(name = "holiday_name")
-    private String holidayName;
+    @Column(name = "reason") 
+    private String reason;
     
     @Column(name = "is_closed")
     private Boolean isClosed;  // true면 예약 불가

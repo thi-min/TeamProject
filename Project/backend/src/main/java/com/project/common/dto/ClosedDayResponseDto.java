@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Builder
 public class ClosedDayResponseDto {
     private LocalDate closedDate;
-    private String holidayName;
+    private String reason;
     private Boolean isClosed;
     
 }

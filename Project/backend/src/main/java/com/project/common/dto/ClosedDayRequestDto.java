@@ -11,7 +11,7 @@ import java.time.LocalDate;
 @Builder
 public class ClosedDayRequestDto {
     private LocalDate closedDate;
-    private String holidayName;
+    private String reason;
     private Boolean isClosed;
 }
 //휴무일 등록, 수정용

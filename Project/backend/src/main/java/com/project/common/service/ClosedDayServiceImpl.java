@@ -26,7 +26,7 @@ public class ClosedDayServiceImpl implements ClosedDayService {
     public void setClosedDay(ClosedDayRequestDto dto) {
         ClosedDay closedDay = ClosedDay.builder()
                 .closedDate(dto.getClosedDate())
-                .holidayName(dto.getHolidayName()) 
+                .reason(dto.getReason()) 
                 .isClosed(dto.getIsClosed())
                 .build();
 
@@ -54,7 +54,7 @@ public class ClosedDayServiceImpl implements ClosedDayService {
                 .stream()
                 .map(cd -> ClosedDayResponseDto.builder()
                         .closedDate(cd.getClosedDate())
-                        .holidayName(cd.getHolidayName())
+                        .reason(cd.getReason())
                         .isClosed(cd.getIsClosed())
                         .build())
                 .collect(Collectors.toList());
@@ -69,7 +69,7 @@ public class ClosedDayServiceImpl implements ClosedDayService {
         for (HolidayDto holiday : holidays) {
             ClosedDay closedDay = ClosedDay.builder()
                     .closedDate(holiday.getDate())
-                    .holidayName(holiday.getName())
+                    .reason(holiday.getName())
                     .isClosed("Y".equalsIgnoreCase(holiday.getIsHoliday()))
                     .build();
 
@@ -77,7 +77,7 @@ public class ClosedDayServiceImpl implements ClosedDayService {
             closedDayRepository.findById(closedDay.getClosedDate())
                     .ifPresentOrElse(
                         existing -> {
-                            existing.setHolidayName(holiday.getName());
+                            existing.setReason(holiday.getName());
                             existing.setIsClosed(closedDay.getIsClosed()); // 필요하다면 isClosed도 갱신
                             closedDayRepository.save(existing);
                         },

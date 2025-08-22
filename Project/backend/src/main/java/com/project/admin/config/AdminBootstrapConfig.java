@@ -33,6 +33,7 @@ public class AdminBootstrapConfig {
                     .adminId(DEFAULT_ADMIN_ID)
                     .adminPw(passwordEncoder.encode(DEFAULT_ADMIN_PW)) // ✅ 암호화 저장
                     .adminName("관리자")
+                    .adminEmail(DEFAULT_ADMIN_ID)
                     .adminPhone("01096861400")
                     .registDate(LocalDateTime.now())
                     .connectData(LocalDateTime.now())
