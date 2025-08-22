@@ -1,14 +1,13 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
 function QnaBbsWrite() {
   const [bbstitle, setBbstitle] = useState("");
-  const [bbscontent, setBbscontent] = useState("");
   const [files, setFiles] = useState([
     { id: Date.now(), file: null, insertOption: "no-insert" },
   ]);
-  const [previewImages, setPreviewImages] = useState({}); // { id: base64string }
+  const editorRef = useRef(null);
   const navigate = useNavigate();
 
   const baseUrl = "http://127.0.0.1:8090/bbs/bbslist/bbsadd";
@@ -23,11 +22,6 @@ function QnaBbsWrite() {
       setFiles((prev) =>
         prev.map((f) => (f.id === id ? { ...f, insertOption: "no-insert" } : f))
       );
-      setPreviewImages((prev) => {
-        const updated = { ...prev };
-        delete updated[id];
-        return updated;
-      });
     }
   };
 
@@ -48,23 +42,39 @@ function QnaBbsWrite() {
 
       const reader = new FileReader();
       reader.onload = (e) => {
-        setPreviewImages((prev) => ({ ...prev, [id]: e.target.result }));
+        const imgTag = `<img src="${e.target.result}" data-id="${id}" style="max-width:600px;" />`;
+
+        if (editorRef.current) {
+          editorRef.current.focus();
+          const sel = window.getSelection();
+          if (!sel.rangeCount) return;
+          const range = sel.getRangeAt(0);
+
+          const el = document.createElement("span");
+          el.innerHTML = imgTag;
+          range.insertNode(el);
+
+          range.setStartAfter(el);
+          range.setEndAfter(el);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
       };
       reader.readAsDataURL(file);
-    } else if (option === "no-insert") {
-      setPreviewImages((prev) => {
-        const updated = { ...prev };
-        delete updated[id];
-        return updated;
-      });
+    } else {
+      // no-insert 선택 시 contentEditable에서 해당 이미지 제거
+      if (editorRef.current) {
+        const imgs = editorRef.current.querySelectorAll(`img[data-id='${id}']`);
+        imgs.forEach((img) => img.remove());
+      }
     }
 
-    // 옵션 상태 업데이트
     setFiles((prev) =>
       prev.map((f) => (f.id === id ? { ...f, insertOption: option } : f))
     );
   };
 
+  // 파일 input 추가/삭제
   const addFileInput = () => {
     setFiles((prev) => [
       ...prev,
@@ -74,12 +84,34 @@ function QnaBbsWrite() {
 
   const removeFileInput = (id) => {
     setFiles((prev) => prev.filter((f) => f.id !== id));
-    setPreviewImages((prev) => {
-      const updated = { ...prev };
-      delete updated[id];
-      return updated;
-    });
+    if (editorRef.current) {
+      const imgs = editorRef.current.querySelectorAll(`img[data-id='${id}']`);
+      imgs.forEach((img) => img.remove());
+    }
   };
+
+  // MutationObserver로 contentEditable 변화를 감지하여 이미지 삭제 시 상태 업데이트
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setFiles((prevFiles) =>
+        prevFiles.map((f) => {
+          if (f.insertOption === "insert") {
+            const imgExists = editorRef.current?.querySelector(`img[data-id='${f.id}']`);
+            if (!imgExists) {
+              return { ...f, insertOption: "no-insert" };
+            }
+          }
+          return f;
+        })
+      );
+    });
+
+    if (editorRef.current) {
+      observer.observe(editorRef.current, { childList: true, subtree: true });
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   // 제출
   const handleSubmit = async (e) => {
@@ -94,13 +126,15 @@ function QnaBbsWrite() {
     formData.append("memberNum", memberNum);
     formData.append("type", "FAQ");
 
+    const contentHTML = editorRef.current?.innerHTML || "";
+
     formData.append(
       "bbsDto",
       new Blob(
         [
           JSON.stringify({
             bbsTitle: bbstitle,
-            bbsContent: bbscontent,
+            bbsContent: contentHTML,
             bulletinType: "FAQ",
           }),
         ],
@@ -146,31 +180,18 @@ function QnaBbsWrite() {
         {/* 내용 */}
         <div className="bbs-row">
           <div className="bbs-label">내용</div>
-          <textarea
+          <div
+            ref={editorRef}
+            contentEditable
             className="bbs-content-input"
-            placeholder="내용을 입력해 주세요"
-            value={bbscontent}
-            onChange={(e) => setBbscontent(e.target.value)}
-            required
+            style={{
+              minHeight: "200px",
+              border: "1px solid #ccc",
+              padding: "10px",
+              whiteSpace: "pre-wrap",
+            }}
           />
         </div>
-
-        {/* 이미지 미리보기 */}
-        {Object.keys(previewImages).length > 0 && (
-          <div className="bbs-preview-area">
-            <div className="bbs-label">본문 삽입 이미지 미리보기</div>
-            <div className="bbs-preview-list">
-              {Object.entries(previewImages).map(([id, src]) => (
-                <img
-                  key={id}
-                  src={src}
-                  alt={`preview-${id}`}
-                  style={{ maxWidth: "300px", margin: "10px" }}
-                />
-              ))}
-            </div>
-          </div>
-        )}
 
         {/* 파일 첨부 */}
         <div className="bbs-row">

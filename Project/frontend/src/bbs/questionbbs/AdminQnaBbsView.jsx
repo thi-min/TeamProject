@@ -10,13 +10,16 @@ function AdminQnaBbsView() {
   const [answerText, setAnswerText] = useState(""); // 답변 내용
   const navigate = useNavigate();
 
+  // ✅ 관리자 게시판 API 기본 URL
+  const BASE_URL = "http://127.0.0.1:8090/admin/bbs";
+
   useEffect(() => {
     fetchPost();
   }, [id]);
 
   const fetchPost = async () => {
     try {
-      const res = await axios.get(`/admin/bbs/bbslist/${id}`);
+      const res = await axios.get(`${BASE_URL}/bbslist/${id}`);
       setPost(res.data);
       setAnswerText(res.data.answerContent || ""); // 기존 답변 불러오기
     } catch (error) {
@@ -28,9 +31,7 @@ function AdminQnaBbsView() {
   // 답변 저장 (새 답변)
   const handleSaveAnswer = async () => {
     try {
-      await axios.post(`/admin/bbs/qna/${id}/answer`, {
-        content: answerText
-      }, { params: { adminId: 1 } });
+      await axios.post(`${BASE_URL}/qna/${id}/answer`, { content: answerText }, { params: { adminId: 1 } });
       alert("답변이 저장되었습니다.");
       fetchPost();
     } catch (error) {
@@ -42,9 +43,7 @@ function AdminQnaBbsView() {
   // 답변 수정
   const handleUpdateAnswer = async () => {
     try {
-      await axios.put(`/admin/bbs/qna/${post.qnaId}`, {
-        content: answerText
-      });
+      await axios.put(`${BASE_URL}/qna/${post.qnaId}`, { content: answerText });
       alert("답변이 수정되었습니다.");
       fetchPost();
     } catch (error) {
@@ -57,7 +56,7 @@ function AdminQnaBbsView() {
   const handleDeleteAnswer = async () => {
     if (!window.confirm("답변을 삭제하시겠습니까?")) return;
     try {
-      await axios.delete(`/admin/bbs/qna/${post.qnaId}`);
+      await axios.delete(`${BASE_URL}/qna/${post.qnaId}`);
       alert("답변이 삭제되었습니다.");
       setAnswerText("");
       fetchPost();
@@ -71,7 +70,7 @@ function AdminQnaBbsView() {
   const handleDeletePost = async () => {
     if (!window.confirm("게시글을 삭제하시겠습니까?")) return;
     try {
-      await axios.delete(`/admin/bbs/${id}`, { params: { adminId: 1 } });
+      await axios.delete(`${BASE_URL}/${id}`, { params: { adminId: 1 } });
       alert("게시글이 삭제되었습니다.");
       navigate("/admin/bbs");
     } catch (error) {

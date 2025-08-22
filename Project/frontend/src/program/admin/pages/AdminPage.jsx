@@ -28,7 +28,7 @@ export default function AdminPage() {
             <Link to="/admin/">봉사 관리</Link>
           </li>
           <li className="link_item type5">
-            <Link to="">게시판 관리</Link>
+            <Link to="/admin/bbs">게시판 관리</Link>
           </li>
           <li className="link_item type6">
             <Link to="">예약 시간대 관리</Link>

@@ -135,7 +135,7 @@ function AdminQnaBbs() {
                   <td>{post.bulletinNum}</td>
                   <td
                     style={{ cursor: "pointer", color: "blue" }}
-                    onClick={() => navigate(`bbs/admin/qna/view/${post.bulletinNum}`)}
+                    onClick={() => navigate(`/admin/qna/view/${post.bulletinNum}`)}
                   >
                     {post.bbsTitle}
                   </td>

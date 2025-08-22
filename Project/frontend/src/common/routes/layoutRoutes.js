@@ -31,6 +31,8 @@ import {
 
 
 // 게시판 관련
+import AdminBbs from "../../bbs/adminbbs";
+
 import Normal from "../../bbs/normalbbs/Normal";
 import NormalBbsView from "../../bbs/normalbbs/NormalBbsview";
 import NormalBbsWrite from "../../bbs/normalbbs/NormalBbsWrite";
@@ -59,9 +61,10 @@ import ImgBoardDummy from "../../bbs/imagebbs/ImgBoardDummy";
 
 // 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
+  <Route key="adminbbstab" path="/admin/bbs" element={<AdminBbs />} />,
 
   // 일반 게시판
-  <Route key="normal" path="/bbs/normal" element={<Normal />} />,
+  <Route key="normal" path="/admin/bbs/normal" element={<Normal />} />,
   <Route key="normal-bbs-view" path="/bbs/normal/:id" element={<NormalBbsView />} />,
   <Route key="normal-bbs-write" path="/bbs/normal/write" element={<NormalBbsWrite />} />,
   <Route key="normal-bbs-edit" path="/bbs/normal/edit" element={<NormalBbsEdit />} />,
@@ -75,8 +78,8 @@ const layoutRoutes = [
   <Route key="qna-bbs-write" path="/bbs/qna/write" element={<QnaBbsWrite />} />,
   <Route key="qna-bbs-view" path="/bbs/qna/:id" element={<QnaBbsView />} />,
   <Route key="qna-bbs-edit" path="/bbs/qna/edit/:id" element={<QnaBbsEdit />} />,
-  <Route key="qna-bbs-admin" path="/bbs/admin/qna" element={<AdminQnaBbs />} />,
-  <Route key="qna-bbs-admin-view" path="/bbs/admin/qna/view" element={<AdminQnaBbsView />} />,
+  <Route key="qna-bbs-admin" path="/admin/bbs/qna" element={<AdminQnaBbs />} />,
+  <Route key="qna-bbs-admin-view" path="/admin/qna/view/:id" element={<AdminQnaBbsView />} />,
   <Route key="qna-bbs-admin-dummy" path="/bbs/admin/qna/dummy" element={<AdminQnaBbsDummy />} />,
 
 
@@ -85,7 +88,7 @@ const layoutRoutes = [
   <Route key="img-detail" path="/bbs/image/:id" element={<ImgDetail />} />,
   <Route key="img-edit" path="/bbs/image/:id/edit" element={<ImgEdit />} />,
   <Route key="img-write" path="/bbs/image/write" element={<ImgWrite />} />,
-  <Route key="img-Admin-ImgBoard" path="/bbs/admin/image" element={<AdminImgBoard />} />,
+  <Route key="img-Admin-ImgBoard" path="/admin/bbs/image" element={<AdminImgBoard />} />,
   <Route key="img-Admin-ImgDetail" path="/bbs/admin/image/Detail" element={<AdminImgDetail />} />,
   <Route key="img-Admin-ImgDummy" path="/bbs/admin/image/Dummy" element={<ImgBoardDummy />} />,
 

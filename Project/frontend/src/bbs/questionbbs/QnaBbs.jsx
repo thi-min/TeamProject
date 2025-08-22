@@ -19,7 +19,6 @@ function QnaBbs() {
     try {
       const params = { type: "FAQ", page: pageNumber, size: 10 };
 
-      // 검색 키워드가 있을 때만 searchType과 키워드 추가
       if (searchType !== "all" && searchKeyword.trim() !== "") {
         params.searchType = searchType;
         if (searchType === "title") params.bbstitle = searchKeyword.trim();
@@ -51,6 +50,16 @@ function QnaBbs() {
     }
   };
 
+  // ✅ 로그인 체크 후 글쓰기 이동
+  const handleWrite = () => {
+    const memberNum = localStorage.getItem("memberNum"); // 로그인 상태 확인
+    if (!memberNum) {
+      alert("로그인 후 글쓰기가 가능합니다.");
+      return; // 로그인 안 되어 있으면 이동 막기
+    }
+    navigate("/bbs/qna/write"); // 로그인 되어 있으면 글쓰기 페이지로 이동
+  };
+
   return (
     <div className="bbs-container">
       <h2>❓ Q&A 게시판</h2>
@@ -77,7 +86,7 @@ function QnaBbs() {
 
       {/* 글쓰기 버튼 */}
       <div className="top-bar" style={{ margin: "10px 0" }}>
-        <button className="write-btn" onClick={() => navigate("/bbs/qna/write")}>
+        <button className="write-btn" onClick={handleWrite}>
           글쓰기
         </button>
       </div>
