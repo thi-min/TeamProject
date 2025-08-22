@@ -33,18 +33,7 @@ const LandReserveDatePage = () => {
   const year = today.getFullYear();
   const month = today.getMonth() + 1;
 
-  const fetchClosedDays = async () => {
-    try {
-      const { data } = await axios.get("/api/closed-days", {
-        params: { year, month },
-      });
-      setClosedDates(data.map((d) => d.closedDate));
-    } catch (err) {
-      console.error("휴무일 조회 실패:", err);
-    }
-  };
-
-  fetchClosedDays();
+  fetchClosedDays(year, month)
 }, []);
 
 

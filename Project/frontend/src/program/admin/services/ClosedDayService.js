@@ -13,11 +13,8 @@ const ClosedDayService = {
   },
 
   // 휴무일 등록
-  setClosedDay(date) {
-    return api.post("/api/closed-days", {
-      closedDate: date,
-      isClosed: true,
-    });
+  setClosedDay(closedDay) {
+    return api.post("/api/closed-days", closedDay);
   },
 
   // 휴무일 삭제

@@ -11,7 +11,6 @@ const VolunteerReserveFormPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const memberNum = localStorage.getItem("memberNum");
-  
   const selectedDate = location.state?.selectedDate
     ? toDateStr(location.state.selectedDate)
     : "";
@@ -77,12 +76,12 @@ const VolunteerReserveFormPage = () => {
     arr.map((s) => {
       const full = (s.reservedCount ?? 0) >= (s.capacity ?? 0);
       return {
-      timeSlotId: s.timeSlotId,
-      label: s.label,
-      capacity: s.capacity ?? 0,
-      reservedCount: s.reservedCount ?? 0,
-      enabled: true,
-      disabled: full, 
+        timeSlotId: s.timeSlotId,
+        label: s.label,
+        capacity: s.capacity ?? 0,
+        reservedCount: s.reservedCount ?? 0,
+        enabled: true,
+        disabled: full, 
       };
     });
 
