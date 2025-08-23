@@ -1,0 +1,6 @@
+.pop_inner{display:flex;justify-content:space-between;}
+.con_popup_box.phone .popup_box .popup_item .item_inner .pop_btn_box{margin-top:0;}
+.con_popup_box.phone .popup_box .popup_item .item_inner .pop_inner + .pop_inner{margin-top:16px;}
+.con_popup_box.phone .popup_box .popup_item .item_inner .pop_inner .temp_form{width:75%;}
+.con_popup_box.phone .popup_box .popup_item .item_inner .pop_inner .pop_btn_box .temp_btn{min-width:100px;text-align:center;}
+.con_popup_box.phone .popup_box .popup_item .item_inner .pop_text_box{max-height:300px;}

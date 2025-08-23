@@ -22,6 +22,7 @@ import {
 } from "react";
 import { RecaptchaVerifier, signInWithPhoneNumber } from "firebase/auth";
 import { auth } from "../firebase/firebase";
+import "../style/common.css";
 
 // ✅ 프로젝트에 맞게 수정 가능
 const MEMBER_PHONE_EXISTS_API = "/api/members/exists/phone?phone=";
@@ -217,7 +218,7 @@ export default function PhoneAuthModal({
 
   // === 제공한 "팝업 내부" 마크업 그대로 ===
   return (
-    <div className="con_popup_box">
+    <div className="con_popup_box phone">
       <div
         className={`popup_box ${open ? "active" : ""}`}
         data-popup={dataPopup}
@@ -249,6 +250,9 @@ export default function PhoneAuthModal({
 
             {/* 본문 영역(.pop_text_box) */}
             <div className="pop_text_box" ref={textBoxRef}>
+              {/* 안내/에러 메시지 */}
+              {message && <p className="temp_help margin_b_15">{message}</p>}
+              <div className="pop_inner">
               {/* 휴대폰 번호 입력 */}
               <div className="temp_form md">
                 <label className="temp_label" htmlFor="phoneInput">
@@ -281,46 +285,47 @@ export default function PhoneAuthModal({
                   </button>
                 </span>
               </div>
-
+                </div>
               {/* 인증번호 입력/확인 (전송 후 표시) */}
               {sent && (
                 <>
-                  <div className="temp_form md">
-                    <label className="temp_label" htmlFor="codeInput">
-                      인증번호(6자리)
-                    </label>
-                    <input
-                      id="codeInput"
-                      className="temp_input"
-                      type="text"
-                      inputMode="numeric"
-                      maxLength={6}
-                      placeholder="예: 123456"
-                      value={code}
-                      onChange={(e) =>
-                        setCode(e.target.value.replace(/[^0-9]/g, ""))
-                      }
-                    />
-                  </div>
+                  <div className="pop_inner">
+                    <div className="temp_form md">
+                      <label className="temp_label" htmlFor="codeInput">
+                        인증번호(6자리)
+                      </label>
+                      <input
+                        id="codeInput"
+                        className="temp_input"
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={6}
+                        placeholder="예: 123456"
+                        value={code}
+                        onChange={(e) =>
+                          setCode(e.target.value.replace(/[^0-9]/g, ""))
+                        }
+                      />
+                    </div>
 
-                  <div className="pop_btn_box">
-                    <span className="temp_btn md white">
-                      <button
-                        type="button"
-                        className="btn chk_close_btn"
-                        onClick={handleVerifyCode}
-                        disabled={verifying}
-                        title="인증확인"
-                      >
-                        {verifying ? "확인 중..." : "인증확인(성공 시 닫힘)"}
-                      </button>
-                    </span>
+                    <div className="pop_btn_box">
+                      <span className="temp_btn md white">
+                        <button
+                          type="button"
+                          className="btn chk_close_btn"
+                          onClick={handleVerifyCode}
+                          disabled={verifying}
+                          title="인증확인"
+                        >
+                          {verifying ? "확인 중..." : "인증확인"}
+                        </button>
+                      </span>
+                    </div>
                   </div>
                 </>
               )}
 
-              {/* 안내/에러 메시지 */}
-              {message && <p className="temp_help">{message}</p>}
+              
             </div>
           </div>
 
