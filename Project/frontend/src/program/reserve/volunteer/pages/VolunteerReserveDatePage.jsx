@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useEffect} from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -8,20 +8,15 @@ import "./../style/VolunteerReserveStyle.css"; // 봉사 예약 스타일
 const VolunteerReserveDatePage = () => {
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(null);
-  const [closedDates, setClosedDates] = useState([]);
-  const [holidays, setHolidays] = useState([]);
+  const [closedDates, setClosedDates] = useState([]); // {date, reason}
 
+  // 휴무일 조회
   const fetchClosedDays = async (year, month) => {
     try {
       const { data } = await axios.get("/api/closed-days", {
         params: { year, month },
       });
-      setClosedDates(data.map((d) => d.closedDate));
-      setHolidays(
-        data
-          .filter((d) => d.holidayName)
-          .map((d) => ({ date: d.closedDate, name: d.holidayName }))
-      );
+      setClosedDates(data.map((d) => ({ date: d.closedDate, reason: d.reason })));
     } catch (err) {
       console.error("휴무일 조회 실패:", err);
     }
@@ -32,10 +27,10 @@ const VolunteerReserveDatePage = () => {
     const year = today.getFullYear();
     const month = today.getMonth() + 1;
 
-    fetchClosedDays(year, month)
+    fetchClosedDays(year, month);
   }, []);
 
-    // 날짜 선택 핸들러
+  // 날짜 선택 핸들러
   const handleDateSelect = (date) => {
     setSelectedDate(date);
   };
@@ -56,7 +51,7 @@ const VolunteerReserveDatePage = () => {
   // 휴무일 또는 평일 제외
   const isDateDisabled = (date) => {
     const dateStr = formatDateKST(date);
-    return !isWeekend(date) || closedDates.includes(dateStr);
+    return !isWeekend(date) || closedDates.some((cd) => cd.date === dateStr);
   };
 
   // 다음 버튼 클릭 시
@@ -88,31 +83,32 @@ const VolunteerReserveDatePage = () => {
             isDateDisabled(date) ? "closed-date" : null
           }
           tileContent={({ date, view }) => {
-            if (view === "month") {
-              const dateStr = formatDateKST(date);
-              const holiday = holidays.find((h) => h.date === dateStr);
+  if (view === "month") {
+    const dateStr = formatDateKST(date);
+    const closed = closedDates.find((cd) => cd.date === dateStr);
 
-              if (holiday) {
-                return (
-                  <div className="holiday-text">
-                    <div>{date.getDate()}일</div>
-                    <div>{holiday.name}</div>
-                  </div>
-                );
-              }
+    // 1️⃣ 휴무일 (DB에 등록된 날) → 빨간 글씨
+    if (closed) {
+      return (
+        <div>
+          <div>{date.getDate()}일</div>
+          <div className="closed-text">{closed.reason || "예약마감"}</div>
+        </div>
+      );
+    }
 
-              if (isDateDisabled(date)) {
-                return (
-                  <div className="closed-text">
-                    <div>{date.getDate()}일</div>
-                    <div>{!isWeekend(date) ? "예약불가" : "예약마감"}</div>
-                  </div>
-                );
-              }
-            }
-            return null;
-          }}
-
+    // 2️⃣ 평일 (주말이 아님) → 그냥 회색 표시만 (글자는 검정)
+    if (!isWeekend(date)) {
+      return (
+        <div>
+          <div>{date.getDate()}일</div>
+          <div className="disabled-text">예약불가</div>
+        </div>
+      );
+    }
+  }
+  return null;
+}}
           onActiveStartDateChange={({ activeStartDate }) => {
             const year = activeStartDate.getFullYear();
             const month = activeStartDate.getMonth() + 1;

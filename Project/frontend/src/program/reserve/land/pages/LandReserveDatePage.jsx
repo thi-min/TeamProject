@@ -4,56 +4,43 @@ import { useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import "./../style/LandReserveStyle.css"; // 필요 시 사용자 정의 스타일 추가
-import ClosedDayService from "../../../admin/services/ClosedDayService";
 
 const LandReserveDatePage = () => {
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(null);
-  const [closedDates, setClosedDates] = useState([]);
-  const [holidays, setHolidays] = useState([]);
+  const [closedDates, setClosedDates] = useState([]); // { date, reason }
 
   const fetchClosedDays = async (year, month) => {
     try {
       const { data } = await axios.get("/api/closed-days", {
         params: { year, month },
       });
-      setClosedDates(data.map((d) => d.closedDate));
-      setHolidays(
-        data
-          .filter((d) => d.holidayName)
-          .map((d) => ({ date: d.closedDate, name: d.holidayName }))
-      );
+      setClosedDates(data.map((d) => ({ date: d.closedDate, reason: d.reason })));
     } catch (err) {
       console.error("휴무일 조회 실패:", err);
     }
   };
-  
+
   useEffect(() => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = today.getMonth() + 1;
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
 
-  fetchClosedDays(year, month)
-}, []);
-
-
-  // 날짜 선택 핸들러
-  const handleDateSelect = (date) => {
-    setSelectedDate(date);
-  };
+    fetchClosedDays(year, month);
+  }, []);
 
   // yyyy-MM-dd 포맷 함수 (로컬 기준)
   const formatDateKST = (date) => {
     const offset = date.getTimezoneOffset() * 60000;
     const localDate = new Date(date.getTime() - offset);
-      return localDate.toISOString().split("T")[0];
+    return localDate.toISOString().split("T")[0];
   };
 
-// 예약 마감 날짜인지 여부 확인
-const isDateClosed = (date) => {
-  const dateStr = formatDateKST(date);
-    return closedDates.includes(dateStr);
-};
+  // 예약 마감 날짜인지 여부 확인
+  const isDateClosed = (date) => {
+    const dateStr = formatDateKST(date);
+    return closedDates.some((cd) => cd.date === dateStr);
+  };
 
   // 다음 버튼 클릭 핸들러
   const handleNextClick = () => {
@@ -62,12 +49,11 @@ const isDateClosed = (date) => {
       return;
     }
 
-  const formattedDate = formatDateKST(selectedDate); 
-  navigate("/reserve/land/form", {
-    state: { selectedDate: formattedDate }, 
-  });
+    const formattedDate = formatDateKST(selectedDate);
+    navigate("/reserve/land/form", {
+      state: { selectedDate: formattedDate },
+    });
   };
-
 
   return (
     <div className="land-date-page">
@@ -84,24 +70,15 @@ const isDateClosed = (date) => {
           tileClassName={({ date }) =>
             isDateClosed(date) ? "closed-date" : null
           }
-          // 👉 여기 tileContent 추가
           tileContent={({ date, view }) => {
             if (view === "month") {
               const dateStr = formatDateKST(date);
-              const holiday = holidays.find((h) => h.date === dateStr);
-              if (holiday) {
+              const closed = closedDates.find((cd) => cd.date === dateStr);
+              if (closed) {
                 return (
-                  <div className="holiday-text">
+                  <div>
                     <div>{date.getDate()}일</div>
-                    <div>{holiday.name}</div>
-                  </div>
-                );
-              }
-              if (isDateClosed(date)) {
-                return (
-                  <div className="closed-text">
-                    <div>{date.getDate()}일</div>
-                    <div>예약마감</div>
+                    <div className="closed-text">{closed.reason || "예약불가"}</div> {/* 사유만 빨강 */}
                   </div>
                 );
               }
@@ -118,7 +95,6 @@ const isDateClosed = (date) => {
       </div>
 
       <div className="form-action-buttons">
-        
         <button className="next-button" onClick={handleNextClick}>
           다음
         </button>

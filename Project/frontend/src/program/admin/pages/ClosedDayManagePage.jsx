@@ -9,7 +9,6 @@ const ClosedDayManagePage = () => {
   const [year, setYear] = useState(today.getFullYear());
   const [month, setMonth] = useState(today.getMonth() + 1);
   const [closedDays, setClosedDays] = useState([]); // {date, reason}
-  const [holidays, setHolidays] = useState([]);     // {date, name}
   const [selectedDate, setSelectedDate] = useState(null);
   const [reason, setReason] = useState("");
 
@@ -20,7 +19,7 @@ const ClosedDayManagePage = () => {
     return localDate.toISOString().split("T")[0];
   };
 
-  // ✅ 직접 등록 휴무일 조회
+  // ✅ 휴무일 조회
   const fetchClosedDays = async (y, m) => {
     try {
       const { data } = await ClosedDayService.getClosedDays(y, m);
@@ -30,31 +29,20 @@ const ClosedDayManagePage = () => {
     }
   };
 
-  // ✅ 공휴일 조회
-  const fetchHolidays = async (y) => {
-    try {
-      const { data } = await ClosedDayService.getHolidaysByYear(y);
-      setHolidays(data.map((d) => ({ date: d.date, name: d.name })));
-    } catch (err) {
-      console.error("공휴일 조회 실패", err);
-    }
-  };
-
   useEffect(() => {
     fetchClosedDays(year, month);
-    fetchHolidays(year);
   }, [year, month]);
 
   // ✅ 휴무일 토글 (등록/삭제)
-   const toggleClosedDay = async (dateStr, reasonInput) => {
+  const toggleClosedDay = async (dateStr, reasonInput) => {
     try {
-      const exists = closedDays.some(cd => cd.date === dateStr);
+      const exists = closedDays.some((cd) => cd.date === dateStr);
 
       if (exists) {
         await ClosedDayService.deleteClosedDay(dateStr);
-        setClosedDays(prev => prev.filter(cd => cd.date !== dateStr));
+        setClosedDays((prev) => prev.filter((cd) => cd.date !== dateStr));
         if (formatDateKST(selectedDate ?? new Date()) === dateStr) setReason("");
-         alert("휴무일이 해제되었습니다.");
+        alert("휴무일이 해제되었습니다.");
         return;
       }
 
@@ -72,7 +60,7 @@ const ClosedDayManagePage = () => {
       });
       alert("휴무일이 등록되었습니다.");
 
-      setClosedDays(prev => [...prev, { date: dateStr, reason: trimmed }]);
+      setClosedDays((prev) => [...prev, { date: dateStr, reason: trimmed }]);
       setReason(""); // 입력 박스 비우기
     } catch (e) {
       console.error("휴무일 등록/삭제 실패", e);
@@ -81,12 +69,10 @@ const ClosedDayManagePage = () => {
   };
 
   return (
-    <div style={{ display: "flex", padding: "20px", gap: "20px" }}>
-      {/* 달력 */}
-      <div style={{ flex: 2, maxWidth: "900px" }}>
-        <h2>
-          휴무일 관리 - {year}년 {month}월
-        </h2>
+    <div className="closed-day-manage-container">
+      {/* 달력 영역 */}
+      <div className="closed-day-calendar">
+        <h2>휴무일 관리 - {year}년 {month}월</h2>
         <Calendar
           value={selectedDate}
           onClickDay={setSelectedDate}
@@ -101,23 +87,11 @@ const ClosedDayManagePage = () => {
             if (view === "month") {
               const dateStr = formatDateKST(date);
 
-              // 1️⃣ 공휴일
-              const holiday = holidays.find((h) => h.date === dateStr);
-              if (holiday) {
-                return (
-                  <div style={{ color: "orange", fontSize: "0.7rem" }}>
-                    {holiday.name}
-                  </div>
-                );
-              }
-
-              // 2️⃣ 직접 등록 휴무일
+              // ✅ 휴무일 (공휴일 + 직접 등록 포함)
               const closed = closedDays.find((cd) => cd.date === dateStr);
               if (closed) {
                 return (
-                  <div style={{ color: "red", fontSize: "0.7rem" }}>
-                    {closed.reason || "예약마감"}
-                  </div>
+                  <div className="closed-text">{closed.reason || "예약마감"}</div>
                 );
               }
             }
@@ -126,43 +100,42 @@ const ClosedDayManagePage = () => {
           tileClassName={({ date, view }) => {
             if (view !== "month") return null;
             const dateStr = formatDateKST(date);
-            const isHoliday = holidays.some(h => h.date === dateStr);
-            const isClosed = closedDays.some(cd => cd.date === dateStr);
-            return (isHoliday || isClosed) ? "disabled-day" : null;
+            const isClosed = closedDays.some((cd) => cd.date === dateStr);
+            return isClosed ? "disabled-day" : null;
+          }}
+          tileDisabled={({ date, view }) => {
+            if (view === "month") {
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              return date < today;
+            }
+            return false;
           }}
         />
       </div>
 
       {/* 우측 패널 */}
-      <div
-        style={{
-          flex: 1,
-          minWidth: "250px",
-          border: "1px solid #ccc",
-          borderRadius: "8px",
-          padding: "15px",
-        }}
-      >
+      <div className="closed-day-sidebar">
         <h3>선택된 날짜</h3>
         {selectedDate ? (
           <>
             <p>{formatDateKST(selectedDate)}</p>
             {closedDays.some((cd) => cd.date === formatDateKST(selectedDate)) ? (
               <>
-                <p style={{ color: "red" }}>현재 휴무일</p>
+                <p className="closed-day-text">현재 휴무일</p>
                 <button onClick={() => toggleClosedDay(formatDateKST(selectedDate))}>
                   휴무일 해제
                 </button>
               </>
             ) : (
               <>
-                <p style={{ color: "green" }}>예약 가능일</p>
+                <p className="available-day-text">예약 가능일</p>
                 <input
                   type="text"
                   placeholder="휴무일 사유 입력"
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
-                  style={{ width: "100%", marginBottom: 8 }}
+                  className="closed-day-input"
                 /> <br />
                 <button onClick={() => toggleClosedDay(formatDateKST(selectedDate), reason)}>
                   휴무일 등록
