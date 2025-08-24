@@ -19,7 +19,7 @@ export default function AdminPage() {
             <Link to="/admin/updatePw">비밀번호 변경</Link>
           </li>
           <li className="link_item type2">
-            <Link to="/admin/memberList">회원 관리</Link>
+            <Link to="/admin/membersList">회원 관리</Link>
           </li>
           <li className="link_item type3">
             <Link to="/admin/">놀이터 관리</Link>

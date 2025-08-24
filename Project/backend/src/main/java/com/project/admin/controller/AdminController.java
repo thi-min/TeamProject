@@ -1,8 +1,10 @@
 package com.project.admin.controller;
 
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -12,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.admin.dto.AdminLoginRequestDto;
-import com.project.admin.dto.AdminLoginResponseDto;
 import com.project.admin.dto.AdminMemberDetailResponseDto;
 import com.project.admin.dto.AdminMemberListResponseDto;
 import com.project.admin.dto.AdminMemberUpdateRequestDto;
@@ -114,16 +114,25 @@ public class AdminController {
 	    return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
 	}
 
+	// ✅ 전체 회원목록 조회(페이징 + 검색)
+    @GetMapping("/membersList")
+    public ResponseEntity<PageResponseDto<AdminMemberListResponseDto>> getPagedMembers(
+            @ModelAttribute PageRequestDto pageRequestDto // 바인딩 명시
+    ){
+        PageResponseDto<AdminMemberListResponseDto> page = adminService.getMemberList(pageRequestDto);
+        return ResponseEntity.ok(page);
+    }
+    
 	//전체 회원목록 조회(페이징 + 검색 포함)
 	//param pageRequestDto 페이지번호, 크기, 검색키워드
 	//return pageResponseDto 형태로 페이지 정보 + 회원 목록 반환
-	@GetMapping("/membersList")
-	public ResponseEntity<PageResponseDto<AdminMemberListResponseDto>> getPagedMembers(PageRequestDto pageRequestDto){
-		PageResponseDto<AdminMemberListResponseDto> page = adminService.getMemberList(pageRequestDto);
-		
-		return ResponseEntity.ok(page);
-	}
-	
+//	@GetMapping("/membersList")
+//	public ResponseEntity<PageResponseDto<AdminMemberListResponseDto>> getPagedMembers(PageRequestDto pageRequestDto){
+//		PageResponseDto<AdminMemberListResponseDto> page = adminService.getMemberList(pageRequestDto);
+//		
+//		return ResponseEntity.ok(page);
+//	}
+//	
 	//회원 상세 조회(관리자용
 	//param : memberNum 조회할 회원 번호
 	//return : AdminMemberDetailResponseDto

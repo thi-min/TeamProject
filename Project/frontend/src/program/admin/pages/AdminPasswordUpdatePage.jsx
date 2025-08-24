@@ -105,7 +105,7 @@ export default function AdminPasswordUpdatePage() {
                 <div className="temp_btn white md">
                   <BackButton label="이전" className="btn white" />
                 </div>
-                <div class="temp_btn md ">
+                <div className="temp_btn md ">
                   <button type="submit" className="btn" disabled={loading}>
                     {loading ? "변경 중..." : "비밀번호 변경"}
                   </button>

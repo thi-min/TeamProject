@@ -58,9 +58,12 @@ const routes = {
   admin: {
     admin: { path: "/admin", label: "관리자 페이지" },
     password: { path: "/admin/updatePw", label: "관리자 비밀번호 변경" },
-    dashboard: { path: "/admin/dashboard", label: "관리자 홈" },
-    members: { path: "/admin/members", label: "회원 관리" },
-    memberDetail: (id) => `/admin/members/${id}`,
+    membersList: { path: "/admin/membersList", label: "회원 목록" },
+    memberDetail: {
+      path: "/admin/membersList/:memberNum",
+      build: (id) => `/admin/membersList/${id}`,
+      label: "회원 상세",
+    },
   },
 
   // 예약

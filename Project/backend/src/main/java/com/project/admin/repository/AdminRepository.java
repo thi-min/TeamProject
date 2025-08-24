@@ -1,6 +1,7 @@
 package com.project.admin.repository;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -21,4 +22,11 @@ public interface AdminRepository extends JpaRepository<AdminEntity, Long>{
 	//예시: adminId로 해당 관리자 조회
 	//Optional<AdminEntity> findByAdminId(String adminId);
 	Optional<AdminEntity> findFirstByAdminId(String adminId);
+	// ✅ 서비스에서 사용하는 검색 메서드 (이게 반드시 있어야 함)
+	 // 이름 부분 일치 검색 (페이지네이션)
+    Page<MemberEntity> findByMemberNameContaining(String keyword, Pageable pageable);
+
+    // 상세 조회에 사용 (memberNum이 PK가 아니면 해당 컬럼명에 맞춘 메서드 추가)
+    Optional<MemberEntity> findByMemberNum(Long memberNum);
 }
+

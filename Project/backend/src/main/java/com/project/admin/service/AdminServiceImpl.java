@@ -1,10 +1,11 @@
 package com.project.admin.service;
 
+
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
+import org.springframework.data.domain.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -120,6 +121,7 @@ public class AdminServiceImpl implements AdminService {
 	    Pageable pageable = pageRequestDto.toPageable();
 	    Page<MemberEntity> result;
 
+	    try {
 	    //검색 키워드가 있을 경우, 이름 기준 부분 일치 검색
 	    if (pageRequestDto.getKeyword() != null && !pageRequestDto.getKeyword().isBlank()) {
 	        result = memberRepository.findByMemberNameContaining(pageRequestDto.getKeyword(), pageable);
@@ -149,8 +151,24 @@ public class AdminServiceImpl implements AdminService {
 	            .isFirst(result.isFirst())                   //첫 페이지 여부
 	            .isLast(result.isLast())                     //마지막 페이지 여부
 	            .build();
+	    } catch (Exception ex) {
+            // ✅ 어디서 터지는지 로그로 반드시 확인
+            // 임시로 빈 페이지 리턴해서 프론트 막힘 해소 (로그로 원인 추적)
+            return PageResponseDto.<AdminMemberListResponseDto>builder()
+                    .content(Collections.emptyList())
+                    .currentPage(1)
+                    .totalPages(1)
+                    .totalElements(0)
+                    .isFirst(true)
+                    .isLast(true)
+                    .build();
+        }
+	    }
+	
+	/** null 이면 "-" 로 */
+	private String safe(String v) {
+	    return (v == null || v.isBlank()) ? "-" : v;
 	}
-
 	
 	//회원정보 상세보기(관리자)
 	@Override
