@@ -35,4 +35,9 @@ public class AlarmService {
     public AlarmEntity update(AlarmEntity e) {
         return alarmRepository.save(e);
     }
+    // 알림 제거
+    @Transactional
+    public void delete(Long id) {
+        alarmRepository.deleteById(id);
+    }
 }

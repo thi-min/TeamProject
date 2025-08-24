@@ -1,95 +1,272 @@
-import axios from 'axios';
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import '../style/Map.css';
 
 const MapForm = () => {
-    const navigate = useNavigate();
-    const [formData, setFormData] = useState({
-        placeName: '',
-        address: '',
-        latitude: '',
-        longitude: '',
-        explanation: '',
+  const [map, setMap] = useState(null);
+  const [places, setPlaces] = useState([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeTab, setActiveTab] = useState('hospital');
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [markers, setMarkers] = useState([]);
+  const kakaoMapKey = '9ef042d2c608fd6bd5f7c5f2658bc1aa';
+
+  // 첫 번째 useEffect: 카카오맵 SDK 로드 및 맵 객체 생성
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = `//dapi.kakao.com/v2/maps/sdk.js?appkey=${kakaoMapKey}&libraries=services,clusterer&autoload=false`;
+    script.async = true;
+    document.head.appendChild(script);
+
+    script.onload = () => {
+      window.kakao.maps.load(() => {
+        const container = document.getElementById('map');
+        const options = {
+          center: new window.kakao.maps.LatLng(33.450701, 126.570667),
+          level: 3,
+        };
+        const newMap = new window.kakao.maps.Map(container, options);
+        setMap(newMap);
+      });
+    };
+  }, []);
+
+  // 두 번째 useEffect: 맵 객체가 생성된 후 현재 위치 및 초기 검색 수행
+  useEffect(() => {
+    if (!map) return;
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((position) => {
+        const lat = position.coords.latitude;
+        const lng = position.coords.longitude;
+        const center = new window.kakao.maps.LatLng(lat, lng);
+        setCurrentLocation(center);
+        map.setCenter(center);
+
+        // 현재 위치 마커 생성
+        const currentMarker = new window.kakao.maps.Marker({
+          position: center,
+          map: map,
+        });
+        setMarkers([currentMarker]);
+
+        // 초기 장소 검색 실행
+        fetchPlacesByRadius(map, center, '동물병원', 3000);
+      }, (error) => {
+        console.error('위치 정보를 가져오는 데 실패했습니다.', error);
+        alert('현재 위치를 가져오지 못했습니다. 장소명을 검색하여 이용해 주세요.');
+        // 위치 정보를 가져오지 못했을 경우에도 초기 검색 실행
+        fetchPlacesByRadius(map, map.getCenter(), '동물병원', 3000);
+      });
+    } else {
+      console.error('이 브라우저에서는 Geolocation이 지원되지 않습니다.');
+      // Geolocation이 지원되지 않는 경우에도 초기 검색 실행
+      fetchPlacesByRadius(map, map.getCenter(), '동물병원', 3000);
+    }
+  }, [map]);
+
+  const fetchPlacesByRadius = (targetMap, center, keyword, radius) => {
+    if (!targetMap) return;
+    
+    // 기존 마커들 모두 제거
+    markers.forEach(marker => marker.setMap(null));
+    const newMarkers = [];
+    
+    // currentLocation이 유효한 경우에만 마커를 추가
+    if (currentLocation) {
+        const currentMarker = new window.kakao.maps.Marker({
+            position: currentLocation,
+            map: targetMap
+        });
+        newMarkers.push(currentMarker);
+    }
+
+    const ps = new window.kakao.maps.services.Places();
+    const searchOptions = {
+        location: center,
+        radius: radius,
+        sort: window.kakao.maps.services.SortBy.DISTANCE
+    };
+
+    ps.keywordSearch(keyword, (data, status) => {
+      if (status === window.kakao.maps.services.Status.OK) {
+        const searchResults = data.map(item => ({
+          mapdataNum: item.id,
+          placeName: item.place_name,
+          address: item.address_name,
+          latitude: item.y,
+          longitude: item.x
+        }));
+        setPlaces(searchResults);
+        
+        const bounds = new window.kakao.maps.LatLngBounds();
+        
+        if (currentLocation) {
+            bounds.extend(currentLocation);
+        }
+
+        searchResults.forEach(place => {
+          const markerPosition = new window.kakao.maps.LatLng(place.latitude, place.longitude);
+          const marker = new window.kakao.maps.Marker({
+            position: markerPosition
+          });
+          marker.setMap(targetMap);
+          newMarkers.push(marker);
+          bounds.extend(markerPosition);
+        });
+        
+        setMarkers(newMarkers);
+
+        if (searchResults.length > 0) {
+            targetMap.setBounds(bounds);
+        }
+        
+      } else {
+        console.log("반경 내 검색 결과가 없습니다.");
+        setPlaces([]);
+      }
+    }, searchOptions);
+  };
+
+  const handleTabClick = (tabName) => {
+    setActiveTab(tabName);
+    setPlaces([]);
+    
+    if (!map || !currentLocation) return;
+    
+    if (tabName === 'hospital') {
+      fetchPlacesByRadius(map, currentLocation, '동물병원', 3000);
+    } else if (tabName === 'playground') {
+      fetchPlacesByRadius(map, currentLocation, '애견놀이터', 3000);
+    }
+  };
+
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      alert('검색어를 입력해주세요.');
+      return;
+    }
+    
+    if (!map) {
+      alert('지도가 로드되지 않았습니다.');
+      return;
+    }
+
+    markers.forEach(marker => marker.setMap(null));
+    const newMarkers = [];
+    
+    // 검색 시 현재 위치 마커를 유지하고 싶다면 이 부분을 추가
+    if (currentLocation) {
+        const currentMarker = new window.kakao.maps.Marker({
+            position: currentLocation,
+            map: map,
+        });
+        newMarkers.push(currentMarker);
+    }
+    
+    const ps = new window.kakao.maps.services.Places();
+    
+    ps.keywordSearch(searchQuery, (data, status) => {
+      if (status === window.kakao.maps.services.Status.OK) {
+        const searchResults = data.map(item => ({
+          mapdataNum: item.id,
+          placeName: item.place_name,
+          address: item.address_name,
+          latitude: item.y,
+          longitude: item.x
+        }));
+        setPlaces(searchResults);
+        
+        const bounds = new window.kakao.maps.LatLngBounds();
+        
+        // 검색 결과 마커 추가
+        searchResults.forEach(place => {
+          const markerPosition = new window.kakao.maps.LatLng(place.latitude, place.longitude);
+          const marker = new window.kakao.maps.Marker({
+            position: markerPosition
+          });
+          marker.setMap(map);
+          newMarkers.push(marker);
+          bounds.extend(markerPosition);
+        });
+        
+        setMarkers(newMarkers);
+
+        if (searchResults.length > 0) {
+            map.setBounds(bounds);
+        }
+        
+      } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
+        alert('검색 결과가 없습니다.');
+        setPlaces([]);
+      } else {
+        alert('검색 중 오류가 발생했습니다.');
+      }
     });
+  };
 
-    const [message, setMessage] = useState(null);
+  const handlePlaceClick = (lat, lng) => {
+    if (map) {
+      const moveLatLon = new window.kakao.maps.LatLng(lat, lng);
+      map.setCenter(moveLatLon);
+      map.setLevel(2);
+    }
+  };
 
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
-    };
+  const handleGetDirections = (destination) => {
+    if (!currentLocation) {
+      alert('현재 위치 정보를 가져올 수 없습니다. 잠시 후 다시 시도해 주세요.');
+      return;
+    }
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const originUrl = `https://map.kakao.com/?sName=내 위치&eName=${destination}`;
+    window.open(originUrl, '_blank');
+  };
 
-        if (!formData.placeName || !formData.address || !formData.latitude || !formData.longitude) {
-            setMessage('필수 입력 항목을 모두 작성해주세요.');
-            setTimeout(() => setMessage(null), 3000);
-            return;
-        }
-
-        try {
-            await axios.post('http://localhost:8080/api/mapdata', formData);
-            alert('장소 정보가 성공적으로 등록되었습니다.');
-            navigate('/land'); // 성공 후 맵 페이지로 이동
-        } catch (error) {
-            console.error('장소 정보 등록 실패:', error);
-            setMessage('장소 정보 등록에 실패했습니다.');
-        }
-    };
-
-    return (
-        <div className="map-form-page">
-            <div className="map-form-container">
-                <h2 className="map-form-title">새 장소 등록</h2>
-                <form onSubmit={handleSubmit}>
-                    <div className="form-input-group">
-                        <div className="form-input-item">
-                            <label htmlFor="placeName" className="form-label required">장소 이름</label>
-                            <input type="text" id="placeName" name="placeName" value={formData.placeName} onChange={handleChange} className="form-input" />
-                        </div>
-                        <div className="form-input-item">
-                            <label htmlFor="address" className="form-label required">주소</label>
-                            <input type="text" id="address" name="address" value={formData.address} onChange={handleChange} className="form-input" />
-                        </div>
-                        <div className="form-input-item">
-                            <label htmlFor="latitude" className="form-label required">위도 (Latitude)</label>
-                            <input type="number" step="any" id="latitude" name="latitude" value={formData.latitude} onChange={handleChange} className="form-input" />
-                        </div>
-                        <div className="form-input-item">
-                            <label htmlFor="longitude" className="form-label required">경도 (Longitude)</label>
-                            <input type="number" step="any" id="longitude" name="longitude" value={formData.longitude} onChange={handleChange} className="form-input" />
-                        </div>
-                        <div className="form-input-item-textarea">
-                            <label htmlFor="explanation" className="form-label">설명</label>
-                            <textarea id="explanation" name="explanation" value={formData.explanation} onChange={handleChange} className="form-textarea" rows="5" />
-                        </div>
-                    </div>
-                    <div className="form-buttons">
-                        <button
-                            type="button"
-                            onClick={() => navigate(-1)}
-                            className="form-button-secondary"
-                        >
-                            취소
-                        </button>
-                        <button
-                            type="submit"
-                            className="form-button-primary"
-                        >
-                            등록
-                        </button>
-                    </div>
-                </form>
-            </div>
-            {message && (
-                <div className="form-message">
-                    {message}
-                </div>
-            )}
+  return (
+    <div className="map-container">
+      <div className="map-wrapper">
+        <div id="map"></div>
+      </div>
+      <div className="list-wrapper">
+        <div className="list-header">
+          <div className="tab-menu">
+            <button className={`tab-button ${activeTab === 'hospital' ? 'active' : ''}`} onClick={() => handleTabClick('hospital')}>동물병원</button>
+            <button className={`tab-button ${activeTab === 'playground' ? 'active' : ''}`} onClick={() => handleTabClick('playground')}>애견놀이터</button>
+          </div>
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="장소명 검색"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+            <button onClick={handleSearch}>검색</button>
+          </div>
         </div>
-    );
+        <ul className="place-list">
+          {places.length > 0 ? (
+            places.map((place) => (
+              <li key={place.mapdataNum} onClick={() => handlePlaceClick(place.latitude, place.longitude)}>
+                <h4>{place.placeName}</h4>
+                <p>{place.address}</p>
+                <button 
+                  className="direction-button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleGetDirections(place.placeName);
+                  }}
+                >
+                  길찾기
+                </button>
+              </li>
+            ))
+          ) : (
+            <li>검색 결과가 없습니다.</li>
+          )}
+        </ul>
+      </div>
+    </div>
+  );
 };
 
 export default MapForm;

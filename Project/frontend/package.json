@@ -19,7 +19,7 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "cross-env HOST=127.0.0.1 react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
@@ -43,11 +43,9 @@
     ]
   },
   "devDependencies": {
-
     "autoprefixer": "^10.4.21",
+    "cross-env": "^10.0.0",
     "postcss": "^8.5.6",
-    "tailwindcss": "^4.1.12",
-    "cross-env": "^10.0.0"
-
+    "tailwindcss": "^4.1.12"
   }
 }

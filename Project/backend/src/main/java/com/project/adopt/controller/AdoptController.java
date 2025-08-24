@@ -82,52 +82,90 @@ public class AdoptController {
         }
         return dto;
     }
-    //신청서 목록 조회(admin, client)
+    // 신청서 목록 조회 (admin, client)
     @GetMapping
-    public ResponseEntity<List<AdoptResponseDto>> listAll(HttpServletRequest request, @AuthenticationPrincipal UserDetails userDetails) {
-        if (request.isUserInRole("ADMIN")) {
-            // 관리자: 모든 신청서 조회
-            List<AdoptEntity> list = adoptService.listAll();
-            return ResponseEntity.ok(list.stream().map(this::toDto).collect(Collectors.toList()));
+    public ResponseEntity<Page<AdoptResponseDto>> listAll(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "sort", defaultValue = "adoptNum,desc") String sort) {
+        
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String role = jwtTokenProvider.getRoleFromToken(authentication.getCredentials().toString());
+        
+        // 페이지네이션 및 정렬 설정
+        String[] sortParts = sort.split(",");
+        Sort s = Sort.by(Sort.Direction.fromString(sortParts[1]), sortParts[0]);
+        Pageable pageable = PageRequest.of(page, size, s);
+        
+        Page<AdoptEntity> adoptPage;
+
+        if ("ADMIN".equals(role)) {
+            adoptPage = adoptService.listAll(pageable);
+        } else if ("USER".equals(role)) {
+            String memberId = authentication.getName();
+            MemberEntity member = memberService.getMemberByMemberId(memberId);
+            if (member == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            adoptPage = adoptService.listByMemberNum(member.getMemberNum(), pageable);
         } else {
-            // 일반 사용자: 자신의 신청서만 조회
-            Long memberNum = ((MemberEntity) userDetails).getMemberNum(); // UserDetails에서 memberNum 추출 로직
-            List<AdoptEntity> list = adoptService.listByMemberNum(memberNum);
-            return ResponseEntity.ok(list.stream().map(this::toDto).collect(Collectors.toList()));
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
+        
+        Page<AdoptResponseDto> responsePage = adoptPage.map(this::toDto);
+        return ResponseEntity.ok(responsePage);
     }
     //신청서 상세 조회(admin, client)
     @GetMapping("/{id}")
-    public ResponseEntity<AdoptResponseDto> get(@PathVariable Long id, HttpServletRequest request, @AuthenticationPrincipal UserDetails userDetails) {
-        AdoptEntity e = adoptService.get(id);
+    public ResponseEntity<AdoptResponseDto> get(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String role = jwtTokenProvider.getRoleFromToken(authentication.getCredentials().toString());
+        AdoptEntity entity = adoptService.get(id);
 
-        if (e == null) {
+        if (entity == null) {
             return ResponseEntity.notFound().build();
         }
 
-        if (request.isUserInRole("ADMIN")) {
-            // 관리자: 모든 신청서 조회
-            return ResponseEntity.ok(toDto(e));
-        } else {
-            // 일반 사용자: 자신의 신청서만 조회
-            Long memberNum = ((MemberEntity) userDetails).getMemberNum(); // UserDetails에서 memberNum 추출 로직
-            if (e.getMember().getMemberNum().equals(memberNum)) {
-                return ResponseEntity.ok(toDto(e));
+        if ("ADMIN".equals(role)) {
+            return ResponseEntity.ok(toDto(entity));
+        } else if ("USER".equals(role)) {
+            String memberId = authentication.getName();
+            if (entity.getMember().getMemberId().equals(memberId)) {
+                return ResponseEntity.ok(toDto(entity));
             } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build(); // 권한 없음
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
     // 입양 신청서 생성(admin)
     @PostMapping
     public ResponseEntity<AdoptResponseDto> create(@RequestBody AdoptRequestDto req) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String role = jwtTokenProvider.getRoleFromToken(authentication.getCredentials().toString());
+        
+        // 클라이언트의 경우, memberNum을 직접 넣지 않고 토큰에서 가져옴
+        if ("USER".equals(role)) {
+            String memberId = authentication.getName();
+            // memberId를 기반으로 memberNum을 찾아 AdoptRequestDto에 설정
+            MemberEntity member = memberService.getMemberByMemberId(memberId);
+            req.setMemberNum(member.getMemberNum());
+        }
+
         AdoptEntity entity = toEntity(req);
         AdoptEntity saved = adoptService.create(entity);
         return ResponseEntity.ok(toDto(saved));
     }
     // 입양 신청서 수정(admin)
-    @PutMapping("/{id}")
+     @PutMapping("/{id}")
     public ResponseEntity<AdoptResponseDto> update(@PathVariable Long id, @RequestBody AdoptRequestDto req) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String role = jwtTokenProvider.getRoleFromToken(authentication.getCredentials().toString());
+        if (!"ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+        
         AdoptEntity exist = adoptService.get(id);
         if (exist == null) return ResponseEntity.notFound().build();
         AdoptEntity entity = toEntity(req);
@@ -136,8 +174,13 @@ public class AdoptController {
         return ResponseEntity.ok(toDto(updated));
     }
     // 입양 신청서 제거(admin)
-    @DeleteMapping("/{id}")
+   @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String role = jwtTokenProvider.getRoleFromToken(authentication.getCredentials().toString());
+        if (!"ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         adoptService.delete(id);
         return ResponseEntity.noContent().build();
     }

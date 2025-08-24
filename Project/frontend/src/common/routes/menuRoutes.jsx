@@ -50,7 +50,7 @@ const menuRoutes = [
     title: "후원하기",
     access: "ALL",
     children: [
-      { title: "후원안내", path: "/fund/info", access: "ALL" },
+      { title: "후원안내", path: "/fund", access: "ALL" },
       { title: "후원금 사용내역", path: "/fund/allfund", access: "ALL" },
     ],
   },

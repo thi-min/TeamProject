@@ -26,30 +26,30 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class MapDataController {
     private final MapDataService mapDataService;
-
+    // 지도 데이터 목록 조회
     @GetMapping
     public ResponseEntity<List<MapDataResponseDto>> listAll() {
         return ResponseEntity.ok(mapDataService.findAll().stream().map(this::toDto).collect(Collectors.toList()));
     }
-
+    // 장소명으로 검색
     @GetMapping("/search")
     public ResponseEntity<List<MapDataResponseDto>> searchByPlace(@RequestParam("place") String place) {
         return ResponseEntity.ok(mapDataService.findByPlace(place).stream().map(this::toDto).collect(Collectors.toList()));
     }
-
+    // 단건 데이터 상세 조회
     @GetMapping("/{id}")
     public ResponseEntity<MapDataResponseDto> get(@PathVariable Long id) {
         MapDataEntity e = mapDataService.get(id);
         if (e == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(this.toDto(e));
     }
-
+    // 데이터 생성
     @PostMapping
     public ResponseEntity<MapDataResponseDto> create(@RequestBody MapDataRequestDto req) {
         MapDataEntity entity = this.toEntity(req);
         return ResponseEntity.ok(this.toDto(mapDataService.create(entity)));
     }
-
+    // 데이터 수정
     @PutMapping("/{id}")
     public ResponseEntity<MapDataResponseDto> update(@PathVariable Long id, @RequestBody MapDataRequestDto req) {
         MapDataEntity exist = mapDataService.get(id);
@@ -58,7 +58,7 @@ public class MapDataController {
         entity.setMapdataNum(id);
         return ResponseEntity.ok(this.toDto(mapDataService.update(entity)));
     }
-
+    // 데이터 삭제
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         mapDataService.delete(id);

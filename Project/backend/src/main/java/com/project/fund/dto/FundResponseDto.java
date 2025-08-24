@@ -49,5 +49,5 @@ public class FundResponseDto {
 
     private LocalDate fundDrawlDate;// 출금일
 
-    private CheckState fundCheck;//확인상태
+    private FundCheck fundCheck;//확인상태
 }

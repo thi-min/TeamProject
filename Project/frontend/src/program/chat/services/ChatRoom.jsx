@@ -1,131 +1,133 @@
-import { Stomp } from '@stomp/stompjs';
+import { Client } from '@stomp/stompjs';
 import axios from 'axios';
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import SockJS from 'sockjs-client';
-import '../style/Chat.css'; // 이전에 제공된 스타일 파일을 기준으로 생성합니다.
+import '../style/Chat.css'; // 스타일시트 경로는 프로젝트 구조에 맞게 수정해주세요.
 
 const ChatRoom = () => {
-  const { roomId } = useParams();
-  const navigate = useNavigate();
-  const [messages, setMessages] = useState([]);
-  const [messageInput, setMessageInput] = useState('');
-  const [stompClient, setStompClient] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const messagesEndRef = useRef(null);
+    const { chatRoomId } = useParams(); // URL에서 채팅방 ID 추출
+    const [messages, setMessages] = useState([]);
+    const [newMessage, setNewMessage] = useState('');
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const stompClient = useRef(null);
+    const messagesEndRef = useRef(null);
 
-  const MEMBER_NUM = 1; // 실제로는 로그인한 회원의 번호를 사용해야 합니다.
-  const ADMIN_ID = 'admin1'; // 실제로는 로그인한 관리자 ID를 사용해야 합니다.
-  const CHAT_ROOM_ID = roomId;
-
-  useEffect(() => {
-    // 기존 메시지 불러오기
-    const fetchMessages = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8080/api/chat/rooms/${CHAT_ROOM_ID}/messages`);
-        setMessages(response.data);
-      } catch (error) {
-        console.error('기존 메시지를 불러오는 데 실패했습니다.', error);
-      }
+    // 메시지 목록의 최하단으로 스크롤
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
-    
-    fetchMessages();
 
-    // STOMP 클라이언트 설정 및 연결
-    const socket = new SockJS('http://localhost:8080/stomp-websocket'); // WebSocket 엔드포인트
-    const client = Stomp.over(socket);
-    
-    client.connect({}, () => {
-      setIsConnected(true);
-      setStompClient(client);
-
-      // 메시지 수신용 토픽 구독
-      client.subscribe(`/topic/chat/${CHAT_ROOM_ID}`, (message) => {
-        const receivedMessage = JSON.parse(message.body);
-        setMessages(prevMessages => [...prevMessages, receivedMessage]);
-      });
-    }, (error) => {
-      console.error('STOMP 연결 실패:', error);
-      setIsConnected(false);
+    // WebSocket 연결 및 API 호출
+    useEffect(() => {
+        // 1. 초기 메시지 목록 불러오기
+        const fetchMessages = async () => {
+            try {
+                const response = await axios.get(`http://localhost:3000/rooms/${chatRoomId}/messages`);
+                setMessages(response.data);
+            } catch (err) {
+                console.error("메시지 목록을 불러오는 중 오류 발생:", err);
+                setError("메시지 목록을 불러오는 데 실패했습니다.");
+            } finally {
+                setLoading(false);
+            }
+        };
+    // 2. WebSocket 연결
+    const socket = new SockJS('http://localhost:3000/ws');
+    // Stomp.over 대신 new Client({ webSocketFactory: () => socket }) 사용
+    const client = new Client({
+        webSocketFactory: () => socket
     });
 
-    // 컴포넌트 언마운트 시 연결 해제
-    return () => {
-      if (client.connected) {
-        client.disconnect();
-      }
+    client.onConnect = (frame) => {
+        console.log('Connected: ' + frame);
+        // 구독: 메시지가 도착하면 목록에 추가
+        client.subscribe(`/topic/chat/${chatRoomId}`, (message) => {
+            const receivedMessage = JSON.parse(message.body);
+            setMessages(prevMessages => [...prevMessages, receivedMessage]);
+        });
     };
-  }, [CHAT_ROOM_ID]);
+    
+    // ⭐ 연결 시도
+    client.activate();
+    stompClient.current = client;
 
-  useEffect(() => {
-    // 새 메시지 수신 시 스크롤을 맨 아래로 이동
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    fetchMessages();
+    
+    // 컴포넌트 언마운트 시 WebSocket 연결 해제
+    return () => {
+        if (stompClient.current) {
+            stompClient.current.deactivate(); // disconnect() 대신 deactivate() 사용
+        }
+    };
+}, [chatRoomId]);
 
-  const handleSendMessage = () => {
-    if (messageInput.trim() && isConnected) {
-      const messageDto = {
-        chatRoomId: CHAT_ROOM_ID,
-        memberNum: null, // 관리자가 보낼 때는 memberNum이 null
-        adminId: ADMIN_ID,
-        chatCont: messageInput
-      };
-      
-      stompClient.send(`/app/chat.send`, {}, JSON.stringify(messageDto));
-      setMessageInput('');
+    // messages 상태가 업데이트될 때마다 스크롤
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    // 메시지 전송 핸들러
+    const handleSendMessage = async (e) => {
+        e.preventDefault();
+        if (newMessage.trim() === '') return;
+
+        // 백엔드에 보낼 메시지 DTO
+        const messagePayload = {
+            chatRoomId: chatRoomId,
+            adminId: 'AdminId', // ⭐ 현재 로그인된 관리자 ID로 변경해야 합니다.
+            chatCont: newMessage
+        };
+
+        try {
+            await axios.post(`http://localhost:3000/rooms/${chatRoomId}/messages`, messagePayload);
+            setNewMessage(''); // 전송 후 입력창 비우기
+        } catch (err) {
+            console.error("메시지 전송 중 오류 발생:", err);
+            // 오류 처리: 사용자에게 메시지를 보여주는 등의 로직 추가
+        }
+    };
+
+    if (loading) {
+        return <div className="loading">채팅 내역을 불러오는 중입니다...</div>;
     }
-  };
 
-  const formatTime = (isoString) => {
-    const date = new Date(isoString);
-    const hours = date.getHours().toString().padStart(2, '0');
-    const minutes = date.getMinutes().toString().padStart(2, '0');
-    return `${hours}:${minutes}`;
-  };
+    if (error) {
+        return <div className="error">{error}</div>;
+    }
 
-  return (
-    <div className="chat-room-container">
-      <div className="chat-room-header">
-        <h2 className="chat-room-title">1:1 대화</h2>
-      </div>
-      <div className="chat-messages-area">
-        <div className="chat-messages">
-          {messages.length === 0 ? (
-            <div className="no-messages">대화 내용이 없습니다.</div>
-          ) : (
-            messages.map((msg, index) => (
-              <div 
-                key={index} 
-                className={`chat-message-row ${msg.adminId ? 'admin-message' : 'member-message'}`}
-              >
-                <div className="chat-message-bubble">
-                  <div className="chat-message-content">{msg.chatCont}</div>
-                  <div className="chat-message-time">{formatTime(msg.sendTime)}</div>
-                </div>
-              </div>
-            ))
-          )}
-          <div ref={messagesEndRef} />
+    return (
+        <div className="chat-container">
+            <h1 className="chat-header">1:1 채팅방 (관리자)</h1>
+            <div className="messages-container">
+                {messages.map((msg) => (
+                    <div 
+                        key={msg.chatMessageId} 
+                        className={`message ${msg.adminId ? 'admin-message' : 'member-message'}`}
+                    >
+                        <div className="message-content">
+                            {msg.chatCont}
+                        </div>
+                        <div className="message-time">
+                            {new Date(msg.sendTime).toLocaleTimeString()}
+                        </div>
+                    </div>
+                ))}
+                <div ref={messagesEndRef} />
+            </div>
+            <form className="message-form" onSubmit={handleSendMessage}>
+                <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    placeholder="메시지를 입력하세요..."
+                    className="message-input"
+                />
+                <button type="submit" className="send-button">전송</button>
+            </form>
         </div>
-      </div>
-      <div className="chat-input-area">
-        <input
-          type="text"
-          value={messageInput}
-          onChange={(e) => setMessageInput(e.target.value)}
-          onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-          className="chat-input"
-          placeholder="메시지를 입력하세요."
-        />
-        <button 
-          onClick={handleSendMessage}
-          className="chat-send-button"
-        >
-          채팅하기
-        </button>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default ChatRoom;

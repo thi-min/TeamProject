@@ -17,8 +17,8 @@ public class AdoptService {
 
     //입양 리스트 전체 확인
     @Transactional(readOnly = true)
-    public List<AdoptEntity> listAll() {
-        return adoptRepository.findAll();
+    public Page<AdoptEntity> listAll(Pageable pageable) {
+        return adoptRepository.findAll(pageable);
     }
     //특정 입양 번호 조회
     @Transactional(readOnly = true)
@@ -27,8 +27,8 @@ public class AdoptService {
     }
     //client 입양 조회
     @Transactional(readOnly = true)
-    public List<AdoptEntity> listByMemberNum(Long memberNum){
-    	return adoptRepository.findByMember_MemberNum(memberNum);
+    public Page<AdoptEntity> listByMemberNum(Long memberNum, Pageable pageable){
+        return adoptRepository.findByMember_MemberNum(memberNum, pageable);
     }
     
     //입양 데이터 저장

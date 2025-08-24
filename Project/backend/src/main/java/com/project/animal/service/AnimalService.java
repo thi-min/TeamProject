@@ -21,8 +21,8 @@ public class AnimalService {
     
     //동물 데이터 조회
     @Transactional(readOnly = true)
-    public List<AnimalEntity> listAll() {
-        return animalRepository.findAll();
+    public Page<AnimalEntity> listAll(Pageable pageable) {
+        return animalRepository.findAll(pageable);
     }
     //특정 동물 데이터 조회 , 없을시 null 반환
     @Transactional(readOnly = true)

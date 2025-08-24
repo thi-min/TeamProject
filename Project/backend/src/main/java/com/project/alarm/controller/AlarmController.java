@@ -72,33 +72,30 @@ public class AlarmController {
 
         return dto;
     }
-
+    //회원별 알림 조회
     @GetMapping("/member/{memberNum}")
     public ResponseEntity<List<AlarmResponseDto>> listByMember(@PathVariable Long memberNum) {
         List<AlarmEntity> list = alarmService.listByMember(memberNum);
         return ResponseEntity.ok(list.stream().map(this::toDto).collect(Collectors.toList()));
     }
-
+    //단일 알림 조회
     @GetMapping("/{id}")
     public ResponseEntity<AlarmResponseDto> get(@PathVariable Long id) {
         AlarmEntity e = alarmService.get(id);
         if (e == null) return ResponseEntity.notFound().build();
         return ResponseEntity.ok(toDto(e));
     }
-
+    //알림 생성
     @PostMapping
     public ResponseEntity<AlarmResponseDto> create(@RequestBody AlarmRequestDto req) {
         AlarmEntity entity = toEntity(req);
         AlarmEntity saved = alarmService.create(entity);
         return ResponseEntity.ok(toDto(saved));
     }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<AlarmResponseDto> update(@PathVariable Long id, @RequestBody AlarmRequestDto req) {
-        AlarmEntity exist = alarmService.get(id);
-        if (exist == null) return ResponseEntity.notFound().build();
-        AlarmEntity entity = toEntity(req);
-        entity.setAlarmId(id);
-        return ResponseEntity.ok(toDto(alarmService.update(entity)));
+    //알림 삭제
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable Long id) {
+        alarmService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }

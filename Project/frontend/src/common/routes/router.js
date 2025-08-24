@@ -43,16 +43,20 @@ const routes = {
     mypage: { path: "/mypage", label: "마이페이지" },
     update: { path: "/mypage/update", label: "회원정보 수정" },
     delete: { path: "/mypage/update/delete", label: "회원 탈퇴" },
+    adopt: {
+            list: { path: "/member/adopt/list", label: "나의 입양 신청서" },
+            detail: (id) => `/member/adopt/detail/${id}`,
+        }
   },
   // 후원 경로
   fund: {
-    root: { path: "/fund/info", label: "후원 메인" },
-    fundForm: { path: "/fund/money", label: "후원금 신청" },
+    root: { path: "/fund", label: "후원 메인" },
+    fundForm: { path: "/fund/donation", label: "후원금 신청" },
     goodsForm: { path: "/fund/goods", label: "후원물품 신청" },
-    recurringForm: { path: "/fund/recurring", label: "정기후원 신청" },
-    fundDetails: { path: "/fund/money-details", label: "후원금 상세" },
+    regularForm: { path: "/fund/regular", label: "정기후원 신청" },
+    fundDetails: { path: "/fund/donation-details", label: "후원금 상세" },
     goodsDetails: { path: "/fund/goods-details", label: "후원물품 상세" },
-    recurringDetails: { path: "/fund/recurring-details", label: "정기후원 상세" },
+    regularDetails: { path: "/fund/regular-details", label: "정기후원 상세" },
   },
 
   admin: {
@@ -64,32 +68,29 @@ const routes = {
     // 1:1 채팅 경로 추가
     chat: {
       list: { path: "/admin/chat/list", label: "채팅 목록" },
-      room: (id) => `/admin/chat/room/${id}`,
+      room: (id) => `/admin/chat/room/:ChatRoomId`,
     },
+    
     // 입양 신청서 경로 추가
       adopt: {
-          form: (memberNum) => `/admin/adopt/request/${memberNum}`,
-          label: "입양 신청서"
-      },
+            list: { path: "/admin/adopt/list", label: "입양 신청서 관리" },
+            detail: (id) => `/admin/adopt/detail/${id}`,
+            resist: { path: "/admin/adopt/resist", label: "입양 신청서 작성" },
+            update: (id) => `/admin/adopt/update/${id}`,
+        },
     // 동물 관리 경로 추가
       animal: {
-          register: { path: "/admin/animal/register", label: "동물 정보 기입" },
+            list: { path: "/admin/animal/list", label: "동물 정보 관리" },
+            detail: (id) => `/admin/animal/detail/${id}`,
+            resist: { path: "/admin/animal/resist", label: "동물 정보 등록" },
+            update: (id) => `/admin/animal/update/${id}`,
+        
       },
   },
-
-  // frontend/src/common/routes/router.js
-
-
-  mapdata:{
-    root: { path: "/map", label: "동물 놀이터" },
-    info: { path: "/map/info", label: "놀이터 소개" },
-    gallery: { path: "/map/gallery", label: "놀이터 둘러보기" },
-    reserve: { path: "/map/reserve", label: "예약하기" },
-    // '놀이터 위치' 경로를 /map으로 변경
-    map: { path: "/map", label: "놀이터 위치" },
-    register: { path: "/map/map/register", label: "장소 등록" },
+  // 맵 관련 경로 추가
+  map: {
+      root: { path: "/map", label: "지도 검색" },
   },
-
 
   reservation: {
     list: { path: "/reservation/list", label: "예약 목록" },

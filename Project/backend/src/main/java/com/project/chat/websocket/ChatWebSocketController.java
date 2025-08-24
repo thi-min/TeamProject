@@ -23,46 +23,53 @@ public class ChatWebSocketController {
     public void processMessage(ChatMessageRequestDto dto, SimpMessageHeaderAccessor headerAccessor) {
         Long roomId = dto.getChatRoomId();
         ChatRoomEntity room = null;
-        if (roomId == null) {
-            if (dto.getMemberNum() == null) return;
+
+        // 채팅방 ID가 없으면 회원 ID로 채팅방을 생성 (입양 문의 시 최초 메시지)
+        if (roomId == null && dto.getMemberNum() != null) {
             room = chatService.createRoomForMember(dto.getMemberNum());
         } else {
+            // 채팅방 ID가 있으면 기존 채팅방을 조회
             room = chatService.getRoom(roomId);
             if (room == null) {
+                // 채팅방이 존재하지 않으면 오류 처리 또는 새로 생성
+                // 여기서는 새로운 채팅방을 생성하는 로직으로 구성
                 if (dto.getMemberNum() == null) return;
                 room = chatService.createRoomForMember(dto.getMemberNum());
             }
         }
-        ChatMessageEntity entity = toEntity(dto, room);
+        // 메시지 엔티티로 변환 및 저장
+        ChatMessageEntity entity = toEntity(dto, room, headerAccessor);
         chatService.saveMessage(entity);
-        // broadcasting is done by service via messagingTemplate
+        // 브로드캐스팅은 서비스 레이어에서 처리
     }
 
     // DTO -> Entity 변환 메서드
-    private ChatMessageEntity toEntity(ChatMessageRequestDto dto, ChatRoomEntity room) {
-        if (dto == null) {
+     private ChatMessageEntity toEntity(ChatMessageRequestDto dto, ChatRoomEntity room, SimpMessageHeaderAccessor headerAccessor) {
+        if (dto == null || room == null) {
             return null;
         }
+
         ChatMessageEntity entity = new ChatMessageEntity();
         
-        // 필드명 불일치 수정
+        // WebSocket 세션에서 사용자 정보(MemberNum 또는 AdminId) 추출
+        String principalType = (String) headerAccessor.getSessionAttributes().get("principalType");
+        String principalValue = (String) headerAccessor.getSessionAttributes().get("principalValue");
+
+        if ("MEMBER".equals(principalType)) {
+            MemberEntity member = chatService.getMember(Long.parseLong(principalValue));
+            entity.setMember(member);
+            entity.setAdmin(null);
+        } else if ("ADMIN".equals(principalType)) {
+            AdminEntity admin = chatService.getAdmin(principalValue);
+            entity.setAdmin(admin);
+            entity.setMember(null);
+        }
+
         entity.setChatCont(dto.getChatCont());
         entity.setChatCheck(CheckState.N);
         entity.setSendTime(LocalDateTime.now());
         entity.setChatRoom(room);
-        
-        // ChatMessageRequestDto에 없는 필드는 변환 로직에서 제거
-        // entity.setMessageId(dto.getChatMessageId());
-        // entity.setAlarmTime(dto.getAlarmTime());
 
-        // Assuming member is also needed, and can be retrieved from service or DTO.
-        // This part would need more context on how to get the MemberEntity.
-        // For now, it is commented out.
-        // if (dto.getMemberNum() != null) {
-        //     MemberEntity member = chatService.getMember(dto.getMemberNum());
-        //     entity.setMember(member);
-        // }
-        
         return entity;
     }
 }
