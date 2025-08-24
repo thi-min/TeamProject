@@ -60,6 +60,8 @@ const routes = {
     memberDetail: (id) => `/admin/members/${id}`,
     timeSlotManage: { path: "/admin/timeslots", label: "시간대 관리" },
     closedDayManage: { path: "/admin/closedday", label: "휴무일 관리"}, 
+    landReserveManage: { path: "/admin/reserve/land", label: "놀이터 예약 관리" },
+    volunteerReserveManage: { path: "/admin/reserve/volunteer", label: "봉사 예약 관리" },
   },
 
   //예약

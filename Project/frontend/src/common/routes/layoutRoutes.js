@@ -29,8 +29,10 @@ import FindPw from "../../program/member/pages/FindPasswordPage"; //비밀번호
 import ChangePw from "../../program/member/pages/ChangePasswordPage"; //비밀번호 변경
 import MyPage from "../../program/member/pages/Mypage"; //마이페이지
 import MyReserveListPage from "../../program/member/pages/MyReserveListPage"; //예약내역조회
-import LandReserveDetailPage from "../../program/member/pages/LandReserveDetailPage";
-import VolunteerReserveDetailPage from "../../program/member/pages/VolunteerReserveDetailPage";
+import LandReserveDetailPage from "../../program/member/pages/LandReserveDetailPage"; //놀이터예약 상세보기
+import VolunteerReserveDetailPage from "../../program/member/pages/VolunteerReserveDetailPage"; //봉사예약 상세보기
+import AdminLandReservePage from "../../program/admin/pages/AdminLandReservePage"; //놀이터예약 관리
+import AdminVolunteerReservePage from "../../program/admin/pages/AdminVolunteerReservePage";  //봉사예약 관리
 
 // 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
@@ -52,7 +54,8 @@ const layoutRoutes = [
   <Route key="admin" path={routes.admin.admin.path} element={<Admin />} />,
   <Route key="updatePw" path={routes.admin.password.path} element={<AdminPw />} />,
   <Route key="admin-closedday-manage" path={routes.admin.closedDayManage.path} element={<ClosedDayManagePage />} />,
-
+  <Route key="admin-land-manage" path={routes.admin.landReserveManage.path} element={<AdminLandReservePage />} />,
+  <Route key="admin-volunteer-manage" path={routes.admin.volunteerReserveManage.path} element={<AdminVolunteerReservePage />} />,
   //사용자
   <Route key="login" path={routes.member.login.path} element={<LoginPage />} />, //로그인
   <Route
@@ -77,13 +80,7 @@ const layoutRoutes = [
   // 봉사 예약 상세보기
   <Route key="mypage-reserve-volunteer-detail" path={routes.member.volunteerReserveDetail.path} element={<VolunteerReserveDetailPage />} />,
 
-  //관리자
-  <Route key="admin" path={routes.admin.admin.path} element={<Admin />} />, //관리자 로그인시 출력
-  <Route
-    key="updatePw"
-    path={routes.admin.password.path}
-    element={<AdminPw />}
-  />, //관리자 비밀번호 변경
+  
 ];
 
 export default layoutRoutes;
