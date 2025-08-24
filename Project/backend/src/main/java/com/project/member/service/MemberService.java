@@ -75,7 +75,6 @@ public interface MemberService {
     //휴대폰 번호 중복 확인
     String checkPhoneNumber(String phoneNum);
     
-
     
     //내 정보 조회
 	MemberMeResponseDto getMyInfo(String memberId);

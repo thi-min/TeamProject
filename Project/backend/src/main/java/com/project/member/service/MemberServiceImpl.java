@@ -61,8 +61,8 @@ public class MemberServiceImpl implements MemberService {
 		String encodedPw = passwordEncoder.encode(dto.getMemberPw());
 		
 		//핸드폰번호 암호화
-		String encryptedPhone = JasyptUtil.encrypt(dto.getMemberPhone());
-		
+		//String encryptedPhone = JasyptUtil.encrypt(dto.getMemberPhone());
+        
 		//Entity 변환
 		MemberEntity newMember = MemberEntity.builder()
 				.memberId(dto.getMemberId())
@@ -70,8 +70,8 @@ public class MemberServiceImpl implements MemberService {
 //				.memberPw(dto.getMemberPw())
 				.memberName(dto.getMemberName())
 				.memberBirth(dto.getMemberBirth())
-				.memberPhone(encryptedPhone)
-//				.memberPhone(dto.getMemberPhone())
+				.memberPhone(dto.getMemberPhone())
+//				.memberPhone(dtoencryptedPhone)
 				.memberAddress(dto.getMemberAddress())
 				.memberDay(LocalDate.now()) 
 				.memberSex(dto.getMemberSex())
