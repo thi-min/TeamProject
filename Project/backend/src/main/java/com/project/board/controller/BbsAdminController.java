@@ -27,7 +27,7 @@ public class BbsAdminController {
     @Autowired
     private BbsService bbsService;
 
-    // ---------------- 관리자 게시글 작성 (NORMAL 게시판) ----------------
+ // ---------------- 관리자 게시글 작성 (NORMAL 게시판) ----------------
     @PostMapping("/bbslist/bbsadd")
     public ResponseEntity<BbsDto> createBbs(
             @RequestParam Long adminId,
@@ -56,9 +56,12 @@ public class BbsAdminController {
             }
         }
 
-        BbsDto created = bbsService.createBbs(dto, null, adminId, files, insertOptions);
+        // isRepresentativeList는 NORMAL 게시판에서는 필요 없으므로 null로 전달
+        BbsDto created = bbsService.createBbs(dto, null, adminId, files, insertOptions, null);
+
         return ResponseEntity.ok(created);
     }
+
 
     // ---------------- QnA 답변 저장 ----------------
     @PostMapping("/qna/{bbsId}/answer")

@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.project.board.BoardType;
 import com.project.board.dto.BbsDto;
 import com.project.board.dto.FileUpLoadDto;
+import com.project.board.dto.ImageBbsDto;
 import com.project.board.service.BbsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
@@ -12,19 +13,15 @@ import org.springframework.core.io.Resource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import java.nio.file.Path;
 import java.nio.file.Paths;
-
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-
+import java.util.*;
 
 @RestController
 @RequestMapping("/bbs")
@@ -40,7 +37,8 @@ public class MemberBbsController {
             @RequestParam BoardType type,
             @RequestPart("bbsDto") BbsDto dto,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
-            @RequestParam(value = "insertOptions", required = false) List<String> insertOptions
+            @RequestParam(value = "insertOptions", required = false) List<String> insertOptions,
+            @RequestParam(value = "isRepresentative", required = false) List<String> isRepresentativeList
     ) {
         // insertOptions와 파일 1:1 매칭 & jpg/jpeg 필터링
         if (files != null && insertOptions != null) {
@@ -59,15 +57,15 @@ public class MemberBbsController {
 
         BbsDto created;
         if (type == BoardType.POTO) {
-            created = bbsService.createPotoBbs(dto, memberNum, files);
+            created = bbsService.createPotoBbs(dto, memberNum, files, isRepresentativeList);
         } else {
-            created = bbsService.createBbs(dto, memberNum, null, files, insertOptions);
+            created = bbsService.createBbs(dto, memberNum, null, files, insertOptions, null);
         }
 
         return ResponseEntity.ok(created);
     }
 
-    // ---------------- 게시글 수정 (본인만) ----------------
+    // ---------------- 게시글 수정 ----------------
     @PutMapping("/member/{id}")
     public ResponseEntity<BbsDto> updateMemberBbs(
             @PathVariable Long id,
@@ -79,7 +77,6 @@ public class MemberBbsController {
     ) {
         List<Long> deleteIds = parseDeleteIds(deletedFileIds);
 
-        // insertOptions와 파일 1:1 매칭 & jpg/jpeg 필터링
         if (files != null && insertOptions != null) {
             int size = Math.min(files.size(), insertOptions.size());
             for (int i = 0; i < size; i++) {
@@ -100,7 +97,7 @@ public class MemberBbsController {
         return ResponseEntity.ok(updated);
     }
 
-    // ---------------- 게시글 삭제 (본인만) ----------------
+    // ---------------- 게시글 삭제 ----------------
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBbs(
             @PathVariable Long id,
@@ -112,14 +109,20 @@ public class MemberBbsController {
 
     // ---------------- 게시글 단건 조회 ----------------
     @GetMapping("/{id}")
-    public ResponseEntity<BbsDto> getBbs(@PathVariable Long id) {
-        BbsDto dto = bbsService.getBbs(id);
-        return ResponseEntity.ok(dto);
+    public ResponseEntity<Map<String, Object>> getBbs(@PathVariable Long id) {
+        BbsDto dto = bbsService.getBbs(id); // BbsDto 고정
+        ImageBbsDto repImg = bbsService.getRepresentativeImage(id); // 대표 이미지 별도 조회
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("bbs", dto);
+        result.put("representativeImage", repImg);
+
+        return ResponseEntity.ok(result);
     }
 
     // ---------------- 게시글 목록 조회 ----------------
     @GetMapping("/bbslist")
-    public ResponseEntity<Page<BbsDto>> getBbsList(
+    public ResponseEntity<Map<String, Object>> getBbsList(
             @RequestParam(required = false) String searchType,
             @RequestParam(required = false) String bbstitle,
             @RequestParam(required = false) String bbscontent,
@@ -127,11 +130,30 @@ public class MemberBbsController {
             @RequestParam(required = false) BoardType type,
             @PageableDefault(size = 10) Pageable pageable) {
 
-        Page<BbsDto> result = bbsService.searchPosts(searchType, bbstitle, bbscontent, memberName, type, pageable);
+        Page<BbsDto> page = bbsService.searchPosts(searchType, bbstitle, bbscontent, memberName, type, pageable);
+
+        Map<String, Object> result = new HashMap<>();
+        Map<String, Object> pageMap = new HashMap<>();
+        pageMap.put("content", page.getContent());
+        pageMap.put("totalPages", page.getTotalPages());
+        pageMap.put("number", page.getNumber());
+        result.put("bbsList", pageMap);
+
+        // 이미지 게시판(POTO)인 경우만 대표 이미지 Map 추가
+        if (type == BoardType.POTO) {
+            Map<String, ImageBbsDto> repImageMap = new HashMap<>();
+            page.forEach(dto -> {
+                ImageBbsDto repImg = bbsService.getRepresentativeImage(dto.getBulletinNum());
+                if (repImg != null) repImageMap.put(dto.getBulletinNum().toString(), repImg);
+            });
+            result.put("representativeImages", repImageMap);
+        }
+
         return ResponseEntity.ok(result);
     }
 
- // ---------------- 첨부파일 조회 ----------------
+
+    // ---------------- 첨부파일 조회 ----------------
     @GetMapping("/{id}/files")
     public ResponseEntity<List<FileUpLoadDto>> getFilesByBbs(@PathVariable Long id) {
         List<FileUpLoadDto> files = bbsService.getFilesByBbs(id);
@@ -164,7 +186,7 @@ public class MemberBbsController {
         bbsService.deleteFileById(fileId);
         return ResponseEntity.noContent().build();
     }
-    
+
     // ---------------- deletedFileIds 문자열 → List<Long> 변환 ----------------
     private List<Long> parseDeleteIds(String deletedFileIds) {
         if (deletedFileIds != null && !deletedFileIds.isEmpty()) {
@@ -177,7 +199,8 @@ public class MemberBbsController {
         }
         return new ArrayList<>();
     }
-    
+
+    // ---------------- 첨부파일 다운로드 ----------------
     @GetMapping("/files/{fileId}/download")
     public ResponseEntity<Resource> downloadFile(@PathVariable Long fileId) {
         FileUpLoadDto fileDto = bbsService.getFileById(fileId);
@@ -188,23 +211,15 @@ public class MemberBbsController {
             return ResponseEntity.notFound().build();
         }
 
-        // jpg/jpeg만 처리
         String ext = fileDto.getExtension();
-        MediaType mediaType;
-        if ("jpg".equalsIgnoreCase(ext) || "jpeg".equalsIgnoreCase(ext)) {
-            mediaType = MediaType.IMAGE_JPEG;
-        } else {
-            mediaType = MediaType.APPLICATION_OCTET_STREAM;
-        }
+        MediaType mediaType = "jpg".equalsIgnoreCase(ext) || "jpeg".equalsIgnoreCase(ext)
+                ? MediaType.IMAGE_JPEG
+                : MediaType.APPLICATION_OCTET_STREAM;
 
         return ResponseEntity.ok()
                 .contentType(mediaType)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileDto.getOriginalName() + "\"")
                 .body(resource);
     }
-
-
-
-
 }
 

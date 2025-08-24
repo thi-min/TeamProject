@@ -20,18 +20,21 @@ function QnaBbs() {
       const params = { type: "FAQ", page: pageNumber, size: 10 };
 
       if (searchType !== "all" && searchKeyword.trim() !== "") {
-        params.searchType = searchType;
         if (searchType === "title") params.bbstitle = searchKeyword.trim();
         if (searchType === "content") params.bbscontent = searchKeyword.trim();
       }
 
       const response = await axios.get(baseUrl, { params });
-      setPosts(response.data.content);
-      setTotalPages(response.data.totalPages);
-      setPage(response.data.number);
+      const content = response.data?.bbsList?.content || []; // 안전하게 가져오기
+      setPosts(content);
+      setTotalPages(response.data?.bbsList?.totalPages || 0);
+      setPage(response.data?.bbsList?.number || 0);
     } catch (error) {
       console.error("게시글 불러오기 중 오류 발생:", error);
       alert("목록 조회 실패");
+      setPosts([]);
+      setTotalPages(0);
+      setPage(0);
     }
   };
 
@@ -45,19 +48,16 @@ function QnaBbs() {
   };
 
   const handlePageChange = (newPage) => {
-    if (newPage >= 0 && newPage < totalPages) {
-      setPage(newPage);
-    }
+    if (newPage >= 0 && newPage < totalPages) setPage(newPage);
   };
 
-  // ✅ 로그인 체크 후 글쓰기 이동
   const handleWrite = () => {
-    const memberNum = localStorage.getItem("memberNum"); // 로그인 상태 확인
+    const memberNum = localStorage.getItem("memberNum");
     if (!memberNum) {
       alert("로그인 후 글쓰기가 가능합니다.");
-      return; // 로그인 안 되어 있으면 이동 막기
+      return;
     }
-    navigate("/bbs/qna/write"); // 로그인 되어 있으면 글쓰기 페이지로 이동
+    navigate("/bbs/qna/write");
   };
 
   return (
@@ -117,7 +117,7 @@ function QnaBbs() {
                     <Link to={`/bbs/qna/${post.bulletinNum}`}>{post.bbsTitle}</Link>
                   </td>
                   <td>{post.memberName || "익명"}</td>
-                  <td>{new Date(post.registDate).toLocaleDateString()}</td>
+                  <td>{post.registDate ? new Date(post.registDate).toLocaleDateString() : ""}</td>
                 </tr>
               ))
             ) : (

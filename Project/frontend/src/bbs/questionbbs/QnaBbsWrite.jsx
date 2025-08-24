@@ -62,7 +62,6 @@ function QnaBbsWrite() {
       };
       reader.readAsDataURL(file);
     } else {
-      // no-insert 선택 시 contentEditable에서 해당 이미지 제거
       if (editorRef.current) {
         const imgs = editorRef.current.querySelectorAll(`img[data-id='${id}']`);
         imgs.forEach((img) => img.remove());
@@ -90,16 +89,14 @@ function QnaBbsWrite() {
     }
   };
 
-  // MutationObserver로 contentEditable 변화를 감지하여 이미지 삭제 시 상태 업데이트
+  // MutationObserver로 이미지 삭제 감지
   useEffect(() => {
     const observer = new MutationObserver(() => {
       setFiles((prevFiles) =>
         prevFiles.map((f) => {
           if (f.insertOption === "insert") {
             const imgExists = editorRef.current?.querySelector(`img[data-id='${f.id}']`);
-            if (!imgExists) {
-              return { ...f, insertOption: "no-insert" };
-            }
+            if (!imgExists) return { ...f, insertOption: "no-insert" };
           }
           return f;
         })
@@ -164,7 +161,6 @@ function QnaBbsWrite() {
   return (
     <div className="bbs-write-container">
       <form className="bbs-write-form" onSubmit={handleSubmit}>
-        {/* 제목 */}
         <div className="bbs-row">
           <div className="bbs-label">제목</div>
           <input
@@ -177,23 +173,16 @@ function QnaBbsWrite() {
           />
         </div>
 
-        {/* 내용 */}
         <div className="bbs-row">
           <div className="bbs-label">내용</div>
           <div
             ref={editorRef}
             contentEditable
             className="bbs-content-input"
-            style={{
-              minHeight: "200px",
-              border: "1px solid #ccc",
-              padding: "10px",
-              whiteSpace: "pre-wrap",
-            }}
+            style={{ minHeight: "200px", border: "1px solid #ccc", padding: "10px" }}
           />
         </div>
 
-        {/* 파일 첨부 */}
         <div className="bbs-row">
           <div className="bbs-label">파일 첨부</div>
           <div className="bbs-file-list">
@@ -238,23 +227,14 @@ function QnaBbsWrite() {
                 )}
               </div>
             ))}
-            <button
-              type="button"
-              className="bbs-file-add"
-              onClick={addFileInput}
-            >
+            <button type="button" className="bbs-file-add" onClick={addFileInput}>
               ➕ 파일 추가
             </button>
           </div>
         </div>
 
-        {/* 버튼 */}
         <div className="bbs-btn-area">
-          <button
-            type="button"
-            className="bbs-cancel-btn"
-            onClick={() => navigate("/bbs/qna")}
-          >
+          <button type="button" className="bbs-cancel-btn" onClick={() => navigate("/bbs/qna")}>
             취소
           </button>
           <button type="submit" className="bbs-save-btn">

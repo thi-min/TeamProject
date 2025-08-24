@@ -9,9 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface BbsService {
 	
-    BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files, List<String> insertOptions); // 게시글 생성 (회원 또는 관리자)
+    BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files, List<String> insertOptions, List<String> isRepresentativeList); // 게시글 생성 (회원 또는 관리자)
     
-    BbsDto createPotoBbs(BbsDto dto, Long requesterMemberNum, List<MultipartFile> files);
+    BbsDto createPotoBbs( BbsDto dto, Long requesterMemberNum, List<MultipartFile> files, List<String> isRepresentativeList);
     
     BbsDto createBbsWithFiles(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files,  List<String> insertOptions); // 생성된 게시글 + 파일첨부 (회원 또는 관리자)
     
@@ -50,6 +50,8 @@ public interface BbsService {
     void deleteFileById(Long fileId);
     
     FileUpLoadDto getFileById(Long fileId);
+    
+    ImageBbsDto getRepresentativeImage(Long bulletinNum);
 
 }
 
