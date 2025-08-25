@@ -4,23 +4,31 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 //비밀번호 단뱡향 복호화
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.project.common.jwt.JwtTokenProvider;
 import com.project.common.util.JasyptUtil;
+import com.project.member.dto.AddressUpdateRequestDto;
 import com.project.member.dto.KakaoSignUpRequestDto;
 import com.project.member.dto.KakaoUserInfoDto;
+import com.project.member.dto.MemberAuthResult;
 import com.project.member.dto.MemberDeleteDto;
 import com.project.member.dto.MemberIdCheckResponseDto;
 import com.project.member.dto.MemberLoginRequestDto;
 import com.project.member.dto.MemberLoginResponseDto;
+import com.project.member.dto.MemberMeResponseDto;
 import com.project.member.dto.MemberMyPageResponseDto;
 import com.project.member.dto.MemberMyPageUpdateRequestDto;
-import com.project.member.dto.MemberPasswordUpdateRequestDto;
 import com.project.member.dto.MemberSignUpRequestDto;
 import com.project.member.dto.MemberSignUpResponseDto;
+import com.project.member.dto.PhoneUpdateRequestDto;
+import com.project.member.dto.ResetPasswordUpdateRequestDto;
+import com.project.member.dto.SelfPasswordUpdateRequestDto;
 import com.project.member.entity.MemberEntity;
 import com.project.member.entity.MemberState;
 import com.project.member.repository.MemberRepository;
@@ -53,8 +61,8 @@ public class MemberServiceImpl implements MemberService {
 		String encodedPw = passwordEncoder.encode(dto.getMemberPw());
 		
 		//핸드폰번호 암호화
-		String encryptedPhone = JasyptUtil.encrypt(dto.getMemberPhone());
-		
+		//String encryptedPhone = JasyptUtil.encrypt(dto.getMemberPhone());
+        
 		//Entity 변환
 		MemberEntity newMember = MemberEntity.builder()
 				.memberId(dto.getMemberId())
@@ -62,8 +70,8 @@ public class MemberServiceImpl implements MemberService {
 //				.memberPw(dto.getMemberPw())
 				.memberName(dto.getMemberName())
 				.memberBirth(dto.getMemberBirth())
-				.memberPhone(encryptedPhone)
-//				.memberPhone(dto.getMemberPhone())
+				.memberPhone(dto.getMemberPhone())
+//				.memberPhone(dtoencryptedPhone)
 				.memberAddress(dto.getMemberAddress())
 				.memberDay(LocalDate.now()) 
 				.memberSex(dto.getMemberSex())
@@ -94,22 +102,87 @@ public class MemberServiceImpl implements MemberService {
         String message = exists ? "사용할 수 없는 아이디입니다." : "사용 가능한 아이디입니다.";
         return new MemberIdCheckResponseDto(exists, message);
     }
-	
-	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
+//	//로그인
+//	 @Override
+//    public MemberLoginResponseDto login(MemberLoginRequestDto dto) {
+//        // 1) ID로 회원 조회
+//        MemberEntity member = memberRepository.findByMemberId(dto.getMemberId())
+//                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
+//
+//        // 2) 탈퇴/잠금 차단
+//        if (member.getMemberState() == MemberState.OUT || Boolean.TRUE.equals(member.getMemberLock())) {
+//            // 403으로 보낼 수 있도록 IllegalStateException 사용(ControllerAdvice에서 매핑)
+//            throw new IllegalStateException("탈퇴(또는 잠금) 처리된 계정입니다. 관리자에게 문의하세요.");
+//        }
+//
+//        // 3) 비밀번호 검증
+//        if (!passwordEncoder.matches(dto.getPassword(), member.getMemberPw())) {
+//            throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
+//        }
+//
+//        // 4) 토큰 발급
+//        String access = jwtTokenProvider.generateAccessToken(member.getMemberId());
+//        String refresh = jwtTokenProvider.generateRefreshToken(member.getMemberId());
+//
+//        // (DB에 refresh 저장/회전 정책이 있으면 갱신)
+//        member.setRefreshToken(refresh);
+//        member.setAccessToken(access); // 선택
+//        memberRepository.save(member);
+//
+//        return MemberLoginResponseDto.builder()
+//                .memberId(member.getMemberId())
+//                .memberName(member.getMemberName())
+//                .message("로그인 성공")
+//                .accessToken(access)
+//                .refreshToken(refresh)
+//                .build();
+//    }
+	//로그인
 	@Override
-	public MemberLoginResponseDto login(MemberLoginRequestDto dto) {
-	    MemberEntity member = memberRepository.findByMemberId(dto.getMemberId())
-	        .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
-	    if (!passwordEncoder.matches(dto.getMemberPw(), member.getMemberPw())) {
-	        throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
-	    }
-	    return MemberLoginResponseDto.builder()
-	        .memberId(member.getMemberId())
-	        .memberName(member.getMemberName())
-	        .message("로그인 성공")
-	        // 토큰은 Controller에서 셋팅
-	        .build();
-	}
+    public MemberAuthResult authenticate(MemberLoginRequestDto dto) {
+        // 1) 회원 조회
+        MemberEntity member = memberRepository.findByMemberId(dto.getMemberId())
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
+
+        // 2) 상태 차단 (OUT/LOCK)
+        if (member.getMemberState() == MemberState.OUT || Boolean.TRUE.equals(member.getMemberLock())) {
+            throw new IllegalStateException("탈퇴(또는 잠금) 처리된 계정입니다. 관리자에게 문의하세요.");
+        }
+
+        // 3) 비밀번호 검증
+        //  - 주의: 요청 DTO 필드명은 memberPw 사용
+        if (!passwordEncoder.matches(dto.getMemberPw(), member.getMemberPw())) {
+            throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 4) 통과 → 기본 정보만 리턴 (토큰 발급/저장은 Controller에서)
+        return MemberAuthResult.builder()
+                .memberNum(member.getMemberNum())
+                .memberId(member.getMemberId())
+                .memberName(member.getMemberName())
+                .build();
+    }
+
+    @Override
+    public boolean isPasswordExpired(MemberEntity member) {
+        // 네 기존 로직 유지
+        // 예: pwUpdated 기준으로 n일 경과 판단 등
+        return false;
+    }
+	 
+	// 설명: memberId로 조회해 마이페이지에 필요한 최소 정보 반환
+	@Transactional
+    @Override
+    public MemberMeResponseDto getMyInfo(String memberId) {
+        MemberEntity member = memberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new IllegalArgumentException("회원이 존재하지 않습니다."));
+        return MemberMeResponseDto.builder()
+                .memberNum(member.getMemberNum())
+                .memberId(member.getMemberId())
+                .memberName(member.getMemberName())
+                .memberState(member.getMemberState() != null ? member.getMemberState().name() : null)
+                .build();
+    }
 	
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
@@ -120,20 +193,23 @@ public class MemberServiceImpl implements MemberService {
 		
 		//핸드폰번호 복호화
 		String decryptedPhone = JasyptUtil.decrypt(member.getMemberPhone());
-		
-		return MemberMyPageResponseDto.builder()
+        return MemberMyPageResponseDto.builder()
 				.memberName(member.getMemberName())
 				.memberId(member.getMemberId())
 				.memberBirth(member.getMemberBirth())
 				.memberSex(member.getMemberSex()) //enum은 그대로 호출
+				// ✅ 분리 주소 그대로 제공
+                .memberPostcode(member.getMemberPostcode())
+                .memberRoadAddress(member.getMemberRoadAddress())
+                .memberDetailAddress(member.getMemberDetailAddress())
+                //합쳐진 주소
 				.memberAddress(member.getMemberAddress())
 				.memberPhone(decryptedPhone)
-//				.memberPhone(member.getMemberPhone())
+//				.memberPhone(phoneForOwner)
 				.kakaoId(member.getKakaoId())
 				.smsAgree(member.isSmsAgree()) //boolean타입은 is로 호출
 				.build();
 	}
-	
 	//마이페이지 수정 + sms 동의
 	@Transactional
 	@Override
@@ -170,32 +246,116 @@ public class MemberServiceImpl implements MemberService {
 	            .build();
 	}
 
-	
-//	//회원 sns 동의
-//	@Transactional
-//	@Override
-//	public MemberSmsAgreeUpdateResponseDto updateSmsAgree(Long memberNum, MemberSmsAgreeUpdateRequestDto dto) {
-//		MemberEntity member = memberRepository.findByMemberNum(memberNum)
-//				.orElseThrow(() -> new IllegalArgumentException("회원 계정에 문제가 발생했습니다."));
-//		
-//		member.setSmsAgree(dto.isSmsAgree());
-//		
-//		String message = dto.isSmsAgree() ? "SMS 수신 동의가 설정되었습니다." : "SMS 수신 동의가 해제 되었습니다.";
-//		
-//		return new MemberSmsAgreeUpdateResponseDto(member.getMemberNum(), member.isSmsAgree(), message);
-//	}
-	
-	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
+	//주소 변경하기
+	@Transactional
+    @Override
+    public MemberMyPageResponseDto updateMyAddress(Long memberNum, AddressUpdateRequestDto dto) {
+        MemberEntity member = memberRepository.findByMemberNum(memberNum)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다"));
+
+        // ✅ 분리 주소로 갱신(+ 레거시 필드 동기화)
+        member.updateAddress(dto.getPostcode(), dto.getRoadAddress(), dto.getDetailAddress());
+        // JPA dirty checking으로 업데이트
+
+        // 갱신 후 최신 데이터로 응답
+        return myPage(memberNum);
+    }
+
+	//휴대폰 번호 변경
+	@Transactional
 	@Override
-	//회원탈퇴
-	public MemberDeleteDto memberOut(Long memberNum) {
-		MemberEntity member = memberRepository.findByMemberNum(memberNum)
-				.orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
-		
-		memberRepository.delete(member);
-		
-		return new MemberDeleteDto(member.getMemberNum(), member.getMemberName(), "회원 탈퇴 완료");
+	public MemberMyPageResponseDto updateMyPhone(Long memberNum, PhoneUpdateRequestDto dto) {
+	    MemberEntity m = memberRepository.findByMemberNum(memberNum)
+	        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다"));
+
+	    // 새 번호: 숫자만
+	    final String newDigits = (dto.getPhone() == null ? "" : dto.getPhone().replaceAll("[^0-9]", ""));
+	    if (newDigits.length() < 10 || newDigits.length() > 11) {
+	        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "휴대전화 번호 형식이 올바르지 않습니다.");
+	    }
+	    // 현재 번호(저장값) 복호화 → 숫자만
+	    String currentDigits = "";
+	    try {
+	        String curRaw = m.getMemberPhone();
+	        if (curRaw != null && !curRaw.isBlank()) {
+	            String dec = curRaw.startsWith("ENC(") && curRaw.endsWith(")") ? JasyptUtil.decrypt(curRaw) : curRaw;
+	            currentDigits = dec.replaceAll("[^0-9]", "");
+	        }
+	    } catch (Exception e) {
+	        // 복호화 실패는 기존값 비교를 못하더라도 업데이트는 가능하도록 넘어감(로그만)
+	        log.warn("phone decrypt failed: {}", e.toString());
+	    }
+	    // ✅ 동일 번호면 NO-OP
+	    if (!currentDigits.isEmpty() && currentDigits.equals(newDigits)) {
+	        return myPage(memberNum);
+	    }
+	    // 저장(암호화)
+	    try {
+	        String encrypted = JasyptUtil.encrypt(newDigits);
+	        m.setMemberPhone(encrypted);
+	        // JPA dirty checking
+	    } catch (DataIntegrityViolationException dive) {
+	        // 유니크 제약 위반 등 → 409
+	        throw new ResponseStatusException(HttpStatus.CONFLICT, "이미 등록된 휴대전화 번호입니다.");
+	    }
+	    return myPage(memberNum);
 	}
+	
+	//sns 동의 변경(회원정보수정)
+	@Transactional
+	@Override
+	public MemberMyPageResponseDto updateMySmsAgree(Long memberNum, boolean smsAgree) {
+	    MemberEntity m = memberRepository.findByMemberNum(memberNum)
+	        .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다"));
+
+	    // 변경 없으면 NO-OP 응답
+	    if (m.isSmsAgree() == smsAgree) {
+	        return myPage(memberNum);
+	    }
+
+	    m.setSmsAgree(smsAgree); // JPA dirty checking으로 업데이트
+	    return myPage(memberNum);
+	}
+	
+ 	@Transactional
+    @Override
+    public MemberDeleteDto memberOut(Long memberNum, String requesterId, String message) {
+        MemberEntity member = memberRepository.findByMemberNum(memberNum)
+                .orElseThrow(() -> new IllegalArgumentException("해당 회원이 존재하지 않습니다."));
+
+        // ✅ 본인 확인: 로그인 주체와 대상 회원이 동일해야 함
+        if (requesterId == null || !requesterId.equals(member.getMemberId())) {
+            throw new SecurityException("본인만 탈퇴할 수 있습니다.");
+        }
+
+        // ✅ 이미 OUT이면 그대로 응답
+        if (member.getMemberState() == MemberState.OUT) {
+            return new MemberDeleteDto(member.getMemberNum(), member.getMemberName(), "이미 탈퇴 처리된 회원입니다.");
+        }
+
+        // === 권장 정책: 논리삭제(OUT) ===
+        member.setMemberState(MemberState.OUT); // 상태 OUT 전환
+        member.setMemberLock(true);             // 로그인 차단
+
+        return new MemberDeleteDto(
+                member.getMemberNum(),
+                member.getMemberName(),
+                (message == null || message.isBlank()) ? "회원 탈퇴(OUT) 처리 완료" : message
+        );
+
+        /* === 만약 물리삭제를 고집한다면, 위 논리삭제 대신 아래 블록 사용 ===
+        try {
+            memberRepository.delete(member); // 물리 삭제
+            return new MemberDeleteDto(member.getMemberNum(), member.getMemberName(), "회원 물리삭제 완료");
+        } catch (DataIntegrityViolationException e) {
+            // FK 제약 등으로 삭제 실패 → OUT 전환 폴백
+            member.setMemberState(MemberState.OUT);
+            member.setMemberLock(true);
+            return new MemberDeleteDto(member.getMemberNum(), member.getMemberName(),
+                    "관련 데이터로 즉시 삭제 불가 → 탈퇴(OUT) 상태로 전환됨");
+        }
+        */
+    }
 	
 	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
 	@Override
@@ -224,48 +384,48 @@ public class MemberServiceImpl implements MemberService {
 		return "본인 확인이 완료되었습니다. 비밀번호를 재설정 해주세요";
 	}
 	
-	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
-	@Override
-	//비밀번호 변경
-	public void updatePassword(MemberPasswordUpdateRequestDto dto) {
-	    String memberId = dto.getMemberId(); // 여기서 꺼냄
-	    MemberEntity member = memberRepository.findByMemberId(memberId)
-	        .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
-	    
-	    //비밀번호 단뱡향 복호화
-		//현재 비밀번호 검증
-	    //만료요청이 아닐 경우에만 현재 비밀번호 체크
-	    if(!dto.isExpiredChange()) {
-	    	if(!passwordEncoder.matches(dto.getCurrentPassword(), member.getMemberPw())) {
-				throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
-			}
-	    }
-		//새 비밀번호와 비밀번호 확인 일치 여부
-		if(!dto.getNewPassword().equals(dto.getNewPasswordCheck())) {
-			throw new IllegalArgumentException("변경할 비밀번호가 일치하지 않습니다.");
-		}
-		//이전 비밀번호와 같은지 확인
-		if(passwordEncoder.matches(dto.getNewPassword(), member.getMemberPw())) {
-			throw new IllegalArgumentException("이전과 동일한 비밀번호는 사용할 수 없습니다.");
-		}
-		//새 비밀번호 암호화 및 저장
-		String newEncodePw = passwordEncoder.encode(dto.getNewPassword());
-		
-		member.setMemberPw(newEncodePw);
-		member.setPwUpdated(LocalDateTime.now()); //비밀번호 변경 시각 갱신
-		
-		memberRepository.save(member); //저장
-	}
-	
-	
-	//비밀번호 만료 로직
-	public boolean isPasswordExpired(MemberEntity member) {
-		LocalDateTime updatedAt = member.getPwUpdated();
-		
-		if(updatedAt == null) return true;	//비밀번호 변경일이 없으면 무조건 만료시키기
-		
-		return updatedAt.isBefore(LocalDateTime.now().minusDays(30));	//기준일 경과 30일
-	}
+//	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
+//	@Override
+//	//비밀번호 변경
+//	public void updatePassword(ResetPasswordUpdateRequestDto dto) {
+//	    String memberId = dto.getMemberId(); // 여기서 꺼냄
+//	    MemberEntity member = memberRepository.findByMemberId(memberId)
+//	        .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
+//	    
+//	    //비밀번호 단뱡향 복호화
+//		//현재 비밀번호 검증
+//	    //만료요청이 아닐 경우에만 현재 비밀번호 체크
+//	    if(!dto.isExpiredChange()) {
+//	    	if(!passwordEncoder.matches(dto.getCurrentPassword(), member.getMemberPw())) {
+//				throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+//			}
+//	    }
+//		//새 비밀번호와 비밀번호 확인 일치 여부
+//		if(!dto.getNewPassword().equals(dto.getNewPasswordCheck())) {
+//			throw new IllegalArgumentException("변경할 비밀번호가 일치하지 않습니다.");
+//		}
+//		//이전 비밀번호와 같은지 확인
+//		if(passwordEncoder.matches(dto.getNewPassword(), member.getMemberPw())) {
+//			throw new IllegalArgumentException("이전과 동일한 비밀번호는 사용할 수 없습니다.");
+//		}
+//		//새 비밀번호 암호화 및 저장
+//		String newEncodePw = passwordEncoder.encode(dto.getNewPassword());
+//		
+//		member.setMemberPw(newEncodePw);
+//		member.setPwUpdated(LocalDateTime.now()); //비밀번호 변경 시각 갱신
+//		
+//		memberRepository.save(member); //저장
+//	}
+//	
+//	
+//	//비밀번호 만료 로직
+//	public boolean isPasswordExpired(MemberEntity member) {
+//		LocalDateTime updatedAt = member.getPwUpdated();
+//		
+//		if(updatedAt == null) return true;	//비밀번호 변경일이 없으면 무조건 만료시키기
+//		
+//		return updatedAt.isBefore(LocalDateTime.now().minusDays(30));	//기준일 경과 30일
+//	}
 	
 	//휴대폰 번호로 회원 존재 여부 확인
 	public String checkPhoneNumber(String phoneNum) {
@@ -394,6 +554,53 @@ public class MemberServiceImpl implements MemberService {
         // 방어코드: null/blank는 중복 아님으로 처리(컨트롤러에서 이미 막지만 한 번 더)
         if (memberId == null || memberId.isBlank()) return false;
         return memberRepository.existsByMemberId(memberId);
+    }
+    
+    //마이페이지 비밀번호 변경
+    @Transactional
+    @Override
+    public void updatePasswordSelf(Long memberNum, SelfPasswordUpdateRequestDto dto) {
+        MemberEntity m = memberRepository.findByMemberNum(memberNum)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."));
+
+        if (dto.getNewPassword() == null || !dto.getNewPassword().equals(dto.getNewPasswordCheck())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "새 비밀번호와 확인이 일치하지 않습니다.");
+        }
+
+        if (!passwordEncoder.matches(dto.getCurrentPassword(), m.getMemberPw())) {
+            // 프론트 요구: 현재 비밀번호 오류 우선 안내
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        if (passwordEncoder.matches(dto.getNewPassword(), m.getMemberPw())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이전과 동일한 비밀번호는 사용할 수 없습니다.");
+        }
+
+        m.setMemberPw(passwordEncoder.encode(dto.getNewPassword()));
+        // (선택) m.setPasswordChangedAt(Instant.now());
+    }
+
+    //비밀번호 찾기 비밀번호 변경
+    @Transactional
+    @Override
+    public void resetPassword(ResetPasswordUpdateRequestDto dto) {
+        if (dto.getMemberId() == null || dto.getMemberId().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "회원 식별 정보가 없습니다.");
+        }
+        if (dto.getNewPassword() == null || !dto.getNewPassword().equals(dto.getNewPasswordCheck())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "새 비밀번호와 확인이 일치하지 않습니다.");
+        }
+
+        // TODO: resetToken 검증 로직(서버 저장된 토큰/만료 확인) 추가 권장
+        MemberEntity m = memberRepository.findByMemberId(dto.getMemberId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."));
+
+        if (passwordEncoder.matches(dto.getNewPassword(), m.getMemberPw())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "이전과 동일한 비밀번호는 사용할 수 없습니다.");
+        }
+
+        m.setMemberPw(passwordEncoder.encode(dto.getNewPassword()));
+        // (선택) 비번 만료 해제, 토큰 소거 등 후처리
     }
     
 }

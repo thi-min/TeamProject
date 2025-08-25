@@ -1,9 +1,15 @@
 package com.project.admin.dto;
 
+import java.time.LocalDate;
+
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
+@Getter
+@Setter
 @Builder
 //전체사용자 목록+필터링
 public class AdminMemberListResponseDto {

@@ -13,4 +13,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoomEntity, Long> 
     //채팅방 아이디 조회
     Optional<ChatRoomEntity> findByMemberMemberNum(Long memberNum);
     //회원번호 조회
+
 }

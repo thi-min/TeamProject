@@ -4,7 +4,6 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.project.chat.entity.CheckState;
 import com.project.member.entity.MemberEntity;
 
 import jakarta.persistence.Column;
@@ -77,5 +76,5 @@ public class FundEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "fund_check", length = 1)
-    private CheckState fundCheck;//확인 상태
+    private FundCheck fundCheck;//확인 상태
 }

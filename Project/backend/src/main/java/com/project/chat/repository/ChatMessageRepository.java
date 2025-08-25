@@ -25,4 +25,10 @@ public interface ChatMessageRepository extends JpaRepository<ChatMessageEntity, 
     
     // 채팅방 제거 (기존)
     void deleteByChatRoom(ChatRoomEntity chatRoom);
+ // 채팅방에서 가장 최근 메시지 1개 조회
+    
+    Optional<ChatMessageEntity> findTopByChatRoomOrderBySendTimeDesc(ChatRoomEntity chatRoom);
+
+    
+
 }

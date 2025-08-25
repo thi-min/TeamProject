@@ -2,8 +2,6 @@ package com.project.chat.dto;
 
 import java.time.LocalDateTime;
 
-import com.project.chat.entity.CheckState;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -15,7 +13,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ChatRoomListResponseDto {
+public class ChatRoomResponseDto {
     private Long chatRoomId;
     private String memberName; // 회원이름
     private String lastMessageContent; // 마지막 채팅 내용

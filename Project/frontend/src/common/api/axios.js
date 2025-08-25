@@ -125,6 +125,8 @@ api.interceptors.request.use((config) => {
   } else {
     delete config.headers["Authorization"];
   }
+  const token = localStorage.getItem("accessToken");
+  if (token) config.headers.Authorization = `Bearer ${token}`;
 
   return config;
 });

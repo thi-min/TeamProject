@@ -20,7 +20,7 @@ public class AdminBootstrapConfig {
 
     // 운영 환경에서는 환경변수/시크릿으로 넘겨주세요.
     private static final String DEFAULT_ADMIN_ID = "admin@admin.kr";
-    private static final String DEFAULT_ADMIN_PW = "Admin!234"; // 반드시 변경!
+    private static final String DEFAULT_ADMIN_PW = "asd123123"; // 반드시 변경!
 
     @Bean
     CommandLineRunner adminSeeder(AdminRepository adminRepository,
@@ -32,6 +32,7 @@ public class AdminBootstrapConfig {
             AdminEntity admin = AdminEntity.builder()
                     .adminId(DEFAULT_ADMIN_ID)
                     .adminPw(passwordEncoder.encode(DEFAULT_ADMIN_PW)) // ✅ 암호화 저장
+                    //.adminPw("asd123123")
                     .adminName("관리자")
                     .adminPhone("01096861400")
                     .registDate(LocalDateTime.now())

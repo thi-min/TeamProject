@@ -1,12 +1,13 @@
 package com.project.adopt.controller;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.adopt.dto.AdoptRequestDto;
@@ -21,9 +23,11 @@ import com.project.adopt.dto.AdoptResponseDto;
 import com.project.adopt.entity.AdoptEntity;
 import com.project.adopt.service.AdoptService;
 import com.project.animal.entity.AnimalEntity;
+import com.project.common.jwt.JwtTokenProvider;
+import com.project.member.dto.MemberMeResponseDto;
 import com.project.member.entity.MemberEntity;
+import com.project.member.service.MemberService;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -31,7 +35,9 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class AdoptController {
     private final AdoptService adoptService;
-
+    private final MemberService memberService;
+    private final JwtTokenProvider jwtTokenProvider;
+    
     private AdoptEntity toEntity(AdoptRequestDto dto) {
         if (dto == null) {
             return null;
@@ -103,7 +109,7 @@ public class AdoptController {
             adoptPage = adoptService.listAll(pageable);
         } else if ("USER".equals(role)) {
             String memberId = authentication.getName();
-            MemberEntity member = memberService.getMemberByMemberId(memberId);
+            MemberMeResponseDto member = memberService.getMyInfo(memberId);
             if (member == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
@@ -149,7 +155,7 @@ public class AdoptController {
         if ("USER".equals(role)) {
             String memberId = authentication.getName();
             // memberId를 기반으로 memberNum을 찾아 AdoptRequestDto에 설정
-            MemberEntity member = memberService.getMemberByMemberId(memberId);
+            MemberMeResponseDto member = memberService.getMyInfo(memberId);
             req.setMemberNum(member.getMemberNum());
         }
 

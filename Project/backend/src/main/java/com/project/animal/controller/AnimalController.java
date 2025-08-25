@@ -1,22 +1,37 @@
 package com.project.animal.controller;
 
+
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.project.animal.dto.AnimalRequestDto;
 import com.project.animal.dto.AnimalResponseDto;
 import com.project.animal.entity.AnimalEntity;
 import com.project.animal.entity.AnimalFileEntity;
 import com.project.animal.service.AnimalService;
 import com.project.common.jwt.JwtTokenProvider;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Set;
-import java.util.Collections;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/animals")
@@ -115,16 +130,20 @@ public class AnimalController {
     @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<AnimalResponseDto> update(@PathVariable Long id, @RequestBody AnimalRequestDto req) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String role = jwtTokenProvider.getRoleFromToken(authentication.getCredentials().toString());
-        if (!"ADMIN".equals(role)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
         AnimalEntity exist = animalService.get(id);
         if (exist == null) return ResponseEntity.notFound().build();
-        AnimalEntity entity = toEntity(req);
-        entity.setAnimalId(id);
-        return ResponseEntity.ok(toDto(animalService.update(entity)));
+
+        // 필요한 필드만 갱신
+        exist.setAnimalName(req.getAnimalName());
+        exist.setAnimalBreed(req.getAnimalBreed());
+        exist.setAnimalSex(req.getAnimalSex());
+        exist.setAnimalState(req.getAnimalState());
+        exist.setAnimalDate(req.getAnimalDate());
+        exist.setAdoptDate(req.getAdoptDate());
+        exist.setAnimalContent(req.getAnimalContent());
+
+        AnimalEntity updated = animalService.update(exist);
+        return ResponseEntity.ok(toDto(updated));
     }
 
     /**

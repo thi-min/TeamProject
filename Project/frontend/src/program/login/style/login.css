@@ -29,6 +29,7 @@
 
 /* 로그인 시작 */
 .form_top_box .form_top_item .form_icon.type1:before{background-image:url('../images/login_icon.png');background-repeat:no-repeat;background-position:0 0;content:'';}
+
 /* 로그인 폼영역 */
 .login_form_box{position:relative;width:100%;margin-top:74px;box-sizing:border-box;vertical-align:top;}
 .form_item{padding:100px 50px;border-radius:30px;box-sizing:border-box;background-color:#fff;box-shadow: 0 0 30px 0px rgba(238,238,238,0.3);}

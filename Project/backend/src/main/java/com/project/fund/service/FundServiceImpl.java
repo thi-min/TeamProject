@@ -1,5 +1,13 @@
 package com.project.fund.service;
 
+import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.project.fund.dto.FundRequestDto;
 import com.project.fund.dto.FundResponseDto;
 import com.project.fund.entity.FundEntity;
@@ -8,13 +16,6 @@ import com.project.member.entity.MemberEntity;
 import com.project.member.repository.MemberRepository;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor

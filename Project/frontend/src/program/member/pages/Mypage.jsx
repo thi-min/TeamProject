@@ -1,193 +1,107 @@
-// MyPage.jsx
-// 목적: 인증된 사용자의 마이페이지 조회/표시
-// 포인트:
-//  - 첫 렌더 시 /mypage 호출
-//  - 401이면 로그인으로 안내
-//  - 403(비번 만료)이면 비번 변경 페이지로 유도
-//  - 서버 메시지는 최대한 사용자에게 친숙하게 노출
-//  - UI 클래스는 기존 프로젝트 스타일 유지(필요한 최소 마크업만 사용)
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import MemberDeleteButton from "./MemberDeleteButton";
+import { useAuth } from "../../../common/context/AuthContext";
+import api from "../../../common/api/axios";
 
-import React, { useEffect, useState, useMemo } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { apiGetMyPage } from "../services/memberApi";
-import BackButton from "../../../common/BackButton";
+export default function Mypage() {
+  // 전역 인증 상태
+  const { isLogin } = useAuth();
 
-export default function MyPage() {
-  const navigate = useNavigate();
-  const location = useLocation();
+  // 라우팅
+  const nav = useNavigate();
 
-  const [data, setData] = useState(null); // 서버 응답 DTO
-  const [loading, setLoading] = useState(true); // 로딩 상태
-  const [error, setError] = useState(""); // 사용자 노출용 에러 메시지
+  // 화면 상태
+  const [myInfo, setMyInfo] = useState(null); // { memberNum, memberId, memberName, memberState }
+  const [loading, setLoading] = useState(true);
 
-  // enum → 표시 문자열
-  const sexLabel = useMemo(() => {
-    if (!data?.memberSex) return "";
-    // 서버 enum이 MALE/FEMALE 로 온다고 가정
-    return data.memberSex === "MALE"
-      ? "남성"
-      : data.memberSex === "FEMALE"
-      ? "여성"
-      : data.memberSex;
-  }, [data]);
-
+  /**
+   * 1) 비로그인 즉시 "/"로 이동
+   * - 버튼 로그아웃, 토큰 만료, 재발급 실패 등으로 isLogin=false가 되면 즉시 홈으로
+   * - replace:true로 히스토리에 남기지 않음
+   */
   useEffect(() => {
-    let mounted = true;
+    if (!isLogin) {
+      nav("/", { replace: true });
+    }
+  }, [isLogin, nav]);
+
+  /**
+   * 2) 로그인 상태에서만 내 정보 요청
+   * - 비로그인이라면 요청 자체를 skip (401/재시도/알림 중복 방지)
+   * - StrictMode(개발)로 인한 효과 2회 실행에 대비해 cancelled 플래그 사용
+   */
+  useEffect(() => {
+    // 로그인 아니면 네트워크 호출 생략하고 로딩 종료
+    if (!isLogin) {
+      setLoading(false);
+      return;
+    }
+
+    let cancelled = false;
+    setLoading(true);
 
     (async () => {
-      setLoading(true);
-      setError("");
       try {
-        const res = await apiGetMyPage();
-        if (!mounted) return;
-        setData(res.data);
-      } catch (err) {
-        if (!mounted) return;
-
-        const status = err?.response?.status;
-        const msg =
-          err?.response?.data?.message ||
-          err?.response?.data ||
-          err?.message ||
-          "마이페이지 조회 중 오류가 발생했습니다.";
-
-        // ✅ 401: 로그인 필요
-        if (status === 401) {
-          alert("로그인이 필요합니다. 로그인 후 다시 시도해주세요.");
-          navigate("/login", { replace: true, state: { from: location } });
-          return;
-        }
-
-        // ✅ 403: 비밀번호 만료
-        if (status === 403 && String(msg).includes("비밀번호가 만료")) {
-          alert("비밀번호가 만료되었습니다. 비밀번호를 변경해 주세요.");
-          // 비번 변경 페이지로 이동 (필요 시 state에 memberId/만료시각 전달)
-          navigate("/change-password", {
-            replace: true,
-            state: {
-              // memberId는 보통 토큰에서 복원 가능. 필요 시 저장소/컨텍스트에서 주입
-              // memberId: decoded.memberId,
-              // expiresAt: ... (없으면 생략)
-            },
-          });
-          return;
-        }
-
-        // 그 외 오류
-        setError(String(msg));
+        const res = await api.get("/member/mypage/me"); // Authorization은 인터셉터가 자동 부착
+        if (!cancelled) setMyInfo(res.data);
+      } catch (e) {
+        // 401/403 → 인터셉터가 재발급 시도, 실패 시 isLogin=false가 되어 위 useEffect가 "/"로 이동 처리
+        // 여기서 알림을 띄우면 두 번 뜰 수 있으니 콘솔만.
+        console.error(
+          "[MyPage] /member/mypage/me 실패:",
+          e?.response?.status,
+          e?.message
+        );
       } finally {
-        if (mounted) setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     })();
 
+    // 언마운트/재마운트 시 setState 방지
     return () => {
-      mounted = false;
+      cancelled = true;
     };
-  }, [navigate, location]);
+  }, [isLogin]);
 
+  // 로딩 중 UI
   if (loading) {
-    return (
-      <div className="form_item type2">
-        <div className="form_login_wrap">
-          <div className="form_item_box">
-            <div className="from_text">마이페이지를 불러오는 중입니다...</div>
-          </div>
-        </div>
-      </div>
-    );
+    return <div className="admin_page">로딩중...</div>;
   }
 
-  if (error) {
-    return (
-      <div className="form_item type2">
-        <div className="form_login_wrap">
-          <div className="form_item_box">
-            <div className="form_error" role="alert" aria-live="assertive">
-              {error}
-            </div>
-            <div className="form_center_box">
-              <BackButton label="이전" className="btn white" />
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!data) {
-    return null;
+  // (안전) 정보 없을 때의 가드 — 보통은 isLogin 가드가 먼저 작동하여 "/"로 이동함
+  if (!myInfo) {
+    return <div className="admin_page">정보를 불러올 수 없습니다.</div>;
   }
 
   return (
-    <div className="form_item type2">
-      <div className="form_top_box">
-        <div className="form_top_item">
-          <i className="form_icon type1"></i>
-          <div className="form_title">마이페이지</div>
-          <div className="form_desc">
-            <p>회원님의 기본 정보를 확인할 수 있습니다.</p>
-          </div>
-        </div>
+    <div className="my_page">
+      <div className="title_box">
+        <div className="title">마이 페이지</div>
       </div>
-
-      <div className="form_login_wrap">
-        <div className="float_box clearfix">
-          <div className="form_item_box">
-            <div className="input_item">
-              <div className="from_text">이름</div>
-              <div className="form_value">{data.memberName ?? "-"}</div>
-            </div>
-
-            <div className="input_item">
-              <div className="from_text">아이디(이메일)</div>
-              <div className="form_value">{data.memberId ?? "-"}</div>
-            </div>
-
-            <div className="input_item">
-              <div className="from_text">생년월일</div>
-              <div className="form_value">{data.memberBirth ?? "-"}</div>
-            </div>
-
-            <div className="input_item">
-              <div className="from_text">성별</div>
-              <div className="form_value">{sexLabel || "-"}</div>
-            </div>
-
-            <div className="input_item">
-              <div className="from_text">주소</div>
-              <div className="form_value">{data.memberAddress ?? "-"}</div>
-            </div>
-
-            <div className="input_item">
-              <div className="from_text">휴대전화</div>
-              <div className="form_value">{data.memberPhone ?? "-"}</div>
-            </div>
-
-            <div className="input_item">
-              <div className="from_text">카카오 ID</div>
-              <div className="form_value">{data.kakaoId ?? "-"}</div>
-            </div>
-
-            <div className="input_item">
-              <div className="from_text">SMS 수신동의</div>
-              <div className="form_value">
-                {data.smsAgree ? "동의" : "미동의"}
-              </div>
-            </div>
-
-            <div className="form_center_box">
-              <div className="temp_btn white md">
-                <BackButton label="이전" className="btn white" />
-              </div>
-              {/* 필요 시 비밀번호 변경/정보 수정 버튼 추가 */}
-              {/* <div className="temp_btn md">
-                <button type="button" className="btn" onClick={() => navigate("/member/edit")}>
-                  정보 수정
-                </button>
-              </div> */}
-            </div>
-          </div>
-        </div>
+      <div className="member_area">
+        <ul className="my_menu">
+          <li className="link_item type1">
+            <Link to="/member/update-password" state={{ mode: "self" }}>
+              비밀번호 변경
+            </Link>
+          </li>
+          <li className="link_item type2">
+            <Link to="/member/mypage/memberdata">회원 정보</Link>
+          </li>
+          <li className="link_item type3">
+            <Link to="/member/mypage/reserves">예약 내역 조회</Link>
+          </li>
+          <li className="link_item type6">
+            <Link to="">예약 시간대 관리</Link>
+          </li>
+          <li className="link_item type5">
+            <MemberDeleteButton
+              memberNum={myInfo?.memberNum}
+              className="form_flex"
+            />
+          </li>
+        </ul>
       </div>
     </div>
   );
