@@ -431,13 +431,15 @@ public class BbsServiceImpl implements BbsService {
             return null; // 대표 이미지가 없는 경우
         }
 
-        // 조회된 경로를 프론트에서 사용할 수 있도록 가공
+        // /uploads/ 접두사 붙여서 프론트에서 절대 URL 생성 가능
         return ImageBbsDto.builder()
                 .bulletinNum(bulletinNum)
-                .thumbnailPath(null) // 필요하면 썸네일 로직 추가
-                .imagePath("http://127.0.0.1:8090" + imagePath) // DB에 저장된 /uploads/ 경로를 URL로 변환
+                .thumbnailPath(null) // 필요시 썸네일 로직 추가 가능
+                .imagePath("/uploads/" + imagePath) // ✅ 절대경로 대신 uploads 경로
                 .build();
     }
+
+
 
 
 

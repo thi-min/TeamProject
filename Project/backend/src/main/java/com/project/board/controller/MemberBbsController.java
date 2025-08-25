@@ -40,7 +40,6 @@ public class MemberBbsController {
             @RequestParam(value = "insertOptions", required = false) List<String> insertOptions,
             @RequestParam(value = "isRepresentative", required = false) List<String> isRepresentativeList
     ) {
-        // insertOptions와 파일 1:1 매칭 & jpg/jpeg 필터링
         if (files != null && insertOptions != null) {
             int size = Math.min(files.size(), insertOptions.size());
             for (int i = 0; i < size; i++) {
@@ -110,8 +109,8 @@ public class MemberBbsController {
     // ---------------- 게시글 단건 조회 ----------------
     @GetMapping("/{id}")
     public ResponseEntity<Map<String, Object>> getBbs(@PathVariable Long id) {
-        BbsDto dto = bbsService.getBbs(id); // BbsDto 고정
-        ImageBbsDto repImg = bbsService.getRepresentativeImage(id); // 대표 이미지 별도 조회
+        BbsDto dto = bbsService.getBbs(id);
+        ImageBbsDto repImg = bbsService.getRepresentativeImage(id);
 
         Map<String, Object> result = new HashMap<>();
         result.put("bbs", dto);
@@ -139,19 +138,25 @@ public class MemberBbsController {
         pageMap.put("number", page.getNumber());
         result.put("bbsList", pageMap);
 
-        // 이미지 게시판(POTO)인 경우만 대표 이미지 Map 추가
+        // 이미지 게시판(POTO)인 경우 대표 이미지 Map 항상 생성 (key 유지)
         if (type == BoardType.POTO) {
-            Map<String, ImageBbsDto> repImageMap = new HashMap<>();
+            Map<String, Object> repImageMap = new HashMap<>();
             page.forEach(dto -> {
                 ImageBbsDto repImg = bbsService.getRepresentativeImage(dto.getBulletinNum());
-                if (repImg != null) repImageMap.put(dto.getBulletinNum().toString(), repImg);
+                if (repImg == null) {
+                    repImg = ImageBbsDto.builder()
+                            .bulletinNum(dto.getBulletinNum())
+                            .thumbnailPath(null)
+                            .imagePath(null)
+                            .build();
+                }
+                repImageMap.put(dto.getBulletinNum().toString(), repImg);
             });
             result.put("representativeImages", repImageMap);
         }
 
         return ResponseEntity.ok(result);
     }
-
 
     // ---------------- 첨부파일 조회 ----------------
     @GetMapping("/{id}/files")
@@ -222,4 +227,3 @@ public class MemberBbsController {
                 .body(resource);
     }
 }
-
