@@ -107,7 +107,7 @@ public class FundController {
 
 
     // 생성
-    @PostMapping
+    @PostMapping("/request")
     public ResponseEntity<FundResponseDto> createFund(@Valid @RequestBody FundRequestDto dto) {
         FundResponseDto created = fundService.createFund(dto);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);

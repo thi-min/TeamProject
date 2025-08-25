@@ -1,4 +1,5 @@
-import axios from 'axios';
+// import axios from 'axios';
+import { api } from "../../../common/api/axios.js";
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import chatIcon from '../images/chat-icon.png'; // 챗 아이콘 이미지 경로 (예시)
@@ -33,7 +34,7 @@ const ChatBanner = () => {
 
             try {
                 // 백엔드 API: 미확인 메시지 및 채팅방 ID 조회
-                const response = await axios.get(`http://localhost:3000/api/chat/status?memberNum=${memberNum}`);
+                const response = await api.get(`http://localhost:3000/api/chat/status?memberNum=${memberNum}`);
                 const data = response.data;
                 
                 setHasUnread(data.hasUnreadMessages);
@@ -64,7 +65,7 @@ const ChatBanner = () => {
         } else {
             // 채팅방이 없으면 새로운 채팅방을 생성하고 이동
             try {
-                const response = await axios.post(
+                const response = await api.post(
                     'http://localhost:3000/api/chat/create-room', 
                     null,
                     { 

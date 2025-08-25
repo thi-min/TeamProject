@@ -1,5 +1,6 @@
 import { Client } from '@stomp/stompjs';
-import axios from 'axios';
+// import axios from 'axios';
+import { api } from "../../../common/api/axios.js";
 import { useEffect, useRef, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import SockJS from 'sockjs-client';
@@ -24,7 +25,7 @@ const ChatRoom = () => {
         // 1. 초기 메시지 목록 불러오기
         const fetchMessages = async () => {
             try {
-                const response = await axios.get(`http://localhost:3000/rooms/${chatRoomId}/messages`);
+                const response = await api.get(`http://localhost:3000/rooms/${chatRoomId}/messages`);
                 setMessages(response.data);
             } catch (err) {
                 console.error("메시지 목록을 불러오는 중 오류 발생:", err);
@@ -81,7 +82,7 @@ const ChatRoom = () => {
         };
 
         try {
-            await axios.post(`http://localhost:3000/rooms/${chatRoomId}/messages`, messagePayload);
+            await api.post(`http://localhost:3000/rooms/${chatRoomId}/messages`, messagePayload);
             setNewMessage(''); // 전송 후 입력창 비우기
         } catch (err) {
             console.error("메시지 전송 중 오류 발생:", err);

@@ -1,4 +1,5 @@
-import axios from 'axios';
+// import axios from 'axios';
+import { api } from "../../../common/api/axios.js";
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import '../style/Animal.css';
@@ -33,11 +34,11 @@ const AnimalForm = () => {
     // 현재 URL 경로에 따른 모드 판단
     const isListView = location.pathname === '/admin/animal/list' || location.pathname === '/animal/list';
     const isDetailView = location.pathname.startsWith('/admin/animal/detail/') || location.pathname.startsWith('/animal/detail/');
-    const isCreateView = location.pathname.startsWith('/admin/animal/resist');
+    const isCreateView = location.pathname.startsWith('/admin/animal/regist');
     const isUpdateView = location.pathname.startsWith('/admin/animal/update/');
 
     // API 요청을 위한 Axios 설정
-    const authAxios = axios.create({
+    const authAxios = api.create({
         baseURL: 'http://localhost:3000/api',
         headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`
@@ -58,7 +59,7 @@ const AnimalForm = () => {
     // 데이터 로딩 함수
     const fetchAnimals = async () => {
         try {
-            const response = await axios.get('/api/animals');
+            const response = await api.get('/api/animals');
             setAnimals(response.data);
         } catch (error) {
             console.error("목록 조회 실패:", error);
@@ -69,7 +70,7 @@ const AnimalForm = () => {
     const fetchAnimalDetail = async () => {
         if (!id) return;
         try {
-            const response = await axios.get(`/api/animals/${id}`);
+            const response = await api.get(`/api/animals/${id}`);
             const data = response.data;
             setAnimalDetail(data);
             if (isUpdateView && isAdmin) {
@@ -101,7 +102,7 @@ const AnimalForm = () => {
 
         try {
             // ⭐ 백엔드 API 주소 확인
-            const response = await axios.post(
+            const response = await api.post(
                 'http://localhost:3000/api/chat/start-adoption-chat', 
                 null,
                 { 
@@ -191,7 +192,7 @@ const AnimalForm = () => {
                     <h2 className="animal-list-title">{isAdmin ? "동물 정보 관리" : "입양 가능한 동물"}</h2>
                     {isAdmin && (
                         <div className="button-container">
-                            <button onClick={() => navigate('/admin/animal/resist')} className="btn-create-animal">
+                            <button onClick={() => navigate('/admin/animal/regist')} className="btn-create-animal">
                                 동물 정보 등록
                             </button>
                         </div>

@@ -1,4 +1,5 @@
-import axios from 'axios';
+// import axios from 'axios';
+import { api } from "../../../common/api/axios.js";
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../style/Chat.css'; // 이전에 제공된 스타일 파일을 기준으로 생성합니다.
@@ -17,7 +18,7 @@ const ChatList = () => {
             try {
                 // 백엔드 API 엔드포인트 호출
                 // ChatListResponseDto 리스트를 반환하는 /rooms 엔드포인트를 호출합니다.
-                const response = await axios.get('http://localhost:3000/rooms');
+                const response = await api.get('http://localhost:3000/rooms');
                 console.log('API 응답:', response.data);
                 
                 // 데이터 상태 업데이트

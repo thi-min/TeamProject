@@ -34,7 +34,7 @@ import com.project.common.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/animals")
+@RequestMapping("/animal")
 @RequiredArgsConstructor
 public class AnimalController {
 
@@ -85,7 +85,7 @@ public class AnimalController {
      * 모든 동물 목록 조회 (관리자/클라이언트)
      * - 클라이언트는 권한 없이 접근 가능
      */
-     @GetMapping
+     @GetMapping("/list")
     public ResponseEntity<Page<AnimalResponseDto>> listAll(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
@@ -105,7 +105,7 @@ public class AnimalController {
      * 특정 동물 정보 조회 (관리자/클라이언트)
      * - 클라이언트는 권한 없이 접근 가능
      */
-    @GetMapping("/{id}")
+    @GetMapping("/detail/{id}")
     public ResponseEntity<AnimalResponseDto> get(@PathVariable Long id) {
         AnimalEntity e = animalService.get(id);
         if (e == null) return ResponseEntity.notFound().build();
@@ -116,7 +116,7 @@ public class AnimalController {
      * 동물 정보 생성 (관리자 전용)
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @PostMapping
+    @PostMapping("/regist")
     public ResponseEntity<AnimalResponseDto> create(@RequestBody AnimalRequestDto req) {
         // 별도의 권한 체크 로직이 필요 없음
         AnimalEntity entity = toEntity(req);
@@ -128,7 +128,7 @@ public class AnimalController {
      * 동물 정보 수정 (관리자 전용)
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @PutMapping("/{id}")
+    @PutMapping("/detail/{id}")
     public ResponseEntity<AnimalResponseDto> update(@PathVariable Long id, @RequestBody AnimalRequestDto req) {
         AnimalEntity exist = animalService.get(id);
         if (exist == null) return ResponseEntity.notFound().build();
@@ -150,7 +150,7 @@ public class AnimalController {
      * 동물 정보 삭제 (관리자 전용)
      */
     @PreAuthorize("hasRole('ADMIN')")
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/detail/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String role = jwtTokenProvider.getRoleFromToken(authentication.getCredentials().toString());

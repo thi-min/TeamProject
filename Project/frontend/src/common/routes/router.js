@@ -99,12 +99,24 @@ const routes = {
       list: { path: "/admin/chat/list", label: "채팅 목록" },
       room: (id) => `/admin/chat/room/:ChatRoomId`,
     },
+     
+   /*chat banner 사용시 해당 위치에 추가
+        import ChatBanner from './components/ChatBanner';
+          function App() {
+        return (
+            <BrowserRouter>
+            <MainPage />
+            <ChatBanner /> 
+          </BrowserRouter>
+        );
+      }
+    */
 
     // 입양 신청서 관리
     adopt: {
       list: { path: "/admin/adopt/list", label: "입양 신청서 관리" },
       detail: (id) => `/admin/adopt/detail/${id}`,
-      resist: { path: "/admin/adopt/resist", label: "입양 신청서 작성" },
+      regist: { path: "/admin/adopt/regist", label: "입양 신청서 작성" },
       update: (id) => `/admin/adopt/update/${id}`,
     },
 
@@ -112,7 +124,7 @@ const routes = {
     animal: {
       list: { path: "/admin/animal/list", label: "동물 정보 관리" },
       detail: (id) => `/admin/animal/detail/${id}`,
-      resist: { path: "/admin/animal/resist", label: "동물 정보 등록" },
+      regist: { path: "/admin/animal/regist", label: "동물 정보 등록" },
       update: (id) => `/admin/animal/update/${id}`,
     },
   },

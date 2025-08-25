@@ -31,7 +31,7 @@ import com.project.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/adopts")
+@RequestMapping("/adopt")
 @RequiredArgsConstructor
 public class AdoptController {
     private final AdoptService adoptService;
@@ -89,7 +89,7 @@ public class AdoptController {
         return dto;
     }
     // 신청서 목록 조회 (admin, client)
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<Page<AdoptResponseDto>> listAll(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
@@ -122,7 +122,7 @@ public class AdoptController {
         return ResponseEntity.ok(responsePage);
     }
     //신청서 상세 조회(admin, client)
-    @GetMapping("/{id}")
+    @GetMapping("/detail/{id}")
     public ResponseEntity<AdoptResponseDto> get(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String role = jwtTokenProvider.getRoleFromToken(authentication.getCredentials().toString());
@@ -146,7 +146,7 @@ public class AdoptController {
         }
     }
     // 입양 신청서 생성(admin)
-    @PostMapping
+    @PostMapping("/regist")
     public ResponseEntity<AdoptResponseDto> create(@RequestBody AdoptRequestDto req) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String role = jwtTokenProvider.getRoleFromToken(authentication.getCredentials().toString());
@@ -164,7 +164,7 @@ public class AdoptController {
         return ResponseEntity.ok(toDto(saved));
     }
     // 입양 신청서 수정(admin)
-     @PutMapping("/{id}")
+     @PutMapping("/detail/{id}")
     public ResponseEntity<AdoptResponseDto> update(@PathVariable Long id, @RequestBody AdoptRequestDto req) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String role = jwtTokenProvider.getRoleFromToken(authentication.getCredentials().toString());
@@ -180,7 +180,7 @@ public class AdoptController {
         return ResponseEntity.ok(toDto(updated));
     }
     // 입양 신청서 제거(admin)
-   @DeleteMapping("/{id}")
+   @DeleteMapping("/detail/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String role = jwtTokenProvider.getRoleFromToken(authentication.getCredentials().toString());

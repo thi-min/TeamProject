@@ -1,4 +1,5 @@
-import axios from 'axios';
+// import axios from 'axios';
+import { api } from "../../../common/api/axios.js";
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import '../style/Adopt.css';
@@ -33,11 +34,11 @@ const AdoptApplicationForm = () => {
     // 현재 URL 경로에 따른 모드 판단
     const isListView = location.pathname === '/admin/adopt/list' || location.pathname === '/member/adopt/list';
     const isDetailView = location.pathname.startsWith('/admin/adopt/detail/') || location.pathname.startsWith('/member/adopt/detail/');
-    const isCreateView = location.pathname.startsWith('/adopt/request/') || location.pathname.startsWith('/admin/adopt/resist');
+    const isCreateView = location.pathname.startsWith('/adopt/request/') || location.pathname.startsWith('/admin/adopt/regist');
     const isUpdateView = location.pathname.startsWith('/admin/adopt/update/');
     
     // API 요청을 위한 기본 Axios 설정 (인터셉터 사용 시 이 부분은 불필요)
-    const authAxios = axios.create({
+    const authAxios = api.create({
         baseURL: 'http://localhost:8080/api',
         headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`
@@ -154,7 +155,7 @@ const AdoptApplicationForm = () => {
                     <h2 className="adopt-list-title">{isAdmin ? "입양 신청서 관리" : "나의 입양 신청서"}</h2>
                     {isAdmin && (
                         <div className="button-container">
-                            <button onClick={() => navigate('/admin/adopt/resist')} className="btn-create-adopt">
+                            <button onClick={() => navigate('/admin/adopt/regist')} className="btn-create-adopt">
                                 입양 신청서 작성
                             </button>
                         </div>

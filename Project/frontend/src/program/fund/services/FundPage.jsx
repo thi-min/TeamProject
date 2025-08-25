@@ -1,68 +1,69 @@
-import axios from 'axios';
+// import axios from 'axios';
+import { api } from "../../../common/api/axios.js";
 import { useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import '../style/Fund.css'; // 경로 수정
 
 // 후원 섹션 컴포넌트
 const FundSection = ({ title, description, icon, onDonateClick }) => {
-  return (
-    <div className="fund-section-card">
-      <div className="fund-section-icon">{icon}</div>
-      <h3 className="fund-section-title">{title}</h3>
-      <p className="fund-section-description">{description}</p>
-      <button 
-        className="fund-donate-button"
-        onClick={onDonateClick}
-      >
-        후원하기
-      </button>
-    </div>
-  );
+  return (
+    <div className="fund-section-card">
+      <div className="fund-section-icon">{icon}</div>
+      <h3 className="fund-section-title">{title}</h3>
+      <p className="fund-section-description">{description}</p>
+      <button 
+        className="fund-donate-button"
+        onClick={onDonateClick}
+      >
+        후원하기
+      </button>
+    </div>
+  );
 };
 
 // 메인 후원 페이지 컴포넌트
 const FundMainPage = () => {
-  const navigate = useNavigate();
+  const navigate = useNavigate();
 
-  const fundSections = [
-    {
-      title: '후원금',
-      description: '금전적 지원을 통해 다양한 프로젝트와 활동에 도움을 줄 수 있습니다. 소중한 후원금은 투명하게 사용됩니다.',
-      icon: '💸',
-      path: '/fund/donation'
-    },
-    {
-      title: '후원물품',
-      description: '필요한 물품을 직접 후원하여 더 직접적이고 실질적인 도움을 전할 수 있습니다.',
-      icon: '🎁',
-      path: '/fund/goods'
-    },
-    {
-      title: '정기후원',
-      description: '정기적인 후원을 통해 지속가능한 지원과 안정적인 운영을 도모할 수 있습니다.',
-      icon: '💖',
-      path: '/fund/regular'
-    },
-  ];
+  const fundSections = [
+    {
+      title: '후원금',
+      description: '금전적 지원을 통해 다양한 프로젝트와 활동에 도움을 줄 수 있습니다. 소중한 후원금은 투명하게 사용됩니다.',
+      icon: '💸',
+      path: '/fund/donation'
+    },
+    {
+      title: '후원물품',
+      description: '필요한 물품을 직접 후원하여 더 직접적이고 실질적인 도움을 전할 수 있습니다.',
+      icon: '🎁',
+      path: '/fund/goods'
+    },
+    {
+      title: '정기후원',
+      description: '정기적인 후원을 통해 지속가능한 지원과 안정적인 운영을 도모할 수 있습니다.',
+      icon: '💖',
+      path: '/fund/regular'
+    },
+  ];
 
-  return (
-    <div className="fund-main-page">
-      <div className="fund-main-container">
-        <h1 className="fund-main-title">후원 정보</h1>
-        <div className="fund-section-grid">
-          {fundSections.map((section, index) => (
-            <FundSection
-              key={index}
-              title={section.title}
-              description={section.description}
-              icon={section.icon}
-              onDonateClick={() => navigate(section.path)}
-            />
-          ))}
-        </div>
-      </div>
-    </div>
-  );
+  return (
+    <div className="fund-main-page">
+      <div className="fund-main-container">
+        <h1 className="fund-main-title">후원 정보</h1>
+        <div className="fund-section-grid">
+          {fundSections.map((section, index) => (
+            <FundSection
+              key={index}
+              title={section.title}
+              description={section.description}
+              icon={section.icon}
+              onDonateClick={() => navigate(section.path)}
+            />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 };
 
 // 후원금 신청서 컴포넌트
@@ -73,12 +74,12 @@ const FundApplicationForm = () => {
     applicantName: '',
     contact: { part1: '010', part2: '', part3: '' },
     birthDate: '',
-    confirmationRequired: '', // '필요' 또는 '불필요'
+    confirmationRequired: '',
     fundAmount: '',
     notes: ''
   });
 
-const handleChange = (e) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
     if (name === 'contact') {
       const parts = value.split('-');
@@ -90,35 +91,42 @@ const handleChange = (e) => {
           part3: parts[2] || ''
         }
       }));
-} else {
+    } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // 1. 로컬 스토리지에서 memberNum 가져오기
+    const memberNum = localStorage.getItem("memberNum");
+    const memberId = memberNum ? Number(memberNum) : null;
+
     if (!formData.applicantName || !formData.contact.part2 || !formData.contact.part3 || !formData.birthDate || !formData.confirmationRequired || !formData.fundAmount) {
-      setMessage('필수 입력 항목을 모두 작성해주세요.');
-      setTimeout(() => setMessage(null), 3000); 
-      return;
+      // 2. 로그인 상태가 아닐 때만 유효성 검사 추가
+      if (!memberId && (!formData.applicantName || !formData.contact.part2 || !formData.contact.part3 || !formData.birthDate)) {
+        setMessage('비회원 후원은 신청자 정보를 모두 입력해야 합니다.');
+        setTimeout(() => setMessage(null), 3000); 
+        return;
+      }
     }
- try {
-      // ⭐️ '확인서 필요' 여부를 FundCheck Enum에 맞게 변환
+    
+    try {
       const fundCheckStatus = formData.confirmationRequired === '필요' ? 'Y' : 'N';
       
       const requestData = {
-        memberId: 1, 
+        memberId: memberId, // 동적으로 설정된 memberId 사용
         fundSponsor: formData.applicantName,
         fundPhone: `${formData.contact.part1}-${formData.contact.part2}-${formData.contact.part3}`,
         fundBirth: formData.birthDate,
         fundType: 'REGULAR', 
         fundMoney: formData.fundAmount,
         fundNote: formData.notes,
-        fundCheck: fundCheckStatus // ⭐️ 변환된 값 할당
+        fundCheck: fundCheckStatus
       };
 
-      const response = await axios.post('http://localhost:3000/fund/request', requestData);
+      const response = await api.post('/fund/request', requestData);
 
       if (response.status === 200 || response.status === 201) {
         navigate('/fund/donation-details', { state: { formData: response.data } });
@@ -130,7 +138,7 @@ const handleChange = (e) => {
       setTimeout(() => setMessage(null), 3000);
     }
   };
-    
+
 return (
     <div className="application-form-page">
       <div className="application-form-container">
@@ -145,29 +153,29 @@ return (
             <div className="form-input-item">
               <label htmlFor="contact" className="form-label required">연락처</label>
               <div className="form-contact-input">
-                <input
-                  type="text"
-                  value={formData.contact.part1}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part1: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="3" // 최대 입력 길이 제한
-                />
-                <span>-</span>
-                <input
-                  type="text"
-                  value={formData.contact.part2}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part2: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="4" // 최대 입력 길이 제한
-                />
-                <span>-</span>
-                <input
-                  type="text"
-                  value={formData.contact.part3}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part3: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="4" // 최대 입력 길이 제한
-                />
+                <input
+                  type="text"
+                  value={formData.contact.part1}
+                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part1: e.target.value } }))}
+                  className="form-input text-center"
+                  maxLength="3" // 최대 입력 길이 제한
+                />
+                <span>-</span>
+                <input
+                  type="text"
+                  value={formData.contact.part2}
+                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part2: e.target.value } }))}
+                  className="form-input text-center"
+                  maxLength="4" // 최대 입력 길이 제한
+                />
+                <span>-</span>
+                <input
+                  type="text"
+                  value={formData.contact.part3}
+                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part3: e.target.value } }))}
+                  className="form-input text-center"
+                  maxLength="4" // 최대 입력 길이 제한
+                />
               </div>
             </div>
             
@@ -278,6 +286,8 @@ const FundApplicationDetails = () => {
     </div>
   );
 };
+
+// 후원 물품 신청서 컴포넌트
 const GoodsApplicationForm = () => {
   const navigate = useNavigate();
   const [message, setMessage] = useState(null);
@@ -285,7 +295,7 @@ const GoodsApplicationForm = () => {
     applicantName: '',
     contact: { part1: '010', part2: '', part3: '' },
     birthDate: '',
-    confirmationRequired: '', // '필요' 또는 '불필요'
+    confirmationRequired: '', 
     goods: '',
     notes: ''
   });
@@ -309,18 +319,24 @@ const GoodsApplicationForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+// 1. 로컬 스토리지에서 memberNum 가져오기
+    const memberNum = localStorage.getItem("memberNum");
+    const memberId = memberNum ? Number(memberNum) : null;
+    
     if (!formData.applicantName || !formData.contact.part2 || !formData.contact.part3 || !formData.birthDate || !formData.confirmationRequired || !formData.goods) {
-      setMessage('필수 입력 항목을 모두 작성해주세요.');
-      setTimeout(() => setMessage(null), 3000); 
-      return;
+      // 2. 로그인 상태가 아닐 때만 유효성 검사 추가
+      if (!memberId && (!formData.applicantName || !formData.contact.part2 || !formData.contact.part3 || !formData.birthDate)) {
+        setMessage('비회원 후원은 신청자 정보를 모두 입력해야 합니다.');
+        setTimeout(() => setMessage(null), 3000); 
+        return;
+      }
     }
-
+    
     try {
       const fundCheckStatus = formData.confirmationRequired === '필요' ? 'Y' : 'N';
       
       const requestData = {
-        memberId: 1, 
+        memberId: memberId, // 동적으로 설정된 memberId 사용
         fundSponsor: formData.applicantName,
         fundPhone: `${formData.contact.part1}-${formData.contact.part2}-${formData.contact.part3}`,
         fundBirth: formData.birthDate,
@@ -330,8 +346,7 @@ const GoodsApplicationForm = () => {
         fundCheck: fundCheckStatus
       };
       
-      // 실제 백엔드 API 엔드포인트로 변경해주세요.
-      const response = await axios.post('http://localhost:3000/fund/request', requestData);
+      const response = await api.post('/fund/request', requestData);
 
       if (response.status === 200 || response.status === 201) {
         navigate('/fund/goods-details', { state: { formData: response.data } });
@@ -358,42 +373,42 @@ const GoodsApplicationForm = () => {
             <div className="form-input-item">
               <label htmlFor="contact" className="form-label required">연락처</label>
               <div className="form-contact-input">
-                <input
-                  type="text"
-                  value={formData.contact.part1}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part1: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="3" // 최대 입력 길이 제한
-                />
-                <span>-</span>
-                <input
-                  type="text"
-                  value={formData.contact.part2}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part2: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="4" // 최대 입력 길이 제한
-                />
-                <span>-</span>
-                <input
-                  type="text"
-                  value={formData.contact.part3}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part3: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="4" // 최대 입력 길이 제한
-                />
+                <input
+                  type="text"
+                  value={formData.contact.part1}
+                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part1: e.target.value } }))}
+                  className="form-input text-center"
+                  maxLength="3" // 최대 입력 길이 제한
+                />
+                <span>-</span>
+                <input
+                  type="text"
+                  value={formData.contact.part2}
+                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part2: e.target.value } }))}
+                  className="form-input text-center"
+                  maxLength="4" // 최대 입력 길이 제한
+                />
+                <span>-</span>
+                <input
+                  type="text"
+                  value={formData.contact.part3}
+                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part3: e.target.value } }))}
+                  className="form-input text-center"
+                  maxLength="4" // 최대 입력 길이 제한
+                />
               </div>
-            </div>
-            <div className="form-input-item">
-              <label htmlFor="birthDate" className="form-label required">생년월일</label>
-              <input type="date" id="birthDate" name="birthDate" value={formData.birthDate} onChange={handleChange} className="form-input" />
-            </div>
-            
-            <div className="form-input-item">
-              <label htmlFor="confirmationRequired" className="form-label required">후원확인서 필 여부</label>
-              <select id="confirmationRequired" name="confirmationRequired" value={formData.confirmationRequired} onChange={handleChange} className="form-select">
-                <option value="">선택</option>
-                <option value="필요">필요</option>
-                <option value="불필요">불필요</option>
+          </div>
+          <div className="form-input-item">
+            <label htmlFor="birthDate" className="form-label required">생년월일</label>
+            <input type="date" id="birthDate" name="birthDate" value={formData.birthDate} onChange={handleChange} className="form-input" />
+          </div>
+          
+          <div className="form-input-item">
+            <label htmlFor="confirmationRequired" className="form-label required">후원확인서 필 여부</label>
+            <select id="confirmationRequired" name="confirmationRequired" value={formData.confirmationRequired} onChange={handleChange} className="form-select">
+              <option value="">선택</option>
+              <option value="필요">필요</option>
+              <option value="불필요">불필요</option>
             </select>
           </div>
           
@@ -501,10 +516,13 @@ const GoodsApplicationDetails = () => {
             메인으로 이동
           </button>
         </div>
-      </div>
-    </div>
-  );
-};
+        </div>
+
+        </div>
+      )}
+    
+  
+
 
 // 정기후원 신청서 컴포넌트
 const RegularApplicationForm = () => {
@@ -553,31 +571,49 @@ const RegularApplicationForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.applicantName || !formData.contact.part2 || !formData.contact.part3 || !formData.birthDate || !formData.confirmationRequired || !formData.fundAmount || !formData.bankName || !formData.accountNumber || !formData.accountHolder || !formData.withdrawalDay) {
-      setMessage('필수 입력 항목을 모두 작성해주세요.');
-      setTimeout(() => setMessage(null), 3000); 
-      return;
-    }
-
+   // 1. 로컬 스토리지에서 memberNum 가져오기
+    const memberNum = localStorage.getItem("memberNum");
+    const memberId = memberNum ? Number(memberNum) : null;
+    
+     // 2. 필수 입력 체크
+  if (
+    !formData.applicantName || !formData.contact.part2 || !formData.contact.part3 ||
+    !formData.birthDate || !formData.confirmationRequired || !formData.fundAmount ||
+    !formData.bankName || !formData.accountNumber || !formData.accountHolder || !formData.withdrawalDay
+  ) {
+    if (!memberId && (!formData.applicantName || !formData.contact.part2 || !formData.contact.part3 || !formData.birthDate)) {
+      setMessage('비회원 후원은 신청자 정보를 모두 입력해야 합니다.');
+      setTimeout(() => setMessage(null), 3000); 
+      return;
+    }
+  }
     try {
       const fundCheckStatus = formData.confirmationRequired === '필요' ? 'Y' : 'N';
-      const requestData = {
-        memberId: 1, 
-        fundSponsor: formData.applicantName,
-        fundPhone: `${formData.contact.part1}-${formData.contact.part2}-${formData.contact.part3}`,
-        fundBirth: formData.birthDate,
-        fundType: 'MONEY',
-        fundMoney: Number(formData.fundAmount),
-        fundBank: formData.bankName,
-        fundAccountNum: formData.accountNumber,
-        fundDepositor: formData.accountHolder,
-        fundDrawlDate: formData.withdrawalDay,
-        fundNote: formData.notes,
-        fundCheck: fundCheckStatus
-      };
+    // 🔹 출금일 처리: "말일"은 99, 숫자일 경우 parseInt
+      let withdrawalDayValue;
+      if (formData.withdrawalDay === "말일") {
+        withdrawalDayValue = 99;
+      } else {
+        // "10일" -> 10
+        withdrawalDayValue = parseInt(formData.withdrawalDay.replace("일", ""), 10);
+      }
       
-      // 실제 백엔드 API 엔드포인트로 변경해주세요.
-      const response = await axios.post('http://localhost:3000/fund/request', requestData);
+      const requestData = {
+        memberId: memberId,
+        fundSponsor: formData.applicantName,
+        fundPhone: `${formData.contact.part1}-${formData.contact.part2}-${formData.contact.part3}`,
+        fundBirth: formData.birthDate,
+        fundType: 'MONEY',
+        fundMoney: Number(formData.fundAmount),
+        fundBank: formData.bankName,
+        fundAccountNum: formData.accountNumber,
+        fundDepositor: formData.accountHolder,
+        fundDrawlDate: withdrawalDayValue, // 숫자 값 전달
+        fundNote: formData.notes,
+        fundCheck: fundCheckStatus
+     };
+      
+      const response = await api.post('/fund/request', requestData);
 
       if (response.status === 200 || response.status === 201) {
         navigate('/fund/regular-details', { state: { formData: response.data } });
@@ -605,29 +641,29 @@ const RegularApplicationForm = () => {
             <label htmlFor="contact" className="form-label required">연락처</label>
             <div className="form-contact-input">
               <input
-                  type="text"
-                  value={formData.contact.part1}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part1: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="3" // 최대 입력 길이 제한
-                />
-                <span>-</span>
-                <input
-                  type="text"
-                  value={formData.contact.part2}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part2: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="4" // 최대 입력 길이 제한
-                />
-                <span>-</span>
-                <input
-                  type="text"
-                  value={formData.contact.part3}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part3: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="4" // 최대 입력 길이 제한
-                />
-                </div>
+                  type="text"
+                  value={formData.contact.part1}
+                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part1: e.target.value } }))}
+                  className="form-input text-center"
+                  maxLength="3" // 최대 입력 길이 제한
+                />
+                <span>-</span>
+                <input
+                  type="text"
+                  value={formData.contact.part2}
+                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part2: e.target.value } }))}
+                  className="form-input text-center"
+                  maxLength="4" // 최대 입력 길이 제한
+                />
+                <span>-</span>
+                <input
+                  type="text"
+                  value={formData.contact.part3}
+                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part3: e.target.value } }))}
+                  className="form-input text-center"
+                  maxLength="4" // 최대 입력 길이 제한
+                />
+                </div>
           </div>
           
           <div className="form-input-item">
@@ -825,4 +861,3 @@ const RegularApplicationDetails = () => {
 
 // 명명된 내보내기를 사용하여 각 컴포넌트를 내보냄
 export { FundApplicationDetails, FundApplicationForm, FundMainPage, GoodsApplicationDetails, GoodsApplicationForm, RegularApplicationDetails, RegularApplicationForm };
-

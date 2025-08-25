@@ -32,7 +32,7 @@ import com.project.member.entity.MemberEntity;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/chat")
+@RequestMapping("chat")
 @RequiredArgsConstructor
 public class ChatRestController {
 
@@ -88,7 +88,7 @@ public class ChatRestController {
     }
 
     // 채팅방 목록 조회
-    @GetMapping("/rooms")
+    @GetMapping("/list")
     public ResponseEntity<List<ChatRoomEntity>> listRooms() {
         return ResponseEntity.ok(chatService.getAllRooms());
     }
@@ -104,7 +104,7 @@ public class ChatRestController {
     }
 
     // 회원번호로 채팅방 조회
-    @GetMapping("/rooms/by-member/{memberNum}")
+    @GetMapping("/list/by-member/{memberNum}")
     public ResponseEntity<ChatRoomResponseDto> getRoomByMemberId(@PathVariable Long memberNum) {
         ChatRoomEntity room = chatService.getRoomByMemberId(memberNum);
         if (room == null) return ResponseEntity.notFound().build();
@@ -132,14 +132,14 @@ public class ChatRestController {
     }
 
     // 메시지 목록 조회
-    @GetMapping("/rooms/{roomId}/messages")
+    @GetMapping("/list/{roomId}/messages")
     public ResponseEntity<List<ChatMessageResponseDto>> getMessages(@PathVariable Long roomId) {
         List<ChatMessageEntity> list = chatService.getMessages(roomId);
         return ResponseEntity.ok(list.stream().map(this::toDto).collect(Collectors.toList()));
     }
 
     // 메시지 전송
-    @PostMapping("/rooms/{roomId}/messages")
+    @PostMapping("/room/{roomId}/messages")
     public ResponseEntity<ChatMessageResponseDto> postMessage(@PathVariable Long roomId,
                                                               @RequestBody ChatMessageRequestDto req) {
         ChatMessageEntity entity = toEntity(req);
@@ -151,7 +151,7 @@ public class ChatRestController {
     }
 
     // 채팅방 삭제
-    @DeleteMapping("/rooms/{roomId}")
+    @DeleteMapping("/room/{roomId}")
     public ResponseEntity<Void> deleteRoom(@PathVariable Long roomId) {
         chatService.deleteRoom(roomId);
         return ResponseEntity.noContent().build();
