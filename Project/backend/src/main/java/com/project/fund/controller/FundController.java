@@ -31,7 +31,7 @@ import jakarta.validation.Valid;
  * 기본 경로: /api/funds
  */
 @RestController
-@RequestMapping("/api/funds")
+@RequestMapping("/fund")
 public class FundController {
 
     private final FundService fundService;
