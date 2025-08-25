@@ -7,7 +7,7 @@ import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons
 
 export default function ImgBoard() {
   const [posts, setPosts] = useState([]);
-  const [repImages, setRepImages] = useState({}); // bulletinNum -> ImageBbsDto
+  const [repImages, setRepImages] = useState({});
   const [searchKeyword, setSearchKeyword] = useState("");
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
@@ -17,6 +17,7 @@ export default function ImgBoard() {
   const baseUrl = "http://127.0.0.1:8090/bbs/bbslist";
   const backendUrl = "http://127.0.0.1:8090"; // 백엔드 주소
 
+  // 게시글 + 대표 이미지 조회
   const fetchPosts = async (page = 0, keyword = "") => {
     try {
       const params = { type: "POTO", page, size: 12 };
@@ -28,21 +29,19 @@ export default function ImgBoard() {
 
       const res = await axios.get(baseUrl, { params });
 
-      // 1. 게시글 리스트
       const pageData = res.data.bbsList;
       setPosts(pageData.content || []);
       setTotalPages(pageData.totalPages || 0);
       setCurrentPage(pageData.number || 0);
 
-      // 2. 대표 이미지 Map
+      // 대표 이미지 Map 처리 (항상 key 유지)
       const repMap = {};
-      for (const [key, value] of Object.entries(res.data.representativeImages || {})) {
-        if (value?.imagePath) {
-          // 백엔드 주소 붙여서 절대 URL로 변경
-          repMap[key.toString()] = {
-            ...value,
-            imagePath: `${backendUrl}${value.imagePath}`
-          };
+      const repImagesFromBack = res.data.representativeImages || {};
+      for (const [key, value] of Object.entries(repImagesFromBack)) {
+        if (value && value.imagePath) {
+          repMap[key] = { ...value, imagePath: `${backendUrl}${value.imagePath}` };
+        } else {
+          repMap[key] = null; // 대표 이미지 없을 경우 null 유지
         }
       }
       setRepImages(repMap);
@@ -100,10 +99,14 @@ export default function ImgBoard() {
                 onClick={() => navigate(`/imgbbs/${post.bulletinNum}`)}
               >
                 <div className="img-thumb">
-                  {repImage ? (
+                  {repImage && repImage.imagePath ? (
                     <img src={repImage.imagePath} alt={post.bbstitle} />
                   ) : (
-                    <div className="no-image">이미지 없음</div>
+                    <div className="no-image">
+                      <span role="img" aria-label="no-image">
+                        🖼️
+                      </span>
+                    </div>
                   )}
                 </div>
                 <div className="img-info">
