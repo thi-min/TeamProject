@@ -40,7 +40,7 @@ const routes = {
 
     findid: { path: "/find-id", label: "아이디 찾기" },
     findpw: { path: "/find-pw", label: "비밀번호 찾기" },
-<<<<<<< HEAD
+
     changepw: { path: "/update-password", label: "비밀번호 변경" },
 
     mypage: { path: "/mypage", label: "마이페이지" },
@@ -60,7 +60,6 @@ const routes = {
     fundDetails: { path: "/fund/donation-details", label: "후원금 상세" },
     goodsDetails: { path: "/fund/goods-details", label: "후원물품 상세" },
     regularDetails: { path: "/fund/regular-details", label: "정기후원 상세" },
-=======
     changepw: { path: "/member/update-password", label: "비밀번호 변경" },
     mypage: { path: "/member/mypage", label: "마이페이지" },
     memberdata: { path: "/member/mypage/memberdata", label: "회원정보" },
@@ -69,13 +68,13 @@ const routes = {
       label: "회원정보 수정",
     },
     delete: { path: "/member/mypage/update/delete", label: "회원 탈퇴" },
->>>>>>> refs/remotes/origin/ahj0808
+
   },
 
   admin: {
     admin: { path: "/admin", label: "관리자 페이지" },
     password: { path: "/admin/updatePw", label: "관리자 비밀번호 변경" },
-<<<<<<< HEAD
+
     dashboard: { path: "/admin/dashboard", label: "관리자 홈" },
     members: { path: "/admin/members", label: "회원 관리" },
     memberDetail: (id) => `/admin/members/${id}`,
@@ -104,14 +103,14 @@ const routes = {
   // 맵 관련 경로 추가
   map: {
       root: { path: "/map", label: "지도 검색" },
-=======
+
     membersList: { path: "/admin/membersList", label: "회원 목록" },
     memberDetail: {
       path: "/admin/membersList/:memberNum",
       build: (id) => `/admin/membersList/${id}`,
       label: "회원 상세",
     },
->>>>>>> refs/remotes/origin/ahj0808
+
   },
 
   reservation: {
