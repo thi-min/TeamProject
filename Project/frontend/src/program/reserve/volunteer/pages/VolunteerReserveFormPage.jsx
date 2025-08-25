@@ -50,7 +50,7 @@ const VolunteerReserveFormPage = () => {
         return;
       }
 
-      const res = await api.get("/member/mypage", {
+      const res = await api.get("/member/mypage/me", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
