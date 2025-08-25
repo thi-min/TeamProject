@@ -2,11 +2,11 @@ package com.project.admin.service;
 
 
 import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.List;
 
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -19,10 +19,10 @@ import com.project.admin.dto.AdminMemberUpdateRequestDto;
 import com.project.admin.dto.AdminPasswordUpdateRequestDto;
 import com.project.admin.entity.AdminEntity;
 import com.project.admin.repository.AdminRepository;
-import com.project.common.dto.PageRequestDto;
-import com.project.common.dto.PageResponseDto;
 import com.project.common.jwt.JwtTokenProvider;
 import com.project.common.util.JasyptUtil;
+import com.project.member.dto.MemberPageRequestDto;
+import com.project.member.dto.MemberPageResponseDto;
 import com.project.member.entity.MemberEntity;
 import com.project.member.entity.MemberState;
 import com.project.member.repository.MemberRepository;
@@ -116,54 +116,90 @@ public class AdminServiceImpl implements AdminService {
 	//param pageRequestDto page, size, keyword 등을 포함한 요청 DTO
 	//return PageResponseDto<AdminMemberListResponseDto>
 	@Override
-	public PageResponseDto<AdminMemberListResponseDto> getMemberList(PageRequestDto pageRequestDto) {
-	    //page, size, sort 정보를 PageRequest로 변환
-	    Pageable pageable = pageRequestDto.toPageable();
-	    Page<MemberEntity> result;
+	public MemberPageResponseDto<AdminMemberListResponseDto> getMemberList(MemberPageRequestDto req) {
+	    //Pageable pageable = req.toPageable(Sort.by("memberNum").descending());	//내림차순
+		Pageable pageable = req.toPageable(Sort.by("memberNum").ascending());	//오름차순
 
-	    try {
-	    //검색 키워드가 있을 경우, 이름 기준 부분 일치 검색
-	    if (pageRequestDto.getKeyword() != null && !pageRequestDto.getKeyword().isBlank()) {
-	        result = memberRepository.findByMemberNameContaining(pageRequestDto.getKeyword(), pageable);
+	    Page<MemberEntity> result;
+	    
+	    if (req.getKeyword() != null && !req.getKeyword().isEmpty()) {
+	        result = memberRepository.findByMemberNameContaining(req.getKeyword(), pageable);
 	    } else {
-	        //검색 키워드가 없으면 전체 회원 목록 조회
 	        result = memberRepository.findAll(pageable);
 	    }
 
-	    //Entity → DTO 변환 (프론트에 필요한 정보만 추출)
-	    List<AdminMemberListResponseDto> dtoList = result.getContent().stream()
-	            .map(member -> AdminMemberListResponseDto.builder()
-	                    .memberNum(member.getMemberNum())                             //회원 고유번호
-	                    .memberId(member.getMemberId())                              //아이디
-	                    .memberName(member.getMemberName())                          //이름
-	                    .memberDay(member.getMemberDay().toString())                 //가입일(LocalDate → String)
-	                    .memberState(member.getMemberState().name())                 //상태(ENUM → 문자열)
-	                    .memberLock(Boolean.TRUE.equals(member.getMemberLock()))     //계정 잠금 여부
-	                    .build())
+	    List<AdminMemberListResponseDto> content = result.getContent().stream()
+	            .map(this::toDto)
 	            .toList();
 
-	    //Page 정보와 함께 결과 묶어서 반환
-	    return PageResponseDto.<AdminMemberListResponseDto>builder()
-	            .content(dtoList)                            //현재 페이지 회원 목록
-	            .currentPage(result.getNumber() + 1)         //현재 페이지 번호 (0 → 1 보정)
-	            .totalPages(result.getTotalPages())          //전체 페이지 수
-	            .totalElements(result.getTotalElements())    //전체 회원 수
-	            .isFirst(result.isFirst())                   //첫 페이지 여부
-	            .isLast(result.isLast())                     //마지막 페이지 여부
-	            .build();
-	    } catch (Exception ex) {
-            // ✅ 어디서 터지는지 로그로 반드시 확인
-            // 임시로 빈 페이지 리턴해서 프론트 막힘 해소 (로그로 원인 추적)
-            return PageResponseDto.<AdminMemberListResponseDto>builder()
-                    .content(Collections.emptyList())
-                    .currentPage(1)
-                    .totalPages(1)
-                    .totalElements(0)
-                    .isFirst(true)
-                    .isLast(true)
-                    .build();
-        }
-	    }
+	    return new MemberPageResponseDto<>(
+	            content,
+	            result.getNumber(),
+	            result.getSize(),
+	            result.getTotalPages(),
+	            result.getTotalElements()
+	    );
+	} 
+
+	private AdminMemberListResponseDto toDto(MemberEntity entity) {
+	    return new AdminMemberListResponseDto(
+	        entity.getMemberNum(),
+	        entity.getMemberId(),
+	        entity.getMemberName(),
+	        entity.getMemberDay() != null ? entity.getMemberDay().toString() : null, // LocalDateTime → String 변환 필요 시
+	        entity.getMemberState().name(),   // enum이면 .name()
+	        entity.getMemberLock()             // boolean 필드
+	    );
+	}
+	
+//	public PageResponseDto<AdminMemberListResponseDto> getMemberList(PageRequestDto pageRequestDto) {
+//	    //page, size, sort 정보를 PageRequest로 변환
+//	    Pageable pageable = pageRequestDto.toPageable();
+//	    Page<MemberEntity> result;
+//
+//	    try {
+//	    //검색 키워드가 있을 경우, 이름 기준 부분 일치 검색
+//	    if (pageRequestDto.getKeyword() != null && !pageRequestDto.getKeyword().isBlank()) {
+//	        result = memberRepository.findByMemberNameContaining(pageRequestDto.getKeyword(), pageable);
+//	    } else {
+//	        //검색 키워드가 없으면 전체 회원 목록 조회
+//	        result = memberRepository.findAll(pageable);
+//	    }
+//
+//	    //Entity → DTO 변환 (프론트에 필요한 정보만 추출)
+//	    List<AdminMemberListResponseDto> dtoList = result.getContent().stream()
+//	            .map(member -> AdminMemberListResponseDto.builder()
+//	                    .memberNum(member.getMemberNum())                             //회원 고유번호
+//	                    .memberId(member.getMemberId())                              //아이디
+//	                    .memberName(member.getMemberName())                          //이름
+//	                    .memberDay(member.getMemberDay().toString())                 //가입일(LocalDate → String)
+//	                    .memberState(member.getMemberState().name())                 //상태(ENUM → 문자열)
+//	                    .memberLock(Boolean.TRUE.equals(member.getMemberLock()))     //계정 잠금 여부
+//	                    .build())
+//	            .toList();
+//
+//	    //Page 정보와 함께 결과 묶어서 반환
+//	    return PageResponseDto.<AdminMemberListResponseDto>builder()
+//	            .content(dtoList)                            //현재 페이지 회원 목록
+//	            .currentPage(result.getNumber() + 1)         //현재 페이지 번호 (0 → 1 보정)
+//	            .totalPages(result.getTotalPages())          //전체 페이지 수
+//	            .totalElements(result.getTotalElements())    //전체 회원 수
+//	            .isFirst(result.isFirst())                   //첫 페이지 여부
+//	            .isLast(result.isLast())                     //마지막 페이지 여부
+//	            .build();
+//	    } catch (Exception ex) {
+//            // ✅ 어디서 터지는지 로그로 반드시 확인
+//            // 임시로 빈 페이지 리턴해서 프론트 막힘 해소 (로그로 원인 추적)
+//            return PageResponseDto.<AdminMemberListResponseDto>builder()
+//                    .content(Collections.emptyList())
+//                    .currentPage(1)
+//                    .totalPages(1)
+//                    .totalElements(0)
+//                    .isFirst(true)
+//                    .isLast(true)
+//                    .build();
+//        }
+//    }
 	
 	/** null 이면 "-" 로 */
 	private String safe(String v) {

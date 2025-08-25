@@ -4254,3 +4254,7 @@ span.temp_form{display:inline-block;width:auto;}
 /* 폼 버튼(이전, submit) */
 .form_center_box{display:flex;margin-top:50px;position:relative;box-sizing:border-box;justify-content:space-between;}
 .form_center_box.solo{justify-content:flex-end;}
+.form_center_box .right_btn_box{display:flex;gap:14px;}
+
+.table.border{overflow:hidden;border-radius:12px;margin:0;}
+.update_box{margin-top:50px;}

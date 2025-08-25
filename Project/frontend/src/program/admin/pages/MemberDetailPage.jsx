@@ -38,10 +38,15 @@ export default function MemberDetailPage() {
       setDetail(data || null);
       // 상세에 상태/잠금이 포함되어 있으면 초기값 반영
       if (data?.memberState) setMemberState(String(data.memberState));
-      if (typeof data?.memberLock === "boolean") setMemberLock(!!data.memberLock);
+      if (typeof data?.memberLock === "boolean")
+        setMemberLock(!!data.memberLock);
     } catch (e) {
       console.error(e);
-      setError(e?.response?.data?.message || e.message || "상세 정보를 불러오지 못했습니다.");
+      setError(
+        e?.response?.data?.message ||
+          e.message ||
+          "상세 정보를 불러오지 못했습니다."
+      );
     } finally {
       setLoading(false);
     }
@@ -64,7 +69,11 @@ export default function MemberDetailPage() {
       await loadDetail();
     } catch (e) {
       console.error(e);
-      alert(e?.response?.data?.message || e.message || "수정 중 오류가 발생했습니다.");
+      alert(
+        e?.response?.data?.message ||
+          e.message ||
+          "수정 중 오류가 발생했습니다."
+      );
     }
   };
 
@@ -74,25 +83,26 @@ export default function MemberDetailPage() {
         <div className="form_top_item">
           <div className="form_icon type2"></div>
           <div className="form_title">회원 상세</div>
-          <div className="form_desc">
-            <p>회원 번호: {memberNum}</p>
-          </div>
         </div>
       </div>
 
-      <div className="temp_btn md" style={{ marginBottom: 12 }}>
-        <Link className="btn" to="/admin/members">목록으로</Link>
-      </div>
-
-      {error && <div className="hint warn" style={{ marginBottom: 8 }}>{error}</div>}
+      {error && (
+        <div className="hint warn" style={{ marginBottom: 8 }}>
+          {error}
+        </div>
+      )}
 
       {!detail || loading ? (
         <div className="form_wrap">불러오는 중...</div>
       ) : (
         <>
           {/* 상세 정보 */}
-          <div className="form_wrap" style={{ marginBottom: 24 }}>
-            <table className="table type2 responsive">
+          <div className="form_wrap">
+            <table className="table type2 responsive border">
+              <colgroup>
+                <col className="w20p" />
+                <col />
+              </colgroup>
               <tbody>
                 <tr>
                   <th scope="row">회원번호</th>
@@ -130,63 +140,71 @@ export default function MemberDetailPage() {
                   <th scope="row">문자 수신</th>
                   <td>{detail.smsAgree ? "동의" : "미동의"}</td>
                 </tr>
-                <tr>
+                {/* <tr>
                   <th scope="row">계정 잠금</th>
                   <td>{detail.memberLock ? "잠금" : "정상"}</td>
-                </tr>
-                <tr>
+                </tr> */}
+                {/* <tr>
                   <th scope="row">상태</th>
                   <td>{detail.memberState || "-"}</td>
-                </tr>
+                </tr> */}
               </tbody>
             </table>
           </div>
-
           {/* 상태/잠금 수정 폼 */}
-          <form className="form_wrap" onSubmit={handleUpdate}>
-            <table className="table type2 responsive">
-              <tbody>
-                <tr>
-                  <th scope="row">회원 상태 변경</th>
-                  <td>
-                    <div className="temp_form md w40p">
-                      <select
-                        className="temp_input"
-                        value={memberState}
-                        onChange={(e) => setMemberState(e.target.value)}
-                      >
-                        {STATE_OPTIONS.map((o) => (
-                          <option key={o.value} value={o.value}>{o.label}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <th scope="row">계정 잠금</th>
-                  <td>
-                    <div className="temp_form md">
-                      <input
-                        id="lockCheck"
-                        type="checkbox"
-                        className="temp_check"
-                        checked={memberLock}
-                        onChange={(e) => setMemberLock(e.target.checked)}
-                      />
-                      <label htmlFor="lockCheck">잠금 설정</label>
-                    </div>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-
-            <div className="form_btn_box">
-              <div className="temp_btn md">
-                <button type="submit" className="btn">저장</button>
-              </div>
+          <form className="update_box" onSubmit={handleUpdate}>
+            <div className="form_wrap">
+              <table className="table type2 responsive border">
+                <colgroup>
+                  <col className="w20p" />
+                  <col />
+                </colgroup>
+                <tbody>
+                  <tr>
+                    <th scope="row">회원 상태 변경</th>
+                    <td>
+                      <div className="temp_form_box sm">
+                        <select
+                          className="temp_select"
+                          value={memberState}
+                          onChange={(e) => setMemberState(e.target.value)}
+                        >
+                          {STATE_OPTIONS.map((o) => (
+                            <option key={o.value} value={o.value}>
+                              {o.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th scope="row">계정 잠금</th>
+                    <td>
+                      <div className="temp_form md">
+                        <input
+                          id="lockCheck"
+                          type="checkbox"
+                          className="temp_check"
+                          checked={memberLock}
+                          onChange={(e) => setMemberLock(e.target.checked)}
+                        />
+                        <label htmlFor="lockCheck">잠금 설정</label>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <div className="form_center_box">
               <div className="temp_btn md white">
-                <button type="button" className="btn" onClick={() => navigate(-1)}>
-                  뒤로
+                <Link className="btn" to="/admin/membersList">
+                  목록으로
+                </Link>
+              </div>
+              <div className="temp_btn md">
+                <button type="submit" className="btn">
+                  저장
                 </button>
               </div>
             </div>

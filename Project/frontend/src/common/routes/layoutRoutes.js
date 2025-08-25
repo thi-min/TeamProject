@@ -4,6 +4,7 @@ import { Route } from "react-router-dom";
 import routes from "./router";
 import { RequireUserOnMember } from "./RouteGuards";
 import { LogoutLink } from "../../program/login/pages/LogoutLink"; //로그아웃
+import RequireAdmin from "../../common/components/RequireAdmin";
 
 // 📌 각 페이지 컴포넌트 import
 //회원
@@ -22,7 +23,6 @@ import Admin from "../../program/admin/pages/AdminPage"; //관리자 로그인�
 import AdminPw from "../../program/admin/pages/AdminPasswordUpdatePage"; //관리자 비밀번호 변경
 import MemberList from "../../program/admin/pages/MemberListPage"; //관리자 전체 회원조회
 import MemberDetail from "../../program/admin/pages/MemberDetailPage"; //관리자 회원정보 변경
-
 
 // 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
@@ -67,22 +67,42 @@ const layoutRoutes = [
   />, //비밀번호 변경
 
   //관리자
-  <Route key="admin" path={routes.admin.admin.path} element={<Admin />} />, //관리자 로그인시 출력
   <Route
-  key="updatePw"
-  path={routes.admin.password.path}
-  element={
-    <RequireUserOnMember>
-        <AdminPw />
-      </RequireUserOnMember>
+    key="admin"
+    path={routes.admin.admin.path}
+    element={
+      <RequireAdmin>
+        <Admin />
+      </RequireAdmin>
     }
-    />, //관리자 비밀번호 변경
-  <Route key="memberList" path={routes.admin.membersList.path} element={<MemberList />} />, //관리자 회원목록
+  />, //관리자 로그인시 출력
+  <Route
+    key="updatePw"
+    path={routes.admin.password.path}
+    element={
+      <RequireAdmin>
+        <AdminPw />
+      </RequireAdmin>
+    }
+  />, //관리자 비밀번호 변경
+  <Route
+    key="memberList"
+    path={routes.admin.membersList.path}
+    element={
+      <RequireAdmin>
+        <MemberList />
+      </RequireAdmin>
+    }
+  />, //관리자 회원목록
   <Route
     key="memberDetail"
     path={routes.admin.memberDetail.path}
-    element={<MemberDetail />}
-  />,//관리자 회원상세보기
+    element={
+      <RequireAdmin>
+        <MemberDetail />
+      </RequireAdmin>
+    }
+  />, //관리자 회원상세보기
 ];
 
 export default layoutRoutes;
