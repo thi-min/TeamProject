@@ -24,6 +24,9 @@ import AdminPw from "../../program/admin/pages/AdminPasswordUpdatePage"; //관�
 import MemberList from "../../program/admin/pages/MemberListPage"; //관리자 전체 회원조회
 import MemberDetail from "../../program/admin/pages/MemberDetailPage"; //관리자 회원정보 변경
 
+//카카오
+import KakaoCallbackPage from "../../program/login/pages/KakaoCallbackPage"; //카카오 로그인 콜백
+
 // 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
   //사용자
@@ -65,6 +68,13 @@ const layoutRoutes = [
     path={routes.member.changepw.path}
     element={<ChangePw />}
   />, //비밀번호 변경
+
+  //카카오
+  <Route
+    key="kakao-collback"
+    path={routes.kakao.colback.path}
+    element={<KakaoCallbackPage />}
+  />, //카카오 로그인 콜백
 
   //관리자
   <Route

@@ -24,7 +24,7 @@ import com.project.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/oauth")
+@RequestMapping("/kakao")
 @RequiredArgsConstructor
 @Service
 public class KakaoAuthController {
@@ -40,7 +40,7 @@ public class KakaoAuthController {
 	private final MemberRepository memberRepository;
 	private final JwtTokenProvider jwtTokenProvider;	//일반 로그인에서 사용중인 JWT 유틸
 	
-	@GetMapping("/oauth/kakao/test-user-info")
+	@GetMapping("/test-user-info")
 	public ResponseEntity<?> testKakaoUser(@RequestParam String accessToken) throws Exception {
 	    KakaoUserInfoDto user = kakaoApiService.getUserInfo(accessToken);
 	    return ResponseEntity.ok(user);
@@ -48,7 +48,7 @@ public class KakaoAuthController {
 
 	
 	//카카오 로그인 콜백 처리
-	@GetMapping("/kakao/callback")
+	@GetMapping("/callback")
 	public ResponseEntity<MemberLoginResponseDto> kakaoLogin(@RequestParam String code) throws Exception{
 		return ResponseEntity.ok(memberService.handleKakaoLogin(code));
 //		
@@ -89,7 +89,7 @@ public class KakaoAuthController {
 	}
 	
 	//카카오 로그인 신규 회원가입 처리
-	@PostMapping("/signup/kakao")
+	@PostMapping("/signup")
 	public ResponseEntity<MemberSignUpResponseDto> kakaoSignup(@RequestBody KakaoSignUpRequestDto dto){
 		MemberEntity saved = memberService.kakaoSignUp(dto);
 		return ResponseEntity.ok(new MemberSignUpResponseDto(
