@@ -9,9 +9,9 @@ import { Link } from "react-router-dom";
 import { fetchAdminMembersNoPaging } from "../services/adminApi";
 
 export default function MemberListPage() {
-  const [keyword, setKeyword] = useState("");   // 서버 검색용 키워드
+  const [keyword, setKeyword] = useState(""); // 서버 검색용 키워드
   const [loading, setLoading] = useState(false);
-  const [members, setMembers] = useState([]);   // 실제 테이블에 뿌릴 데이터
+  const [members, setMembers] = useState([]); // 실제 테이블에 뿌릴 데이터
   const [error, setError] = useState("");
 
   // 목록 로드 (검색 포함)
@@ -23,7 +23,9 @@ export default function MemberListPage() {
       setMembers(list);
     } catch (e) {
       console.error(e);
-      setError(e?.response?.data?.message || e.message || "목록을 불러오지 못했습니다.");
+      setError(
+        e?.response?.data?.message || e.message || "목록을 불러오지 못했습니다."
+      );
     } finally {
       setLoading(false);
     }
@@ -54,7 +56,11 @@ export default function MemberListPage() {
       </div>
 
       {/* 검색바 (서버 검색: 이름 부분일치) */}
-      <form className="form_flex" onSubmit={handleSearch} style={{ gap: 8, marginBottom: 12 }}>
+      <form
+        className="form_flex"
+        onSubmit={handleSearch}
+        style={{ gap: 8, marginBottom: 12 }}
+      >
         <div className="temp_form md">
           <input
             className="temp_input"
@@ -65,16 +71,31 @@ export default function MemberListPage() {
           />
         </div>
         <div className="temp_btn md">
-          <button type="submit" className="btn">검색</button>
+          <button type="submit" className="btn">
+            검색
+          </button>
         </div>
       </form>
 
       {/* 에러 메시지 */}
-      {error && <div className="hint warn" style={{ marginBottom: 8 }}>{error}</div>}
+      {error && (
+        <div className="hint warn" style={{ marginBottom: 8 }}>
+          {error}
+        </div>
+      )}
 
       {/* 목록 테이블 */}
       <div className="form_wrap">
         <table className="table type2 responsive">
+          <colgroup>
+            <col className="w10p" />
+            <col />
+            <col className="w15p" />
+            <col className="w15p" />
+            <col className="w15p" />
+            <col className="w10p" />
+            <col className="w10p" />
+          </colgroup>
           <thead>
             <tr>
               <th>번호</th>
@@ -86,11 +107,15 @@ export default function MemberListPage() {
               <th>관리</th>
             </tr>
           </thead>
-          <tbody>
+          <tbody className="text_center">
             {loading ? (
-              <tr><td colSpan={7}>불러오는 중...</td></tr>
+              <tr>
+                <td colSpan={7}>불러오는 중...</td>
+              </tr>
             ) : members.length === 0 ? (
-              <tr><td colSpan={7}>데이터가 없습니다.</td></tr>
+              <tr>
+                <td colSpan={7}>데이터가 없습니다.</td>
+              </tr>
             ) : (
               members.map((m) => (
                 <tr key={m.memberNum}>
@@ -102,9 +127,7 @@ export default function MemberListPage() {
                   <td>{m.memberLock ? "잠금" : "정상"}</td>
                   <td>
                     <div className="temp_btn sm">
-                      <Link className="btn">
-                        상세보기
-                      </Link>
+                      <Link className="btn">상세보기</Link>
                     </div>
                   </td>
                 </tr>
