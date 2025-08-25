@@ -3,7 +3,9 @@ import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
 const RequireAdmin = ({ children }) => {
-  const token = localStorage.getItem("accessToken") || localStorage.getItem("adminAccessToken");
+  const token =
+    localStorage.getItem("accessToken") ||
+    localStorage.getItem("adminAccessToken");
 
   if (!token) {
     // 토큰 없으면 로그인 페이지로 이동
@@ -16,8 +18,8 @@ const RequireAdmin = ({ children }) => {
 
     // role 값이 ADMIN 이 아니면 접근 불가
     if (!role || !String(role).includes("ADMIN")) {
-        alert("관리자만 접근할 수 있는 페이지입니다.");
-        return <Navigate to="/" replace />;
+      alert("관리자만 접근할 수 있는 페이지입니다.");
+      return <Navigate to="/" replace />;
     }
   } catch (err) {
     console.error("토큰 검증 실패:", err);

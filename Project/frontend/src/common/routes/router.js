@@ -37,33 +37,44 @@ const routes = {
 
   // 회원 관련
   member: {
-    signup: { path: "/signup", label: "회원가입" },
+    join: { path: "/join", label: "회원 약관" },
+    phone: { path: "/phonetest", label: "휴대폰 인증" },
+    signup: { path: "/join/signup", label: "회원가입" },
     login: { path: "/login", label: "로그인" },
     logout: { path: "/logout", label: "로그아웃" },
     findid: { path: "/find-id", label: "아이디 찾기" },
     findpw: { path: "/find-pw", label: "비밀번호 찾기" },
-    changepw: { path: "/update-password", label: "비밀번호 변경" },
+    changepw: { path: "/member/update-password", label: "비밀번호 변경" },
     mypage: { path: "/member/mypage", label: "마이페이지" },
-    update: { path: "/mypage/update", label: "회원정보 수정" },
-    delete: { path: "/mypage/update/delete", label: "회원 탈퇴" },
     reserves: { path: "/member/mypage/reserves", label: "예약 내역 조회" },
     landReserveDetail: { path: "/member/mypage/reserves/land/:reserveCode", label: "놀이터 예약 상세보기" },
     volunteerReserveDetail: { path: "/member/mypage/reserves/volunteer/:reserveCode", label: "봉사 예약 상세보기"},
+    memberdata: { path: "/member/mypage/memberdata", label: "회원정보" },
+    update: {
+      path: "/member/mypage/memberdata/update",
+      label: "회원정보 수정",
+    },
+    delete: { path: "/member/mypage/update/delete", label: "회원 탈퇴" },
+
   },
 
   // 관리자
   admin: {
     admin: { path: "/admin", label: "관리자 페이지" },
     password: { path: "/admin/updatePw", label: "관리자 비밀번호 변경" },
-    dashboard: { path: "/admin/dashboard", label: "관리자 홈" },
-    members: { path: "/admin/members", label: "회원 관리" },
-    memberDetail: (id) => `/admin/members/${id}`,
+    membersList: { path: "/admin/membersList", label: "회원 목록" },
+    memberDetail: {
+      path: "/admin/membersList/:memberNum",
+      build: (id) => `/admin/membersList/${id}`,
+      label: "회원 상세",
+    },
     timeSlotManage: { path: "/admin/timeslots", label: "시간대 관리" },
     closedDayManage: { path: "/admin/closedday", label: "휴무일 관리"}, 
     landReserveManage: { path: "/admin/reserve/land", label: "놀이터 예약 관리" },
     volunteerReserveManage: { path: "/admin/reserve/volunteer", label: "봉사 예약 관리" },
     landReserveDetail: { path: "/admin/reserve/land/:reserveCode", label: "놀이터 예약 상세보기" },
     volunteerReserveDetail: { path: "/admin/reserve/volunteer/:reserveCode", label: "봉사 예약 상세보기" }, 
+
   },
 
   //예약

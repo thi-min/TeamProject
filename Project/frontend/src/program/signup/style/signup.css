@@ -2,3 +2,10 @@
 .id_check_btn{margin-left:16px;}
 .address_form{display:flex;flex-direction:column;gap:10px;}
 
+.phone_box{display:block;position:relative;box-sizing:border-box;text-align:center;}
+.phone_box .phone_inner{display:block;width:400px;height:400px;margin:0 auto;border:1px solid #333;border-radius:12px;background-color:#fff;}
+.phone_box .phone_inner .phone_btn{position:relative;width:100%;height:100%;border:none;background-color:transparent;}
+.phone_box .phone_inner .phone_btn:before{display:block;position:absolute;top:80px;left:calc(50% - 75px);width:150px;height:150px;background-image:url(../images/phone_image.png);background-repeat:no-repeat;background-size:contain;content:'';}
+.phone_box .phone_inner .phone_btn span{display:block;position:absolute;width:100%;bottom:60px;font-size:28px;line-height:30px;letter-spacing:0;color:#333;font-weight:400;}
+
+.form_top_box .form_top_item .form_icon.type5:before{background-image:url('../images/phone_icon.png');background-repeat:no-repeat;background-position:0 0;content:'';}

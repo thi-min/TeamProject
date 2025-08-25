@@ -24,10 +24,14 @@ import com.project.admin.service.AdminService;
 import com.project.member.dto.AddressUpdateRequestDto;
 import com.project.member.dto.MemberDeleteDto;
 import com.project.member.dto.MemberFindPasswordRequestDto;
+import com.project.member.dto.MemberMeResponseDto;
 import com.project.member.dto.MemberMyPageResponseDto;
-import com.project.member.dto.MemberPasswordUpdateRequestDto;
 import com.project.member.dto.MemberSignUpRequestDto;
 import com.project.member.dto.MemberSignUpResponseDto;
+import com.project.member.dto.PhoneUpdateRequestDto;
+import com.project.member.dto.ResetPasswordUpdateRequestDto;
+import com.project.member.dto.SelfPasswordUpdateRequestDto;
+import com.project.member.dto.SmsAgreeUpdateRequestDto;
 import com.project.member.entity.MemberEntity;
 import com.project.member.repository.MemberRepository;
 import com.project.member.service.MemberService;
@@ -56,8 +60,30 @@ public class MemberController {
 //	PUT /members/update-password → 비밀번호 변경
 //	GET /members/check-phone?phoneNum=01012345678 → 휴대폰 중복확인
 	
+	/**
+     * 현재 로그인한 회원의 기초 정보 조회
+     * - 프론트의 마이페이지 진입 시 memberNum을 얻기 위해 호출
+     * - Authorization 헤더(JWT)가 반드시 필요
+     */
+    @GetMapping("/member/mypage/me")
+    public ResponseEntity<MemberMeResponseDto> getMyInfo() {
+        // Security에 저장된 로그인 주체(일반적으로 memberId)를 꺼냄
+        String memberId = SecurityContextHolder.getContext() != null
+                && SecurityContextHolder.getContext().getAuthentication() != null
+                ? SecurityContextHolder.getContext().getAuthentication().getName()
+                : null;
+
+        if (memberId == null || memberId.isBlank()) {
+            // 인증 정보가 없으면 401
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        MemberMeResponseDto dto = memberService.getMyInfo(memberId);
+        return ResponseEntity.ok(dto);
+    }
+    
 	//회원가입
-	@PostMapping("/signup")
+	@PostMapping("/join/signup")
 	public ResponseEntity<MemberSignUpResponseDto> signup(@RequestBody MemberSignUpRequestDto dto){
 		return ResponseEntity.ok(memberService.sigup(dto));
 	}
@@ -85,10 +111,11 @@ public class MemberController {
         }
     }
    
+    
     //인증된 마이페이지 수정(토큰으로 본인확인)
   	//현재 로그인한 사용자의 마이페이지 정보를 수정합니다.
   	//인증 정보를 기반으로 해당 사용자만 수정 가능하도록 합니다.
-    @GetMapping("/member/mypage")
+    @GetMapping("/member/mypage/memberdata")
     public ResponseEntity<MemberMyPageResponseDto> myPage() {
         // 1) 인증 체크 → 비로그인: 401
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -119,7 +146,9 @@ public class MemberController {
         // ※ 그 외 예외는 전역 예외 핸들러(있다면)에서 500으로 표준화하도록 두고,
         //   다음 스텝에서 서비스/DTO 보강으로 근본 원인을 줄입니다.
     }
-    @PutMapping(value = "/member/mypage/address", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    
+    //회원정보 수정 주소변경
+    @PutMapping(value = "/member/mypage/memberdata/address", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MemberMyPageResponseDto> updateMyAddress(@RequestBody AddressUpdateRequestDto dto) {
         // 1) 인증 검사
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -141,32 +170,43 @@ public class MemberController {
         MemberMyPageResponseDto body = memberService.updateMyAddress(member.getMemberNum(), dto);
         return ResponseEntity.ok(body);
     }
-//  	@PutMapping("/member/mypage")
-//  	public ResponseEntity<MemberMyPageResponseDto> updateMyPage(@RequestBody MemberMyPageUpdateRequestDto dto){
-//  		//현재 인증 정보 가져오기
-//  		Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-//  		
-//  		//인증이 안된경우
-//  		if(auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
-//  			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
-//  		}
-//  		
-//  		//인증된 사용자 ID 추출
-//  		String memberId = auth.getName();	//principal로 전달된 memberId
-//  		
-//  		//사용자 정보 조회(memberNum 얻기 위함)
-//  		MemberEntity member = memberRepository.findByMemberId(memberId)
-//  	            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 회원입니다."));
-//  				
-//  		//마이페이지 수정 로직 호출 및 결과 반환
-//  		return ResponseEntity.ok(memberService.updateMyPage(member.getMemberNum(), dto));
-//  	}
-//  	
-	//회원탈퇴
-	@DeleteMapping("/mypage/del/{memberNum}")
-	public ResponseEntity<MemberDeleteDto> memberOut(@PathVariable Long memberNum){
-		return ResponseEntity.ok(memberService.memberOut(memberNum));
-	}
+    
+    //회원정보 수정 sns수신동의 변경
+    @PutMapping(value = "/member/mypage/memberdata/smsagree", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<MemberMyPageResponseDto> updateMySmsAgree(@RequestBody SmsAgreeUpdateRequestDto dto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+
+        String memberId = auth.getName();
+        MemberEntity member = memberRepository.findByMemberId(memberId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."));
+
+        MemberMyPageResponseDto body = memberService.updateMySmsAgree(member.getMemberNum(), dto.isSmsAgree());
+        return ResponseEntity.ok(body);
+    }
+    
+    /**
+     * 회원 탈퇴
+     * - PathVariable: memberNum (프론트에서 /me로 먼저 조회한 값)
+     * - Optional: ?message= 사유(선택)
+     * - 실제 삭제 정책(물리/논리)은 Service에서 수행
+     */
+    @DeleteMapping("/member/mypage/del/{memberNum}")
+    public ResponseEntity<MemberDeleteDto> memberOut(
+            @PathVariable Long memberNum,
+            @RequestParam(value = "message", required = false) String message
+    ){
+        // 인증 주체(본인확인 용)
+        String requesterId = SecurityContextHolder.getContext() != null
+                && SecurityContextHolder.getContext().getAuthentication() != null
+                ? SecurityContextHolder.getContext().getAuthentication().getName()
+                : null;
+
+        MemberDeleteDto result = memberService.memberOut(memberNum, requesterId, message);
+        return ResponseEntity.ok(result);
+    }
 
 	//아이디 찾기
 	@GetMapping("/find-id")
@@ -184,11 +224,50 @@ public class MemberController {
 		return ResponseEntity.ok(result);
 	}
 
-	//비밀번호 변경
-	@PutMapping("/update-password")
-	public ResponseEntity<String> updatePassword(@RequestBody MemberPasswordUpdateRequestDto dto){
-		memberService.updatePassword(dto);
-		return ResponseEntity.ok("비밀번호가 변경되었습니다.");
+	//(로그인 상태) 내 비밀번호 변경
+    @PutMapping(value = "/member/mypage/password", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> updatePasswordSelf(@RequestBody SelfPasswordUpdateRequestDto dto) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        String memberId = auth.getName();
+        MemberEntity me = memberRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."));
+
+        memberService.updatePasswordSelf(me.getMemberNum(), dto);
+        return ResponseEntity.ok().build();
+    }
+
+    //(비번찾기) 인증 후 비밀번호 재설정
+    @PutMapping(value = "/member/update-password", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Void> resetPassword(@RequestBody ResetPasswordUpdateRequestDto dto) {
+        memberService.resetPassword(dto);
+        return ResponseEntity.ok().build();
+    }
+    
+//	//비밀번호 변경
+//	@PutMapping("/member/update-password")
+//	public ResponseEntity<String> updatePassword(@RequestBody ResetPasswordUpdateRequestDto dto){
+//		memberService.updatePassword(dto);
+//		return ResponseEntity.ok("비밀번호가 변경되었습니다.");
+//	}
+	
+	//휴대폰 번호 변경
+	@PutMapping(value = "/member/mypage/memberdata/phone", consumes = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<MemberMyPageResponseDto> updateMyPhone(@RequestBody PhoneUpdateRequestDto dto) {
+	    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+	    if (auth == null || !auth.isAuthenticated() || auth instanceof AnonymousAuthenticationToken) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+	    }
+
+	    String memberId = auth.getName();
+	    MemberEntity member = memberRepository.findByMemberId(memberId)
+	        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."));
+
+	    // 서비스에서 BAD_REQUEST/CONFLICT 등을 ResponseStatusException으로 던지므로 그대로 전파
+	    MemberMyPageResponseDto body = memberService.updateMyPhone(member.getMemberNum(), dto);
+	    return ResponseEntity.ok(body);
 	}
 	
 	//휴대폰인증(중복확인)

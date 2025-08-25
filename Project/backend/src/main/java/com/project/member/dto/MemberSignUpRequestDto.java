@@ -45,7 +45,7 @@ public class MemberSignUpRequestDto {
     private LocalDate memberBirth;
     //private String memberBirth;
 
-    @NotBlank(message = "휴대폰 번호는 필수입니다.")
+    @NotBlank
     @Pattern(regexp = "^\\d{10,11}$", message = "휴대폰 번호는 숫자만 10~11자리 입력하세요.")
     private String memberPhone;
 

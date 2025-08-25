@@ -68,9 +68,9 @@ export default function FindPasswordPage() {
 
         // ✅ 본인확인 요청 (성공 시 서버가 안내 문자열 반환)
         const text = await apiFindMemberPw({
-          memberId: form.memberId,
-          memberName: form.memberName,
-          memberPhone: form.memberPhone,
+          memberId: form.memberId.trim(),
+          memberName: form.memberName.trim(),
+          memberPhone: form.memberPhone.trim(),
         });
 
         // ✅ 성공: 안내 → 비밀번호 변경 화면으로 이동
@@ -78,9 +78,13 @@ export default function FindPasswordPage() {
         window.alert(
           text || "본인 확인이 완료되었습니다. 비밀번호를 재설정 해주세요."
         );
-        navigate("/update-password", {
+        navigate("/member/update-password", {
+          state: {
+            mode: "reset", // ← 페이지에서 reset 모드로 동작
+            memberId: form.memberId.trim(), // ← 재설정 페이지에서 사용할 아이디
+            // resetToken, expiresAt 등은 추후 서버가 주면 여기에 추가
+          },
           replace: true,
-          state: { memberId: form.memberId }, // 재설정 화면에서 사용
         });
       } catch (err) {
         // ❌ 실패: 메시지 표시 후 현재 페이지 유지
