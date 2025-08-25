@@ -805,5 +805,27 @@ public class BbsServiceImpl implements BbsService {
 
         fileUploadRepository.delete(file);
     }
+    
+    @Override
+    public Map<String, Object> getBbsList(BoardType type, int page, int size, String bbstitle, String memberName, String bbscontent) {
+        // 등록일 기준 내림차순 정렬 (최신글 맨 위)
+        Pageable pageable = PageRequest.of(page, size, Sort.by("registdate").descending());
+        
+        // Repository 호출
+        Page<BbsDto> pageResult = bbsRepository.findBbsByTypeAndSearch(type, bbstitle, memberName, bbscontent, pageable);
+        List<BbsDto> list = pageResult.getContent(); // Page -> List
+        long total = pageResult.getTotalElements();  // 전체 개수
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        result.put("total", total);
+        result.put("page", page);
+        result.put("size", size);
+        return result;
+    }
+
+
+
+
 
 }

@@ -3,6 +3,8 @@ package com.project.board.service;
 import com.project.board.BoardType;
 import com.project.board.dto.*;
 import java.util.List;
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -52,6 +54,9 @@ public interface BbsService {
     FileUpLoadDto getFileById(Long fileId);
     
     ImageBbsDto getRepresentativeImage(Long bulletinNum);
+    
+    // FAQ 게시글 리스트 조회
+    Map<String, Object> getBbsList(BoardType type, int page, int size, String bbstitle, String memberName, String bbscontent);
 
 }
 

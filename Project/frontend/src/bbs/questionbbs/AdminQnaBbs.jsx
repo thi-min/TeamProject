@@ -1,10 +1,10 @@
 // 📁 src/admin/AdminQnaBbs.jsx
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../common/api/axios";
 import "./qnabbs.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
 function AdminQnaBbs() {
   const [posts, setPosts] = useState([]);
@@ -16,28 +16,41 @@ function AdminQnaBbs() {
   const [selectedPosts, setSelectedPosts] = useState([]);
   const navigate = useNavigate();
 
-  const BASE_URL = "http://127.0.0.1:8090"; // 백엔드 서버 주소
+  const BASE_URL = "http://127.0.0.1:8090/admin/bbs";
 
   const fetchPosts = async (pageNumber = 0) => {
     try {
       const params = { type: "FAQ", page: pageNumber, size: 10 };
+
       if (searchType !== "all" && searchKeyword.trim() !== "") {
         if (searchType === "title") params.bbstitle = searchKeyword.trim();
         else if (searchType === "writer") params.memberName = searchKeyword.trim();
         else if (searchType === "content") params.bbscontent = searchKeyword.trim();
       }
-      const response = await axios.get(`${BASE_URL}/bbs/bbslist`, { params });
-      setPosts(response.data.content);
-      setTotalPages(response.data.totalPages);
-      setPage(response.data.number);
+
+      const response = await api.get(`${BASE_URL}/bbslist`, { params });
+
+      const data = response.data ?? {};
+      const content = data.list ?? [];
+      const total = data.total ?? 0;
+      const size = data.size ?? 10;
+      const currentPage = data.page ?? 0;
+
+      setPosts(content);
+      setTotalPages(Math.ceil(total / size));
+      setPage(currentPage);
     } catch (error) {
       console.error("게시글 불러오기 중 오류:", error);
       alert("목록 조회 실패");
+      setPosts([]);
+      setTotalPages(0);
+      setPage(0);
     }
   };
 
   useEffect(() => {
     fetchPosts(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page]);
 
   const handleSearch = () => {
@@ -46,8 +59,8 @@ function AdminQnaBbs() {
   };
 
   const handleCheckboxChange = (id) => {
-    setSelectedPosts(prev =>
-      prev.includes(id) ? prev.filter(pid => pid !== id) : [...prev, id]
+    setSelectedPosts((prev) =>
+      prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]
     );
   };
 
@@ -59,10 +72,22 @@ function AdminQnaBbs() {
     if (!window.confirm("선택한 게시글을 정말 삭제하시겠습니까?")) return;
 
     try {
-      await axios.delete(`${BASE_URL}/admin/bbs/delete-multiple`, {
-        data: { ids: selectedPosts },
-        params: { adminId: 1 }
+      await api.delete(`${BASE_URL}/delete-multiple`, {
+        params: { ids: selectedPosts, adminId: 1 }, // 실제 adminId 동적으로 연결 가능
+        paramsSerializer: params => {
+          // 배열 직렬화: ids=35&ids=32
+          const queryString = Object.keys(params)
+            .map(key => {
+              if (Array.isArray(params[key])) {
+                return params[key].map(val => `${key}=${encodeURIComponent(val)}`).join("&");
+              }
+              return `${key}=${encodeURIComponent(params[key])}`;
+            })
+            .join("&");
+          return queryString;
+        }
       });
+
       alert("선택한 게시글이 삭제되었습니다.");
       setSelectedPosts([]);
       fetchPosts(page);
@@ -77,9 +102,7 @@ function AdminQnaBbs() {
   };
 
   const handlePageChange = (newPage) => {
-    if (newPage >= 0 && newPage < totalPages) {
-      setPage(newPage);
-    }
+    if (newPage >= 0 && newPage < totalPages) setPage(newPage);
   };
 
   return (
@@ -121,7 +144,7 @@ function AdminQnaBbs() {
           </tr>
         </thead>
         <tbody>
-          {posts.length > 0 ? (
+          {posts?.length > 0 ? (
             posts.map((post) => (
               <React.Fragment key={post.bulletinNum}>
                 <tr>
@@ -140,7 +163,7 @@ function AdminQnaBbs() {
                     {post.bbsTitle}
                   </td>
                   <td>{post.memberName || "익명"}</td>
-                  <td>{new Date(post.registDate).toLocaleDateString()}</td>
+                  <td>{post.registdate ? new Date(post.registdate).toLocaleDateString() : "-"}</td>
                   <td>
                     {post.answerContent && (
                       <button onClick={() => toggleRow(post.bulletinNum)}>
@@ -172,22 +195,30 @@ function AdminQnaBbs() {
       </table>
 
       {/* 페이지네이션 */}
-      <div className="pagination">
-        <button disabled={page === 0} onClick={() => handlePageChange(page - 1)}>
+      <div className="pagination_box">
+        <button
+          className="page_btn prev"
+          disabled={page === 0}
+          onClick={() => handlePageChange(page - 1)}
+        >
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
-
-        {Array.from({ length: Math.max(totalPages, 1) }, (_, i) => (
-          <button
-            key={i}
-            className={page === i ? "active" : ""}
-            onClick={() => handlePageChange(i)}
-          >
-            {i + 1}
-          </button>
-        ))}
-
-        <button disabled={page === Math.max(totalPages, 1) - 1} onClick={() => handlePageChange(page + 1)}>
+        <div className="page_btn_box">
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i}
+              className={page === i ? "page active" : "page"}
+              onClick={() => handlePageChange(i)}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+        <button
+          className="next page_btn"
+          disabled={page === totalPages - 1}
+          onClick={() => handlePageChange(page + 1)}
+        >
           <FontAwesomeIcon icon={faChevronRight} />
         </button>
       </div>
