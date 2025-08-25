@@ -1,12 +1,18 @@
 import React from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 const VolunteerReserveSuccessPage = () => {
   const { state } = useLocation();
+  const navigate = useNavigate();
+
   if (!state) return <p>예약 정보가 없습니다.</p>;
 
   // ✅ 구조 분해
-  const { reserveCode /*, formData, selectedSlot, selectedDate */ } = state;
+  const { reserveCode } = state;
+
+  const handleGoMyReserves = () => {
+    navigate("/member/mypage/reserves"); 
+  };
 
   return (
     <div className="box reserve_box">
@@ -25,7 +31,9 @@ const VolunteerReserveSuccessPage = () => {
 
       <div className="btn_group">
         <span className="temp_btn white md">
-          <button type="button" className="btn">봉사 신청내역 확인</button>
+          <button type="button" className="btn" onClick={handleGoMyReserves}>
+            예약 내역 확인
+          </button>
         </span>
       </div>
     </div>

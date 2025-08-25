@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../../../common/api/axios";
 import VolunteerReserveService from "../services/VolunteerReserveService";
 import "./../style/VolunteerReserveStyle.css";
 
@@ -50,7 +50,7 @@ const VolunteerReserveFormPage = () => {
         return;
       }
 
-      const res = await axios.get("/member/mypage", {
+      const res = await api.get("/member/mypage", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -187,7 +187,7 @@ const VolunteerReserveFormPage = () => {
       );
     }
     try {
-    const { data: exists } = await axios.get("/api/reserve/check-duplicate", {
+    const { data: exists } = await api.get("/api/reserve/check-duplicate", {
       params: { memberNum: formData.memberNum, date: selectedDate, timeSlotId: selectedSlotId, type: "VOLUNTEER" },
       });
       if (exists) {

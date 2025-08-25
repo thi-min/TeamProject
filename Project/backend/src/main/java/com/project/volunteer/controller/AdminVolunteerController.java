@@ -13,7 +13,7 @@ import com.project.volunteer.service.VolunteerService;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/admin/volunteer")
+@RequestMapping("/admin/volunteer")
 @RequiredArgsConstructor
 public class AdminVolunteerController {
 

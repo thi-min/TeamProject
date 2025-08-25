@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../../common/api/axios";
+import { useNavigate } from "react-router-dom";
 import "../style/ReserveManage.css";
+import "../../../common/styles/pagin.css";
 
 const AdminVolunteerReservePage = () => {
   const [reservations, setReservations] = useState([]);
@@ -10,17 +12,29 @@ const AdminVolunteerReservePage = () => {
     memberName: "",
     reserveState: "",
   });
+  const navigate = useNavigate();
+
 
   // 봉사 예약 목록 조회
   const fetchReservations = async () => {
     try {
-      const { data } = await axios.get("/api/admin/reserve/volunteer");
+      const { data } = await api.get("/api/admin/reserve/volunteer");
       setReservations(data);
     } catch (err) {
-      console.error("봉사 예약 목록 조회 실패", err);
+      console.error("예약 목록 조회 실패", err);
     }
   };
 
+  //페이지네이션 상태
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+  const totalPages = Math.ceil(reservations.length / itemsPerPage);
+  
+  const paginatedReservations = reservations.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  
   // 봉사 예약 검색 실행 (조건부)
   const handleSearch = async () => {
     try {
@@ -35,7 +49,7 @@ const AdminVolunteerReservePage = () => {
         return;
       }
 
-      const { data } = await axios.post(
+      const { data } = await api.post(
         "/api/admin/reserve/volunteer/search",
         payload
       );
@@ -59,6 +73,7 @@ const AdminVolunteerReservePage = () => {
   useEffect(() => {
     fetchReservations();
   }, []);
+
 
   return (
     <div className="admin-reserve-page">
@@ -92,6 +107,7 @@ const AdminVolunteerReservePage = () => {
         >
           <option value="">상태 전체</option>
           <option value="ING">진행중</option>
+          <option value="REJ">거절</option>
           <option value="DONE">완료</option>
           <option value="CANCEL">취소</option>
         </select>
@@ -100,7 +116,7 @@ const AdminVolunteerReservePage = () => {
       </div>
 
       {/* 결과 테이블 */}
-      <table className="reservation-table">
+      <table className="table type2 responsive border">
         <thead>
           <tr>
             <th>예약코드</th>
@@ -110,9 +126,12 @@ const AdminVolunteerReservePage = () => {
             <th>상태</th>
           </tr>
         </thead>
-        <tbody>
-          {reservations.map((r) => (
-            <tr key={r.reserveCode}>
+        <tbody className="text_center">
+          {paginatedReservations.map((r) => (
+            <tr  
+              key={r.reserveCode}
+              onClick={() => navigate(`/admin/reserve/volunteer/${r.reserveCode}`)}
+              style={{ cursor: "pointer" }} >
               <td>{r.reserveCode}</td>
               <td>{r.memberName}</td>
               <td>{r.programName}</td>
@@ -122,6 +141,35 @@ const AdminVolunteerReservePage = () => {
           ))}
         </tbody>
       </table>
+      <div className="pagination_box">
+        <button
+          className="page_btn prev"
+          disabled={currentPage === 1}
+          onClick={() => setCurrentPage(currentPage - 1)}
+        >
+          이전
+        </button>
+
+        <div className="page_btn_box">
+          {Array.from({ length: totalPages }, (_, i) => (
+            <button
+              key={i + 1}
+              className={`page ${currentPage === i + 1 ? "active" : ""}`}
+              onClick={() => setCurrentPage(i + 1)}
+            >
+              {i + 1}
+            </button>
+          ))}
+        </div>
+
+        <button
+          className="page_btn next"
+          disabled={currentPage === totalPages}
+          onClick={() => setCurrentPage(currentPage + 1)}
+        >
+          다음
+        </button>
+      </div>
     </div>
   );
 };

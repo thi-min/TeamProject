@@ -1,5 +1,5 @@
 import React from "react";
-import axios from "axios";
+import api from "../../../../common/api/axios";
 import { useLocation, useNavigate } from "react-router-dom";
 import "./../style/LandReserveStyle.css";
 
@@ -56,7 +56,7 @@ const LandReserveConfirmPage = () => {
     };
     console.log("[POST] /api/reserve payload:", payload);
 
-    const { data } = await axios.post("/api/reserve", payload, {
+    const { data } = await api.post("/api/reserve", payload, {
       headers: token ? { Authorization: `Bearer ${token}` } : undefined,
     });
 

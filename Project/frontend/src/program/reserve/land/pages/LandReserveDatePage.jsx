@@ -1,4 +1,4 @@
-import axios from "axios";
+import api from "../../../../common/api/axios";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
@@ -12,7 +12,7 @@ const LandReserveDatePage = () => {
 
   const fetchClosedDays = async (year, month) => {
     try {
-      const { data } = await axios.get("/api/closed-days", {
+      const { data } = await api.get("/api/closed-days", {
         params: { year, month },
       });
       setClosedDates(data.map((d) => ({ date: d.closedDate, reason: d.reason })));

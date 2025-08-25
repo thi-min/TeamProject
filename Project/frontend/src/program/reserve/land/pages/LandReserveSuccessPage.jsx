@@ -1,12 +1,23 @@
-import React from "react";
-import { useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
+import PaymentInfo from "../../../../common/components/PaymentInfo";
 
 const LandReserveSuccessPage = () => {
   const { state } = useLocation();
+  const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+
   if (!state) return <p>예약 정보가 없습니다.</p>;
 
-  // ✅ 구조 분해
-  const { reserveCode} = state;
+  const { reserveCode } = state;
+
+  const handlePaymentInfo = () => {
+    setShowModal(true);
+  };
+
+  const handleGoMyReserves = () => {
+    navigate("/member/mypage/reserves"); 
+  };
 
   return (
     <div className="box reserve_box">
@@ -25,12 +36,26 @@ const LandReserveSuccessPage = () => {
 
       <div className="btn_group">
         <span className="temp_btn white md">
-          <button type="button" className="btn">예약 결제하기</button>
+          <button type="button" className="btn" onClick={handlePaymentInfo}>
+            예약 결제하기
+          </button>
         </span>
         <span className="temp_btn white md">
-          <button type="button" className="btn">예약 내역 확인</button>
+          <button type="button" className="btn" onClick={handleGoMyReserves}>
+            예약 내역 확인
+          </button>
         </span>
       </div>
+
+      {/* ✅ 결제 안내 모달 */}
+      {showModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <PaymentInfo />
+            <button onClick={() => setShowModal(false)}>닫기</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

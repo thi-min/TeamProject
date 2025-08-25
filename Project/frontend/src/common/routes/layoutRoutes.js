@@ -1,6 +1,7 @@
 // 📁 src/router/layoutRoutes.js
 import { Route } from "react-router-dom";
 import routes from "./router";
+import RequireAdmin from "../../common/components/RequireAdmin";
 
 // 관리자 - 시간관리 + 휴무일 관리
 import TimeSlotManagePage from "../../program/admin/pages/TimeSlotManagePage";
@@ -33,7 +34,8 @@ import LandReserveDetailPage from "../../program/member/pages/LandReserveDetailP
 import VolunteerReserveDetailPage from "../../program/member/pages/VolunteerReserveDetailPage"; //봉사예약 상세보기
 import AdminLandReservePage from "../../program/admin/pages/AdminLandReservePage"; //놀이터예약 관리
 import AdminVolunteerReservePage from "../../program/admin/pages/AdminVolunteerReservePage";  //봉사예약 관리
-
+import AdminLandReserveDetailPage from "../../program/admin/pages/AdminLandReserveDetailPage"; //관리자 놀이터예약 상태 변경
+import AdminVolunteerReserveDetailPage from "../../program/admin/pages/AdminVolunteerReserveDetailPage"; //관리자 봉사예약 상태 변경
 // 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
 
@@ -50,12 +52,14 @@ const layoutRoutes = [
   <Route key="reserve-volunteer-success" path={routes.reserve.volunteer.success.path} element={<VolunteerReserveSuccessPage />} />,
 
   // 🔹 관리자 페이지 - 
-  <Route key="admin-timeslot-manage" path={routes.admin.timeSlotManage.path} element={<TimeSlotManagePage />} />,
+  <Route key="admin-timeslot-manage" path={routes.admin.timeSlotManage.path} element={<RequireAdmin><TimeSlotManagePage /></RequireAdmin>} />,
   <Route key="admin" path={routes.admin.admin.path} element={<Admin />} />,
   <Route key="updatePw" path={routes.admin.password.path} element={<AdminPw />} />,
-  <Route key="admin-closedday-manage" path={routes.admin.closedDayManage.path} element={<ClosedDayManagePage />} />,
-  <Route key="admin-land-manage" path={routes.admin.landReserveManage.path} element={<AdminLandReservePage />} />,
-  <Route key="admin-volunteer-manage" path={routes.admin.volunteerReserveManage.path} element={<AdminVolunteerReservePage />} />,
+  <Route key="admin-closedday-manage" path={routes.admin.closedDayManage.path} element={<RequireAdmin><ClosedDayManagePage /></RequireAdmin>} />,
+  <Route key="admin-land-manage" path={routes.admin.landReserveManage.path} element={<RequireAdmin><AdminLandReservePage /></RequireAdmin>} />,
+  <Route key="admin-volunteer-manage" path={routes.admin.volunteerReserveManage.path} element={<RequireAdmin><AdminVolunteerReservePage /></RequireAdmin>} />,
+  <Route key="admin-land-detail" path={routes.admin.landReserveDetail.path} element={<RequireAdmin><AdminLandReserveDetailPage /></RequireAdmin>} />,
+  <Route key="admin-volunteer-detail" path={routes.admin.volunteerReserveDetail.path} element={<RequireAdmin><AdminVolunteerReserveDetailPage /></RequireAdmin>} />,
   //사용자
   <Route key="login" path={routes.member.login.path} element={<LoginPage />} />, //로그인
   <Route

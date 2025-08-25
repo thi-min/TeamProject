@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/admin/reserve")
@@ -70,9 +71,13 @@ public class AdminReserveController {
     }
 
     // 예약 상태 변경 (승인, 거절 등) 
-    @PatchMapping("/state")
-    public ResponseEntity<Void> updateReserveStateByAdmin(@RequestBody AdminReservationUpdateDto updateDto) {
-        reserveService.updateReserveStateByAdmin(updateDto.getReserveCode(), updateDto.getReserveState());
+    @PatchMapping("/{reserveCode}/state")
+    public ResponseEntity<Void> updateReserveStateByAdmin(
+            @PathVariable Long reserveCode,
+            @RequestBody Map<String, String> body) {
+
+        ReserveState newState = ReserveState.valueOf(body.get("reserveState"));
+        reserveService.updateReserveStateByAdmin(reserveCode, newState);
         return ResponseEntity.ok().build();
     }
 }

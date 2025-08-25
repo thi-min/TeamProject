@@ -1,17 +1,25 @@
 import React, { useState, useEffect } from "react";
 import MyReserveService from "./../services/MyReserveService";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import "./../style/MyReserveStyle.css";
+import PaymentInfo from "../../../common/components/PaymentInfo";
 
 function MyReserveListPage() {
   const [selectedType, setSelectedType] = useState("LAND"); // 기본값 LAND
   const [reserves, setReserves] = useState([]);
+  const location = useLocation();
   const navigate = useNavigate();
   const memberNum = localStorage.getItem("memberNum"); // 로그인된 사용자 정보
+  
+  useEffect(() => {
+  fetchReserves();
+}, [selectedType]);
 
   useEffect(() => {
-    fetchReserves();
-  }, [selectedType]);
+    if (location.state?.selectedType) {
+      setSelectedType(location.state.selectedType);
+    }
+  }, [location.state]);
 
   const fetchReserves = async () => {
     try {
@@ -52,7 +60,7 @@ function MyReserveListPage() {
         </button>
       </div>
 
-      <table className="reserve-table">
+      <table className="table type2 responsive">
         <thead>
           <tr>
             <th>예약코드</th>
@@ -62,7 +70,7 @@ function MyReserveListPage() {
             <th>예약상태</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="text_center">
           {reserves.length === 0 ? (
             <tr>
               <td colSpan="5">조회된 예약 내역이 없습니다.</td>
@@ -84,6 +92,7 @@ function MyReserveListPage() {
           )}
         </tbody>
       </table>
+      {selectedType === "LAND" && <PaymentInfo />}
     </div>
   );
 }

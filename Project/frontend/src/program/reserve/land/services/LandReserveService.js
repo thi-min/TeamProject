@@ -1,7 +1,4 @@
-import axios from "axios";
-
-const API_BASE = process.env.REACT_APP_API_BASE || "";
-const api = axios.create({ baseURL: API_BASE });
+import api from "../../../../common/api/axios";
 
 /**
  * 백엔드 매핑

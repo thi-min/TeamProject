@@ -45,7 +45,7 @@ body {
 }
 
 .calendar-wrapper .react-calendar__tile {
-  height: 100px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -62,7 +62,7 @@ body {
   justify-content: flex-start;
   width: 100%; 
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 5px;
 }
 
 .form-action-buttons .prev-button,

@@ -1,8 +1,4 @@
-import axios from "axios";
-
-// .env.development 에 REACT_APP_API_BASE=http://localhost:8080 넣고 개발서버 재시작 권장
-const API_BASE = process.env.REACT_APP_API_BASE || "";
-const api = axios.create({ baseURL: API_BASE });
+import api from "../../../../common/api/axios";
 
 /**
  * 백엔드 매핑

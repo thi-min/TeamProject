@@ -30,10 +30,4 @@ public class AdminLandController {
         return ResponseEntity.ok(countInfo);
     }
 
-    // 관리자용 - 상세 예약 정보 미리보기
-    @GetMapping("/preview/{reserveCode}")
-    public ResponseEntity<LandDetailDto> getLandPreview(@PathVariable Long reserveCode) {
-        LandDetailDto dto = landService.getLandDetailByReserveCode(reserveCode);
-        return ResponseEntity.ok(dto);
-    }
 }

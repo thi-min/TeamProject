@@ -62,6 +62,8 @@ const routes = {
     closedDayManage: { path: "/admin/closedday", label: "휴무일 관리"}, 
     landReserveManage: { path: "/admin/reserve/land", label: "놀이터 예약 관리" },
     volunteerReserveManage: { path: "/admin/reserve/volunteer", label: "봉사 예약 관리" },
+    landReserveDetail: { path: "/admin/reserve/land/:reserveCode", label: "놀이터 예약 상세보기" },
+    volunteerReserveDetail: { path: "/admin/reserve/volunteer/:reserveCode", label: "봉사 예약 상세보기" }, 
   },
 
   //예약

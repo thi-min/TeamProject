@@ -40,7 +40,11 @@ const LandReserveDetailPage = () => {
   return (
     <div className="mypage-reserve-wrapper">
       <h2>놀이터 예약 정보</h2>
-      <table className="reserve-table">
+      <table className="table type2 responsive">
+        <colgroup>
+          <col className="w20p" />
+          <col />
+        </colgroup>
         <tbody>
           <tr><th>예약 코드</th><td>{detail.reserveCode}</td></tr>
           <tr><th>신청자명</th><td>{detail.memberName}</td></tr>
@@ -57,7 +61,11 @@ const LandReserveDetailPage = () => {
       </table>
 
       <h2>결제 정보</h2>
-      <table className="reserve-table">
+      <table className="table type2 responsive">
+        <colgroup>
+          <col className="w20p" />
+          <col />
+        </colgroup>
         <tbody>
           <tr><th>기본</th><td>{detail.basePriceDetail}</td></tr>
           <tr><th>추가</th><td>{detail.extraPriceDetail}</td></tr>
