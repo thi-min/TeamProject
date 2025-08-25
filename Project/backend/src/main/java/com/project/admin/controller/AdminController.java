@@ -3,6 +3,7 @@ package com.project.admin.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -14,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.admin.dto.AdminLoginRequestDto;
+import com.project.admin.dto.AdminLoginResponseDto;
 import com.project.admin.dto.AdminMemberDetailResponseDto;
 import com.project.admin.dto.AdminMemberListResponseDto;
 import com.project.admin.dto.AdminMemberUpdateRequestDto;
@@ -41,39 +44,33 @@ public class AdminController {
 	//param : dto 관리자 로그인 요청 정보(아이디, 비밀번호)
 	//return : 관리자 정보 + 로그인 성공 메시지 + 토큰
 	// ✅ 컨트롤러는 DTO 수신 → 서비스 위임 → 결과만 반환(얇게 유지)
-//    @PostMapping("/login")
-//    public ResponseEntity<AdminLoginResponseDto> login(@RequestBody AdminLoginRequestDto dto) {
-//        AdminLoginResponseDto result = adminService.login(dto);
-//        return ResponseEntity.ok(result);
-//    }
-//	@PostMapping("login")
-//	public AdminLoginResponseDto login(@RequestBody AdminLoginRequestDto dto) {
-//		
-//		//1. 아이디로 관리자 먼저 조회
-//	    AdminEntity admin = adminRepository.findFirstByAdminId(dto.getAdminId())
-//	        .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
-//	    
-//	    //2. 비밀번호는 passwordEncoder로 암호화 매칭
-//	    if (!new BCryptPasswordEncoder().matches(dto.getAdminPw(), admin.getAdminPw())) {
-//	        throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
-//	    }
-//	    
-//	    // ✅ role: ADMIN 포함한 토큰 발급
-//	    String accessToken = jwtTokenProvider.generateAccessToken(admin.getAdminId(), "ADMIN");
-//	    String refreshToken = jwtTokenProvider.generateRefreshToken(admin.getAdminId());
-//
-//	    // ✅ refreshToken 저장
-//	    admin.setRefreshToken(refreshToken);
-//	    adminRepository.save(admin);
-//
-//	    return AdminLoginResponseDto.builder()
-//	            .adminId(admin.getAdminId())
-//	            .adminEmail(admin.getAdminEmail())
-//	            .accessToken(accessToken)	// ⬅️ 발급한 토큰 포함
-//	            .refreshToken(refreshToken)
-//	            .message("관리자 로그인 성공")
-//	            .build();
-//	}
+	@PostMapping("login")
+	public AdminLoginResponseDto login(@RequestBody AdminLoginRequestDto dto) {
+		
+		//1. 아이디로 관리자 먼저 조회
+	    AdminEntity admin = adminRepository.findFirstByAdminId(dto.getAdminId())
+	        .orElseThrow(() -> new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다."));
+	    
+	    //2. 비밀번호는 passwordEncoder로 암호화 매칭
+	    if (!new BCryptPasswordEncoder().matches(dto.getAdminPw(), admin.getAdminPw())) {
+	        throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
+	    }
+	    
+	    // ✅ role: ADMIN 포함한 토큰 발급
+	    String accessToken = jwtTokenProvider.generateAccessToken(admin.getAdminId(), "ADMIN");
+	    String refreshToken = jwtTokenProvider.generateRefreshToken(admin.getAdminId());
+
+	    // ✅ refreshToken 저장
+	    admin.setRefreshToken(refreshToken);
+	    adminRepository.save(admin);
+
+	    return AdminLoginResponseDto.builder()
+	            .adminId(admin.getAdminId())
+	            .accessToken(accessToken)	// ⬅️ 발급한 토큰 포함
+	            .refreshToken(refreshToken)
+	            .message("관리자 로그인 성공")
+	            .build();
+	}
 
 	
 	//관리자 로그아웃

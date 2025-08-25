@@ -50,7 +50,7 @@ public interface MemberService {
     MemberMyPageResponseDto updateMyPage(Long memberNum, MemberMyPageUpdateRequestDto dto);
     //휴대폰 번호 변경
     MemberMyPageResponseDto updateMyPhone(Long memberNum, PhoneUpdateRequestDto dto);
-    //수신동의 변
+    //수신동의 변경
     MemberMyPageResponseDto updateMySmsAgree(Long memberNum, boolean smsAgree);
     
     //회원탈퇴
@@ -87,10 +87,7 @@ public interface MemberService {
 	//카카오 회원가입
     MemberEntity kakaoSignUp(KakaoSignUpRequestDto dto);
 	//MemberSignUpResponseDto kakaoSignup(KakaoSignUpRequestDto dto);
-
-
-
-
-
     
+    
+
 }
