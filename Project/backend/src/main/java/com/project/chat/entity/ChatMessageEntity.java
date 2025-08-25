@@ -3,6 +3,7 @@ package com.project.chat.entity;
 import java.time.LocalDateTime;
 
 import com.project.admin.entity.AdminEntity;
+import com.project.member.dto.MemberMyPageResponseDto;
 import com.project.member.entity.MemberEntity;
 
 import jakarta.persistence.Column;
