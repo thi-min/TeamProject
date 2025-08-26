@@ -12,7 +12,7 @@ function isMemberRoot(pathname) {
   return pathname === "/member" || pathname.startsWith("/member/");
 }
 
-export function RequireUserOnMember({ children }) {
+export function RequireMember({ children }) {
   const { isLogin } = useAuth();
   const location = useLocation();
   const alerted = useRef(false); // 알림 중복 방지

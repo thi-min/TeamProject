@@ -1,7 +1,52 @@
-import React from "react";
-import { Link } from "react-router-dom";
+import React, { useMemo, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import routes from "../../../common/routes/router"; // 중앙 라우트 객체
+
+// 카카오 콜백에서 프리필 저장에 사용하는 세션 키 (KakaoCallbackPage와 동일해야 함)
+const KAKAO_PREFILL_KEY = "kakao_prefill_v1";
 
 export default function Join() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  // ✅ 1) 카카오 콜백에서 넘어온 state 우선 사용
+  //    구조 예: { from:"kakao", kakaoId, prefill:{...}, via:"kakao" }
+  const kakaoState = location.state;
+
+  // ✅ 2) 세션 백업에서 프리필 복구 (콜백에서 직접 /join으로 온 경우 등)
+  const sessionPrefill = useMemo(() => {
+    try {
+      const raw = sessionStorage.getItem(KAKAO_PREFILL_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }, []);
+
+  // ✅ 3) 최종적으로 다음 페이지에 전달할 state (우선순위: location.state > session)
+  const nextState = kakaoState ?? sessionPrefill ?? null;
+
+  // (예시) 약관 상태
+  const [agreeTerms, setAgreeTerms] = useState(false); // 필수
+  const [agreePrivacy, setAgreePrivacy] = useState(false); // 선택(예시), 필요 시 필수로 변경
+
+  // ✅ 4) “다음” 클릭 → /join/signup 이동 + state 함께 전달
+  const handleGoSignup = () => {
+    // 필수 약관 검증 (지금은 '사용자 준수사항'을 필수로 본 예시)
+    if (!agreeTerms) {
+      alert("필수 약관에 동의해주세요.");
+      return;
+    }
+
+    // 라우트 객체가 있으면 사용, 없으면 문자열 경로로 폴백
+    const signupPath = routes?.member?.signup?.path || "/join/signup";
+
+    navigate(signupPath, {
+      replace: false, // 뒤로가기 시 약관으로 돌아올 수 있게
+      state: nextState, // 카카오 프리필/메타 전달
+    });
+  };
+
   return (
     <div className="p-wrap">
       <h3>
@@ -75,13 +120,17 @@ export default function Join() {
             </ul>
           </div>
         </div>
+
+        {/* 필수 약관 동의 라디오 → 상태 연결 */}
         <div className="margin_t_5">
           <span className="p-form-radio">
             <input
               type="radio"
-              name="aa"
+              name="agree_required"
               id="agree"
               className="p-form-radio__input"
+              checked={agreeTerms === true}
+              onChange={() => setAgreeTerms(true)}
             />
             <label htmlFor="agree" className="p-form-radio__label margin_r_20">
               동의 합니다.
@@ -90,9 +139,11 @@ export default function Join() {
           <span className="p-form-radio">
             <input
               type="radio"
-              name="aa"
+              name="agree_required"
               id="agree-2"
               className="p-form-radio__input"
+              checked={agreeTerms === false}
+              onChange={() => setAgreeTerms(false)}
             />
             <label htmlFor="agree-2" className="p-form-radio__label">
               동의하지 않습니다.
@@ -100,6 +151,7 @@ export default function Join() {
           </span>
         </div>
       </div>
+
       <h3>
         개인정보 수집 및 이용안내
         <span className="p-form__required">(선택)</span>
@@ -113,13 +165,17 @@ export default function Join() {
               <li>ㅇㅇㅇ(기관명) 예약, 교육 수강 신청 게시판 글 작성</li>
             </ul>
           </div>
+
+          {/* 선택 약관 동의 라디오 → 상태 연결(프로젝트 정책에 맞춰 필수로 바꿀 수도 있음) */}
           <div className="margin_t_5">
             <span className="p-form-radio">
               <input
                 type="radio"
-                name="bb"
+                name="agree_optional"
                 id="agree2"
                 className="p-form-radio__input"
+                checked={agreePrivacy === true}
+                onChange={() => setAgreePrivacy(true)}
               />
               <label
                 htmlFor="agree2"
@@ -131,9 +187,11 @@ export default function Join() {
             <span className="p-form-radio">
               <input
                 type="radio"
-                name="bb"
+                name="agree_optional"
                 id="agree2-1"
                 className="p-form-radio__input"
+                checked={agreePrivacy === false}
+                onChange={() => setAgreePrivacy(false)}
               />
               <label htmlFor="agree2-1" className="p-form-radio__label">
                 동의하지 않습니다.
@@ -142,16 +200,19 @@ export default function Join() {
           </div>
         </div>
       </div>
+
       <div className="form_center_box">
         <div className="temp_btn white md">
           <Link to="/" className="btn">
             취소
           </Link>
         </div>
+
+        {/* 🔑 Link 대신 버튼 + navigate로 state 전달 */}
         <div className="temp_btn md">
-          <Link to="/phonetest" className="btn">
+          <button type="button" className="btn" onClick={handleGoSignup}>
             다음
-          </Link>
+          </button>
         </div>
       </div>
     </div>

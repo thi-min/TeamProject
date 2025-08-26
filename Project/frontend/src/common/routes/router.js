@@ -53,10 +53,12 @@ const routes = {
     },
     delete: { path: "/member/mypage/update/delete", label: "회원 탈퇴" },
   },
+
   //카카오 관련
   kakao: {
-    colback: { path: "/oauth/kakao/callback", label: "카카오 로그인 콜백" },
+    callback: { path: "/oauth/kakao/callback", label: "카카오 콜백" },
   },
+
   // 관리자
   admin: {
     admin: { path: "/admin", label: "관리자 페이지" },

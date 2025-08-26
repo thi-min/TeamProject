@@ -184,12 +184,12 @@ const LoginPage = () => {
                 </Link>
               </div>
               <div className="signup bth_item">
-                <Link to="/join" className="login_btn type2">
+                <Link to="/phonetest" className="login_btn type2">
                   <span>회원가입</span>
                 </Link>
               </div>
             </div>
-            <KakaoLoginButton />
+            <KakaoLoginButton fullWidth />
           </div>
         </div>
       </div>

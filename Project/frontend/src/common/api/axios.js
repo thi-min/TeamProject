@@ -14,7 +14,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
 // ===== 환경 설정 =====
-const BASE_URL = "http://localhost:8090";
+const BASE_URL = "http://127.0.0.1:8090";
 const REISSUE_URL = "/auth/reissue"; // 재발급 엔드포인트
 const LOGIN_URL = "/auth/login"; // 로그인 엔드포인트
 const FRONT_LOGIN_ROUTE = "/login"; // 프론트 로그인 라우트

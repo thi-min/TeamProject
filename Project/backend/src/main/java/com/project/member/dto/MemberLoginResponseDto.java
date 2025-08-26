@@ -23,13 +23,5 @@ public class MemberLoginResponseDto {
     // ✅ 권한 정보 (프론트 분기용)
     // - "ADMIN" 또는 "USER" 값 사용
     // - AuthController.login()에서 판별 후 세팅
-    private String role;           // <-- 추가!
-
-    // ⬇️ 이하 소셜 로그인 사용자 추가 정보 (카카오용)
-    private boolean requireSignup; // 신규 가입 필요 여부
-    private String kakaoId;        // 카카오 고유 ID
-    private String email;          // 카카오 이메일
-    private String gender;         // male / female
-    private String birth;          // 생년월일 (yyyy-MM-dd)
-    private String phone;          // 01012345678 ← 가공 처리
+    private String role;
 }

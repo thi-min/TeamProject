@@ -2,9 +2,11 @@
 
 import { Route } from "react-router-dom";
 import routes from "./router";
-import { RequireUserOnMember } from "./RouteGuards";
 import { LogoutLink } from "../../program/login/pages/LogoutLink"; //로그아웃
-import RequireAdmin from "../../common/components/RequireAdmin";
+
+//권한 부여
+import { RequireMember } from "../components/RequireUser"; //사용자
+import RequireAdmin from "../components/RequireAdmin"; //관리자
 
 // 📌 각 페이지 컴포넌트 import
 //회원
@@ -47,18 +49,18 @@ const layoutRoutes = [
     key="mypage"
     path={routes.member.mypage.path}
     element={
-      <RequireUserOnMember>
+      <RequireMember>
         <MyPage />
-      </RequireUserOnMember>
+      </RequireMember>
     }
   />, //마이페이지
   <Route
     key="memberdata"
     path={routes.member.memberdata.path}
     element={
-      <RequireUserOnMember>
+      <RequireMember>
         <MemberPage />
-      </RequireUserOnMember>
+      </RequireMember>
     }
   />, //회원정보
   <Route key="find-id" path={routes.member.findid.path} element={<FindId />} />, //아이디 찾기
@@ -66,15 +68,19 @@ const layoutRoutes = [
   <Route
     key="update-password"
     path={routes.member.changepw.path}
-    element={<ChangePw />}
+    element={
+      <RequireMember>
+        <ChangePw />
+      </RequireMember>
+    }
   />, //비밀번호 변경
 
   //카카오
   <Route
-    key="kakao-collback"
-    path={routes.kakao.colback.path}
+    key="kakao-callback"
+    path={routes.kakao.callback.path}
     element={<KakaoCallbackPage />}
-  />, //카카오 로그인 콜백
+  />, //콜백 연결
 
   //관리자
   <Route

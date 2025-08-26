@@ -149,4 +149,20 @@ public class JwtTokenProvider {
                 .getBody();
     }
 
+ // ==============================
+    // 🔁 컨트롤러 호환용 래핑 메서드 (기존 generate* 재사용)
+    //  - createAccessToken(subject, role)  → generateAccessToken(subject, role)
+    //  - createRefreshToken(subject, role) → generateRefreshToken(subject)
+    //    (refresh는 role 클레임이 굳이 필요 없어서 무시해도 무방)
+    // ==============================
+    public String createAccessToken(String subject, String role) {
+        // subject: 이메일(=ID), role: "USER"/"ADMIN"
+        return generateAccessToken(subject, role);
+    }
+
+    public String createRefreshToken(String subject, String role) {
+        // 필요하면 role 클레임을 refresh에도 넣도록 generateRefreshToken 로직을 확장해도 됨.
+        return generateRefreshToken(subject);
+    }
+    
 }
