@@ -1,6 +1,7 @@
+// 📁 src/admin/AdminImgDetail.jsx
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../common/api/axios";
 import "./Gallery.css";
 
 export default function AdminImgDetail() {
@@ -8,9 +9,12 @@ export default function AdminImgDetail() {
   const [post, setPost] = useState(null);
   const navigate = useNavigate();
 
+  // 🔹 관리자 이미지 게시글 상세 조회 URL
+  const baseUrl = "http://127.0.0.1:8090/admin/bbs/poto";
+
   useEffect(() => {
-    axios
-      .get(`/bbs/${id}`) // 관리자도 동일 엔드포인트 사용, 백엔드에서 권한 체크
+    api
+      .get(`${baseUrl}/${id}`) // 관리자 상세 조회용 엔드포인트
       .then((res) => setPost(res.data))
       .catch((err) => {
         console.error(err);
@@ -21,7 +25,7 @@ export default function AdminImgDetail() {
   const handleDelete = async () => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     try {
-      await axios.delete(`/admin/bbs/${id}`, { params: { adminId: 1 } }); // 관리자 ID
+      await api.delete(`/admin/bbs/${id}`, { params: { adminId: 1 } }); // 관리자 ID
       alert("삭제 완료");
       navigate("/admin/imgboard"); // 관리자 목록 페이지로 이동
     } catch (err) {
@@ -58,7 +62,6 @@ export default function AdminImgDetail() {
       </div>
 
       <div className="detail-actions">
-        {/* 수정 버튼 제거, 삭제만 가능 */}
         <button onClick={handleDelete}>삭제</button>
       </div>
     </div>

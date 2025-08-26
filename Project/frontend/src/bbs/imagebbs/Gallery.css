@@ -165,6 +165,15 @@ button.active {
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  position: relative;   /* ✅ 체크박스 absolute 위치 기준 */
+}
+
+.item-checkbox {
+  position: absolute;   /* ✅ 카드 안에서 고정 */
+  top: 8px;
+  left: 8px;
+  z-index: 10;
+  transform: scale(1.2); /* 체크박스 크기 살짝 키움 */
 }
 
 .img-thumb {
@@ -216,4 +225,3 @@ button.active {
   padding: 6px;
   font-size: 14px;
 }
-
