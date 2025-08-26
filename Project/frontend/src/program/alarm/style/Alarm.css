@@ -1,0 +1,18 @@
+.alarm-banner {
+  position: fixed;
+  top: 60px;
+  right: 20px;
+  background-color: #007bff;
+  color: #fff;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  z-index: 1000;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.alarm-banner:hover {
+  background-color: #0056b3;
+  transform: translateY(-2px);
+}

@@ -2,8 +2,8 @@ package com.project.alarm.dto;
 
 import java.time.LocalDateTime;
 
+import com.project.alarm.entity.AlarmCheck;
 import com.project.alarm.entity.AlarmType;
-import com.project.chat.entity.CheckState;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,5 +24,5 @@ public class AlarmResponseDto {
     private String alarmContent; // 알림 내용
     private String alarmUrl; // 알림 링크
     private LocalDateTime alarmTime; // 알림 시간
-    private CheckState alarmCheck; // 알림 확인
+    private AlarmCheck alarmCheck; // 알림 확인
 }

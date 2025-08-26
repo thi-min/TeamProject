@@ -2,7 +2,6 @@ package com.project.alarm.entity;
 
 import java.time.LocalDateTime;
 
-import com.project.chat.entity.CheckState;
 import com.project.member.entity.MemberEntity;
 
 import jakarta.persistence.Column;
@@ -52,5 +51,5 @@ public class AlarmEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "alarm_check", length = 1)
-    private CheckState alarmCheck; //알림 확인 (chatcheck enum과 동일 구조로 공유)
+    private AlarmCheck alarmCheck; //알림 확인 
 }

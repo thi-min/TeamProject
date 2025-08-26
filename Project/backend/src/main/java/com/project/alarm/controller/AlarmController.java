@@ -21,7 +21,7 @@ import com.project.member.entity.MemberEntity;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/api/alarms")
+@RequestMapping("/alarm")
 @RequiredArgsConstructor
 public class AlarmController {
     private final AlarmService alarmService;

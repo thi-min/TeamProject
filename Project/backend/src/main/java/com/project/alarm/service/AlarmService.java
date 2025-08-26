@@ -40,4 +40,5 @@ public class AlarmService {
     public void delete(Long id) {
         alarmRepository.deleteById(id);
     }
+
 }
