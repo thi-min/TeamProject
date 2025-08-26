@@ -18,5 +18,7 @@ public interface FundRepository extends JpaRepository<FundEntity, Long> {
 
     // FundServiceImpl에서 사용되는 메서드를 추가
     Page<FundEntity> findByFundSponsorContaining(String fundSponsor, Pageable pageable);
+    
+    Page<FundEntity> findByMember_MemberNum(Long memberNum, Pageable pageable); 
 
 }

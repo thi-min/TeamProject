@@ -128,4 +128,11 @@ public class FundServiceImpl implements FundService {
     public void deleteFund(Long id) {
         fundRepository.deleteById(id);
     }
+    
+    @Override
+    @Transactional(readOnly = true)
+    public Page<FundResponseDto> listByMemberNum(Long memberNum, Pageable pageable) {
+        return fundRepository.findByMember_MemberNum(memberNum, pageable) // MemberNum 기준으로 조회
+                             .map(this::toDto); // Entity → DTO 변환
+    }
 }
