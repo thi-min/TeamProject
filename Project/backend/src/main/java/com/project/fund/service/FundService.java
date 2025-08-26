@@ -22,6 +22,5 @@ public interface FundService {
     // 후원내역 삭제
     void deleteFund(Long fundId);
     
-	Page<FundResponseDto> listByMemberNum(Long memberNum, Pageable pageable);
     
 }
