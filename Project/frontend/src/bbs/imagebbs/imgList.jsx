@@ -15,7 +15,7 @@ export default function ImgBoard() {
 
   const navigate = useNavigate();
   const baseUrl = "http://127.0.0.1:8090/bbs/bbslist";
-  const backendUrl = "http://127.0.0.1:8090"; // 백엔드 주소
+  const backendUrl = "http://127.0.0.1:8090";
 
   // 게시글 + 대표 이미지 조회
   const fetchPosts = async (page = 0, keyword = "") => {
@@ -34,14 +34,14 @@ export default function ImgBoard() {
       setTotalPages(pageData.totalPages || 0);
       setCurrentPage(pageData.number || 0);
 
-      // 대표 이미지 Map 처리 (항상 key 유지)
+      // 대표 이미지 Map 처리
       const repMap = {};
       const repImagesFromBack = res.data.representativeImages || {};
       for (const [key, value] of Object.entries(repImagesFromBack)) {
         if (value && value.imagePath) {
           repMap[key] = { ...value, imagePath: `${backendUrl}${value.imagePath}` };
         } else {
-          repMap[key] = null; // 대표 이미지 없을 경우 null 유지
+          repMap[key] = null;
         }
       }
       setRepImages(repMap);
@@ -96,17 +96,13 @@ export default function ImgBoard() {
               <div
                 className="img-board-item"
                 key={post.bulletinNum}
-                onClick={() => navigate(`/imgbbs/${post.bulletinNum}`)}
+                onClick={() => navigate(`/bbs/image/${post.bulletinNum}`)}
               >
                 <div className="img-thumb">
                   {repImage && repImage.imagePath ? (
                     <img src={repImage.imagePath} alt={post.bbstitle} />
                   ) : (
-                    <div className="no-image">
-                      <span role="img" aria-label="no-image">
-                        🖼️
-                      </span>
-                    </div>
+                    <div className="no-image">🖼️</div>
                   )}
                 </div>
                 <div className="img-info">
@@ -128,7 +124,6 @@ export default function ImgBoard() {
         <button disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)}>
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
-
         {Array.from({ length: Math.max(totalPages, 1) }, (_, idx) => (
           <button
             key={idx}
@@ -138,7 +133,6 @@ export default function ImgBoard() {
             {idx + 1}
           </button>
         ))}
-
         <button
           disabled={currentPage === Math.max(totalPages, 1) - 1}
           onClick={() => handlePageChange(currentPage + 1)}

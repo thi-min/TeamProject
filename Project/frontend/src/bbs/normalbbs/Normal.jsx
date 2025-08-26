@@ -1,6 +1,6 @@
 // 📁 src/admin/NoticeBbs.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../common/api/axios";
 import { useNavigate } from "react-router-dom";
 import "./normalbbs.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -18,25 +18,29 @@ function NoticeBbs() {
   const navigate = useNavigate();
   const BASE_URL = "http://127.0.0.1:8090"; // 관리자 백엔드 서버 주소
 
-  // 게시글 목록 불러오기
+  // 📌 공지사항 목록 불러오기
   const fetchNotices = async (pageNumber = 0) => {
     try {
       const params = {
-        type: "NORMAL",
         page: pageNumber,
         size: 10,
+        type: "NORMAL",
       };
 
       if (searchKeyword.trim() !== "" && searchType !== "all") {
         if (searchType === "title") params.bbstitle = searchKeyword.trim();
-        else if (searchType === "writer") params.writer = searchKeyword.trim();
+        else if (searchType === "writer") params.memberName = searchKeyword.trim();
         else if (searchType === "content") params.bbscontent = searchKeyword.trim();
       }
 
-      const response = await axios.get(`${BASE_URL}/admin/bbs/bbslist`, { params });
-      setPosts(response.data.content);
-      setTotalPages(response.data.totalPages);
-      setPage(response.data.number);
+      // 🔹 공지사항 전용 API 호출
+      const response = await api.get(`${BASE_URL}/admin/bbs/notices`, { params });
+
+      // 🔑 백엔드 구조에 맞게 처리
+      const data = response.data;
+      setPosts(data.list || []);
+      setTotalPages(Math.ceil((data.total || 0) / (data.size || 10)));
+      setPage(data.page || 0);
     } catch (error) {
       console.error("공지사항 불러오기 오류:", error);
       alert("목록 조회 실패");
@@ -47,8 +51,9 @@ function NoticeBbs() {
     fetchNotices(page);
   }, [page]);
 
+  // ✍ 글쓰기 버튼 클릭 시
   const handleWrite = () => {
-    navigate("/admin/bbs/write");
+    navigate("/admin/bbs/normal/write"); // Route에 맞춰 수정
   };
 
   const handleSearch = () => {
@@ -66,7 +71,7 @@ function NoticeBbs() {
     <div className="bbs-container">
       <h2>📢 공지사항 게시판 (관리자)</h2>
 
-      {/* 검색창 */}
+      {/* 🔍 검색창 */}
       <div className="search-bar">
         <div className="temp_form_box lg">
           <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
@@ -87,7 +92,7 @@ function NoticeBbs() {
         <button onClick={handleSearch}>조회</button>
       </div>
 
-      {/* 글쓰기 버튼 */}
+      {/* ✍ 글쓰기 버튼 */}
       {isAdmin && (
         <div className="top-bar" style={{ margin: "10px 0" }}>
           <button className="write-btn" onClick={handleWrite}>
@@ -96,7 +101,7 @@ function NoticeBbs() {
         </div>
       )}
 
-      {/* 게시글 테이블 */}
+      {/* 📄 게시글 테이블 */}
       <table className="bbs-table">
         <div className="table responsive">
           <colgroup>
@@ -123,7 +128,7 @@ function NoticeBbs() {
                 >
                   <td>{post.bulletinNum}</td>
                   <td>{post.bbstitle}</td>
-                  <td>{post.writer}</td>
+                  <td>{post.memberName}</td>
                   <td>{new Date(post.createdAt).toLocaleDateString()}</td>
                 </tr>
               ))
@@ -138,7 +143,7 @@ function NoticeBbs() {
         </div>
       </table>
 
-      {/* 페이지네이션 */}
+      {/* 📌 페이지네이션 */}
       <div className="pagination">
         <button disabled={page === 0} onClick={() => handlePageChange(page - 1)}>
           <FontAwesomeIcon icon={faChevronLeft} />

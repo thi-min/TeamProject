@@ -65,8 +65,8 @@ const layoutRoutes = [
 
   // 일반 게시판
   <Route key="normal" path="/admin/bbs/normal" element={<Normal />} />,
-  <Route key="normal-bbs-view" path="/bbs/normal/:id" element={<NormalBbsView />} />,
-  <Route key="normal-bbs-write" path="/bbs/normal/write" element={<NormalBbsWrite />} />,
+  <Route key="normal-bbs-view" path="/admin/bbs/normal/:id" element={<NormalBbsView />} />,
+  <Route key="normal-bbs-write" path="/admin/bbs/normal/write" element={<NormalBbsWrite />} />,
   <Route key="normal-bbs-edit" path="/bbs/normal/edit" element={<NormalBbsEdit />} />,
   <Route key="Membernormal" path="/bbs/member/normal" element={<MemberNormalBbs />} />,
   <Route key="Membernormal-view" path="/bbs/member/normal/view" element={<MemberNormalBbsView />} />,
@@ -86,10 +86,10 @@ const layoutRoutes = [
   // 이미지 게시판
   <Route key="img-list" path="/bbs/image" element={<ImgList />} />,
   <Route key="img-detail" path="/bbs/image/:id" element={<ImgDetail />} />,
-  <Route key="img-edit" path="/bbs/image/:id/edit" element={<ImgEdit />} />,
+  <Route key="img-edit" path="/bbs/image/edit/:id" element={<ImgEdit />} />,
   <Route key="img-write" path="/bbs/image/write" element={<ImgWrite />} />,
   <Route key="img-Admin-ImgBoard" path="/admin/bbs/image" element={<AdminImgBoard />} />,
-  <Route key="img-Admin-ImgDetail" path="/bbs/admin/image/Detail" element={<AdminImgDetail />} />,
+  <Route key="img-Admin-ImgDetail" path="/admin/bbs/image/Detail/:id" element={<AdminImgDetail />} />,
   <Route key="img-Admin-ImgDummy" path="/bbs/admin/image/Dummy" element={<ImgBoardDummy />} />,
 
   // 후원 route

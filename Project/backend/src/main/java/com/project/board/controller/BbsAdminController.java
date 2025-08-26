@@ -25,6 +25,23 @@ public class BbsAdminController {
     @Autowired
     private BbsService bbsService;
 
+ // ---------------- 관리자용 공지사항 게시글 조회 (최신순) ----------------
+    @GetMapping("/notices")
+    public ResponseEntity<Map<String, Object>> getNoticeBbsList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String bbstitle,
+            @RequestParam(required = false) String memberName,
+            @RequestParam(required = false) String bbscontent
+    ) {
+        // type은 무조건 NORMAL
+        BoardType type = BoardType.NORMAL;
+
+        Map<String, Object> result = bbsService.getBbsList(type, page, size, bbstitle, memberName, bbscontent);
+        return ResponseEntity.ok(result);
+    }
+
+    
     // ---------------- 관리자 게시글 작성 (NORMAL 게시판) ----------------
     @PostMapping("/bbslist/bbsadd")
     public ResponseEntity<BbsDto> createBbs(
@@ -180,6 +197,29 @@ public class BbsAdminController {
         // 기존 getBbsList 호출
         Map<String, Object> result = bbsService.getBbsList(type, page, size, bbstitle, memberName, bbscontent);
         return ResponseEntity.ok(result);
+    }
+    
+ // ---------------- 관리자용 이미지 게시글 조회 (최신순) ----------------
+    @GetMapping("/poto")
+    public ResponseEntity<Map<String, Object>> getPotoBbsList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) String bbstitle,
+            @RequestParam(required = false) String memberName,
+            @RequestParam(required = false) String bbscontent
+    ) {
+        // type은 무조건 POTO
+        BoardType type = BoardType.POTO;
+
+        Map<String, Object> result = bbsService.getBbsList(type, page, size, bbstitle, memberName, bbscontent);
+        return ResponseEntity.ok(result);
+    }
+
+ // 관리자 이미지 게시글 단건 조회
+    @GetMapping("/poto/{id}")
+    public ResponseEntity<BbsDto> getPotoBbsDetail(@PathVariable Long id) {
+        BbsDto dto = bbsService.getBbs(id);
+        return ResponseEntity.ok(dto);
     }
 
 }

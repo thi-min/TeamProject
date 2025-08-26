@@ -30,9 +30,11 @@ public class MemberBbsController {
     @Autowired
     private BbsService bbsService;
 
+    private final String BACKEND_URL = "http://127.0.0.1:8090";
+
     // ---------------- 게시글 작성 ----------------
     @PostMapping("/bbslist/bbsadd")
-    public ResponseEntity<BbsDto> createBbs(
+    public ResponseEntity<Map<String, Object>> createBbs(
             @RequestParam Long memberNum,
             @RequestParam BoardType type,
             @RequestPart("bbsDto") BbsDto dto,
@@ -40,6 +42,7 @@ public class MemberBbsController {
             @RequestParam(value = "insertOptions", required = false) List<String> insertOptions,
             @RequestParam(value = "isRepresentative", required = false) List<String> isRepresentativeList
     ) {
+        // 이미지 파일만 insert 가능하게 필터링
         if (files != null && insertOptions != null) {
             int size = Math.min(files.size(), insertOptions.size());
             for (int i = 0; i < size; i++) {
@@ -61,12 +64,41 @@ public class MemberBbsController {
             created = bbsService.createBbs(dto, memberNum, null, files, insertOptions, null);
         }
 
-        return ResponseEntity.ok(created);
+        // ---------------- Map 구조로 변환 ----------------
+        Map<String, Object> response = new HashMap<>();
+        response.put("bbs", created);
+
+        ImageBbsDto repImg = bbsService.getRepresentativeImage(created.getBulletinNum());
+        Map<String, Object> repImgMap = null;
+        if (repImg != null) {
+            repImgMap = new HashMap<>();
+            repImgMap.put("bulletinNum", repImg.getBulletinNum());
+            repImgMap.put("thumbnailPath", repImg.getThumbnailPath());
+            repImgMap.put("imagePath", repImg.getImagePath() != null ? BACKEND_URL + repImg.getImagePath() : null);
+        }
+        response.put("representativeImage", repImgMap);
+
+        List<FileUpLoadDto> filesList = bbsService.getFilesByBbs(created.getBulletinNum());
+        List<Map<String, Object>> fileMapList = new ArrayList<>();
+        for (FileUpLoadDto f : filesList) {
+            Map<String, Object> fileMap = new HashMap<>();
+            fileMap.put("fileNum", f.getFileNum());
+            fileMap.put("originalName", f.getOriginalName());
+            fileMap.put("savedName", f.getSavedName());
+            fileMap.put("path", f.getPath());
+            fileMap.put("size", f.getSize());
+            fileMap.put("extension", f.getExtension());
+            fileMap.put("fileUrl", BACKEND_URL + "/bbs/files/" + f.getFileNum() + "/download");
+            fileMapList.add(fileMap);
+        }
+        response.put("files", fileMapList);
+
+        return ResponseEntity.ok(response);
     }
 
     // ---------------- 게시글 수정 ----------------
     @PutMapping("/member/{id}")
-    public ResponseEntity<BbsDto> updateMemberBbs(
+    public ResponseEntity<Map<String, Object>> updateMemberBbs(
             @PathVariable Long id,
             @RequestParam Long memberNum,
             @RequestPart("bbsDto") BbsDto dto,
@@ -93,7 +125,36 @@ public class MemberBbsController {
         BbsDto updated = bbsService.updateBbs(
                 id, dto, memberNum, files, deleteIds, false, insertOptions
         );
-        return ResponseEntity.ok(updated);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("bbs", updated);
+
+        ImageBbsDto repImg = bbsService.getRepresentativeImage(updated.getBulletinNum());
+        Map<String, Object> repImgMap = null;
+        if (repImg != null) {
+            repImgMap = new HashMap<>();
+            repImgMap.put("bulletinNum", repImg.getBulletinNum());
+            repImgMap.put("thumbnailPath", repImg.getThumbnailPath());
+            repImgMap.put("imagePath", repImg.getImagePath() != null ? BACKEND_URL + repImg.getImagePath() : null);
+        }
+        response.put("representativeImage", repImgMap);
+
+        List<FileUpLoadDto> filesList = bbsService.getFilesByBbs(updated.getBulletinNum());
+        List<Map<String, Object>> fileMapList = new ArrayList<>();
+        for (FileUpLoadDto f : filesList) {
+            Map<String, Object> fileMap = new HashMap<>();
+            fileMap.put("fileNum", f.getFileNum());
+            fileMap.put("originalName", f.getOriginalName());
+            fileMap.put("savedName", f.getSavedName());
+            fileMap.put("path", f.getPath());
+            fileMap.put("size", f.getSize());
+            fileMap.put("extension", f.getExtension());
+            fileMap.put("fileUrl", BACKEND_URL + "/bbs/files/" + f.getFileNum() + "/download");
+            fileMapList.add(fileMap);
+        }
+        response.put("files", fileMapList);
+
+        return ResponseEntity.ok(response);
     }
 
     // ---------------- 게시글 삭제 ----------------
@@ -101,7 +162,6 @@ public class MemberBbsController {
     public ResponseEntity<Void> deleteBbs(
             @PathVariable Long id,
             @RequestParam Long memberNum) {
-
         bbsService.deleteBbs(id, memberNum, null);
         return ResponseEntity.noContent().build();
     }
@@ -112,14 +172,37 @@ public class MemberBbsController {
         BbsDto dto = bbsService.getBbs(id);
         ImageBbsDto repImg = bbsService.getRepresentativeImage(id);
 
+        Map<String, Object> repImgMap = null;
+        if (repImg != null) {
+            repImgMap = new HashMap<>();
+            repImgMap.put("bulletinNum", repImg.getBulletinNum());
+            repImgMap.put("thumbnailPath", repImg.getThumbnailPath());
+            repImgMap.put("imagePath", repImg.getImagePath() != null ? BACKEND_URL + repImg.getImagePath() : null);
+        }
+
+        List<FileUpLoadDto> filesList = bbsService.getFilesByBbs(id);
+        List<Map<String, Object>> fileMapList = new ArrayList<>();
+        for (FileUpLoadDto f : filesList) {
+            Map<String, Object> fileMap = new HashMap<>();
+            fileMap.put("fileNum", f.getFileNum());
+            fileMap.put("originalName", f.getOriginalName());
+            fileMap.put("savedName", f.getSavedName());
+            fileMap.put("path", f.getPath());
+            fileMap.put("size", f.getSize());
+            fileMap.put("extension", f.getExtension());
+            fileMap.put("fileUrl", BACKEND_URL + "/bbs/files/" + f.getFileNum() + "/download");
+            fileMapList.add(fileMap);
+        }
+
         Map<String, Object> result = new HashMap<>();
         result.put("bbs", dto);
-        result.put("representativeImage", repImg);
+        result.put("representativeImage", repImgMap);
+        result.put("files", fileMapList);
 
         return ResponseEntity.ok(result);
     }
 
-    // ---------------- 게시글 목록 조회 ----------------
+ // ---------------- 게시글 목록 조회 ----------------
     @GetMapping("/bbslist")
     public ResponseEntity<Map<String, Object>> getBbsList(
             @RequestParam(required = false) String searchType,
@@ -138,19 +221,16 @@ public class MemberBbsController {
         pageMap.put("number", page.getNumber());
         result.put("bbsList", pageMap);
 
-        // 이미지 게시판(POTO)인 경우 대표 이미지 Map 항상 생성 (key 유지)
+        // 대표 이미지 매핑
         if (type == BoardType.POTO) {
             Map<String, Object> repImageMap = new HashMap<>();
-            page.forEach(dto -> {
+            page.getContent().forEach(dto -> {
                 ImageBbsDto repImg = bbsService.getRepresentativeImage(dto.getBulletinNum());
-                if (repImg == null) {
-                    repImg = ImageBbsDto.builder()
-                            .bulletinNum(dto.getBulletinNum())
-                            .thumbnailPath(null)
-                            .imagePath(null)
-                            .build();
-                }
-                repImageMap.put(dto.getBulletinNum().toString(), repImg);
+                Map<String, Object> repMap = new HashMap<>();
+                repMap.put("bulletinNum", dto.getBulletinNum());
+                repMap.put("thumbnailPath", repImg != null ? repImg.getThumbnailPath() : "");
+                repMap.put("imagePath", repImg != null ? repImg.getImagePath() : "");
+                repImageMap.put(dto.getBulletinNum().toString(), repMap);
             });
             result.put("representativeImages", repImageMap);
         }
@@ -158,38 +238,25 @@ public class MemberBbsController {
         return ResponseEntity.ok(result);
     }
 
+
+
     // ---------------- 첨부파일 조회 ----------------
     @GetMapping("/{id}/files")
-    public ResponseEntity<List<FileUpLoadDto>> getFilesByBbs(@PathVariable Long id) {
-        List<FileUpLoadDto> files = bbsService.getFilesByBbs(id);
-        return ResponseEntity.ok(files);
-    }
-
-    // ---------------- 첨부파일 업로드 ----------------
-    @PostMapping("/{id}/files")
-    public ResponseEntity<List<FileUpLoadDto>> uploadFiles(
-            @PathVariable Long id,
-            @RequestParam BoardType boardType,
-            @RequestPart("files") List<MultipartFile> files) {
-        List<FileUpLoadDto> uploaded = bbsService.saveFileList(id, files, boardType);
-        return ResponseEntity.ok(uploaded);
-    }
-
-    // ---------------- 첨부파일 수정 ----------------
-    @PutMapping("/files/{fileId}")
-    public ResponseEntity<FileUpLoadDto> updateFile(
-            @PathVariable Long fileId,
-            @RequestPart(value = "file", required = false) MultipartFile newFile,
-            @RequestPart("fileDto") FileUpLoadDto dto) {
-        FileUpLoadDto updated = bbsService.updateFile(fileId, dto, newFile);
-        return ResponseEntity.ok(updated);
-    }
-
-    // ---------------- 첨부파일 삭제 ----------------
-    @DeleteMapping("/files/{fileId}")
-    public ResponseEntity<Void> deleteFile(@PathVariable Long fileId) {
-        bbsService.deleteFileById(fileId);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<List<Map<String, Object>>> getFilesByBbs(@PathVariable Long id) {
+        List<FileUpLoadDto> filesList = bbsService.getFilesByBbs(id);
+        List<Map<String, Object>> fileMapList = new ArrayList<>();
+        for (FileUpLoadDto f : filesList) {
+            Map<String, Object> fileMap = new HashMap<>();
+            fileMap.put("fileNum", f.getFileNum());
+            fileMap.put("originalName", f.getOriginalName());
+            fileMap.put("savedName", f.getSavedName());
+            fileMap.put("path", f.getPath());
+            fileMap.put("size", f.getSize());
+            fileMap.put("extension", f.getExtension());
+            fileMap.put("fileUrl", BACKEND_URL + "/bbs/files/" + f.getFileNum() + "/download");
+            fileMapList.add(fileMap);
+        }
+        return ResponseEntity.ok(fileMapList);
     }
 
     // ---------------- deletedFileIds 문자열 → List<Long> 변환 ----------------

@@ -424,20 +424,24 @@ public class BbsServiceImpl implements BbsService {
 
     @Override
     public ImageBbsDto getRepresentativeImage(Long bulletinNum) {
-        // DB에서 대표 이미지 경로 조회
+        // 1. 대표 이미지 조회
         String imagePath = imageBbsRepository.findRepresentativeImagePath(bulletinNum);
 
+        // 2. 대표 이미지가 없으면 첫 번째 이미지 사용
         if (imagePath == null) {
-            return null; // 대표 이미지가 없는 경우
+            List<ImageBbsEntity> images = imageBbsRepository.findByBbsBulletinNum(bulletinNum);
+            if (images.isEmpty()) return null; // 이미지 자체가 없는 경우
+            imagePath = images.get(0).getImagePath(); // 첫 번째 이미지
         }
 
-        // /uploads/ 접두사 붙여서 프론트에서 절대 URL 생성 가능
+        // 3. DTO 반환
         return ImageBbsDto.builder()
                 .bulletinNum(bulletinNum)
-                .thumbnailPath(null) // 필요시 썸네일 로직 추가 가능
-                .imagePath("/uploads/" + imagePath) // ✅ 절대경로 대신 uploads 경로
+                .thumbnailPath(null)
+                .imagePath("/uploads/" + imagePath)
                 .build();
     }
+
 
 
 
