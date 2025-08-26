@@ -1,7 +1,7 @@
 // import axios from 'axios';
 import { api } from "../../../common/api/axios.js";
-import { useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useState , useEffect} from 'react';
+import { useLocation, useNavigate,useParams } from 'react-router-dom';
 import '../style/Fund.css'; // 경로 수정
 
 // 후원 섹션 컴포넌트
@@ -859,5 +859,102 @@ const RegularApplicationDetails = () => {
   );
 };
 
+const MemberFundList = () => {
+    const navigate = useNavigate();
+    const [funds, setFunds] = useState([]);
+    const [message, setMessage] = useState(null);
+
+    const authAxios = api.create({
+        baseURL: 'http://localhost:8080/api',
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+    });
+
+    const fetchFunds = async () => {
+        try {
+            const res = await authAxios.get('/funds'); // 전체 목록 조회
+            setFunds(res.data);
+        } catch (err) {
+            console.error(err);
+            setMessage("목록 불러오기 실패");
+        }
+    };
+
+    useEffect(() => {
+        fetchFunds();
+    }, []);
+
+    return (
+        <div className="fund-list-page">
+            <h2>나의 후원 목록</h2>
+            <table className="fund-table">
+                <thead>
+                    <tr>
+                        <th>제목</th>
+                        <th>후원자</th>
+                        <th>금액</th>
+                        <th>상태</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {funds.map(fund => (
+                        <tr key={fund.fundId} 
+                            style={{ cursor: 'pointer' }}
+                            onClick={() => navigate(`/member/fund/detail/${fund.fundId}`)}
+                        >
+                            <td>{fund.title}</td>
+                            <td>{fund.memberName}</td>
+                            <td>{fund.amount}</td>
+                            <td>{fund.state}</td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            {message && <div>{message}</div>}
+        </div>
+    );
+};
+
+
+const MemberFundDetail = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [fundDetail, setFundDetail] = useState(null);
+    const [message, setMessage] = useState(null);
+
+    const authAxios = api.create({
+        baseURL: 'http://localhost:8080/api',
+        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+    });
+
+    const fetchFundDetail = async () => {
+        try {
+            const res = await authAxios.get(`/funds/${id}`);
+            setFundDetail(res.data);
+        } catch (err) {
+            console.error(err);
+            setMessage("상세 정보 불러오기 실패");
+        }
+    };
+
+    useEffect(() => {
+        fetchFundDetail();
+    }, [id]);
+
+    if (!fundDetail) return <div>{message || "로딩 중..."}</div>;
+
+    return (
+        <div className="fund-detail-page">
+            <h2>후원 상세</h2>
+            <div><strong>제목:</strong> {fundDetail.title}</div>
+            <div><strong>후원자:</strong> {fundDetail.memberName}</div>
+            <div><strong>금액:</strong> {fundDetail.amount}</div>
+            <div><strong>상태:</strong> {fundDetail.state}</div>
+            <button onClick={() => navigate(-1)}>목록으로 돌아가기</button>
+        </div>
+    );
+};
+
+
+
 // 명명된 내보내기를 사용하여 각 컴포넌트를 내보냄
-export { FundApplicationDetails, FundApplicationForm, FundMainPage, GoodsApplicationDetails, GoodsApplicationForm, RegularApplicationDetails, RegularApplicationForm };
+export { FundApplicationDetails, FundApplicationForm, FundMainPage, GoodsApplicationDetails, GoodsApplicationForm, RegularApplicationDetails, RegularApplicationForm, MemberFundList, MemberFundDetail};

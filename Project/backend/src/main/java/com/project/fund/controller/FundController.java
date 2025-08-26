@@ -7,6 +7,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,11 +19,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.project.common.jwt.JwtTokenProvider;
 import com.project.fund.dto.FundRequestDto;
 import com.project.fund.dto.FundResponseDto;
 import com.project.fund.entity.FundEntity;
 import com.project.fund.service.FundService;
+import com.project.member.dto.MemberMeResponseDto;
 import com.project.member.entity.MemberEntity;
+import com.project.member.service.MemberService;
 
 import jakarta.validation.Valid;
 
@@ -35,11 +40,16 @@ import jakarta.validation.Valid;
 public class FundController {
 
     private final FundService fundService;
-
+    private final MemberService memberService;
+    private final JwtTokenProvider jwtTokenProvider;
+    
     @Autowired
-    public FundController(FundService fundService) {
+    public FundController(FundService fundService, MemberService memberService, JwtTokenProvider jwtTokenProvider) {
         this.fundService = fundService;
+        this.memberService = memberService;
+        this.jwtTokenProvider = jwtTokenProvider;
     }
+
 
     /**
      * DTO를 Entity로 변환하는 메서드
@@ -121,23 +131,42 @@ public class FundController {
     }
 
     // 전체 조회 (페이징, 정렬)
-    @GetMapping
+    @GetMapping("/list")
     public ResponseEntity<Page<FundResponseDto>> listFunds(
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "20") int size,
             @RequestParam(value = "sort", defaultValue = "fundTime,desc") String sort) {
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String role = authentication.getAuthorities().stream()
+                .findFirst()
+                .map(a -> a.getAuthority().replace("ROLE_", ""))
+                .orElse("USER");
+
+        // 페이지네이션 및 정렬 설정
         String[] sortParts = sort.split(",");
-        Sort s;
-        if (sortParts.length == 2) {
-            s = Sort.by(Sort.Direction.fromString(sortParts[1]), sortParts[0]);
+        Sort s = Sort.by(Sort.Direction.fromString(sortParts[1]), sortParts[0]);
+        Pageable pageable = PageRequest.of(page, size, s);
+
+        Page<FundResponseDto> fundPage;
+
+        if ("ADMIN".equals(role)) {
+            fundPage = fundService.getFunds(pageable);
+        } else if ("USER".equals(role)) {
+            String memberId = authentication.getName();
+            // MemberService 주입 필요
+            MemberMeResponseDto member = memberService.getMyInfo(memberId);
+            if (member == null) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
+            fundPage = fundService.listByMemberNum(member.getMemberNum(), pageable); // Service에 새로 추가해야 함
         } else {
-            s = Sort.by(sort);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        Pageable pageable = PageRequest.of(page, size, s);
-        Page<FundResponseDto> results = fundService.getFunds(pageable);
-        return ResponseEntity.ok(results);
+        return ResponseEntity.ok(fundPage);
     }
+
 
     // 스폰서로 검색 (페이징)
     @GetMapping("/search")

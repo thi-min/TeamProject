@@ -64,6 +64,10 @@ const routes = {
     update: { path: "/mypage/update", label: "회원정보 수정" },
     delete: { path: "/mypage/update/delete", label: "회원 탈퇴" },
 
+    fund: {
+      list: { path : "/member/fund/list", label: "나의 후원 목록"},
+      detail: (id) => `/member/fund/detail/${id}`,
+    },
     // 개인 입양 신청서
     adopt: {
       list: { path: "/member/adopt/list", label: "나의 입양 신청서" },
@@ -97,7 +101,7 @@ const routes = {
     // 1:1 채팅
     chat: {
       list: { path: "/admin/chat/list", label: "채팅 목록" },
-      room: (id) => `/admin/chat/room/:ChatRoomId`,
+      room: (id = ":roomId") => `/admin/chat/room/${id}`,
     },
      
    /*chat banner 사용시 해당 위치에 추가

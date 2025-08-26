@@ -27,7 +27,9 @@ import {
   GoodsApplicationDetails,
   GoodsApplicationForm,
   RegularApplicationDetails,
-  RegularApplicationForm
+  RegularApplicationForm,
+  MemberFundList,
+  MemberFundDetail
 } from "../../program/fund/services/FundPage";
 
 // ==============================
@@ -74,7 +76,8 @@ const layoutRoutes = [
   <Route key="fundDetails" path={routes.fund.fundDetails.path} element={<FundApplicationDetails />} />,
   <Route key="goodsDetails" path={routes.fund.goodsDetails.path} element={<GoodsApplicationDetails />} />,
   <Route key="regularDetails" path={routes.fund.regularDetails.path} element={<RegularApplicationDetails />} />,
-
+  <Route key="MemberFundList" path={routes.member.fund.list.path} element={<MemberFundList />} />,
+  <Route key="memberFundDetail" path={routes.member.fund.detail(`:id`)} element={<MemberFundDetail/>} />,
   // ------------------------------
   // 1:1 채팅 Route
   // ------------------------------
@@ -88,7 +91,7 @@ const layoutRoutes = [
   <Route key="memberAdoptDetail" path={routes.member.adopt.detail(':id')} element={<AdoptApplicationForm />} />,
   <Route key="adminAdoptList" path={routes.admin.adopt.list.path} element={<AdoptApplicationForm />} />,
   <Route key="adminAdoptDetail" path={routes.admin.adopt.detail(':id')} element={<AdoptApplicationForm />} />,
-  <Route key="adminAdoptResist" path={routes.admin.adopt.resist.path} element={<AdoptApplicationForm />} />,
+  <Route key="adminAdoptRegist" path={routes.admin.adopt.regist.path} element={<AdoptApplicationForm />} />,
   <Route key="adminAdoptUpdate" path={routes.admin.adopt.update(':id')} element={<AdoptApplicationForm />} />,
 
   // ------------------------------
@@ -96,7 +99,7 @@ const layoutRoutes = [
   // ------------------------------
   <Route key="adminAnimalList" path={routes.admin.animal.list.path} element={<AnimalForm />} />,
   <Route key="adminAnimalDetail" path={routes.admin.animal.detail(':id')} element={<AnimalForm />} />,
-  <Route key="adminAnimalResist" path={routes.admin.animal.resist.path} element={<AnimalForm />} />,
+  <Route key="adminAnimalRegist" path={routes.admin.animal.regist.path} element={<AnimalForm />} />,
   <Route key="adminAnimalUpdate" path={routes.admin.animal.update(':id')} element={<AnimalForm />} />,
 
   // ------------------------------
