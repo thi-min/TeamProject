@@ -1,9 +1,9 @@
 // 📁 src/router/layoutRoutes.js
 import { Route } from "react-router-dom";
 import routes from "./router";
-import { RequireUserOnMember } from "./RouteGuards";
 import { LogoutLink } from "../../program/login/pages/LogoutLink"; //로그아웃
-import RequireAdmin from "../../common/components/RequireAdmin";
+import { RequireMember } from "../components/RequireUser"; //사용자
+import RequireAdmin from "../components/RequireAdmin"; //관리자
 
 // 관리자 - 시간관리 + 휴무일 관리
 import TimeSlotManagePage from "../../program/admin/pages/TimeSlotManagePage";
@@ -50,21 +50,21 @@ import MemberDetail from "../../program/admin/pages/MemberDetailPage"; //관리�
 const layoutRoutes = [
 
    // 🔹 Land 예약: 날짜 → 폼 → 확인 → 완료
-  <Route key="reserve-land-date" path={routes.reserve.land.date.path} element={<LandReserveDatePage />} />,
-  <Route key="reserve-land-form" path={routes.reserve.land.form.path} element={<LandReserveFormPage />} />,
-  <Route key="reserve-land-confirm" path={routes.reserve.land.confirm.path} element={<LandReserveConfirmPage />} />,
-  <Route key="reserve-land-success" path={routes.reserve.land.success.path} element={<LandReserveSuccessPage />} />,
+  <Route key="reserve-land-date" path={routes.reserve.land.date.path} element={<RequireMember><LandReserveDatePage /></RequireMember>} />,
+  <Route key="reserve-land-form" path={routes.reserve.land.form.path} element={<RequireMember><LandReserveFormPage /></RequireMember>} />,
+  <Route key="reserve-land-confirm" path={routes.reserve.land.confirm.path} element={<RequireMember><LandReserveConfirmPage /></RequireMember>} />,
+  <Route key="reserve-land-success" path={routes.reserve.land.success.path} element={<RequireMember><LandReserveSuccessPage /></RequireMember>} />,
 
   // 🔹 Volunteer 예약: 날짜 → 폼 → 확인 → 완료
-  <Route key="reserve-volunteer-date" path={routes.reserve.volunteer.date.path} element={<VolunteerReserveDatePage />} />,
-  <Route key="reserve-volunteer-form" path={routes.reserve.volunteer.form.path} element={<VolunteerReserveFormPage />} />,
-  <Route key="reserve-volunteer-confirm" path={routes.reserve.volunteer.confirm.path} element={<VolunteerReserveConfirmPage />} />,
-  <Route key="reserve-volunteer-success" path={routes.reserve.volunteer.success.path} element={<VolunteerReserveSuccessPage />} />,
+  <Route key="reserve-volunteer-date" path={routes.reserve.volunteer.date.path} element={<RequireMember><VolunteerReserveDatePage /></RequireMember>} />,
+  <Route key="reserve-volunteer-form" path={routes.reserve.volunteer.form.path} element={<RequireMember><VolunteerReserveFormPage /></RequireMember>} />,
+  <Route key="reserve-volunteer-confirm" path={routes.reserve.volunteer.confirm.path} element={<RequireMember><VolunteerReserveConfirmPage /></RequireMember>} />,
+  <Route key="reserve-volunteer-success" path={routes.reserve.volunteer.success.path} element={<RequireMember><VolunteerReserveSuccessPage /></RequireMember>} />,
 
   // 🔹 관리자 페이지 - 
   <Route key="admin-timeslot-manage" path={routes.admin.timeSlotManage.path} element={<RequireAdmin><TimeSlotManagePage /></RequireAdmin>} />,
-  <Route key="admin" path={routes.admin.admin.path} element={<Admin />} />,
-  <Route key="updatePw" path={routes.admin.password.path} element={<AdminPw />} />,
+  <Route key="admin" path={routes.admin.admin.path} element={<RequireAdmin><Admin /></RequireAdmin>} />,
+  <Route key="updatePw" path={routes.admin.password.path} element={<RequireAdmin><AdminPw /></RequireAdmin>} />,
   <Route key="admin-closedday-manage" path={routes.admin.closedDayManage.path} element={<RequireAdmin><ClosedDayManagePage /></RequireAdmin>} />,
   <Route key="admin-land-manage" path={routes.admin.landReserveManage.path} element={<RequireAdmin><AdminLandReservePage /></RequireAdmin>} />,
   <Route key="admin-volunteer-manage" path={routes.admin.volunteerReserveManage.path} element={<RequireAdmin><AdminVolunteerReservePage /></RequireAdmin>} />,
@@ -88,18 +88,18 @@ const layoutRoutes = [
     key="mypage"
     path={routes.member.mypage.path}
     element={
-      <RequireUserOnMember>
+      <RequireMember>
         <MyPage />
-      </RequireUserOnMember>
+      </RequireMember>
     }
   />, //마이페이지
   <Route
     key="memberdata"
     path={routes.member.memberdata.path}
     element={
-      <RequireUserOnMember>
+      <RequireMember>
         <MemberPage />
-      </RequireUserOnMember>
+      </RequireMember>
     }
   />, //회원정보
   <Route key="find-id" path={routes.member.findid.path} element={<FindId />} />, //아이디 찾기
@@ -107,15 +107,15 @@ const layoutRoutes = [
   <Route
     key="update-password"
     path={routes.member.changepw.path}
-    element={<ChangePw />}
+    element={<RequireMember><ChangePw /></RequireMember>}
   />, //비밀번호 변경
 
   // 마이페이지 예약내역조회
-  <Route key="mypage-reserves" path={routes.member.reserves.path} element={<MyReserveListPage />} />,
+  <Route key="mypage-reserves" path={routes.member.reserves.path} element={<RequireMember><MyReserveListPage /></RequireMember>} />,
   // 놀이터 예약 상세보기
-  <Route key="mypage-reserve-land-detail" path={routes.member.landReserveDetail.path} element={<LandReserveDetailPage />} />,
+  <Route key="mypage-reserve-land-detail" path={routes.member.landReserveDetail.path} element={<RequireMember><LandReserveDetailPage /></RequireMember>} />,
   // 봉사 예약 상세보기
-  <Route key="mypage-reserve-volunteer-detail" path={routes.member.volunteerReserveDetail.path} element={<VolunteerReserveDetailPage />} />,
+  <Route key="mypage-reserve-volunteer-detail" path={routes.member.volunteerReserveDetail.path} element={<RequireMember><VolunteerReserveDetailPage /></RequireMember>} />,
 
   //관리자
   <Route

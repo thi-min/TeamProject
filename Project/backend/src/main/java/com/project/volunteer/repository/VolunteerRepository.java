@@ -36,7 +36,8 @@ public interface VolunteerRepository extends JpaRepository<Volunteer, Long> {
     	            )
     	            THEN r.reserveNumber ELSE 0 END
     	        ), 0),
-    	        ts.capacity
+    	        ts.capacity,
+    	        :date
     	    )
     	    FROM TimeSlot ts
     	    LEFT JOIN Volunteer v 

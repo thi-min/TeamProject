@@ -59,10 +59,18 @@ const VolunteerReserveDetailPage = () => {
         </tbody>
       </table>
 
-      <div className="reserve-buttons">
-        <button onClick={() => navigate(-1)}>이전</button>
-        {detail && detail.reserveState !== "CANCEL" && detail.reserveState !== "REJ" && (
-        <button onClick={handleCancel}>예약취소</button>)}
+      <div className="form_center_box">
+          <div className="temp_btn white md">
+            <button type="button" className="btn" onClick={() => navigate(-1)}>이전</button>
+          </div>
+
+          
+          {detail && detail.reserveState !== "CANCEL" && detail.reserveState !== "REJ" && (
+            <div className="temp_btn md">
+            <button type="button" className="btn" onClick={handleCancel}>예약취소</button>
+          </div>
+          )}
+          
       </div>
     </div>
   );

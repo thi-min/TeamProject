@@ -29,6 +29,10 @@ const LandReserveDatePage = () => {
     fetchClosedDays(year, month);
   }, []);
 
+   const handleDateSelect = (date) => {
+    setSelectedDate(date);
+  };
+
   // yyyy-MM-dd 포맷 함수 (로컬 기준)
   const formatDateKST = (date) => {
     const offset = date.getTimezoneOffset() * 60000;
@@ -62,7 +66,7 @@ const LandReserveDatePage = () => {
 
       <div className="calendar-wrapper">
         <Calendar
-          onChange={setSelectedDate}
+          onChange={handleDateSelect}
           value={selectedDate}
           minDate={new Date()}
           maxDate={new Date(new Date().setMonth(new Date().getMonth() + 3))}
@@ -74,6 +78,7 @@ const LandReserveDatePage = () => {
             if (view === "month") {
               const dateStr = formatDateKST(date);
               const closed = closedDates.find((cd) => cd.date === dateStr);
+              
               if (closed) {
                 return (
                   <div>
@@ -92,12 +97,17 @@ const LandReserveDatePage = () => {
             fetchClosedDays(year, month);
           }}
         />
+
       </div>
 
-      <div className="form-action-buttons">
-        <button className="next-button" onClick={handleNextClick}>
-          다음
-        </button>
+      <div className="my-btn-wrap">
+        <div className="form_center_box">
+          <div className="temp_btn md">
+            <button className="btn" onClick={handleNextClick}>
+              다음
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -9,10 +9,12 @@ import { useAuth } from "../context/AuthContext";
 // 경로가 /member 또는 /member/** 인지 판별
 function isMemberRoot(pathname) {
   if (!pathname) return false;
-  return pathname === "/member" || pathname.startsWith("/member/");
+
+    const protectedRoots = ["/member", "/reserve" ];
+  return protectedRoots.some((root) => pathname === root || pathname.startsWith(root + "/"));
 }
 
-export function RequireUserOnMember({ children }) {
+export function RequireMember({ children }) {
   const { isLogin } = useAuth();
   const location = useLocation();
   const alerted = useRef(false); // 알림 중복 방지

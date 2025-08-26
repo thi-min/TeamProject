@@ -57,7 +57,7 @@ const AdminLandReserveDetailPage = () => {
           <tr>
             <th>현재 상태</th>
             <td>
-                <select value={newState} onChange={(e) => setNewState(e.target.value)}>
+                <select className="ui-select" value={newState} onChange={(e) => setNewState(e.target.value)}>
                 <option value="ING">진행중(ING)</option>
                 <option value="DONE">완료(DONE)</option>
                 <option value="REJ">거절(REJ)</option>
@@ -81,9 +81,18 @@ const AdminLandReserveDetailPage = () => {
         </tbody>
       </table>
 
-      <div className="reserve-buttons">
-        <button onClick={() => navigate(-1)}>목록보기</button>
-        <button onClick={handleUpdateState}>상태 변경</button>
+      <div className="form_center_box">
+          <div className="temp_btn white md">
+            <button type="button" className="btn" onClick={() => navigate(-1)}>
+              목록보기
+            </button>
+          </div>
+
+          <div className="temp_btn md">
+            <button type="submit" className="btn" onClick={handleUpdateState} >
+              상태변경 
+            </button>
+          </div>
       </div>
     </div>
   );

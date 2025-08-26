@@ -48,6 +48,8 @@ public class ReserveServiceImpl implements ReserveService {
    
     private final LandRepository landRepository;
     private final VolunteerRepository volunteerRepository;
+
+
     
     // 예약생성 (사용자가 예약요청하면 예약상태 기본값으로 설정, DB에 저장)
     @Override
