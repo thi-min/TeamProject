@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import api from "../../../../common/api/axios";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
@@ -7,13 +8,37 @@ import "./../style/VolunteerReserveStyle.css"; // 봉사 예약 스타일
 const VolunteerReserveDatePage = () => {
   const navigate = useNavigate();
   const [selectedDate, setSelectedDate] = useState(null);
+  const [closedDates, setClosedDates] = useState([]); // {date, reason}
 
-  // ❗ 서버에서 불러오면 아래는 제거 예정
-  const closedDates = ["2025-08-17", "2025-08-31"]; // 예약 마감일 or 불가일
+  // 휴무일 조회
+  const fetchClosedDays = async (year, month) => {
+    try {
+      const { data } = await api.get("/api/closed-days", {
+        params: { year, month },
+      });
+      setClosedDates(data.map((d) => ({ date: d.closedDate, reason: d.reason })));
+    } catch (err) {
+      console.error("휴무일 조회 실패:", err);
+    }
+  };
+
+  useEffect(() => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth() + 1;
+
+    fetchClosedDays(year, month);
+  }, []);
 
   // 날짜 선택 핸들러
   const handleDateSelect = (date) => {
     setSelectedDate(date);
+  };
+
+  // 주말 여부 확인 (토: 6, 일: 0)
+  const isWeekend = (date) => {
+    const day = date.getDay();
+    return day === 0 || day === 6;
   };
 
   // yyyy-MM-dd 포맷 함수 (KST 기준)
@@ -23,16 +48,10 @@ const VolunteerReserveDatePage = () => {
     return localDate.toISOString().split("T")[0];
   };
 
-  // 주말 여부 확인 (토: 6, 일: 0)
-  const isWeekend = (date) => {
-    const day = date.getDay();
-    return day === 0 || day === 6;
-  };
-
   // 휴무일 또는 평일 제외
   const isDateDisabled = (date) => {
     const dateStr = formatDateKST(date);
-    return !isWeekend(date) || closedDates.includes(dateStr);
+    return !isWeekend(date) || closedDates.some((cd) => cd.date === dateStr);
   };
 
   // 다음 버튼 클릭 시
@@ -63,14 +82,38 @@ const VolunteerReserveDatePage = () => {
           tileClassName={({ date }) =>
             isDateDisabled(date) ? "closed-date" : null
           }
-          tileContent={({ date, view }) =>
-            view === "month" && isDateDisabled(date) ? (
-              <div className="closed-text">
-                <div>{date.getDate()}일</div>
-                <div>{!isWeekend(date) ? "예약불가" : "예약마감"}</div>
-              </div>
-            ) : null
-          }
+          tileContent={({ date, view }) => {
+  if (view === "month") {
+    const dateStr = formatDateKST(date);
+    const closed = closedDates.find((cd) => cd.date === dateStr);
+
+    // 1️⃣ 휴무일 (DB에 등록된 날) → 빨간 글씨
+    if (closed) {
+      return (
+        <div>
+          <div>{date.getDate()}일</div>
+          <div className="closed-text">{closed.reason || "예약마감"}</div>
+        </div>
+      );
+    }
+
+    // 2️⃣ 평일 (주말이 아님) → 그냥 회색 표시만 (글자는 검정)
+    if (!isWeekend(date)) {
+      return (
+        <div>
+          <div>{date.getDate()}일</div>
+          <div className="disabled-text">예약불가</div>
+        </div>
+      );
+    }
+  }
+  return null;
+}}
+          onActiveStartDateChange={({ activeStartDate }) => {
+            const year = activeStartDate.getFullYear();
+            const month = activeStartDate.getMonth() + 1;
+            fetchClosedDays(year, month);
+          }}
         />
       </div>
 

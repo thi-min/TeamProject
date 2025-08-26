@@ -24,9 +24,9 @@ import com.project.admin.dto.AdminPasswordUpdateRequestDto;
 import com.project.admin.entity.AdminEntity;
 import com.project.admin.repository.AdminRepository;
 import com.project.admin.service.AdminService;
-import com.project.common.dto.PageRequestDto;
-import com.project.common.dto.PageResponseDto;
 import com.project.common.jwt.JwtTokenProvider;
+import com.project.member.dto.MemberPageRequestDto;
+import com.project.member.dto.MemberPageResponseDto;
 import com.project.member.entity.MemberState;
 
 import lombok.RequiredArgsConstructor;
@@ -40,7 +40,7 @@ public class AdminController {
 	private final AdminRepository adminRepository;
 	private final JwtTokenProvider jwtTokenProvider;
 	
-	//관리자 로그인
+	//관리자 로그인 
 	//param : dto 관리자 로그인 요청 정보(아이디, 비밀번호)
 	//return : 관리자 정보 + 로그인 성공 메시지 + 토큰
 	// ✅ 컨트롤러는 DTO 수신 → 서비스 위임 → 결과만 반환(얇게 유지)
@@ -112,19 +112,29 @@ public class AdminController {
 	}
 
 	// ✅ 전체 회원목록 조회(페이징 + 검색)
-    @GetMapping("/membersList")
-    public ResponseEntity<PageResponseDto<AdminMemberListResponseDto>> getPagedMembers(
-            @ModelAttribute PageRequestDto pageRequestDto // 바인딩 명시
-    ){
-        PageResponseDto<AdminMemberListResponseDto> page = adminService.getMemberList(pageRequestDto);
-        return ResponseEntity.ok(page);
-    }
+//    @GetMapping("/membersList")
+//    public ResponseEntity<MemberPageResponseDto<AdminMemberListResponseDto>> getPagedMembers(
+//            @ModelAttribute MemberPageRequestDto memberPageRequestDto // 바인딩 명시
+//    ){
+//    	MemberPageResponseDto<AdminMemberListResponseDto> page = adminService.getMemberList(memberPageRequestDto);
+//        return ResponseEntity.ok(page);
+//    }
+    
+	@GetMapping("/membersList")
+	public ResponseEntity<MemberPageResponseDto<AdminMemberListResponseDto>> getPagedMembers(
+	        @ModelAttribute MemberPageRequestDto pageRequestDto // ← 여기를 기준으로
+	) {
+	    MemberPageResponseDto<AdminMemberListResponseDto> page =
+	            adminService.getMemberList(pageRequestDto); // ← 동일 변수명 사용
+	    return ResponseEntity.ok(page);
+	}
+
     
 	//전체 회원목록 조회(페이징 + 검색 포함)
 	//param pageRequestDto 페이지번호, 크기, 검색키워드
 	//return pageResponseDto 형태로 페이지 정보 + 회원 목록 반환
 //	@GetMapping("/membersList")
-//	public ResponseEntity<PageResponseDto<AdminMemberListResponseDto>> getPagedMembers(PageRequestDto pageRequestDto){
+//	public ResponseEntity<PageResponseDto<AdminMemberListResponseDto>> getPagedMembers(MemberPageRequestDto pageRequestDto){
 //		PageResponseDto<AdminMemberListResponseDto> page = adminService.getMemberList(pageRequestDto);
 //		
 //		return ResponseEntity.ok(page);

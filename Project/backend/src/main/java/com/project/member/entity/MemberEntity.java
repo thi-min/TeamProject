@@ -133,4 +133,5 @@ public class MemberEntity {
     // ── 내부 유틸 ─────────────────────────────────────────────
     private static String safeTrim(String s) { return s == null ? "" : s.trim(); }
     private static boolean isNotEmpty(String s) { return s != null && !s.isBlank(); }
+
 }

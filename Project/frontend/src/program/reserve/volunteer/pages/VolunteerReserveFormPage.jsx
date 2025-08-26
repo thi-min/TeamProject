@@ -1,146 +1,322 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import api from "../../../../common/api/axios";
+import VolunteerReserveService from "../services/VolunteerReserveService";
 import "./../style/VolunteerReserveStyle.css";
+
+const toDateStr = (d) =>
+  typeof d === "string" ? d : new Date(d).toISOString().slice(0, 10);
 
 const VolunteerReserveFormPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const selectedDate = location.state?.selectedDate;
+  const memberNum = localStorage.getItem("memberNum");
+  const selectedDate = location.state?.selectedDate
+    ? toDateStr(location.state.selectedDate)
+    : "";
 
+  const [displaySlots, setDisplaySlots] = useState([]);
   const [selectedSlotId, setSelectedSlotId] = useState(null);
-
-  const timeSlots = [
-    { timeSlotId: 1, label: "09:00 ~ 12:00 (오전)", reservedCount: 5, capacity: 10 },
-    { timeSlotId: 2, label: "13:00 ~ 16:00 (오후)", reservedCount: 10, capacity: 10 },
-    { timeSlotId: 3, label: "09:00 ~ 16:00 (점심시간 12:00 ~13:00 제외)", reservedCount: 2, capacity: 10 },
-  ];
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState("");
 
   const [formData, setFormData] = useState({
     name: "",
-    phone1: "010",
-    phone2: "",
-    phone3: "",
+    phone: "",
     birth: "",
     reserveNumber: "",
     note: "",
+    memberNum: null,
   });
 
+  // membernum 주입
+  useEffect(() => {
+    if (memberNum) {
+      setFormData((prev) => ({
+        ...prev,
+        memberNum: Number(memberNum),
+      }));
+    }
+  }, []);
+
+  /** 🔹 로그인 사용자 정보 불러오기 */
+  useEffect(() => {
+  const fetchMemberInfo = async () => {
+    try {
+      const token = localStorage.getItem("accessToken");
+      if (!token) {
+        alert("로그인이 필요합니다.");
+        navigate("/login");
+        return;
+      }
+
+      const res = await api.get("/member/mypage/me", {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      setFormData((prev) => ({
+        ...prev,
+        name: res.data.memberName,
+        phone: res.data.memberPhone,
+        birth: res.data.memberBirth,
+        memberNum: res.data.memberNum ?? prev.memberNum,
+      }));
+    } catch (err) {
+      console.error("회원정보 불러오기 실패:", err);
+      alert("회원정보를 불러올 수 없습니다. 다시 로그인해주세요.");
+      navigate("/login");
+    }
+  };
+
+  fetchMemberInfo();
+}, [navigate]);
+
+  /** VolunteerCountDto -> 표준형 변환 */
+  const normalizeCountDto = (arr = []) =>
+    arr.map((s) => {
+      const full = (s.reservedCount ?? 0) >= (s.capacity ?? 0);
+      return {
+        timeSlotId: s.timeSlotId,
+        label: s.label,
+        capacity: s.capacity ?? 0,
+        reservedCount: s.reservedCount ?? 0,
+        enabled: true,
+        disabled: full, 
+      };
+    });
+
+  /** TimeSlotDto -> 표준형 변환 */
+  const normalizeSlotDto = (arr = []) =>
+    arr.map((s) => ({
+      timeSlotId: s.timeSlotId,
+      label: s.label,
+      capacity: s.capacity ?? 0,
+      reservedCount: s.reservedCount ?? 0,          
+      enabled: s.enabled ?? true,
+      type: s.type,           
+    }));
+
+  /** 시간대 데이터 로드 */
+  useEffect(() => {
+  let mounted = true;
+
+  const loadSlots = async () => {
+    if (!selectedDate) {
+      setDisplaySlots([]);
+      return;
+    }
+
+    if (!formData.memberNum) {
+      try {
+        const res2 = await VolunteerReserveService.fetchTimeSlots();
+        const slotsData = normalizeSlotDto(res2.data);
+        if (mounted) setDisplaySlots(slotsData);
+      } catch (err) {
+        console.error("시간대 기본 목록 API 실패:", err);
+      }
+      return;  // ✅ 여기서 종료 (아래 예약 현황 조회는 memberNum 있을 때만 실행)
+    }
+
+    try {
+      setLoading(true);
+      setErrorMsg("");
+
+      let slotsData = null;
+
+      // ✅ 예약 현황 API 먼저 호출
+      try {
+        const res = await VolunteerReserveService.fetchReservationStatus(
+          selectedDate,
+          formData.memberNum
+        );
+        if (mounted) {
+          slotsData = normalizeCountDto(res.data); // 바로 slotsData에 넣음
+          setDisplaySlots(slotsData);
+          setLoading(false);
+          return; // 성공하면 여기서 종료
+        }
+      } catch (err) {
+        console.error("예약 현황 API 실패:", err);
+      }
+
+      // ✅ 예약 현황 없거나 실패 시 → 전체 시간대 불러오기
+      if (!slotsData) {
+        const res2 = await VolunteerReserveService.fetchTimeSlots();
+        slotsData = normalizeSlotDto(res2.data); // Land랑 동일하게 normalizeSlotDto 사용
+        if (mounted) setDisplaySlots(slotsData);
+      }
+    } catch (err) {
+      console.error("시간대 목록 API 실패:", err);
+      if (mounted) setErrorMsg("시간대 목록을 불러오지 못했습니다.");
+    } finally {
+      if (mounted) setLoading(false);
+    }
+  };
+
+  loadSlots();
+  return () => { mounted = false; };
+}, [selectedDate, formData.memberNum]);
+
+  /** 입력 핸들러 */
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleTimeSelect = (slotId) => {
-    setSelectedSlotId(slotId);
-  };
+  /** 시간대 선택 */
+  const handleTimeSelect = (slotId) => setSelectedSlotId(slotId);
 
-  const handleSubmit = (e) => {
+  /** 제출 처리 */
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!formData.reserveNumber) return alert("신청 인원 수를 선택해 주세요.");
+    if (!selectedDate) return alert("예약 날짜를 선택해 주세요.");
+    if (!selectedSlotId) return alert("시간대를 선택해 주세요.");
 
-    // ✅ 유효성 검사
-    if (!formData.name.trim()) return alert("신청자명을 입력해주세요.");
-    if (!formData.phone2.trim() || !formData.phone3.trim()) return alert("연락처를 모두 입력해주세요.");
-    if (!formData.birth) return alert("생년월일을 선택해주세요.");
-    if (!formData.reserveNumber) return alert("신청 인원 수를 선택해주세요.");
-    if (!selectedSlotId) return alert("시간대를 선택해주세요.");
-
+    // 선택한 시간대 db에 존재하는지
+    const selectedSlot = displaySlots.find(s => s.timeSlotId === selectedSlotId);
+    if (!selectedSlot) {
+      return alert("선택한 시간대 정보를 불러올 수 없습니다.");
+    }
+    //정원 검사
+    const total = (selectedSlot.reservedCount ?? 0) + Number(formData.reserveNumber ?? 0);
+    if (total > (selectedSlot.capacity ?? 0)) {
+      return alert(
+        `선택한 인원이 남은 정원을 초과했습니다.\n` +
+        `현재 신청 인원: ${selectedSlot.reservedCount ?? 0} / 최대 ${selectedSlot.capacity}`
+      );
+    }
+    try {
+    const { data: exists } = await api.get("/api/reserve/check-duplicate", {
+      params: { memberNum: formData.memberNum, date: selectedDate, timeSlotId: selectedSlotId, type: "VOLUNTEER" },
+      });
+      if (exists) {
+        return alert("이미 예약하신 시간대입니다. 다른 시간대를 선택해 주세요.");
+      }
+    } catch (err) {
+      console.error("중복 검사 실패:", err);
+      return alert("중복 검사 중 오류가 발생했습니다.");
+    }
     navigate("/reserve/volunteer/confirm", {
       state: {
-        name: formData.name,
-        phone: `010-${formData.phone2}-${formData.phone3}`,
-        birth: formData.birth,
-        reserveNumber: formData.reserveNumber,
-        note: formData.note,
+        formData,
         selectedDate,
         selectedSlotId,
-        timeSlots,
+        timeSlots: displaySlots,
       },
     });
   };
 
+  if (loading)return <div className="volunteer-form-page">시간대를 불러오는 중입니다…</div>;
+  if (errorMsg) return <div className="volunteer-form-page">{errorMsg}</div>;
+
   return (
     <div className="volunteer-form-page">
       <h2 className="form-title">봉사활동 신청서</h2>
-      <div className="required-info"><span className="required">*</span>표시된 부분은 필수 입력항목입니다.</div>
+      <div className="required-info">
+        <span className="required">*</span>표시는 필수 입력항목입니다.
+      </div>
 
       <form className="form-container" onSubmit={handleSubmit}>
-        <div className="form-wrapper">
-          <p className="selected-date">선택한 날짜: <strong>{selectedDate}</strong></p>
+        <p className="selected-date">
+          선택한 날짜: <strong>{selectedDate || "-"}</strong>
+        </p>
 
-          {/* ▶️ 신청 정보 입력 */}
-          <div className="form-section">
-            {/* 신청자명 */}
-            <div className="form-row">
-              <label htmlFor="name">신청자명 <span className="required">*</span></label>
-              <input type="text" name="name" value={formData.name} onChange={handleChange} required />
-            </div>
-
-            {/* 연락처 */}
-            <div className="form-row">
-              <label htmlFor="phone1">연락처 <span className="required">*</span></label>
-              <div className="phone-input-wrapper">
-                <select name="phone1" value={formData.phone1} onChange={handleChange}>
-                  <option value="010">010</option>
-                  <option value="011">011</option>
-                </select>
-                <span>-</span>
-                <input type="text" name="phone2" maxLength={4} value={formData.phone2} onChange={handleChange} required />
-                <span>-</span>
-                <input type="text" name="phone3" maxLength={4} value={formData.phone3} onChange={handleChange} required />
-              </div>
-            </div>
-
-            {/* 생년월일 */}
-            <div className="form-row">
-              <label htmlFor="birth">생년월일 <span className="required">*</span></label>
-              <input type="date" name="birth" value={formData.birth} onChange={handleChange} required />
-            </div>
-
-            {/* 신청 인원 수 */}
-            <div className="form-row">
-              <label htmlFor="reserveNumber">신청 인원 수 <span className="required">*</span></label>
-              <select name="reserveNumber" value={formData.reserveNumber} onChange={handleChange} required>
-                <option value="">선택</option>
-                {[...Array(10)].map((_, i) => (
-                  <option key={i + 1} value={i + 1}>{i + 1}명</option>
-                ))}
-              </select>
-            </div>
+        {/* 신청자 정보 */}
+        <div className="form-section">
+          <div className="form-row">
+            <label>신청자명</label>
+            <p>{formData.name || "-"}</p>
           </div>
+          <div className="form-row">
+            <label>연락처</label>
+            <p>{formData.phone || "--"}</p>
+          </div>
+          <div className="form-row">
+            <label>생년월일</label>
+            <p>{formData.birth || "--"}</p>
+          </div>
+          <div className="form-row">
+            <label htmlFor="reserveNumber">
+              신청 인원 수 <span className="required">*</span>
+            </label>
+            <select
+              name="reserveNumber"
+              value={formData.reserveNumber}
+              onChange={handleChange}
+              required
+            >
+              <option value="">선택</option>
+              {[...Array(10)].map((_, i) => (
+                <option key={i + 1} value={i + 1}>
+                  {i + 1}명
+                </option>
+              ))}
+            </select>
+          </div>
+        </div>
 
-          {/* ▶️ 시간대 선택 */}
-          <div className="form-section">
-            <div className="form-row">
-              <label>시간대 선택 <span className="required">*</span></label>
-              <div className="time-slot-group">
-                {timeSlots.map((slot) => (
+        {/* 시간대 선택 */}
+        <div className="form-section">
+          <div className="form-row">
+            <label>
+              시간대 선택 <span className="required">*</span>
+            </label>
+            <div className="time-slot-group">
+              {displaySlots.map((slot) => {
+                const full =
+                  (slot.reservedCount ?? 0) >= (slot.capacity ?? 0);
+                return (
                   <button
                     key={slot.timeSlotId}
                     type="button"
                     onClick={() => handleTimeSelect(slot.timeSlotId)}
-                    disabled={slot.reservedCount >= slot.capacity}
-                    className={`time-slot-button ${selectedSlotId === slot.timeSlotId ? "selected" : ""}`}
+                    disabled={full || !slot.enabled}
+                    className={`time-slot-button ${
+                      selectedSlotId === slot.timeSlotId ? "selected" : ""
+                    }`}
                   >
-                    {slot.label}<br />정원: {slot.reservedCount}/{slot.capacity}
+                    {slot.label}
+                    {(slot.capacity ?? 0) > 0 && (
+                      <>
+                        <br />
+                        {`정원: ${slot.reservedCount ?? 0}/${slot.capacity}`}
+                      </>
+                    )}
+                    {(slot.reservedCount ?? 0) >= (slot.capacity ?? 0) && " - 마감"}
                   </button>
-                ))}
-              </div>
+                );
+              })}
             </div>
           </div>
+        </div>
 
-          {/* ▶️ 비고 입력 */}
-          <div className="form-section">
-            <div className="form-row">
-              <label htmlFor="note">비고</label>
-              <textarea name="note" rows={3} value={formData.note} onChange={handleChange} />
-            </div>
+        {/* 비고 */}
+        <div className="form-section">
+          <div className="form-row">
+            <label htmlFor="note">비고</label>
+            <textarea
+              id="note"
+              name="note"
+              value={formData.note}
+              onChange={handleChange}
+              rows={3}
+            />
           </div>
+        </div>
 
-          {/* ▶️ 버튼 */}
-          <div className="form-action-buttons">
-            <button className="prev-button" type="button" onClick={() => window.history.back()}>이전</button>
-            <button className="next-button" type="submit">다음</button>
-          </div>
+        {/* 버튼 */}
+        <div className="form-action-buttons">
+          <button
+            className="prev-button"
+            type="button"
+            onClick={() => window.history.back()}
+          >
+            이전
+          </button>
+          <button className="next-button" type="submit">
+            다음
+          </button>
         </div>
       </form>
     </div>

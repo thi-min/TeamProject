@@ -1,36 +1,30 @@
-import axios from "axios";
+import api from "../../../../common/api/axios";
 
-const BASE_URL = "/api/reserve";
-
+/**
+ * 백엔드 매핑
+ * - GET /api/volunteer/timeslots?date=yyyy-MM-dd&memberNum=1
+ *     -> List<VolunteerCountDto> (timeSlotId, label, reservedCount, capacity)
+ * - GET /api/timeslots/VOLUNTEER
+ *     -> List<TimeSlotDto> (id, label, startTime, endTime, capacity, enabled)
+ * - POST /api/reserve
+ *     -> 예약 생성 (공통 엔드포인트 유지)
+ */
 const VolunteerReserveService = {
-  /**
-   * 봉사 예약 생성 (POST /api/reserve)
-   * @param {Object} fullReserveRequestDto
-   * @returns {Promise}
-   */
-  createReserve: (fullReserveRequestDto) => {
-    return axios.post(BASE_URL, fullReserveRequestDto);
-  },
-
-  /**
-   * 봉사 시간대 리스트 조회 (GET /api/timeslot?type=VOLUNTEER)
-   * @returns {Promise}
-   */
-  fetchTimeSlots: () => {
-    return axios.get("/api/timeslot", {
-      params: { type: "VOLUNTEER" }
+  // 날짜별 봉사 시간대 현황 조회
+  fetchReservationStatus(volDate, memberNum) {
+    return api.get("/api/volunteer/timeslots", {
+      params: { date: volDate, memberNum }
     });
   },
 
-  /**
-   * 날짜별 봉사 예약 현황 조회 (GET /api/volunteer/count?date=yyyy-MM-dd)
-   * @param {String} volDate
-   * @returns {Promise}
-   */
-  fetchReservationStatus: (volDate) => {
-    return axios.get("/api/volunteer/count", {
-      params: { date: volDate }
-    });
+  // 전체 시간대 조회 (봉사 전용)
+  fetchTimeSlots() {
+    return api.get("/api/timeslots/VOL");
+  },
+
+  // 예약 생성 (공통 엔드포인트)
+  createReserve(fullReserveRequestDto) {
+    return api.post("/api/reserve", fullReserveRequestDto);
   },
 };
 
