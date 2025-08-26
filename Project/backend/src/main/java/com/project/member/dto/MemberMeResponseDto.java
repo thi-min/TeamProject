@@ -1,5 +1,7 @@
 package com.project.member.dto;
 
+import java.time.LocalDate;
+
 import lombok.*;
 
 @Getter
@@ -12,4 +14,8 @@ public class MemberMeResponseDto {
     private String memberId;    // 이메일 ID
     private String memberName;  // 이름
     private String memberState; // ACTIVE/REST/OUT 등 (선택)
+    
+    //추가 선택사항(김강민)
+    private String memberPhone;	//휴대폰번호
+    private LocalDate memberBirth;	//생년월일
 }
