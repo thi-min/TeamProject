@@ -14,9 +14,10 @@ const VolunteerReserveDatePage = () => {
 
   // ✅ yyyy-MM-dd 포맷 (KST)
   const formatDateKST = (date) => {
-    const offset = date.getTimezoneOffset() * 60000;
-    const localDate = new Date(date.getTime() - offset);
-    return localDate.toISOString().split("T")[0];
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   // ✅ 주말 여부 확인 (토:6, 일:0)
@@ -40,19 +41,11 @@ const VolunteerReserveDatePage = () => {
   // ✅ 예약 현황 조회 (월 단위)
   const fetchMonthlyCounts = async (year, month) => {
     try {
-      const { data } = await api.get("/api/volunteer/timeslots", {
-        params: { date: `${year}-${String(month).padStart(2, "0")}-01`, memberNum: 1 },
+      const { data } = await api.get("/api/volunteer/timeslots/month", {
+        params: { year, month},
       });
 
-      const countsByDate = data.reduce((acc, cur) => {
-        const dateStr = cur.volDate; // 예: "2025-09-21"
-        if (!dateStr) return acc;
-        if (!acc[dateStr]) acc[dateStr] = {};
-        acc[dateStr][cur.label] = { reserved: cur.reservedCount, capacity: cur.capacity };
-        return acc;
-      }, {});
-
-      setVolunteerCounts((prev) => ({ ...prev, ...countsByDate }));
+      setVolunteerCounts(data);
     } catch (err) {
       console.error("예약 현황(월) 불러오기 실패:", err);
     }
@@ -60,22 +53,21 @@ const VolunteerReserveDatePage = () => {
 
   // ✅ 마감 여부 확인
   const isFullyBooked = (date) => {
-    const dateStr = formatDateKST(date);
-    const counts = volunteerCounts[dateStr];
-    if (closedDates.some((cd) => cd.date === dateStr)) return true; // 휴무일
-    if (!counts) return false; // 데이터 없으면 선택 가능
-    return Object.values(counts).every((c) => c.reserved >= c.capacity);
-  };
+  const dateStr = formatDateKST(date);
+  const counts = volunteerCounts[dateStr];
 
-  // ✅ 다음 버튼 클릭
-  const handleNextClick = () => {
-    if (!selectedDate) {
-      alert("예약 날짜를 선택해주세요.");
-      return;
-    }
-    const formattedDate = formatDateKST(selectedDate);
-    navigate("/reserve/volunteer/form", { state: { selectedDate: formattedDate } });
-  };
+  console.log("체크하는 날짜:", dateStr, "counts:", counts);
+
+  if (closedDates.some((cd) => cd.date === dateStr)) return true; // 휴무일
+  if (!counts) return false; 
+
+  // 예약이 전혀 없는 경우 → 선택 가능
+  const totalReserved = counts.reduce((sum, c) => sum + c.reservedCount, 0);
+  if (totalReserved === 0) return false;
+
+  // 모든 슬롯이 정원 마감일 때만 true
+  return counts.every((c) => c.reservedCount >= c.capacity);
+};
 
   // ✅ 최초 로딩 시 이번 달 데이터 조회
   useEffect(() => {
@@ -93,6 +85,16 @@ const VolunteerReserveDatePage = () => {
     loadInit();
   }, []);
 
+  // ✅ 다음 버튼 클릭
+  const handleNextClick = () => {
+    if (!selectedDate) {
+      alert("예약 날짜를 선택해주세요.");
+      return;
+    }
+    const formattedDate = formatDateKST(selectedDate);
+    navigate("/reserve/volunteer/form", { state: { selectedDate: formattedDate } });
+  };
+
   return (
     <div className="volunteer-date-page">
       <h2>봉사활동 예약 신청</h2>
@@ -107,7 +109,9 @@ const VolunteerReserveDatePage = () => {
             value={selectedDate}
             minDate={new Date()}
             maxDate={new Date(new Date().setMonth(new Date().getMonth() + 3))}
-            tileDisabled={({ date }) => {
+ 
+            tileDisabled={({ date, view }) => {
+              if (view !== "month") return false;  
               const dateStr = formatDateKST(date);
               return (
                 !isWeekend(date) || // 평일 불가
@@ -115,7 +119,8 @@ const VolunteerReserveDatePage = () => {
                 isFullyBooked(date) // 정원 초과 불가
               );
             }}
-            tileClassName={({ date }) => {
+            tileClassName={({ date, view }) => {
+              if (view !== "month") return null;   
               const dateStr = formatDateKST(date);
               if (closedDates.some((cd) => cd.date === dateStr)) return "closed-date";
               if (!isWeekend(date)) return "weekday-disabled";
@@ -139,6 +144,7 @@ const VolunteerReserveDatePage = () => {
                 if (!isWeekend(date)) {
                   return (
                     <div>
+                      <div>{date.getDate()}일</div>
                       <div className="disabled-text">예약불가</div>
                     </div>
                   );

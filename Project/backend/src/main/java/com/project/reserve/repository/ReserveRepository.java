@@ -74,11 +74,27 @@ public interface ReserveRepository extends JpaRepository<Reserve, Long> {
     	       "LEFT JOIN FETCH r.volunteerDetail")
     	List<Reserve> findAllWithDetails();
     
-    // 관리자- 놀이터 특정 시간대 + 오늘 이후 날짜에 예약 존재 여부
+    // 관리자- 놀이터 특정 시간대 + 오늘 이후 날짜에 예약 존재 여부(시간대관리)
     boolean existsByLandDetail_TimeSlot_IdAndLandDetail_LandDateAfterAndReserveStateIn(Long timeSlotId, LocalDate date, List<ReserveState> states);
 
-    // 관리자 - 봉사 특정 시간대 + 오늘 이후 날짜에 예약 존재 여부
+    // 관리자 - 봉사 특정 시간대 + 오늘 이후 날짜에 예약 존재 여부(시간대관리)
     boolean existsByVolunteerDetail_TimeSlot_IdAndVolunteerDetail_VolDateAfterAndReserveStateIn(Long timeSlotId, LocalDate date, List<ReserveState> states);
+    
+    // 놀이터 예약 중복검사(예약시)
+    boolean existsByMember_MemberNumAndLandDetail_TimeSlot_IdAndLandDetail_LandDateAndReserveStateIn(
+    	    Long memberNum,
+    	    Long timeSlotId,
+    	    LocalDate landDate,
+    	    List<ReserveState> states
+    	);
+
+    // Volunteer 예약 중복검사(예약시)
+    boolean existsByMember_MemberNumAndVolunteerDetail_TimeSlot_IdAndVolunteerDetail_VolDateAndReserveStateIn(
+    	    Long memberNum,
+    	    Long timeSlotId,
+    	    LocalDate volDate,
+    	    List<ReserveState> states
+    	);
     
     // 관리자 놀이터예약 조회
     @Query("SELECT r FROM Reserve r WHERE r.reserveType = 1") // 1: 놀이터

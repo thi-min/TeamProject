@@ -45,6 +45,9 @@ public class Reserve {
     @Column(name = "reserve_number")
     private Integer reserveNumber;		//인원수
     
+    @Column(name = "update_time")
+    private LocalDateTime updateTime;	// 상태변경 시간
+    
     @Column(name = "note")
     private String note;		//비고
 

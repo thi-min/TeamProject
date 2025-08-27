@@ -29,10 +29,14 @@ import com.project.land.service.LandService;
 import com.project.member.entity.MemberEntity;
 
 import lombok.RequiredArgsConstructor;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -96,11 +100,12 @@ public class ReserveServiceImpl implements ReserveService {
 
             // ✅ 중복 예약 검사
             boolean exists = reserveRepository
-                    .existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_TimeSlot_Id(
-                            memberNum,
-                            landDto.getLandDate(),
-                            timeSlotId
-                    );
+            	    .existsByMember_MemberNumAndLandDetail_TimeSlot_IdAndLandDetail_LandDateAndReserveStateIn(
+            	        memberNum,
+            	        timeSlotId,
+            	        landDto.getLandDate(),
+            	        List.of(ReserveState.ING, ReserveState.DONE)
+            	    );
             if (exists) {
                 throw new DuplicateReservationException("이미 해당 시간에 놀이터 예약이 존재합니다.");
             }
@@ -128,11 +133,12 @@ public class ReserveServiceImpl implements ReserveService {
 
             // ✅ 중복 예약 검사
             boolean exists = reserveRepository
-                    .existsByMember_MemberNumAndVolunteerDetail_VolDateAndVolunteerDetail_TimeSlot_Id(
-                            memberNum,
-                            volunteerDto.getVolDate(),
-                            timeSlotId
-                    );
+            	    .existsByMember_MemberNumAndVolunteerDetail_TimeSlot_IdAndVolunteerDetail_VolDateAndReserveStateIn(
+            	        memberNum,
+            	        timeSlotId,
+            	        volunteerDto.getVolDate(),
+            	        List.of(ReserveState.ING, ReserveState.DONE)
+            	    );
             if (exists) {
                 throw new DuplicateReservationException("이미 해당 시간에 봉사 예약이 존재합니다.");
             }
@@ -363,13 +369,22 @@ public class ReserveServiceImpl implements ReserveService {
          .collect(Collectors.toList());
     }
     
-    //관리자가 특정 예약의 상태를 직접 변경
+    //관리자가 특정 예약의 상태를 변경
     @Override
     @Transactional
     public void updateReserveStateByAdmin(Long reserveCode, ReserveState newState) {
         Reserve reserve = reserveRepository.findByReserveCode(reserveCode)
                 .orElseThrow(() -> new IllegalArgumentException("예약 정보를 찾을 수 없습니다."));
+        // 현재 상태
+        ReserveState cur = reserve.getReserveState();
+
+        // 취소건을 진행/완료로 변경 시도 → 예외
+        if (cur == ReserveState.CANCEL && (newState == ReserveState.ING || newState == ReserveState.DONE)) {
+            throw new IllegalArgumentException("취소된 예약은 진행/완료로 변경할 수 없습니다.");
+        }
+
         reserve.setReserveState(newState);
+        reserve.setUpdateTime(LocalDateTime.now());
     }
     
     //마이페이지에서 예약유형 별 탭 기능
@@ -387,15 +402,16 @@ public class ReserveServiceImpl implements ReserveService {
     // 놀이터 예약 중복검사(formpage->confirmpage넘어갈때)
     @Override
     public boolean existsLandDuplicate(Long memberNum, LocalDate date, Long timeSlotId) {
-        return reserveRepository.existsByMember_MemberNumAndLandDetail_LandDateAndLandDetail_TimeSlot_Id(
-                memberNum, date, timeSlotId
+        return reserveRepository.existsByMember_MemberNumAndLandDetail_TimeSlot_IdAndLandDetail_LandDateAndReserveStateIn(
+            memberNum, timeSlotId, date, List.of(ReserveState.ING, ReserveState.DONE)
         );
     }
+
     // 봉사 예약 중복검사(formpage->confirmpage넘어갈때)
     @Override
     public boolean existsVolunteerDuplicate(Long memberNum, LocalDate date, Long timeSlotId) {
-        return reserveRepository.existsByMember_MemberNumAndVolunteerDetail_VolDateAndVolunteerDetail_TimeSlot_Id(
-                memberNum, date, timeSlotId
+        return reserveRepository.existsByMember_MemberNumAndVolunteerDetail_TimeSlot_IdAndVolunteerDetail_VolDateAndReserveStateIn(
+            memberNum, timeSlotId, date, List.of(ReserveState.ING, ReserveState.DONE)
         );
     }
   

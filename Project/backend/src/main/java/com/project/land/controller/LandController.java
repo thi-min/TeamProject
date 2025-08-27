@@ -2,6 +2,7 @@ package com.project.land.controller;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
@@ -29,6 +30,15 @@ public class LandController {
             @RequestParam("memberNum") Long memberNum,
             @RequestParam("landType") LandType landType) {
         List<LandCountDto> result = landService.getLandTimeSlotsWithCount(landDate, memberNum, landType);
+        return ResponseEntity.ok(result);
+    }
+    
+    // 사용자 - 월별 예약 마감 확인
+    @GetMapping("/timeslots/month")
+    public ResponseEntity<Map<LocalDate, List<LandCountDto>>> getLandTimeSlotsByMonth(
+            @RequestParam("year") int year,
+            @RequestParam("month") int month) {
+        Map<LocalDate, List<LandCountDto>> result = landService.getLandTimeSlotsByMonth(year, month);
         return ResponseEntity.ok(result);
     }
     

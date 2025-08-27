@@ -46,18 +46,22 @@ function MyReserveListPage() {
         <h2>마이페이지 - 예약내역 조회</h2>
       </div>
       <div className="reserve-tabs">
-        <button
-          className={`tab-button ${selectedType === "LAND" ? "active" : ""}`}
-          onClick={() => setSelectedType("LAND")}
-        >
-          놀이터예약
-        </button>
-        <button
-          className={`tab-button ${selectedType === "VOLUNTEER" ? "active" : ""}`}
-          onClick={() => setSelectedType("VOLUNTEER")}
-        >
-          봉사예약
-        </button>
+        <div className={`temp_btn md ${selectedType === "LAND" ? "" : "white"}`}>
+          <button
+            className="btn"
+            onClick={() => setSelectedType("LAND")}
+          >
+            놀이터예약
+          </button>
+        </div>
+        <div className={`temp_btn md ${selectedType === "VOLUNTEER" ? "" : "white"}`}>
+          <button
+            className="btn"
+            onClick={() => setSelectedType("VOLUNTEER")}
+          >
+            봉사예약
+          </button>
+        </div>
       </div>
 
       <table className="table type2 responsive">

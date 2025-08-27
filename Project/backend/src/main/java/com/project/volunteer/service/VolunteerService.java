@@ -2,6 +2,7 @@ package com.project.volunteer.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import com.project.common.entity.TimeSlot;
 import com.project.reserve.entity.Reserve;
@@ -21,6 +22,9 @@ public interface VolunteerService {
     VolunteerCountDto getVolunteerCountInfo(LocalDate volDate, Long timeSlotId);
     
     // 전체 시간대별 현황 조회 (사용자용)  
+    List<VolunteerCountDto> getVolunteerTimeSlotsWithCount(LocalDate volDate); 
     List<VolunteerCountDto> getVolunteerTimeSlotsWithCount(LocalDate volDate, Long memberNum);
     
+    // 월별 정원 체크(사용자용)
+    Map<LocalDate, List<VolunteerCountDto>> getVolunteerTimeSlotsByMonth(int year, int month);
 }

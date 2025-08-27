@@ -17,7 +17,7 @@ public class VolunteerCountDto {
     private String label;		// 시간대 (예: "09:00 ~ 12:00")
     private int reservedCount;	// 예약된 사람수
     private int capacity; 		// 고정값 예: 10명
-    private LocalDate volDate;
+    private LocalDate volDate;	// 날짜 데이터
     
     public VolunteerCountDto(Long timeSlotId, String label, Long reservedCount, Integer capacity, LocalDate volDate) {
         this.timeSlotId = timeSlotId;

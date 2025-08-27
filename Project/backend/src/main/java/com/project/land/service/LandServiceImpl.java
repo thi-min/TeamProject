@@ -17,8 +17,12 @@ import com.project.member.entity.MemberEntity;
 import lombok.RequiredArgsConstructor;
 
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
@@ -132,11 +136,41 @@ public class LandServiceImpl implements LandService {
                 .capacity(timeSlot.getCapacity())
                 .build();
     }
+    // 사용자용 월별 예약마감 확인
+    @Override
+    public Map<LocalDate, List<LandCountDto>> getLandTimeSlotsByMonth(int year, int month) {
+        YearMonth ym = YearMonth.of(year, month);
+        Map<LocalDate, List<LandCountDto>> map = new HashMap<>();
+
+        for (int day = 1; day <= ym.lengthOfMonth(); day++) {
+            LocalDate date = ym.atDay(day);
+
+            // 소형견
+            List<LandCountDto> smallCounts = landRepository.getLandCountInfo(date, LandType.SMALL);
+
+            // 대형견
+            List<LandCountDto> largeCounts = landRepository.getLandCountInfo(date, LandType.LARGE);
+
+            // 합쳐서 날짜별로 저장
+            List<LandCountDto> counts = new ArrayList<>();
+            counts.addAll(smallCounts);
+            counts.addAll(largeCounts);
+
+            map.put(date, counts);
+        }
+
+        return map;
+    }
     
-    // 사용자용 - 프론트에서 시간대 선택 ui 구성때 사용
+    // 사용자용 - 놀이터 시간대 조회
     @Override
     @Transactional(readOnly = true)
     public List<LandCountDto> getLandTimeSlotsWithCount(LocalDate landDate, Long memberNum, LandType landType) {
+        return landRepository.getLandCountInfo(landDate, landType);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<LandCountDto> getLandTimeSlotsWithCount(LocalDate landDate, LandType landType) {
         return landRepository.getLandCountInfo(landDate, landType);
     }
     

@@ -77,7 +77,7 @@ body {
 
 /* 날짜 셀 */
 .volunteer-date-page .react-calendar__tile {
-  height: 56px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -111,8 +111,16 @@ body {
   color: #fff !important;
 }
 
-/* 휴무일 강조 */
+/* 휴무일 날짜표시 지우기  */
 .volunteer-date-page .react-calendar__tile.closed-date abbr {
+  display: none;
+}
+/* 평일 날짜표시 지우기 */
+.volunteer-date-page .react-calendar__tile.weekday-disabled abbr {
+  display: none;
+}
+/* 예약마감일 날짜표시 지우기*/
+.volunteer-date-page .react-calendar__tile.full-booked abbr {
   display: none;
 }
 
@@ -166,15 +174,6 @@ body {
   font-size: 12px;
   font-weight: bold;
   text-align: center;
-}
-
-/* 날짜 셀 높이 통일 */
-.volunteer-date-page .react-calendar__tile {
-  height: 80px; /* 기존보다 조금 크게 통일 */
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
 }
 
 /* 버튼 영역 */

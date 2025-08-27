@@ -111,7 +111,9 @@ body {
 .land-date-page .react-calendar__tile.closed-date abbr {
   display: none;
 }
-
+.land-date-page .react-calendar__tile.full-booked abbr {
+  display: none;
+}
 .land-date-page .disabled-day {
   background: #fef2f2 !important;
   color: #b91c1c !important;
@@ -124,6 +126,19 @@ body {
   font-weight: 700;
   text-align: center;
   margin-top: 4px;
+}
+/* 정원마감 */
+.full-booked {
+  background: #f3f4f6 !important;
+  color: #9ca3af !important;
+  border: 1px solid #d1d5db !important;
+  cursor: not-allowed !important;
+}
+.full-text {
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
 }
 
 /* 버튼 영역 (달력 아래) */

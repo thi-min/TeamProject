@@ -32,10 +32,13 @@ const AdminVolunteerReserveDetailPage = () => {
       alert("상태가 변경되었습니다.");
       navigate("/admin/reserve/volunteer");
     } catch (err) {
-      console.error("상태 변경 실패:", err);
+      if (newState === "ING" || newState === "DONE") {
+      alert("취소된 예약은 진행/완료로 변경할 수 없습니다.");
+    } else {
       alert("상태 변경 중 오류가 발생했습니다.");
     }
-  };
+  }
+};
 
   if (!detail) return <p>로딩 중...</p>;
 
@@ -61,8 +64,8 @@ const AdminVolunteerReserveDetailPage = () => {
             <th>현재 상태</th>
             <td>
                 <select className="ui-select" value={newState} onChange={(e) => setNewState(e.target.value)}>
-                <option value="ING">진행중(ING)</option>
-                <option value="DONE">완료(DONE)</option>
+                <option value="ING">대기중(ING)</option>
+                <option value="DONE">승인(DONE)</option>
                 <option value="REJ">거절(REJ)</option>
                 <option value="CANCEL">취소(CANCEL)</option>
                 </select>
