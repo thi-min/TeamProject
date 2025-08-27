@@ -88,6 +88,9 @@ public interface MemberService {
     MemberEntity kakaoSignUp(KakaoSignUpRequestDto dto);
 	//MemberSignUpResponseDto kakaoSignup(KakaoSignUpRequestDto dto);
     
+    //회원 번호로 회원 객체를 찾아 반환
+    MemberEntity findByMemberNum(Long memberNum);
+    
     
 
 }

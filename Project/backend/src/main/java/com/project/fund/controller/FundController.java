@@ -36,7 +36,7 @@ import jakarta.validation.Valid;
  * 기본 경로: /api/funds
  */
 @RestController
-@RequestMapping("/fund")
+@RequestMapping("/funds")
 public class FundController {
 
     private final FundService fundService;
@@ -130,6 +130,41 @@ public class FundController {
     }
 
     // 전체 조회 (페이징, 정렬)
+//    @GetMapping("/list")
+//    public ResponseEntity<Page<FundResponseDto>> listFunds(
+//            @RequestParam(value = "page", defaultValue = "0") int page,
+//            @RequestParam(value = "size", defaultValue = "20") int size,
+//            @RequestParam(value = "sort", defaultValue = "fundTime,desc") String sort) {
+//
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        String role = authentication.getAuthorities().stream()
+//                .findFirst()
+//                .map(a -> a.getAuthority().replace("ROLE_", ""))
+//                .orElse("USER");
+//
+//        // 페이지네이션 및 정렬 설정
+//        String[] sortParts = sort.split(",");
+//        Sort s = Sort.by(Sort.Direction.fromString(sortParts[1]), sortParts[0]);
+//        Pageable pageable = PageRequest.of(page, size, s);
+//
+//        Page<FundResponseDto> fundPage;
+//
+//        if ("ADMIN".equals(role)) {
+//            fundPage = fundService.getFunds(pageable);
+//        } else if ("USER".equals(role)) {
+//            String memberId = authentication.getName();
+//            // MemberService 주입 필요
+//            MemberMeResponseDto member = memberService.getMyInfo(memberId);
+//            if (member == null) {
+//                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//            }
+//            fundPage = fundService.listByMemberNum(member.getMemberNum(), pageable); // Service에 새로 추가해야 함
+//        } else {
+//            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+//        }
+//
+//        return ResponseEntity.ok(fundPage);
+//    }
     @GetMapping("/list")
     public ResponseEntity<Page<FundResponseDto>> listFunds(
             @RequestParam(value = "page", defaultValue = "0") int page,
@@ -137,12 +172,17 @@ public class FundController {
             @RequestParam(value = "sort", defaultValue = "fundTime,desc") String sort) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        
+        // 익명 사용자일 경우 UNAUTHORIZED 반환 (로그인 상태가 아닐 때)
+        if (authentication == null || "anonymousUser".equals(authentication.getName())) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        
         String role = authentication.getAuthorities().stream()
                 .findFirst()
                 .map(a -> a.getAuthority().replace("ROLE_", ""))
                 .orElse("USER");
 
-        // 페이지네이션 및 정렬 설정
         String[] sortParts = sort.split(",");
         Sort s = Sort.by(Sort.Direction.fromString(sortParts[1]), sortParts[0]);
         Pageable pageable = PageRequest.of(page, size, s);
@@ -151,18 +191,14 @@ public class FundController {
 
         if ("ADMIN".equals(role)) {
             fundPage = fundService.getFunds(pageable);
-        } else if ("USER".equals(role)) {
+        } else { // "USER" 역할일 경우
             String memberId = authentication.getName();
-            // MemberService 주입 필요
             MemberMeResponseDto member = memberService.getMyInfo(memberId);
             if (member == null) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
             }
-            fundPage = fundService.listByMemberNum(member.getMemberNum(), pageable); // Service에 새로 추가해야 함
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            fundPage = fundService.listByMemberNum(member.getMemberNum(), pageable);
         }
-
         return ResponseEntity.ok(fundPage);
     }
 

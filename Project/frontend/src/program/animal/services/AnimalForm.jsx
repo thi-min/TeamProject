@@ -1,4 +1,3 @@
-// import axios from 'axios';
 import { api } from "../../../common/api/axios.js";
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
@@ -12,7 +11,7 @@ const AnimalForm = () => {
     const [animals, setAnimals] = useState([]);
     const [animalDetail, setAnimalDetail] = useState(null);
     const [message, setMessage] = useState(null);
-    
+
     // JWT 토큰에서 역할 및 회원 번호 정보 추출
     const getInfoFromToken = () => {
         const token = localStorage.getItem('accessToken');
@@ -37,14 +36,6 @@ const AnimalForm = () => {
     const isCreateView = location.pathname.startsWith('/admin/animal/regist');
     const isUpdateView = location.pathname.startsWith('/admin/animal/update/');
 
-    // API 요청을 위한 Axios 설정
-    const authAxios = api.create({
-        baseURL: 'http://localhost:3000/api',
-        headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`
-        }
-    });
-
     // 폼 입력 상태
     const [userInput, setUserInput] = useState({
         animalName: '',
@@ -59,8 +50,9 @@ const AnimalForm = () => {
     // 데이터 로딩 함수
     const fetchAnimals = async () => {
         try {
-            const response = await api.get('/api/animals');
-            setAnimals(response.data);
+            // ✅ Correct URL
+            const response = await api.get('/animals/list');
+            setAnimals(response.data.content); // Use .content because the backend returns a Page object
         } catch (error) {
             console.error("목록 조회 실패:", error);
             setMessage("목록을 불러올 수 없습니다.");
@@ -70,7 +62,8 @@ const AnimalForm = () => {
     const fetchAnimalDetail = async () => {
         if (!id) return;
         try {
-            const response = await api.get(`/api/animals/${id}`);
+            // ✅ Correct URL
+            const response = await api.get(`/animals/detail/${id}`);
             const data = response.data;
             setAnimalDetail(data);
             if (isUpdateView && isAdmin) {
@@ -89,10 +82,10 @@ const AnimalForm = () => {
             setMessage("상세 정보를 불러올 수 없습니다.");
         }
     };
-    
+
     // '동물 입양 상담' 버튼 클릭 핸들러 (추가)
     const handleStartChat = async () => {
-        const memberNum = userInfo?.memberNum; 
+        const memberNum = userInfo?.memberNum;
 
         if (!memberNum) {
             alert("로그인 후 이용 가능합니다.");
@@ -101,14 +94,14 @@ const AnimalForm = () => {
         }
 
         try {
-            // ⭐ 백엔드 API 주소 확인
+            // ✅ Correct URL
             const response = await api.post(
-                'http://localhost:3000/api/chat/start-adoption-chat', 
+                '/chat/start-adoption-chat',
                 null,
-                { 
+                {
                     params: {
                         memberNum: memberNum,
-                        animalId: animalDetail.animalId 
+                        animalId: animalDetail.animalId
                     },
                     headers: {
                         Authorization: `Bearer ${localStorage.getItem('accessToken')}`
@@ -117,8 +110,6 @@ const AnimalForm = () => {
             );
 
             const chatRoomId = response.data.chatRoomId;
-            // ⭐ 사용자는 '/chat/room/:chatRoomId' 경로로 이동하도록 수정
-            // 관리자는 '/admin/chat/room/:chatRoomId' 로 이동
             const destinationPath = isAdmin ? `/admin/chat/room/${chatRoomId}` : `/chat/room/${chatRoomId}`;
             navigate(destinationPath);
         } catch (error) {
@@ -142,10 +133,16 @@ const AnimalForm = () => {
         }
         try {
             if (isCreateView) {
-                await authAxios.post('/animals', userInput);
+                // ✅ Correct URL
+                await api.post('/animals/regist', userInput, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+                });
                 alert("동물 정보가 성공적으로 등록되었습니다.");
             } else if (isUpdateView) {
-                await authAxios.put(`/animals/${id}`, userInput);
+                // ✅ Correct URL
+                await api.put(`/animals/detail/${id}`, userInput, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+                });
                 alert("동물 정보가 성공적으로 수정되었습니다.");
             }
             navigate('/admin/animal/list');
@@ -163,7 +160,10 @@ const AnimalForm = () => {
         }
         if (window.confirm("정말 삭제하시겠습니까?")) {
             try {
-                await authAxios.delete(`/animals/${id}`);
+                // ✅ Correct URL
+                await api.delete(`/animals/detail/${id}`, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+                });
                 alert("삭제가 완료되었습니다.");
                 navigate('/admin/animal/list');
             } catch (error) {
@@ -183,9 +183,7 @@ const AnimalForm = () => {
     }, [location.pathname, id]);
 
     // ------------------ JSX 렌더링 부분 ------------------
-
     if (isListView) {
-        // ... (기존 목록 렌더링) ...
         return (
             <div className="animal-list-page">
                 <div className="animal-list-container">
@@ -197,7 +195,7 @@ const AnimalForm = () => {
                             </button>
                         </div>
                     )}
-                    
+
                     <table className="animal-table">
                         <thead>
                             <tr>
@@ -208,24 +206,29 @@ const AnimalForm = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {animals.map((animal) => (
-                                <tr key={animal.animalId} 
-                                    onClick={() => navigate(isAdmin ? `/admin/animal/detail/${animal.animalId}` : `/animal/detail/${animal.animalId}`)}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    <td>{animal.animalName}</td>
-                                    <td>{animal.animalBreed}</td>
-                                    <td>{animal.animalSex}</td>
-                                    <td>{animal.animalState}</td>
+                            {animals.length > 0 ? (
+                                animals.map((animal) => (
+                                    <tr key={animal.animalId}
+                                        onClick={() => navigate(isAdmin ? `/admin/animal/detail/${animal.animalId}` : `/animal/detail/${animal.animalId}`)}
+                                        style={{ cursor: 'pointer' }}
+                                    >
+                                        <td>{animal.animalName}</td>
+                                        <td>{animal.animalBreed}</td>
+                                        <td>{animal.animalSex}</td>
+                                        <td>{animal.animalState}</td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan="4">등록된 동물이 없습니다.</td>
                                 </tr>
-                            ))}
+                            )}
                         </tbody>
                     </table>
                 </div>
             </div>
         );
     } else if (isCreateView || isUpdateView) {
-        // ... (기존 등록/수정 렌더링) ...
         if (!isAdmin) {
             return <div>권한이 없습니다.</div>;
         }
@@ -243,17 +246,16 @@ const AnimalForm = () => {
                     <input type="date" name="animalDate" value={userInput.animalDate} onChange={handleChange} placeholder="입소일" required />
                     <textarea name="animalContent" value={userInput.animalContent} onChange={handleChange} placeholder="특이사항" required />
                     <select name="animalState" value={userInput.animalState} onChange={handleChange} required>
-                        <option value="">상태 선택</option>
-                        <option value="PROTECTING">보호 중</option>
-                        <option value="ADOPTED">입양 완료</option>
-                    </select>
+                    <option value="">상태 선택</option>
+                    <option value="WAIT">보호 중</option>
+                    <option value="DONE">입양 완료</option>
+                </select>
                     <button type="submit">{isCreateView ? "등록" : "수정"}</button>
                     <button type="button" onClick={() => navigate(-1)}>이전</button>
                 </form>
             </div>
         );
     } else if (isDetailView) {
-        // ... (기존 상세 페이지 렌더링 + 상담 버튼 추가) ...
         if (!animalDetail) return <div>{message || "로딩 중..."}</div>;
         return (
             <div className="animal-detail-page">

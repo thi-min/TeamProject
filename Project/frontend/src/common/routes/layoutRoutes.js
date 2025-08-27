@@ -39,7 +39,9 @@ import {
   RegularApplicationDetails,
   RegularApplicationForm,
   MemberFundList,
-  MemberFundDetail
+  MemberFundDetail,
+  AdminFundList,
+  AdminFundDetail,
 } from "../../program/fund/services/FundPage";
 
 // ==============================
@@ -155,15 +157,15 @@ const layoutRoutes = [
   <Route key="img-Admin-ImgDetail" path="/admin/bbs/image/Detail/:id" element={<AdminImgDetail />} />,
   <Route key="img-Admin-ImgDummy" path="/bbs/admin/image/Dummy" element={<ImgBoardDummy />} />,
 
-  // 후원 route
-  // 각 후원 페이지를 별도의 경로로 라우팅합니다.
-  <Route key="fundMainPage" path={routes.fund.root.path} element={<FundMainPage />} />,
-  <Route key="fundForm" path={routes.fund.fundForm.path} element={<FundApplicationForm />} />,
-  <Route key="goodsForm" path={routes.fund.goodsForm.path} element={<GoodsApplicationForm />} />,
-  <Route key="recurringForm" path={routes.fund.recurringForm.path} element={<RecurringApplicationForm />} />,
-  <Route key="fundDetails" path={routes.fund.fundDetails.path} element={<FundApplicationDetails />} />,
-  <Route key="goodsDetails" path={routes.fund.goodsDetails.path} element={<GoodsApplicationDetails />} />,
-  <Route key="recurringDetails" path={routes.fund.recurringDetails.path} element={<RecurringApplicationDetails />} />,
+  // // 후원 route
+  // // 각 후원 페이지를 별도의 경로로 라우팅합니다.
+  // <Route key="fundMainPage" path={routes.fund.root.path} element={<FundMainPage />} />,
+  // <Route key="fundForm" path={routes.fund.fundForm.path} element={<FundApplicationForm />} />,
+  // <Route key="goodsForm" path={routes.fund.goodsForm.path} element={<GoodsApplicationForm />} />,
+  // <Route key="recurringForm" path={routes.fund.recurringForm.path} element={<RecurringApplicationForm />} />,
+  // <Route key="fundDetails" path={routes.fund.fundDetails.path} element={<FundApplicationDetails />} />,
+  // <Route key="goodsDetails" path={routes.fund.goodsDetails.path} element={<GoodsApplicationDetails />} />,
+  // <Route key="recurringDetails" path={routes.fund.recurringDetails.path} element={<RecurringApplicationDetails />} />,
 
   // 1:1 채팅 route 추가
   //<Route key="chatList" path={routes.admin.chat.list.path} element={<ChatList />} />,
@@ -187,7 +189,7 @@ const layoutRoutes = [
     element={<LogoutLink />}
   />, //로그아웃
   <Route key="signup" path={routes.member.signup.path} element={<Signup />} />, //회원가입
-  <Route key="find-pw" path={routes.member.mypage.path} element={<Mypage />} />, //마이페이지
+  <Route key="find-pw" path={routes.member.mypage.path} element={<MyPage />} />, //마이페이지
   <Route key="find-id" path={routes.member.findid.path} element={<FindId />} />, //아이디 찾기
   <Route key="find-pw" path={routes.member.findpw.path} element={<FindPw />} />, //비밀번호 찾기
   <Route
@@ -210,6 +212,8 @@ const layoutRoutes = [
   <Route key="regularDetails" path={routes.fund.regularDetails.path} element={<RegularApplicationDetails />} />,
   <Route key="memberFundList" path={routes.member.fund.list.path} element={<MemberFundList />} />,
   <Route key="memberFundDetail" path={routes.member.fund.detail(`:id`)} element={<MemberFundDetail/>} />,
+  <Route key="adminFundList" path={routes.admin.fund.list.path} element={<AdminFundList/>}/>,
+  <Route key="adminFundDetail" path={routes.admin.fund.detail(`:id`)} element={<AdminFundDetail/>}/>,
 
   // ------------------------------
   // 1:1 채팅 Route

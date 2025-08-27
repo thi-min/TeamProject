@@ -30,19 +30,19 @@ const FundMainPage = () => {
       title: '후원금',
       description: '금전적 지원을 통해 다양한 프로젝트와 활동에 도움을 줄 수 있습니다. 소중한 후원금은 투명하게 사용됩니다.',
       icon: '💸',
-      path: '/fund/donation'
+      path: '/funds/donation'
     },
     {
       title: '후원물품',
       description: '필요한 물품을 직접 후원하여 더 직접적이고 실질적인 도움을 전할 수 있습니다.',
       icon: '🎁',
-      path: '/fund/goods'
+      path: '/funds/goods'
     },
     {
       title: '정기후원',
       description: '정기적인 후원을 통해 지속가능한 지원과 안정적인 운영을 도모할 수 있습니다.',
       icon: '💖',
-      path: '/fund/regular'
+      path: '/funds/regular'
     },
   ];
 
@@ -126,10 +126,10 @@ const FundApplicationForm = () => {
         fundCheck: fundCheckStatus
       };
 
-      const response = await api.post('/fund/request', requestData);
+      const response = await api.post('/funds/request', requestData);
 
       if (response.status === 200 || response.status === 201) {
-        navigate('/fund/donation-details', { state: { formData: response.data } });
+        navigate('/funds/donation-details', { state: { formData: response.data } });
       }
 
     } catch (error) {
@@ -232,7 +232,7 @@ const FundApplicationDetails = () => {
     return (
       <div className="application-details-error">
         <p>잘못된 접근입니다. 후원금 신청서를 먼저 작성해주세요.</p>
-        <button onClick={() => navigate('/fund/donation')} className="form-button-primary mt-4">신청서로 이동</button>
+        <button onClick={() => navigate('/funds/donation')} className="form-button-primary mt-4">신청서로 이동</button>
       </div>
     );
   }
@@ -279,7 +279,7 @@ const FundApplicationDetails = () => {
         </div>
         
         <div className="details-buttons">
-          <button onClick={() => navigate('/fund/donation')} className="form-button-secondary">이전</button>
+          <button onClick={() => navigate('/funds/donation')} className="form-button-secondary">이전</button>
           <button onClick={() => navigate('/fund')} className="form-button-primary">메인으로 이동</button>
         </div>
       </div>
@@ -346,10 +346,10 @@ const GoodsApplicationForm = () => {
         fundCheck: fundCheckStatus
       };
       
-      const response = await api.post('/fund/request', requestData);
+      const response = await api.post('/funds/request', requestData);
 
       if (response.status === 200 || response.status === 201) {
-        navigate('/fund/goods-details', { state: { formData: response.data } });
+        navigate('/funds/goods-details', { state: { formData: response.data } });
       }
 
     } catch (error) {
@@ -458,7 +458,7 @@ const GoodsApplicationDetails = () => {
     return (
       <div className="application-details-error">
         <p>잘못된 접근입니다. 후원물품 신청서를 먼저 작성해주세요.</p>
-        <button onClick={() => navigate('/fund/goods')} className="form-button-primary mt-4">신청서로 이동</button>
+        <button onClick={() => navigate('/funds/goods')} className="form-button-primary mt-4">신청서로 이동</button>
       </div>
     );
   }
@@ -504,7 +504,7 @@ const GoodsApplicationDetails = () => {
         
         <div className="details-buttons">
           <button
-            onClick={() => navigate('/fund/goods')}
+            onClick={() => navigate('/funds/goods')}
             className="form-button-secondary"
           >
             이전
@@ -613,10 +613,10 @@ const RegularApplicationForm = () => {
         fundCheck: fundCheckStatus
      };
       
-      const response = await api.post('/fund/request', requestData);
+      const response = await api.post('/funds/request', requestData);
 
       if (response.status === 200 || response.status === 201) {
-        navigate('/fund/regular-details', { state: { formData: response.data } });
+        navigate('/funds/regular-details', { state: { formData: response.data } });
       }
 
     } catch (error) {
@@ -782,7 +782,7 @@ const RegularApplicationDetails = () => {
     return (
       <div className="application-details-error">
         <p>잘못된 접근입니다. 정기후원 신청서를 먼저 작성해주세요.</p>
-        <button onClick={() => navigate('/fund/regular')} className="form-button-primary mt-4">신청서로 이동</button>
+        <button onClick={() => navigate('/funds/regular')} className="form-button-primary mt-4">신청서로 이동</button>
       </div>
     );
   }
@@ -858,58 +858,88 @@ const RegularApplicationDetails = () => {
     </div>
   );
 };
-
 const MemberFundList = () => {
     const navigate = useNavigate();
     const [funds, setFunds] = useState([]);
-    const [message, setMessage] = useState(null);
-
-    const authAxios = api.create({
-        baseURL: 'http://localhost:8080/api',
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
-    });
-
-    const fetchFunds = async () => {
-        try {
-            const res = await authAxios.get('/funds'); // 전체 목록 조회
-            setFunds(res.data);
-        } catch (err) {
-            console.error(err);
-            setMessage("목록 불러오기 실패");
-        }
-    };
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
+        const fetchFunds = async () => {
+            try {
+                const res = await api.get('/funds/list'); 
+                setFunds(res.data.content); 
+            } catch (err) {
+                console.error("후원 목록 불러오기 오류:", err);
+                if (err.response && err.response.status === 401) {
+                    setError("로그인이 필요합니다. 로그인 후 다시 시도해주세요.");
+                } else {
+                    setError("후원 목록을 불러오는 데 실패했습니다.");
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
         fetchFunds();
     }, []);
 
+    // ⭐️ Add this function to handle navigation
+    const handleRowClick = (fundId) => {
+        navigate(`/member/funds/${fundId}`);
+    };
+
+    if (loading) {
+        return (
+            <div className="fund-list-container">
+                <p>후원 목록을 불러오는 중입니다...</p>
+            </div>
+        );
+    }
+    if (error) {
+      return (
+        <div className="fund-list-container">
+          <p className="error-message">
+            {error}
+          </p>
+          <button onClick={() => navigate('/login')} className="form-button-primary mt-4">
+            로그인 페이지로 이동
+          </button>
+        </div>
+      );
+    }
+
     return (
         <div className="fund-list-page">
-            <h2>나의 후원 목록</h2>
-            <table className="fund-table">
-                <thead>
-                    <tr>
-                        <th>제목</th>
-                        <th>후원자</th>
-                        <th>금액</th>
-                        <th>상태</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {funds.map(fund => (
-                        <tr key={fund.fundId} 
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => navigate(`/member/fund/detail/${fund.fundId}`)}
-                        >
-                            <td>{fund.title}</td>
-                            <td>{fund.memberName}</td>
-                            <td>{fund.amount}</td>
-                            <td>{fund.state}</td>
+            <div className="fund-list-container">
+                <h2 className="fund-list-title">나의 후원 내역</h2>
+                <table className="fund-table">
+                    <thead>
+                        <tr>
+                            <th>후원금/물품</th>
+                            <th>신청자</th>
+                            <th>후원일</th>
                         </tr>
-                    ))}
-                </tbody>
-            </table>
-            {message && <div>{message}</div>}
+                    </thead>
+                    <tbody>
+                        {funds.length > 0 ? (
+                            funds.map((fund) => (
+                                // ⭐️ Add onClick handler to the table row
+                                <tr 
+                                    key={fund.fundId} 
+                                    onClick={() => handleRowClick(fund.fundId)}
+                                    style={{ cursor: 'pointer' }} // Add a pointer cursor to indicate it's clickable
+                                >
+                                    <td>{fund.fundMoney ? `${fund.fundMoney.toLocaleString()} 원` : fund.fundItem}</td>
+                                    <td>{fund.fundSponsor}</td>
+                                    <td>{fund.fundTime}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr><td colSpan="3">아직 후원하신 내역이 없습니다.</td></tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
         </div>
     );
 };
@@ -922,7 +952,7 @@ const MemberFundDetail = () => {
     const [message, setMessage] = useState(null);
 
     const authAxios = api.create({
-        baseURL: 'http://localhost:8080/api',
+        baseURL: 'http://localhost:8090/',
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
     });
 
@@ -943,18 +973,186 @@ const MemberFundDetail = () => {
     if (!fundDetail) return <div>{message || "로딩 중..."}</div>;
 
     return (
+    <div className="fund-detail-page">
+        <h2>후원 상세</h2>
+        {/* ⭐️ Corrected property names */}
+        <div><strong>후원금/물품:</strong> {fundDetail.fundMoney ? `${fundDetail.fundMoney.toLocaleString()} 원` : fundDetail.fundItem}</div>
+        <div><strong>신청자:</strong> {fundDetail.fundSponsor}</div>
+        <div><strong>연락처:</strong> {fundDetail.fundPhone}</div>
+        <div><strong>생년월일:</strong> {fundDetail.fundBirth}</div>
+        <div><strong>후원일:</strong> {fundDetail.fundTime}</div>
+        <div><strong>입금정보:</strong> {fundDetail.fundBank} / {fundDetail.fundAccountNum} ({fundDetail.fundDepositor})</div>
+        <div><strong>인출예정일:</strong> {fundDetail.fundDrawlDate}</div>
+        <div><strong>확인여부:</strong> {fundDetail.fundCheck}</div>
+        <div><strong>비고:</strong> {fundDetail.fundNote}</div>
+        <button onClick={() => navigate(-1)}>목록으로 돌아가기</button>
+    </div>
+);
+};
+const AdminFundList = () => {
+    const navigate = useNavigate();
+    const [funds, setFunds] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchAdminFunds = async () => {
+            try {
+                // Admin API endpoint is the same, but the backend handles role validation
+                const res = await api.get('/funds/list'); 
+                setFunds(res.data.content);
+            } catch (err) {
+                console.error("관리자 후원 목록 불러오기 오류:", err);
+                if (err.response && err.response.status === 403) {
+                    // Unauthorized: User is not an admin
+                    setError("접근 권한이 없습니다. 관리자 계정으로 로그인해주세요.");
+                } else if (err.response && err.response.status === 401) {
+                    // Not authenticated: No token or invalid token
+                    setError("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
+                    // Optional: Navigate to login after a delay
+                    setTimeout(() => navigate('/login'), 3000); 
+                } else {
+                    setError("후원 목록을 불러오는 데 실패했습니다.");
+                }
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchAdminFunds();
+    }, [navigate]); // Added `Maps` to dependency array to satisfy ESLint
+
+    // Add a navigation handler for row clicks
+    const handleRowClick = (fundId) => {
+        navigate(`/admin/funds/detail/${fundId}`);
+    };
+
+    if (loading) {
+        return (
+            <div className="fund-list-container">
+                <p>후원 목록을 불러오는 중입니다...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="fund-list-container">
+                <p className="error-message">{error}</p>
+                {/* Optional: Add a button to navigate to the login page */}
+                {error.includes("로그인") && (
+                    <button onClick={() => navigate('/login')} className="form-button-primary mt-4">
+                        로그인 페이지로 이동
+                    </button>
+                )}
+            </div>
+        );
+    }
+
+    return (
+        <div className="fund-list-page">
+            <div className="fund-list-container">
+                <h2 className="fund-list-title">후원 정보 관리</h2>
+                <table className="fund-table">
+                    <thead>
+                        <tr>
+                            <th>후원금/물품</th>
+                            <th>신청자</th>
+                            <th>후원일</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {funds.length > 0 ? (
+                            funds.map((fund) => (
+                                <tr 
+                                    key={fund.fundId} 
+                                    onClick={() => handleRowClick(fund.fundId)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <td>{fund.fundMoney ? `${fund.fundMoney.toLocaleString()} 원` : fund.fundItem}</td>
+                                    <td>{fund.fundSponsor}</td>
+                                    <td>{fund.fundTime}</td>
+                                </tr>
+                            ))
+                        ) : (
+                            <tr><td colSpan="3">등록된 후원 내역이 없습니다.</td></tr>
+                        )}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};const AdminFundDetail = () => {
+    const { id } = useParams();
+    const navigate = useNavigate();
+    const [fundDetail, setFundDetail] = useState(null);
+    const [message, setMessage] = useState("로딩 중...");
+
+    useEffect(() => {
+        const fetchFundDetail = async () => {
+            try {
+                const res = await api.get(`/funds/${id}`);
+                setFundDetail(res.data);
+            } catch (err) {
+                console.error(err);
+                if (err.response && err.response.status === 404) {
+                    setMessage("해당 후원 내역을 찾을 수 없습니다.");
+                } else if (err.response && err.response.status === 403) {
+                    setMessage("접근 권한이 없습니다. 관리자 계정으로 로그인해주세요.");
+                } else {
+                    setMessage("상세 정보 불러오기 실패");
+                }
+            }
+        };
+        fetchFundDetail();
+    }, [id]);
+
+    const handleUpdate = () => {
+        // TODO: 수정 페이지로 이동 로직 구현
+        // navigate(`/admin/funds/update/${id}`);
+        alert("수정 기능은 아직 구현되지 않았습니다.");
+    };
+
+    const handleDelete = async () => {
+        if (window.confirm("정말로 이 후원 내역을 삭제하시겠습니까?")) {
+            try {
+                await api.delete(`/funds/${id}`);
+                alert("후원 내역이 성공적으로 삭제되었습니다.");
+                // 삭제 후 목록 페이지로 이동
+                navigate('/admin/funds/list'); 
+            } catch (err) {
+                console.error("후원 내역 삭제 실패:", err);
+                alert("후원 내역 삭제에 실패했습니다.");
+            }
+        }
+    };
+
+    if (!fundDetail) return <div>{message}</div>;
+
+    return (
         <div className="fund-detail-page">
-            <h2>후원 상세</h2>
-            <div><strong>제목:</strong> {fundDetail.title}</div>
-            <div><strong>후원자:</strong> {fundDetail.memberName}</div>
-            <div><strong>금액:</strong> {fundDetail.amount}</div>
-            <div><strong>상태:</strong> {fundDetail.state}</div>
-            <button onClick={() => navigate(-1)}>목록으로 돌아가기</button>
+            <h2>후원 상세 정보 (관리자)</h2>
+            <div className="detail-info">
+                <div><strong>후원금/물품:</strong> {fundDetail.fundMoney ? `${fundDetail.fundMoney.toLocaleString()} 원` : fundDetail.fundItem}</div>
+                <div><strong>신청자:</strong> {fundDetail.fundSponsor}</div>
+                <div><strong>연락처:</strong> {fundDetail.fundPhone}</div>
+                <div><strong>생년월일:</strong> {fundDetail.fundBirth}</div>
+                <div><strong>후원일:</strong> {fundDetail.fundTime}</div>
+                <div><strong>입금 정보:</strong> {fundDetail.fundBank} / {fundDetail.fundAccountNum} ({fundDetail.fundDepositor})</div>
+                <div><strong>인출 예정일:</strong> {fundDetail.fundDrawlDate}</div>
+                <div><strong>확인 여부:</strong> {fundDetail.fundCheck ? '확인됨' : '미확인'}</div>
+                <div><strong>비고:</strong> {fundDetail.fundNote}</div>
+            </div>
+            <div className="button-group">
+                <button onClick={handleUpdate} className="btn-update">수정</button>
+                <button onClick={handleDelete} className="btn-delete">삭제</button>
+                <button onClick={() => navigate(-1)} className="btn-back">목록으로 돌아가기</button>
+            </div>
         </div>
     );
 };
 
 
 
+
 // 명명된 내보내기를 사용하여 각 컴포넌트를 내보냄
-export { FundApplicationDetails, FundApplicationForm, FundMainPage, GoodsApplicationDetails, GoodsApplicationForm, RegularApplicationDetails, RegularApplicationForm, MemberFundList, MemberFundDetail};
+export { FundApplicationDetails, FundApplicationForm, FundMainPage, GoodsApplicationDetails, GoodsApplicationForm, RegularApplicationDetails, RegularApplicationForm, MemberFundList, MemberFundDetail, AdminFundList, AdminFundDetail};

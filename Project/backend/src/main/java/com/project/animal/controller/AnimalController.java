@@ -34,7 +34,7 @@ import com.project.common.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("/animal")
+@RequestMapping("/animals")
 @RequiredArgsConstructor
 public class AnimalController {
 
@@ -152,11 +152,15 @@ public class AnimalController {
     @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/detail/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
+        // The @PreAuthorize annotation already ensures this is called by an ADMIN.
+        // The following manual check is not necessary.
+        /*
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String role = jwtTokenProvider.getRoleFromToken(authentication.getCredentials().toString());
         if (!"ADMIN".equals(role)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+        */
         animalService.delete(id);
         return ResponseEntity.noContent().build();
     }

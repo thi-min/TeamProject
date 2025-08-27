@@ -56,6 +56,7 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
 
     //상태 기준 조회시 필요할떄 사용
     //Page<MemberEntity> findByMemberState(MemberState state, Pageable pageable);
+	
     
 }
 

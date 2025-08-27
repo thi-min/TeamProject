@@ -81,40 +81,29 @@ const routes = {
       detail: (id) => `/member/adopt/detail/${id}`,
     },
     
-    // // 나의 후원
-    // fund: {
-    //   list: { path: "/member/fund/list", label: "나의 후원 목록" },
-    //   detail: (id) => `/member/fund/detail/${id}`,
-    // },
+    // 나의 후원
+    fund: {
+      list: { path: "/member/funds/list", label: "나의 후원 목록" },
+      detail: (id) => `/member/funds/${id}`,
+    },
 
     changepw: { path: "/update-password", label: "비밀번호 변경" },
     mypage: { path: "/mypage", label: "마이페이지" },
     update: { path: "/mypage/update", label: "회원정보 수정" },
     delete: { path: "/mypage/update/delete", label: "회원 탈퇴" },
   },
-  // 후원 경로
-  fund: {
-    root: { path: "/fund", label: "후원 메인" },
-    fundForm: { path: "/fund/money", label: "후원금 신청" },
-    goodsForm: { path: "/fund/goods", label: "후원물품 신청" },
-    recurringForm: { path: "/fund/recurring", label: "정기후원 신청" },
-    fundDetails: { path: "/fund/money-details", label: "후원금 상세" },
-    goodsDetails: { path: "/fund/goods-details", label: "후원물품 상세" },
-    recurringDetails: { path: "/fund/recurring-details", label: "정기후원 상세" },
-
-  },
 
   // ==============================
   // 후원(Fund) 관련
   // ==============================
   fund: {
-    root: { path: "/fund", label: "후원 메인" },
-    fundForm: { path: "/fund/donation", label: "후원금 신청" },
-    goodsForm: { path: "/fund/goods", label: "후원물품 신청" },
-    regularForm: { path: "/fund/regular", label: "정기후원 신청" },
-    fundDetails: { path: "/fund/donation-details", label: "후원금 상세" },
-    goodsDetails: { path: "/fund/goods-details", label: "후원물품 상세" },
-    regularDetails: { path: "/fund/regular-details", label: "정기후원 상세" },
+    root: { path: "/funds", label: "후원 메인" },
+    fundForm: { path: "/funds/donation", label: "후원금 신청" },
+    goodsForm: { path: "/funds/goods", label: "후원물품 신청" },
+    regularForm: { path: "/funds/regular", label: "정기후원 신청" },
+    fundDetails: { path: "/funds/donation-details", label: "후원금 상세" },
+    goodsDetails: { path: "/funds/goods-details", label: "후원물품 상세" },
+    regularDetails: { path: "/funds/regular-details", label: "정기후원 상세" },
   },
 
   // ==============================
@@ -147,6 +136,10 @@ const routes = {
       detail: (id) => `/admin/animal/detail/${id}`,
       regist: { path: "/admin/animal/regist", label: "동물 정보 등록" },
       update: (id) => `/admin/animal/update/${id}`,
+    },
+    fund:{
+      list: { path: "/admin/funds/list", label: " 후원 정보 관리" },
+      detail: (id) => `/admin/funds/detail/${id}`,
     },
     
     // 예약 관리

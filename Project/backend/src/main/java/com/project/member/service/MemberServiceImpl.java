@@ -602,5 +602,11 @@ public class MemberServiceImpl implements MemberService {
         m.setMemberPw(passwordEncoder.encode(dto.getNewPassword()));
         // (선택) 비번 만료 해제, 토큰 소거 등 후처리
     }
+    @Override
+    public MemberEntity findByMemberNum(Long memberNum) {
+        // 회원 번호로 회원을 찾고, 없으면 예외 발생
+        return memberRepository.findByMemberNum(memberNum)
+                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+    }
     
 }
