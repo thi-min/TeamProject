@@ -1,10 +1,11 @@
 package com.project.banner.dto;
 
-import com.project.banner.BannerEntity;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+
+import com.project.banner.entity.BannerEntity;
 
 @Getter 
 @Setter
@@ -21,7 +22,7 @@ public class BannerListDto {
     private String linkUrl;           // 배너 클릭 시 이동할 링크
     private LocalDate startDate;      // 노출 시작일
     private LocalDate endDate;        // 노출 종료일
-    private Boolean visible;          // 노출 여부
+    private Boolean isVisible;          // 노출 여부
     private LocalDateTime createdAt;  // 생성일
     private String adminName;         // 등록한 관리자 이름
 
@@ -35,7 +36,7 @@ public class BannerListDto {
             .linkUrl(entity.getLinkUrl())
             .startDate(entity.getStartDate())
             .endDate(entity.getEndDate())
-            .visible(entity.getVisible())
+            .isVisible(entity.getIsVisible())
             .createdAt(entity.getCreatedAt())
             .adminName(entity.getAdmin() != null ? entity.getAdmin().getAdminName() : null)
             .build();

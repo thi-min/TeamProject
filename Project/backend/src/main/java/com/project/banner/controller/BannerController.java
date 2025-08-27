@@ -1,14 +1,14 @@
-package com.project.banner;
+package com.project.banner.controller;
 
-import com.project.banner.BannerService;
-import com.project.banner.dto.BannerCreateDto;
+import com.project.banner.dto.BannerRequestDto;
+import com.project.banner.dto.BannerResponseDto;
 import com.project.banner.dto.BannerDeleteDto;
-import com.project.banner.dto.BannerListDto;
-import com.project.banner.dto.BannerUpdateDto;
-
+import com.project.banner.service.BannerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 
 import java.io.IOException;
 import java.util.List;
@@ -22,27 +22,30 @@ public class BannerController {
 
     // 배너 생성
     @PostMapping
-    public void createBanner(@RequestPart("data") BannerCreateDto dto,
+    public void createBanner(@RequestPart("data") String dtoJson,
                              @RequestPart("file") MultipartFile file) throws IOException {
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        BannerRequestDto dto = mapper.readValue(dtoJson, BannerRequestDto.class);
         bannerService.createBanner(dto, file);
     }
 
     // 배너 전체 목록 조회
     @GetMapping
-    public List<BannerListDto> getAll() {
+    public List<BannerResponseDto> getAll() {
         return bannerService.getAll();
     }
 
     // 특정 배너 상세 정보 조회
     @GetMapping("/{id}")
-    public BannerListDto getDetail(@PathVariable Long id) {
+    public BannerResponseDto getDetail(@PathVariable Long id) {
         return bannerService.getDetail(id);
     }
 
     // 배너 수정
     @PutMapping("/{id}")
     public void updateBanner(@PathVariable Long id,
-                             @RequestPart("data") BannerUpdateDto dto,
+                             @RequestPart("data") BannerRequestDto dto,
                              @RequestPart(name = "file", required = false) MultipartFile file) throws IOException {
         bannerService.update(id, dto, file);
     }

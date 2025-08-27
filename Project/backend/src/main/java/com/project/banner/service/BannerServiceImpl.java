@@ -1,7 +1,10 @@
-package com.project.banner;
+package com.project.banner.service;
 
-import com.project.banner.dto.*;
 import com.project.admin.entity.AdminEntity;
+import com.project.banner.dto.BannerRequestDto;
+import com.project.banner.dto.BannerResponseDto;
+import com.project.banner.entity.BannerEntity;
+import com.project.banner.repository.BannerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,28 +17,24 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class BannerService {
+public class BannerServiceImpl implements BannerService {
 
     private final BannerRepository bannerRepository;
-    
+
     // 배너 이미지 저장 경로
-    private final String UPLOAD_PATH = "C:/banner-uploads"; 
-    
-    // 배너 생성
-    public void createBanner(BannerCreateDto dto, MultipartFile file) throws IOException {
+    private final String UPLOAD_PATH = "src/main/resources/static/banner-uploads"; 
+
+    @Override
+    public void createBanner(BannerRequestDto dto, MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
             throw new RuntimeException("이미지 파일은 필수입니다.");
         }
 
         // 이미지 파일 저장
         String fileName = saveFile(file);
-
-        // 관리자 정보 조회 (배너 작성자)
-        AdminEntity admin = bannerRepository.findAdminByAdminId(dto.getAdminId());
-        if (admin == null) {
-            throw new RuntimeException("관리자 정보를 찾을 수 없습니다.");
-        }
         
+        AdminEntity admin = AdminEntity.builder().adminNum(5L).build();
+
         // 배너 엔티티 생성 및 저장
         BannerEntity banner = BannerEntity.builder()
                 .title(dto.getTitle())
@@ -45,30 +44,30 @@ public class BannerService {
                 .imageUrl(fileName)
                 .startDate(dto.getStartDate())
                 .endDate(dto.getEndDate())
-                .visible(dto.getVisible())
+                .isVisible(dto.getIsVisible())
                 .createdAt(LocalDateTime.now())
-                .admin(admin)
+                .admin(admin) 
                 .build();
 
         bannerRepository.save(banner);
     }
 
-    // 모든 배너 리스트 조회
-    public List<BannerListDto> getAll() {
+    @Override
+    public List<BannerResponseDto> getAll() {
         return bannerRepository.findAll().stream()
-                .map(BannerListDto::fromEntity)
+                .map(BannerResponseDto::fromEntity) // ✅ ResponseDto 변환 메서드 필요
                 .collect(Collectors.toList());
     }
 
-    // 특정 배너 상세 정보 조회
-    public BannerListDto getDetail(Long id) {
+    @Override
+    public BannerResponseDto getDetail(Long id) {
         BannerEntity banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("배너 없음"));
-        return BannerListDto.fromEntity(banner);
+        return BannerResponseDto.fromEntity(banner); // ✅ ResponseDto 변환
     }
 
-    // 배너 수정
-    public void update(Long id, BannerUpdateDto dto, MultipartFile file) throws IOException {
+    @Override
+    public void update(Long id, BannerRequestDto dto, MultipartFile file) throws IOException {
         BannerEntity banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("배너 없음"));
 
@@ -79,7 +78,7 @@ public class BannerService {
         banner.setLinkUrl(dto.getLinkUrl());
         banner.setStartDate(dto.getStartDate());
         banner.setEndDate(dto.getEndDate());
-        banner.setVisible(dto.getVisible());
+        banner.setIsVisible(dto.getIsVisible());
         banner.setUpdatedAt(LocalDateTime.now());
 
         if (file != null && !file.isEmpty()) {
@@ -90,24 +89,24 @@ public class BannerService {
         bannerRepository.save(banner);
     }
 
-    // 배너 단건 삭제
+    @Override
     public void delete(Long id) {
         bannerRepository.deleteById(id);
     }
 
-    // 배너 복수건 삭제
+    @Override
     public void deleteBulk(List<Long> ids) {
         bannerRepository.deleteByBannerIdIn(ids);
     }
 
-    // 파일 저장 및 유효성 검사
+    // 파일 저장
     private String saveFile(MultipartFile file) throws IOException {
         String originalFileName = file.getOriginalFilename();
         if (originalFileName == null) {
             throw new RuntimeException("파일 이름이 유효하지 않습니다.");
         }
 
-        // 1. 파일 크기 제한 (5MB = 5 * 1024 * 1024 바이트)
+        // 1. 파일 크기 제한 (5MB)
         long maxFileSize = 5 * 1024 * 1024;
         if (file.getSize() > maxFileSize) {
             throw new RuntimeException("파일 크기는 5MB를 초과할 수 없습니다.");
