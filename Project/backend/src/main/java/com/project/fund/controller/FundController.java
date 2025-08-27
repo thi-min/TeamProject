@@ -50,7 +50,6 @@ public class FundController {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
-
     /**
      * DTO를 Entity로 변환하는 메서드
      * @param dto FundRequestDto

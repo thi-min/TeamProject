@@ -35,14 +35,23 @@ const routes = {
     reserve: { path: "/land/reserve", label: "예약하기" },
   },
 
+
   // ==============================
   // 게시판 관련
   // ==============================
-  board: {
-    root: { path: "/board", label: "게시판" },
-    notice: { path: "/board/notice", label: "공지사항" },
-    qna: { path: "/board/qna", label: "질문 게시판" },
-    photo: { path: "/board/photo", label: "포토 게시판" },
+  // board: {
+  //   root: { path: "/board", label: "게시판" },
+  //   notice: { path: "/board/notice", label: "공지사항" },
+  //   qna: { path: "/board/qna", label: "질문 게시판" },
+  //   photo: { path: "/board/photo", label: "포토 게시판" },
+
+  // 게시판
+   board: {
+    root: { path: "/bbs", label: "게시판" },
+    notice: { path: "/bbs/normalbbs", label: "공지사항" },
+    qna: { path: "/bbs/questionbbs", label: "질문 게시판" },
+    photo: { path: "/bbs/imagebbs", label: "포토 게시판" },
+
   },
 
   // ==============================
@@ -56,6 +65,7 @@ const routes = {
     logout: { path: "/logout", label: "로그아웃" },
     findid: { path: "/find-id", label: "아이디 찾기" },
     findpw: { path: "/find-pw", label: "비밀번호 찾기" },
+
     changepw: { path: "/member/update-password", label: "비밀번호 변경" },
     mypage: { path: "/member/mypage", label: "마이페이지" },
     memberdata: { path: "/member/mypage/memberdata", label: "회원정보" },
@@ -71,11 +81,27 @@ const routes = {
       detail: (id) => `/member/adopt/detail/${id}`,
     },
     
-    // 나의 후원
-    fund: {
-      list: { path: "/member/fund/list", label: "나의 후원 목록" },
-      detail: (id) => `/member/fund/detail/${id}`,
-    },
+    // // 나의 후원
+    // fund: {
+    //   list: { path: "/member/fund/list", label: "나의 후원 목록" },
+    //   detail: (id) => `/member/fund/detail/${id}`,
+    // },
+
+    changepw: { path: "/update-password", label: "비밀번호 변경" },
+    mypage: { path: "/mypage", label: "마이페이지" },
+    update: { path: "/mypage/update", label: "회원정보 수정" },
+    delete: { path: "/mypage/update/delete", label: "회원 탈퇴" },
+  },
+  // 후원 경로
+  fund: {
+    root: { path: "/fund", label: "후원 메인" },
+    fundForm: { path: "/fund/money", label: "후원금 신청" },
+    goodsForm: { path: "/fund/goods", label: "후원물품 신청" },
+    recurringForm: { path: "/fund/recurring", label: "정기후원 신청" },
+    fundDetails: { path: "/fund/money-details", label: "후원금 상세" },
+    goodsDetails: { path: "/fund/goods-details", label: "후원물품 상세" },
+    recurringDetails: { path: "/fund/recurring-details", label: "정기후원 상세" },
+
   },
 
   // ==============================

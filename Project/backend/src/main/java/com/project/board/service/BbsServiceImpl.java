@@ -5,9 +5,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
 import java.util.UUID;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -55,10 +58,14 @@ public class BbsServiceImpl implements BbsService {
     private final AdminRepository adminRepository;
  
     
- // 게시글 저장만 담당하는 메소드
+    private final String uploadDir = "C:/photo"; // 공통 업로드 경로
+
+    // ---------------- 게시글 저장 ----------------
     private BbsDto saveOnlyBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId) {
         MemberEntity member = null;
-        if(dto.getMemberNum() != null) {
+
+        // ✅ memberNum이 null이면 엔티티에 세팅하지 않음
+        if (dto.getMemberNum() != null) {
             member = memberRepository.findByMemberNum(dto.getMemberNum())
                     .orElseThrow(() -> new BbsException("회원이 존재하지 않습니다."));
         }
@@ -67,10 +74,10 @@ public class BbsServiceImpl implements BbsService {
                 .bulletinNum(dto.getBulletinNum())
                 .bbstitle(dto.getBbsTitle())
                 .bbscontent(dto.getBbsContent())
-                .registdate(dto.getRegistDate())
+                .registdate(LocalDateTime.now())
                 .revisiondate(dto.getRevisionDate())
                 .deldate(dto.getDelDate())
-                .viewers(dto.getViewers())
+                .viewers(dto.getViewers() != null ? dto.getViewers() : 0)
                 .bulletinType(dto.getBulletinType());
 
         if (member != null) {
@@ -83,63 +90,123 @@ public class BbsServiceImpl implements BbsService {
         return convertToDto(savedEntity);
     }
 
-    // 최상위 호출 메소드: 게시글 저장 후 분기 처리
+    
+
+    // ---------------- 최상위 생성 메소드 ----------------
     @Override
-    public BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files) {
+    @Transactional
+    public BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId,
+                            List<MultipartFile> files, List<String> insertOptions,
+                            List<String> isRepresentativeList) {
+
         BoardType type = dto.getBulletinType();
 
+        // 로그인 상태 확인
+        if ((type == BoardType.FAQ || type == BoardType.POTO) && requesterMemberNum == null) {
+            throw new BbsException("로그인 후 작성 가능합니다.");
+        }
+
+        // 권한 체크 (공지사항)
         if (type == BoardType.NORMAL && requesterAdminId == null) {
             throw new BbsException("공지사항은 관리자만 작성할 수 있습니다.");
         }
-        if ((type == BoardType.FAQ || type == BoardType.POTO) && requesterMemberNum == null) {
-            throw new BbsException("해당 게시판은 회원만 작성할 수 있습니다.");
-        }
 
-        // 게시글 저장만 처리
+        // DTO에 memberNum 설정
+        dto.setMemberNum(requesterMemberNum);
+
+        // 게시글 저장 (첨부파일 제외)
         BbsDto savedDto = saveOnlyBbs(dto, requesterMemberNum, requesterAdminId);
 
-        // 타입에 따른 후속 작업 분기
         if (type == BoardType.POTO) {
-            return createPotoBbs(savedDto, requesterMemberNum, files);  // 여기서 다시 createBbs 호출 NO!
+            return createPotoBbs(savedDto, requesterMemberNum, files, isRepresentativeList);
         } else {
-            return createBbsWithFiles(savedDto, requesterMemberNum, requesterAdminId, files);
+            BbsDto result = createBbsWithFiles(savedDto, requesterMemberNum, requesterAdminId, files, insertOptions);
+
+            // 본문 삽입 이미지 처리
+            if (files != null && insertOptions != null) {
+                StringBuilder contentBuilder = new StringBuilder(
+                        result.getBbsContent() == null ? "" : result.getBbsContent()
+                );
+
+                List<FileUpLoadDto> savedFiles = getFilesByBbs(result.getBulletinNum());
+                int size = Math.min(savedFiles.size(), insertOptions.size());
+
+                for (int i = 0; i < size; i++) {
+                    String option = insertOptions.get(i);
+                    if ("insert".equals(option)) {
+                        FileUpLoadDto fileDto = savedFiles.get(i);
+                        String fileUrl = "http://127.0.0.1:8090/bbs/files/" + fileDto.getFileNum() + "/download";
+                        contentBuilder.append("<br><img src='")
+                                      .append(fileUrl)
+                                      .append("' style='max-width:600px;'/>");
+                    }
+                }
+
+                // 본문 업데이트 후 다시 저장
+                result.setBbsContent(contentBuilder.toString());
+                saveOnlyBbs(result, requesterMemberNum, requesterAdminId);
+            }
+
+            return result;
         }
     }
 
- // 대표 이미지 1개 + 첨부파일 저장
+
+
+    
+    @Override
+    public FileUpLoadDto getFileById(Long fileId) {
+        return bbsRepository.findFileById(fileId)
+                .orElseThrow(() -> new BbsException("해당 파일이 존재하지 않습니다. ID: " + fileId));
+    }
+   
+
+ // ---------------- POTO 게시판 처리 ----------------
     @Override
     @Transactional
-    public BbsDto createPotoBbs(BbsDto savedBbs, Long requesterMemberNum, List<MultipartFile> files) {
-        BoardType type = savedBbs.getBulletinType();
-
-        if (type != BoardType.POTO) {
-            throw new BbsException("createPotoBbs는 POTO 타입 게시글만 처리합니다.");
-        }
+    public BbsDto createPotoBbs(BbsDto dto, Long requesterMemberNum,
+                                List<MultipartFile> files, List<String> isRepresentativeList) {
 
         if (files == null || files.isEmpty()) {
             throw new BbsException("이미지 게시판은 최소 1장 이상의 사진을 등록해야 합니다.");
         }
 
-        // 이미지 저장 조건
+        MemberEntity member = memberRepository.findById(requesterMemberNum)
+                .orElseThrow(() -> new BbsException("회원 정보가 존재하지 않습니다."));
+
+        // 게시글 먼저 저장
+        BbsEntity savedEntity = BbsEntity.builder()
+                .bbstitle(dto.getBbsTitle())
+                .bbscontent(dto.getBbsContent())
+                .bulletinType(dto.getBulletinType())
+                .memberNum(member)
+                .registdate(LocalDateTime.now())
+                .viewers(0)
+                .build();
+        savedEntity = bbsRepository.save(savedEntity);
+
+        if (isRepresentativeList == null || isRepresentativeList.size() != files.size()) {
+            throw new BbsException("대표 이미지 정보가 올바르지 않습니다.");
+        }
+
+        ImageBbsEntity representativeImage = null;
         List<String> allowedExtensions = List.of("jpg", "jpeg");
         List<String> allowedMimeTypes = List.of("image/jpeg");
-        long maxSize = 5 * 1024 * 1024;
-        String uploadDir = "C:/Image";
 
-        ImageBbsEntity imageBbs = null;
+        for (int i = 0; i < files.size(); i++) {
+            MultipartFile file = files.get(i);
+            if (file == null || file.isEmpty()) continue;
 
-        for (MultipartFile file : files) {
             String ext = getExtension(file.getOriginalFilename());
             String contentType = file.getContentType();
 
-            if (file == null || file.isEmpty()
-                    || ext == null || !allowedExtensions.contains(ext.toLowerCase())
+            if (ext == null || !allowedExtensions.contains(ext.toLowerCase())
                     || contentType == null || !allowedMimeTypes.contains(contentType.toLowerCase())
-                    || file.getSize() > maxSize) {
-                continue;
+                    || file.getSize() > 5 * 1024 * 1024) {
+                throw new BbsException("첨부파일은 jpg 또는 jpeg 이미지만 가능합니다. (" + file.getOriginalFilename() + ")");
             }
 
-            String savedName = UUID.randomUUID().toString() + "." + ext;
+            String savedName = UUID.randomUUID() + "." + ext;
             Path target = Paths.get(uploadDir, savedName);
 
             try {
@@ -148,254 +215,168 @@ public class BbsServiceImpl implements BbsService {
                 throw new BbsException("이미지 저장 실패: " + file.getOriginalFilename(), e);
             }
 
-            imageBbs = ImageBbsEntity.builder()
-                    .bbs(bbsRepository.findById(savedBbs.getBulletinNum())
-                            .orElseThrow(() -> new BbsException("게시글이 존재하지 않습니다.")))
-                    .thumbnailPath("/uploads/thumb/" + savedName)
-                    .imagePath("/uploads/" + savedName)
-                    .build();
-
-            break; // 대표 이미지 1개만 저장
+            boolean isRep = "Y".equalsIgnoreCase(isRepresentativeList.get(i));
+            if (isRep && representativeImage == null) {
+                representativeImage = ImageBbsEntity.builder()
+                        .bbs(savedEntity)
+                        .thumbnailPath("/uploads/thumb/" + savedName)
+                        .imagePath("/uploads/" + savedName)
+                        .build();
+                imageBbsRepository.save(representativeImage);
+            }
         }
 
-        if (imageBbs == null) {
-            throw new BbsException("유효한 이미지 파일(jpg, jpeg)만 첨부할 수 있습니다.");
+        if (representativeImage == null) {
+            throw new BbsException("대표 이미지가 반드시 필요합니다.");
         }
 
-        imageBbsRepository.save(imageBbs);
+        saveFileList(savedEntity.getBulletinNum(), files, BoardType.POTO);
 
-        // 모든 파일 첨부 저장
-        saveFileList(savedBbs.getBulletinNum(), files, BoardType.POTO);
-
-        return savedBbs;
+        return dto;
     }
 
+    // ---------------- 일반 게시판 파일 처리 ----------------
     @Transactional
-    public BbsDto createBbsWithFiles(BbsDto savedBbs, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files) {
-
-        BoardType type = savedBbs.getBulletinType();
+    public BbsDto createBbsWithFiles(BbsDto savedBbs, Long requesterMemberNum, Long requesterAdminId,
+                                    List<MultipartFile> files, List<String> insertOptions) {
 
         if (files != null && !files.isEmpty()) {
-            switch (type) {
-                case FAQ:
-                case NORMAL:
-                    List<FileUpLoadDto> uploadedFiles = saveFileList(savedBbs.getBulletinNum(), files, type);
-                    String updatedContent = insertFilesToContent(savedBbs.getBbsContent(), uploadedFiles);
+            // 1️⃣ 파일 저장
+            List<FileUpLoadDto> uploadedFiles = saveFileList(savedBbs.getBulletinNum(), files, savedBbs.getBulletinType());
 
-                    BbsEntity bbsEntity = bbsRepository.findById(savedBbs.getBulletinNum())
-                        .orElseThrow(() -> new BbsException("게시글이 존재하지 않습니다."));
-                    bbsEntity.setBbscontent(updatedContent);
-                    bbsRepository.save(bbsEntity);
+            // 2️⃣ insertOptions 기반 본문 삽입
+            String updatedContent = insertFilesToContent(savedBbs.getBbsContent(), uploadedFiles, insertOptions);
 
-                    savedBbs.setBbsContent(updatedContent);
-                    break;
+            // 3️⃣ 게시글 엔티티 업데이트
+            BbsEntity bbsEntity = bbsRepository.findById(savedBbs.getBulletinNum())
+                    .orElseThrow(() -> new BbsException("게시글이 존재하지 않습니다."));
+            bbsEntity.setBbscontent(updatedContent);
+            bbsRepository.save(bbsEntity);
 
-                default:
-                    throw new BbsException("지원하지 않는 게시판 타입입니다.");
-            }
+            savedBbs.setBbsContent(updatedContent);
         }
 
         return savedBbs;
     }
 
+    // ---------------- 본문 삽입 처리 ----------------
+    private String insertFilesToContent(String originalContent, List<FileUpLoadDto> files, List<String> insertOptions) {
+        StringBuilder content = new StringBuilder(originalContent == null ? "" : originalContent);
+        List<String> imageExt = List.of("jpg", "jpeg");
 
-    private String insertFilesToContent(String originalContent, List<FileUpLoadDto> files) {
-        StringBuilder contentBuilder = new StringBuilder(originalContent == null ? "" : originalContent);
-        // 허용된 이미지 확장자 (본문에 <img> 태그로 삽입)
-        List<String> imageExtensions = List.of("jpg", "jpeg");
+        for (int i = 0; i < files.size(); i++) {
+            FileUpLoadDto file = files.get(i);
+            String option = (insertOptions != null && insertOptions.size() > i) ? insertOptions.get(i) : "no-insert";
+            String ext = file.getExtension().toLowerCase();
+            String url = "/uploads/" + file.getSavedName();
 
-        for (FileUpLoadDto file : files) {
-            String extension = file.getExtension().toLowerCase();
-            String fileUrl = "/uploads/" + file.getSavedName(); // 실제 경로에 맞게 수정
-
-            if (imageExtensions.contains(extension)) {
-                // 이미지 파일은 <img> 태그로 삽입
-                contentBuilder.append("\n<img src=\"")
-                              .append(fileUrl)
-                              .append("\" alt=\"")
-                              .append(file.getOriginalName())
-                              .append("\" />");
-            } else if (List.of("pdf", "ppt", "pptx", "doc", "docx").contains(extension)) {
-                // 문서 파일은 다운로드 링크로 삽입
-                contentBuilder.append("\n<a href=\"")
-                              .append(fileUrl)
-                              .append("\" download>")
-                              .append(file.getOriginalName())
-                              .append("</a>");
-            } else {
-                // 허용되지 않은 확장자는 무시하거나 로그 남기기
-                // 예: contentBuilder.append("\n<!-- 허용되지 않은 확장자: ").append(extension).append(" -->");
+            if ("insert".equals(option) && imageExt.contains(ext)) {
+                content.append("\n<img src=\"").append(url).append("\" alt=\"").append(file.getOriginalName()).append("\" />");
+            } else if (!imageExt.contains(ext)) { // 문서류는 항상 링크
+                content.append("\n<a href=\"").append(url).append("\" download>").append(file.getOriginalName()).append("</a>");
             }
         }
-        return contentBuilder.toString();
+
+        return content.toString();
     }
 
-    @Transactional
+    // ---------------- 게시글 수정 ----------------
     @Override
-    public BbsDto updateBbs(Long id, BbsDto dto, Long memberNum) {
+    @Transactional
+    public BbsDto updateBbs(Long id, BbsDto dto, Long userId, List<MultipartFile> newFiles, List<Long> deleteFileIds, boolean isAdmin, List<String> insertOptions) {
         BbsEntity bbs = bbsRepository.findById(id)
-            .orElseThrow(() -> new BbsException("게시글 없음: " + id));
-        if (!bbs.getMemberNum().getMemberNum().equals(memberNum)) {
-            throw new BbsException("본인이 작성한 글만 수정할 수 있습니다.");
+                .orElseThrow(() -> new BbsException("게시글 없음: " + id));
+
+        // 권한 체크
+        if (isAdmin && (bbs.getAdminId() == null || !bbs.getAdminId().getAdminId().equals(userId))) {
+            throw new BbsException("관리자 권한이 없습니다.");
+        }
+        if (!isAdmin && (bbs.getMemberNum() == null || !bbs.getMemberNum().getMemberNum().equals(userId))) {
+            throw new BbsException("본인이 작성한 글만 수정 가능합니다.");
         }
 
+        // 게시글 업데이트
         bbs.setBbstitle(dto.getBbsTitle());
         bbs.setBbscontent(dto.getBbsContent());
         bbs.setRevisiondate(dto.getRevisionDate());
+
+        // 삭제 파일 처리
+        if (deleteFileIds != null) {
+            for (Long fileId : deleteFileIds) deleteFileById(fileId);
+        }
+
+        // 새 파일 업로드 (본문 삽입 옵션 반영)
+        if (newFiles != null && !newFiles.isEmpty()) {
+            createBbsWithFiles(convertToDto(bbs), isAdmin ? null : userId, isAdmin ? userId : null, newFiles, insertOptions);
+        }
+
         return convertToDto(bbsRepository.save(bbs));
     }
 
+    // ---------------- 게시글 단일 삭제 ----------------
     @Override
     @Transactional
     public void deleteBbs(Long id, Long requesterMemberNum, Long requesterAdminId) {
-        BbsEntity bbs = bbsRepository.findById(id)
-            .orElseThrow(() -> new BbsException("게시글 없음: " + id));
-
-        if (bbs.getMemberNum() != null) {
-            memberRepository.findById(bbs.getMemberNum().getMemberNum())
-                .orElseThrow(() -> new BbsException("작성자 회원 정보가 존재하지 않습니다."));
-        }
+        BbsEntity bbs = bbsRepository.findById(id).orElseThrow(() -> new BbsException("게시글 없음: " + id));
 
         boolean isAdmin = requesterAdminId != null;
-        boolean isAuthor = requesterMemberNum != null &&
-            bbs.getMemberNum() != null &&
-            requesterMemberNum.equals(bbs.getMemberNum().getMemberNum());
+        boolean isAuthor = requesterMemberNum != null && bbs.getMemberNum() != null && requesterMemberNum.equals(bbs.getMemberNum().getMemberNum());
 
-        if (!(isAdmin || isAuthor)) {
-            throw new BbsException("삭제 권한이 없습니다.");
-        }
+        if (!(isAdmin || isAuthor)) throw new BbsException("삭제 권한이 없습니다.");
 
-        String uploadDir = "C:/photo"; // 실제 파일 저장 경로
+        // QnA, 첨부파일, 이미지 삭제 처리
+        if (bbs.getBulletinType() == BoardType.FAQ) qandARepository.deleteByBbsBulletinNum(id);
+        deleteFilesAndImages(bbs);
 
-        // 1. QANDA 게시판의 경우 qanda 테이블 먼저 삭제 (외래키 제약 회피)
-        if (bbs.getBulletinType() == BoardType.FAQ) {
-        	qandARepository.deleteByBbsBulletinNum(bbs.getBulletinNum());  // bulletin_num을 참조하는 QANDA 먼저 삭제
-        }
-
-        // 2. 첨부파일 삭제 (NORMAL, FAQ, POTO 모두 포함됨)
-        switch (bbs.getBulletinType()) {
-            case NORMAL:
-            case FAQ:
-            case POTO:
-                List<FileUpLoadEntity> files = fileUploadRepository.findByBbsBulletinNum(id);
-                for (FileUpLoadEntity file : files) {
-                    try {
-                        Path filePath = Paths.get(uploadDir, file.getSavedName());
-                        Files.deleteIfExists(filePath);
-                    } catch (IOException e) {
-                        System.err.println("첨부파일 삭제 실패: " + e.getMessage());
-                    }
-                }
-                fileUploadRepository.deleteByBbsBulletinNum(id);
-                break;
-        }
-
-        //  3. POTO 게시판인 경우, 대표 이미지 + 썸네일 삭제
-        if (bbs.getBulletinType() == BoardType.POTO) {
-            List<ImageBbsEntity> images = imageBbsRepository.findByBbsBulletinNum(id);
-            for (ImageBbsEntity image : images) {
-                try {
-                    if (image.getThumbnailPath() != null) {
-                        String thumbnailFile = Paths.get(image.getThumbnailPath()).getFileName().toString();
-                        Files.deleteIfExists(Paths.get(uploadDir, thumbnailFile));
-                    }
-                    if (image.getImagePath() != null) {
-                        String imageFile = Paths.get(image.getImagePath()).getFileName().toString();
-                        Files.deleteIfExists(Paths.get(uploadDir, imageFile));
-                    }
-                } catch (IOException e) {
-                    System.err.println("이미지 삭제 실패: " + e.getMessage());
-                }
-            }
-            imageBbsRepository.deleteByBbsBulletinNum(id);
-        }
-
-        // ✅ 4. 마지막으로 게시글 삭제
         bbsRepository.deleteById(id);
     }
-    
+
+    // ---------------- 다중 삭제 ----------------
     @Override
     @Transactional
     public void deleteBbsMultiple(List<Long> ids, Long requesterMemberNum, Long requesterAdminId) {
-        if (requesterAdminId == null) {
-            throw new BbsException("관리자 권한이 필요합니다.");
-        }
-
-        String uploadDir = "C:/photo"; // 실제 파일 저장 경로
+        if (requesterAdminId == null) throw new BbsException("관리자 권한이 필요합니다.");
 
         for (Long id : ids) {
-            BbsEntity bbs = bbsRepository.findById(id)
-                .orElseThrow(() -> new BbsException("게시글 없음: " + id));
-
-            // 작성자 회원 존재 여부 확인 (필요시)
-            if (bbs.getMemberNum() != null) {
-                memberRepository.findById(bbs.getMemberNum().getMemberNum())
-                    .orElseThrow(() -> new BbsException("작성자 회원 정보가 존재하지 않습니다."));
-            }
-
-            // 관리자만 삭제 가능하므로 작성자 권한 체크는 생략 가능
-            boolean isAdmin = requesterAdminId != null;
-            if (!isAdmin) {
-                throw new BbsException("삭제 권한이 없습니다.");
-            }
-
-            // 1. QANDA 게시판 관련 데이터 삭제
-            if (bbs.getBulletinType() == BoardType.FAQ) {
-                qandARepository.deleteByBbsBulletinNum(bbs.getBulletinNum());
-            }
-
-            // 2. 첨부파일 삭제
-            switch (bbs.getBulletinType()) {
-                case NORMAL:
-                case FAQ:
-                case POTO:
-                    List<FileUpLoadEntity> files = fileUploadRepository.findByBbsBulletinNum(id);
-                    for (FileUpLoadEntity file : files) {
-                        try {
-                            Path filePath = Paths.get(uploadDir, file.getSavedName());
-                            Files.deleteIfExists(filePath);
-                        } catch (IOException e) {
-                            System.err.println("첨부파일 삭제 실패: " + e.getMessage());
-                        }
-                    }
-                    fileUploadRepository.deleteByBbsBulletinNum(id);
-                    break;
-                default:
-                    // 기타 게시판 타입이 있으면 여기에 처리
-                    break;
-            }
-
-            // 3. POTO 게시판 대표 이미지 + 썸네일 삭제
-            if (bbs.getBulletinType() == BoardType.POTO) {
-                List<ImageBbsEntity> images = imageBbsRepository.findByBbsBulletinNum(id);
-                for (ImageBbsEntity image : images) {
-                    try {
-                        if (image.getThumbnailPath() != null) {
-                            String thumbnailFile = Paths.get(image.getThumbnailPath()).getFileName().toString();
-                            Files.deleteIfExists(Paths.get(uploadDir, thumbnailFile));
-                        }
-                        if (image.getImagePath() != null) {
-                            String imageFile = Paths.get(image.getImagePath()).getFileName().toString();
-                            Files.deleteIfExists(Paths.get(uploadDir, imageFile));
-                        }
-                    } catch (IOException e) {
-                        System.err.println("이미지 삭제 실패: " + e.getMessage());
-                    }
-                }
-                imageBbsRepository.deleteByBbsBulletinNum(id);
-            }
-
-            // 4. 게시글 삭제
+            BbsEntity bbs = bbsRepository.findById(id).orElseThrow(() -> new BbsException("게시글 없음: " + id));
+            if (bbs.getBulletinType() == BoardType.FAQ) qandARepository.deleteByBbsBulletinNum(id);
+            deleteFilesAndImages(bbs);
             bbsRepository.deleteById(id);
         }
     }
 
+    // ---------------- 첨부파일 + POTO 이미지 삭제 공통 ----------------
+    private void deleteFilesAndImages(BbsEntity bbs) {
+        // 첨부파일 삭제
+        List<FileUpLoadEntity> files = fileUploadRepository.findByBbsBulletinNum(bbs.getBulletinNum());
+        for (FileUpLoadEntity file : files) {
+            try { Files.deleteIfExists(Paths.get(uploadDir, file.getSavedName())); }
+            catch (IOException ignored) {}
+        }
+        fileUploadRepository.deleteByBbsBulletinNum(bbs.getBulletinNum());
+
+        // POTO 이미지 삭제
+        if (bbs.getBulletinType() == BoardType.POTO) {
+            List<ImageBbsEntity> images = imageBbsRepository.findByBbsBulletinNum(bbs.getBulletinNum());
+            for (ImageBbsEntity image : images) {
+                try {
+                    if (image.getThumbnailPath() != null) Files.deleteIfExists(Paths.get(uploadDir, Paths.get(image.getThumbnailPath()).getFileName().toString()));
+                    if (image.getImagePath() != null) Files.deleteIfExists(Paths.get(uploadDir, Paths.get(image.getImagePath()).getFileName().toString()));
+                } catch (IOException ignored) {}
+            }
+            imageBbsRepository.deleteByBbsBulletinNum(bbs.getBulletinNum());
+        }
+    }
+
+
+ // 게시글 단건 조회
     @Override
     public BbsDto getBbs(Long id) {
-        return bbsRepository.findById(id)
-            .map(this::convertToDto)
-            .orElseThrow(() -> new BbsException("게시글 없음: " + id));
+        BbsEntity entity = bbsRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("게시글 없음: " + id));
+        return convertToDto(entity); // BbsDto만 반환
     }
+
 
     @Override
     public List<BbsDto> getAllByType(BoardType type) {
@@ -414,37 +395,58 @@ public class BbsServiceImpl implements BbsService {
         return page.map(this::convertToDto);
     }
 
+ // 게시글 목록 조회
     @Override
-    public Page<BbsDto> searchPosts(String searchType, String bbstitle, String bbscontent, BoardType type, Pageable pageable) {
+    public Page<BbsDto> searchPosts(String searchType, String bbstitle, String bbscontent,
+                                    String memberName, BoardType type, Pageable pageable) {
         Page<BbsEntity> result;
 
+        String typeLower = (searchType == null || searchType.isEmpty()) ? "all" : searchType.toLowerCase();
+
         if (type != null) {
-            result = switch (searchType.toLowerCase()) {
+            result = switch (typeLower) {
                 case "title" -> bbsRepository.findByBulletinTypeAndBbstitleContaining(type, bbstitle, pageable);
                 case "content" -> bbsRepository.findByBulletinTypeAndBbscontentContaining(type, bbscontent, pageable);
-                case "title+content" -> {
-                    if (bbstitle == null || bbscontent == null) {
-                        throw new IllegalArgumentException("제목과 내용 검색어를 모두 입력하세요.");
-                    }
-                    yield bbsRepository.findByBulletinTypeAndTitleAndContent(type, bbstitle, pageable);
-                }
+                case "all" -> bbsRepository.findByBulletinType(type, pageable);
                 default -> throw new IllegalArgumentException("Invalid search type: " + searchType);
             };
         } else {
-            result = switch (searchType.toLowerCase()) {
+            result = switch (typeLower) {
                 case "title" -> bbsRepository.findByBbstitleContaining(bbstitle, pageable);
                 case "content" -> bbsRepository.findByBbscontentContaining(bbscontent, pageable);
-                case "title+content" -> {
-                    if (bbstitle == null || bbscontent == null) {
-                        throw new IllegalArgumentException("제목과 내용 검색어를 모두 입력하세요.");
-                    }
-                    yield bbsRepository.findByBbstitleContainingAndBbscontentContaining(bbstitle, bbscontent, pageable);
-                }
+                case "all" -> bbsRepository.findAll(pageable);
                 default -> throw new IllegalArgumentException("Invalid search type: " + searchType);
             };
         }
+
         return result.map(this::convertToDto);
     }
+
+    @Override
+    public ImageBbsDto getRepresentativeImage(Long bulletinNum) {
+        // 1. 대표 이미지 조회
+        String imagePath = imageBbsRepository.findRepresentativeImagePath(bulletinNum);
+
+        // 2. 대표 이미지가 없으면 첫 번째 이미지 사용
+        if (imagePath == null) {
+            List<ImageBbsEntity> images = imageBbsRepository.findByBbsBulletinNum(bulletinNum);
+            if (images.isEmpty()) return null; // 이미지 자체가 없는 경우
+            imagePath = images.get(0).getImagePath(); // 첫 번째 이미지
+        }
+
+        // 3. DTO 반환
+        return ImageBbsDto.builder()
+                .bulletinNum(bulletinNum)
+                .thumbnailPath(null)
+                .imagePath("/uploads/" + imagePath)
+                .build();
+    }
+
+
+
+
+
+
     private BbsDto convertToDto(BbsEntity e) {
         String originalName = null;
         String filteredName = null;
@@ -523,6 +525,21 @@ public class BbsServiceImpl implements BbsService {
             .answer(qna.getAnswer())
             .build();
     }
+    
+    @Override
+    public void deleteQna(Long qnaId, Long adminId) {
+        QandAEntity qna = qandARepository.findById(qnaId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 QnA 답변이 존재하지 않습니다."));
+
+        // 관리자 권한 체크 (필요하면 로직 추가)
+        // 예: adminId가 null이거나, 권한 없는 경우 예외 처리
+        if (adminId == null) {
+            throw new IllegalArgumentException("관리자 ID가 필요합니다.");
+        }
+
+        qandARepository.delete(qna);
+    }
+
     @Override
     public QandADto updateQna(Long qnaId, QandADto dto) {
         QandAEntity qna = qandARepository.findById(qnaId)
@@ -784,4 +801,37 @@ public class BbsServiceImpl implements BbsService {
             .extension(file.getExtension())
             .build();
     }
+    @Transactional
+    public void deleteFileById(Long fileId) {
+        FileUpLoadEntity file = fileUploadRepository.findById(fileId)
+            .orElseThrow(() -> new BbsException("삭제할 파일이 존재하지 않습니다: " + fileId));
+
+        // 실제 저장소 파일 삭제 로직이 있다면 추가 (예: 파일 시스템에서 삭제)
+        // 예) Files.deleteIfExists(Paths.get(file.getPath(), file.getSavedName()));
+
+        fileUploadRepository.delete(file);
+    }
+    
+    @Override
+    public Map<String, Object> getBbsList(BoardType type, int page, int size, String bbstitle, String memberName, String bbscontent) {
+        // 등록일 기준 내림차순 정렬 (최신글 맨 위)
+        Pageable pageable = PageRequest.of(page, size, Sort.by("registdate").descending());
+        
+        // Repository 호출
+        Page<BbsDto> pageResult = bbsRepository.findBbsByTypeAndSearch(type, bbstitle, memberName, bbscontent, pageable);
+        List<BbsDto> list = pageResult.getContent(); // Page -> List
+        long total = pageResult.getTotalElements();  // 전체 개수
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        result.put("total", total);
+        result.put("page", page);
+        result.put("size", size);
+        return result;
+    }
+
+
+
+
+
 }

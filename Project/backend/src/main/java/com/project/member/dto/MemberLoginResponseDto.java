@@ -12,6 +12,7 @@ import lombok.NoArgsConstructor;
 @Builder
 // 로그인 완료 후 front-end 에 제공할 변수 선언
 public class MemberLoginResponseDto {
+	
     // ✅ 공통 로그인 정보
 	private Long memberNum;	   // 회원번호
     private String memberId;       // 로그인 ID (일반: 이메일, 카카오: kakaoId)

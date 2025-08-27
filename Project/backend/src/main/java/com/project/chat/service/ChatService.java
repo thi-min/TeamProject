@@ -69,6 +69,7 @@ public class ChatService {
     public List<ChatMessageEntity> getMessages(Long chatRoomId) {
         return chatMessageRepository.findByChatRoomChatRoomIdOrderBySendTimeAsc(chatRoomId);
     }
+
     // 모든 채팅방 목록 조회 (목록 화면 전용)
     @Transactional(readOnly = true)
     public List<ChatRoomResponseDto> getChatRoomList() {
@@ -135,14 +136,18 @@ public class ChatService {
         return adminRepository.findFirstByAdminId(adminId)
                 .orElseThrow(() -> new EntityNotFoundException("Admin not found with id: " + adminId));
     }
+
+
     @Transactional(readOnly = true)
     public List<ChatRoomEntity> getAllRooms() {
         return chatRoomRepository.findAll();
     }
+
     @Transactional(readOnly = true)
     public boolean hasUnreadMessagesForMember(Long chatRoomId) {
         ChatRoomEntity room = chatRoomRepository.findById(chatRoomId)
             .orElseThrow(() -> new EntityNotFoundException("Chat room not found with id: " + chatRoomId));
         return chatMessageRepository.existsByChatRoomAndChatCheck(room, CheckState.N);
+
     }
 }
