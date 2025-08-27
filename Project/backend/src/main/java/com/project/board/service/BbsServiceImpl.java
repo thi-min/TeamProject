@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -496,25 +497,40 @@ public class BbsServiceImpl implements BbsService {
         }
 
         BbsEntity bbs = bbsRepository.findById(bbsId)
-            .orElseThrow(() -> new BbsException("게시글 없음"));
+                .orElseThrow(() -> new BbsException("게시글 없음"));
 
         AdminEntity adminEntity = adminRepository.findFirstByAdminId(requesterAdminId)
                 .orElseThrow(() -> new RuntimeException("관리자 없음"));
 
-        QandAEntity entity = QandAEntity.builder()
-            .bbs(bbs)
-            .question(bbs.getBbscontent())
-            .answer(dto.getAnswer())
-            .build();
+        // 기존 답변 확인
+        Optional<QandAEntity> existingAnswer = qandARepository.findByBbsBulletinNum(bbsId);
+
+        QandAEntity entity;
+        if (existingAnswer.isPresent()) {
+            // 답변 있으면 update
+            entity = existingAnswer.get();
+            entity.setAnswer(dto.getAnswer());
+            entity.setQuestion(dto.getQuestion() != null ? dto.getQuestion() : bbs.getBbscontent());
+        } else {
+            // 답변 없으면 새로 insert
+            entity = QandAEntity.builder()
+                    .bbs(bbs)
+                    .question(bbs.getBbscontent()) // 기존 구조 유지
+                    .answer(dto.getAnswer())
+                    .build();
+        }
 
         QandAEntity saved = qandARepository.save(entity);
 
+        // 반환 DTO 구조를 기존 saveQna와 동일하게 맞춤
         return QandADto.builder()
-            .bulletinNum(saved.getBbs().getBulletinNum())
-            .question(bbs.getBbscontent())
-            .answer(saved.getAnswer())
-            .build();
+                .bulletinNum(saved.getBbs().getBulletinNum()) // saved.getBbs() 사용
+                .question(bbs.getBbscontent())                // 기존 saveQna와 동일
+                .answer(saved.getAnswer())
+                .build();
     }
+
+
 
     @Override
     public QandADto getQna(Long bbsId) {
@@ -547,15 +563,18 @@ public class BbsServiceImpl implements BbsService {
         QandAEntity qna = qandARepository.findById(qnaId)
             .orElseThrow(() -> new BbsException("QnA 없음"));
 
-        qna.setQuestion(dto.getQuestion());
+        // 답변 및 질문 업데이트
         qna.setAnswer(dto.getAnswer());
+        qna.setQuestion(dto.getQuestion() != null ? dto.getQuestion() : qna.getBbs().getBbscontent());
 
+        // 반환 DTO 구조를 saveQna와 동일하게 맞춤
         return QandADto.builder()
-            .bulletinNum(qna.getBbs().getBulletinNum())
-            .question(qna.getQuestion())
-            .answer(qna.getAnswer())
-            .build();
+                .bulletinNum(qna.getBbs().getBulletinNum())
+                .question(qna.getBbs().getBbscontent()) // 기존 saveQna와 동일
+                .answer(qna.getAnswer())
+                .build();
     }
+
     
   /*  @Override
     public List<ImageBbsDto> saveImageFileList(Long bbsId, List<MultipartFile> files) {

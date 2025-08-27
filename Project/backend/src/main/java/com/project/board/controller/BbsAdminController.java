@@ -4,6 +4,7 @@ import com.project.board.BoardType;
 import com.project.board.dto.BbsDto;
 import com.project.board.dto.FileUpLoadDto;
 import com.project.board.dto.QandADto;
+import com.project.board.exception.BbsException;
 import com.project.board.service.BbsService;
 import com.project.common.jwt.JwtTokenProvider;
 
@@ -121,25 +122,52 @@ public class BbsAdminController {
         return ResponseEntity.ok(updated);
     }
 
-    // ---------------- 게시글 단건 삭제 ----------------
+ // ---------------- 게시글 단건 삭제 (JWT) ----------------
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBbs(
             @PathVariable Long id,
-            HttpSession session) {
-    	String adminId = (String) session.getAttribute("adminId");
-        bbsService.deleteBbs(id, null, adminId);
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        String token = authorizationHeader.replace("Bearer ", "");
+        if (!jwtTokenProvider.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String role = jwtTokenProvider.getRoleFromToken(token);
+        String adminId = jwtTokenProvider.getMemberIdFromToken(token);
+
+        if (!"ADMIN".equals(role)) {
+            throw new BbsException("삭제 권한이 없습니다.");
+        }
+
+        bbsService.deleteBbs(id, null, adminId); // ← requesterAdminId 전달
         return ResponseEntity.noContent().build();
     }
 
-    // ---------------- 다중 삭제 ----------------
+
+    // ---------------- 다중 삭제 (JWT) ----------------
     @DeleteMapping("/delete-multiple")
     public ResponseEntity<Void> deleteMultipleBbs(
             @RequestParam List<Long> ids,
-            HttpSession session) {
-    	String adminId = (String) session.getAttribute("adminId");
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        String token = authorizationHeader.replace("Bearer ", "");
+
+        if (!jwtTokenProvider.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String role = jwtTokenProvider.getRoleFromToken(token);
+        String adminId = jwtTokenProvider.getMemberIdFromToken(token);
+
+        if (!"ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         bbsService.deleteBbsMultiple(ids, null, adminId);
         return ResponseEntity.noContent().build();
     }
+
 
     // ---------------- 관리자 게시글 수정 ----------------
     @PutMapping("/admin/{id}")
@@ -228,6 +256,7 @@ public class BbsAdminController {
     @GetMapping("/qna/{id}")
     public ResponseEntity<QandADto> getQnaBbsDetail(@PathVariable Long id) {
         try {
+        	
             QandADto dto = bbsService.getQna(id);
             if (dto == null) {
                 return ResponseEntity.notFound().build();
