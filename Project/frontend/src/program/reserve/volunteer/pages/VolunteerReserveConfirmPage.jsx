@@ -86,9 +86,18 @@ const VolunteerReserveConfirmPage = () => {
         </table>
       </section>
 
-      <div className="form-action-buttons">
-        <button className="prev-button" type="button" onClick={() => navigate(-1)}>이전</button>
-        <button className="next-button" type="button" onClick={handleConfirm}>예약하기</button>
+      <div className="form_center_box">
+
+          <div className="temp_btn white md">
+            <button type="button" className="btn" onClick={() => navigate(-1)}>
+              이전
+            </button>
+          </div>
+          <div className="temp_btn md">
+            <button type="submit" className="btn" onClick={handleConfirm} >
+             예약하기
+            </button>
+          </div>
       </div>
     </div>
   );

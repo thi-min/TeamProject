@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/volunteer")
@@ -22,10 +23,22 @@ public class VolunteerController {
     // 사용자 - 봉사 시간대 전체 조회 + 예약 인원 포함
     @GetMapping("/timeslots")
     public ResponseEntity<List<VolunteerCountDto>> getVolunteerTimeSlotsWithCount(
-            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate volDate,
-            @RequestParam("memberNum") Long memberNum) {
+            @RequestParam("date") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate volDate, 
+    		@RequestParam("memberNum") Long memberNum){
 
-        List<VolunteerCountDto> result = volunteerService.getVolunteerTimeSlotsWithCount(volDate, memberNum);
+        List<VolunteerCountDto> result = volunteerService.getVolunteerTimeSlotsWithCount(volDate);
+        return ResponseEntity.ok(result);
+    }
+    
+    // 사용자- 월별 정원마감 확인
+    @GetMapping("/timeslots/month")
+    public ResponseEntity<Map<LocalDate, List<VolunteerCountDto>>> getVolunteerTimeSlotsByMonth(
+            @RequestParam("year") int year,
+            @RequestParam("month") int month) {
+
+        Map<LocalDate, List<VolunteerCountDto>> result =
+                volunteerService.getVolunteerTimeSlotsByMonth(year, month);
+
         return ResponseEntity.ok(result);
     }
     

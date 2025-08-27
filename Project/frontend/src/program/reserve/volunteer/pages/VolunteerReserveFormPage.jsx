@@ -50,15 +50,15 @@ const VolunteerReserveFormPage = () => {
         return;
       }
 
-      const res = await api.get("/member/mypage/me", {
+      const res = await api.get("/member/mypage/memberdata", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       setFormData((prev) => ({
         ...prev,
-        name: res.data.memberName,
-        phone: res.data.memberPhone,
-        birth: res.data.memberBirth,
+        name: res.data.memberName ?? prev.memberName,
+        phone: res.data.memberPhone ?? prev.memberPhone,
+        birth: res.data.memberBirth ?? prev. memberBirth,
         memberNum: res.data.memberNum ?? prev.memberNum,
       }));
     } catch (err) {
@@ -306,17 +306,19 @@ const VolunteerReserveFormPage = () => {
         </div>
 
         {/* 버튼 */}
-        <div className="form-action-buttons">
-          <button
-            className="prev-button"
-            type="button"
-            onClick={() => window.history.back()}
-          >
-            이전
-          </button>
-          <button className="next-button" type="submit">
-            다음
-          </button>
+        <div className="form_center_box">
+
+          <div className="temp_btn white md">
+            <button type="button" className="btn" onClick={() => window.history.back()}>
+              이전
+            </button>
+          </div>
+
+          <div className="temp_btn md">
+            <button type="submit" className="btn" >
+              다음
+            </button>
+          </div>
         </div>
       </form>
     </div>

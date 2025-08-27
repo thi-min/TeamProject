@@ -2,6 +2,7 @@ package com.project.land.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 import com.project.common.dto.TimeSlotDto;
 import com.project.common.entity.TimeSlot;
@@ -22,7 +23,10 @@ public interface LandService {
     LandCountDto getLandCountForSlot(LocalDate landDate, Long timeSlotId, LandType landType);
 
     //  전체 시간대별 현황 조회 (사용자용)
+    List<LandCountDto> getLandTimeSlotsWithCount(LocalDate landDate, LandType landType);
     List<LandCountDto> getLandTimeSlotsWithCount(LocalDate landDate, Long memberNum, LandType landType);
     
+    // 월별 정원 체크(사용자용)
+    Map<LocalDate, List<LandCountDto>> getLandTimeSlotsByMonth(int year, int month);
 }
     

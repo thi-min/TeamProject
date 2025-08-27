@@ -15,9 +15,13 @@ import com.project.common.util.JasyptUtil;
 
 import lombok.RequiredArgsConstructor;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -100,10 +104,31 @@ public class VolunteerServiceImpl implements VolunteerService {
                 .build();
     }
     
+    //사용자 월별 예약마감 확인
+    public Map<LocalDate, List<VolunteerCountDto>> getVolunteerTimeSlotsByMonth(int year, int month) {
+        YearMonth ym = YearMonth.of(year, month);
+        Map<LocalDate, List<VolunteerCountDto>> map = new HashMap<>();
+
+        for (int day = 1; day <= ym.lengthOfMonth(); day++) {
+            LocalDate date = ym.atDay(day);
+            // 주말만 조회해도 됨 (프론트 규칙 반영하려면)
+            if (date.getDayOfWeek() == DayOfWeek.SATURDAY || date.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                List<VolunteerCountDto> counts = getVolunteerTimeSlotsWithCount(date);
+                map.put(date, counts);
+            }
+        }
+        return map;
+    }
+    
     // 사용자용 - 봉사 시간대 조회
     @Override
     @Transactional(readOnly = true)
     public List<VolunteerCountDto> getVolunteerTimeSlotsWithCount(LocalDate volDate, Long memberNum) {
+        return volunteerRepository.getVolunteerCountInfo(volDate);
+    }
+    @Override
+    @Transactional(readOnly = true)
+    public List<VolunteerCountDto> getVolunteerTimeSlotsWithCount(LocalDate volDate) {
         return volunteerRepository.getVolunteerCountInfo(volDate);
     }
 }

@@ -3,89 +3,151 @@ body {
   overflow-x: hidden; /* 오른쪽 쏠림 방지 */
 }
 
-/* ---------- 놀이터 예약 날짜 선택 페이지 ---------- */
+/* ---------- 봉사 예약 날짜 선택 페이지 ---------- */
 .land-date-page {
   width: 100%;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   background-color: #fff;
   box-sizing: border-box;
   margin: 0;
   padding: 20px 0;
-  overflow-y: auto;
 }
 
 .calendar-wrapper {
   width: 100%;
-  max-width: 1400px;
+  max-width: 1200px;
   display: flex;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
 }
 
-.react-calendar {
+/* Land 전용 react-calendar */
+.land-date-page .react-calendar {
   width: 100%;
-  height: auto;
-  display: flex;
-  flex-direction: column;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px;
 }
 
-.react-calendar__month-view__weekdays {
+/* 네비게이션 */
+.land-date-page .react-calendar__navigation {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.land-date-page .react-calendar__navigation button {
+  min-width: 44px;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.land-date-page .react-calendar__navigation button:enabled:hover {
+  background: #f3f4f6;
+}
+
+/* 요일 헤더 */
+.land-date-page .react-calendar__month-view__weekdays {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 6px 0;
+  font-weight: 700;
+  color: #374151;
   height: 60px;
   display: flex;
 }
 
-.calendar-wrapper .react-calendar__month-view__days {
+/* 날짜 셀 영역 */
+.land-date-page .react-calendar__month-view__days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(6, 1fr);
 }
 
-.calendar-wrapper .react-calendar__tile {
-  height: 40px;
+/* 날짜 셀 */
+.land-date-page .react-calendar__tile {
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  border-radius: 2px;
+  transition: background 0.2s;
 }
 
-.react-calendar__tile.closed-date abbr {
-  display: none; /* 예약 마감일 숨기기 */
+/* 비활성 */
+.land-date-page .react-calendar__tile:disabled {
+  background: #f5f5f5;
+  color: #aaa;
+  cursor: not-allowed;
+  border-radius: 0;
 }
 
-/* 버튼 영역 */
-.form-action-buttons {
-  display: flex;
-  justify-content: flex-start;
-  width: 100%; 
-  gap: 10px;
-  margin-top: 5px;
+/* hover */
+.land-date-page .react-calendar__tile:hover {
+  background: #f3f4f6;
 }
 
-.form-action-buttons .prev-button,
-.form-action-buttons .next-button {
-  padding: 12px 24px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  min-width: 100px;
+/* 오늘 */
+.land-date-page .react-calendar__tile--now {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+}
+
+/* 선택된 날짜 */
+.land-date-page .react-calendar__tile--active {
+  background: #2563eb !important;
+  color: #fff !important;
+}
+
+/* 휴무일 강조 */
+.land-date-page .react-calendar__tile.closed-date abbr {
+  display: none;
+}
+.land-date-page .react-calendar__tile.full-booked abbr {
+  display: none;
+}
+.land-date-page .disabled-day {
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fecaca !important;
+}
+
+.land-date-page .closed-text {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  margin-top: 4px;
+}
+/* 정원마감 */
+.full-booked {
+  background: #f3f4f6 !important;
+  color: #9ca3af !important;
+  border: 1px solid #d1d5db !important;
+  cursor: not-allowed !important;
+}
+.full-text {
+  color: #9ca3af;
+  font-size: 12px;
   font-weight: bold;
-  color: #fff;
+  text-align: center;
 }
 
-.form-action-buttons .prev-button {
-  background-color: #6c757d; /* 회색 */
+/* 버튼 영역 (달력 아래) */
+.my-btn-wrap {
+  display: flex;
+  justify-content: flex-end; /* 오른쪽 정렬 */
+  width: 100%;
+  padding: 20px;
 }
-
-.form-action-buttons .next-button {
-  background-color: #007bff; /* 파란색 */
-  margin-left: auto;
-}
-
 
 /* ---------- 놀이터 예약 신청 폼 페이지 ---------- */
 /* 전체 페이지 스타일 */
@@ -323,12 +385,3 @@ textarea {
   line-height: 1.6;
 }
 
-/* 버튼 그룹 */
-.btn_group {
-  display: flex;
-  justify-content: center; /* 중앙 정렬 */
-  gap: 10px;               /* 버튼 간격 */
-}
-.btn_group .btn:hover {
-  background: #f0f0f0;
-}

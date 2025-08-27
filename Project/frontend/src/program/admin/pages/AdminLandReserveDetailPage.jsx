@@ -25,15 +25,25 @@ const AdminLandReserveDetailPage = () => {
 
   const handleUpdateState = async () => {
     if (!window.confirm("예약 상태를 변경하시겠습니까?")) return;
-    try {
-      await api.patch(`/api/admin/reserve/${reserveCode}/state`, { reserveState: newState, });
-      alert("상태가 변경되었습니다.");
-      navigate("/admin/reserve/land");
-    } catch (err) {
-      console.error("상태 변경 실패:", err);
-      alert("상태 변경 중 오류가 발생했습니다.");
+    if (
+      detail.reserveState === "CANCEL" &&
+      (newState === "ING" || newState === "DONE")
+    ) {
+      alert("취소된 예약은 대기/승인 으로 변경할 수 없습니다.");
+      return;
     }
-  };
+
+      try {
+        await api.patch(`/api/admin/reserve/${reserveCode}/state`, {
+          reserveState: newState,
+        });
+        alert("상태가 변경되었습니다.");
+        navigate("/admin/reserve/land");
+      } catch (err) {
+        console.error("상태 변경 실패:", err);
+        alert("상태 변경 중 오류가 발생했습니다.");
+      }
+    };
 
   if (!detail) return <p>로딩 중...</p>;
 
@@ -57,9 +67,9 @@ const AdminLandReserveDetailPage = () => {
           <tr>
             <th>현재 상태</th>
             <td>
-                <select value={newState} onChange={(e) => setNewState(e.target.value)}>
-                <option value="ING">진행중(ING)</option>
-                <option value="DONE">완료(DONE)</option>
+                <select className="ui-select" value={newState} onChange={(e) => setNewState(e.target.value)}>
+                <option value="ING">대기중(ING)</option>
+                <option value="DONE">승인(DONE)</option>
                 <option value="REJ">거절(REJ)</option>
                 <option value="CANCEL">취소(CANCEL)</option>
                 </select>
@@ -81,9 +91,18 @@ const AdminLandReserveDetailPage = () => {
         </tbody>
       </table>
 
-      <div className="reserve-buttons">
-        <button onClick={() => navigate(-1)}>목록보기</button>
-        <button onClick={handleUpdateState}>상태 변경</button>
+      <div className="form_center_box">
+          <div className="temp_btn white md">
+            <button type="button" className="btn" onClick={() => navigate(-1)}>
+              목록보기
+            </button>
+          </div>
+
+          <div className="temp_btn md">
+            <button type="submit" className="btn" onClick={handleUpdateState} >
+              상태변경 
+            </button>
+          </div>
       </div>
     </div>
   );

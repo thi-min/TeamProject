@@ -35,7 +35,7 @@ public interface LandRepository extends JpaRepository<Land, Long> {
     	    SELECT new com.project.land.dto.LandCountDto(
     	        ts.id,
     	        ts.label,
-    	        l.landType,
+    	        :landType,
     	        COALESCE(SUM(
     	            CASE WHEN r.reserveState IN (
     	                com.project.reserve.entity.ReserveState.ING,
@@ -43,7 +43,8 @@ public interface LandRepository extends JpaRepository<Land, Long> {
     	            )
     	            THEN l.animalNumber ELSE 0 END
     	        ), 0),
-    	        ts.capacity
+    	        ts.capacity,
+    	        :date
     	    )
     	    FROM TimeSlot ts
     	    LEFT JOIN Land l 
@@ -55,7 +56,7 @@ public interface LandRepository extends JpaRepository<Land, Long> {
     	    WHERE ts.timeType = com.project.common.entity.TimeType.LAND
     	    GROUP BY ts.id, ts.label, ts.capacity, l.landType
     	    ORDER BY ts.startTime ASC
-    	    """)
+    	""")
     	List<LandCountDto> getLandCountInfo(
     	    @Param("date") LocalDate date,
     	    @Param("landType") LandType landType

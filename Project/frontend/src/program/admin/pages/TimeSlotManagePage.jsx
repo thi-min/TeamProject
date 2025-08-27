@@ -216,13 +216,13 @@ const TimeSlotManagePage = () => {
       {/* 탭 */}
       <div className="ts-tabs" style={{ marginBottom: "1rem" }}>
         <button
-          className={`btn ${selectedType === "LAND" ? "btn-primary" : ""}`}
+          className={`ts-btn ${selectedType === "LAND" ? "ts-btn primary" : ""}`}
           onClick={() => setSelectedType("LAND")}
         >
           놀이터
         </button>
         <button
-          className={`btn ${selectedType === "VOL" ? "btn-primary" : ""}`}
+          className={`ts-btn ${selectedType === "VOL" ? "ts-btn primary" : ""}`}
           onClick={() => setSelectedType("VOL")}
           style={{ marginLeft: "6px" }}
         >
@@ -234,31 +234,69 @@ const TimeSlotManagePage = () => {
       <div className="ts-card" style={{ marginBottom: "1rem" }}>
         <strong>새 시간대 추가</strong>
         <form onSubmit={submitNew} className="ts-form" style={{ marginTop: "0.5rem" }}>
-          <label>시작</label>
-          <input type="time" name="startTime" value={newForm.startTime} onChange={handleNewChange} required step="3600" />
-          <label>종료</label>
-          <input type="time" name="endTime" value={newForm.endTime} onChange={handleNewChange} required step="3600" />
-          <label>정원</label>
-          <input type="number" name="capacity" value={newForm.capacity} min={1} onChange={handleNewChange} />
-          <label>활성</label>
-          <input type="checkbox" name="enabled" checked={newForm.enabled} onChange={handleNewChange} />
-          <button type="submit" className="btn btn-primary">추가</button>
+          
+          <div className="form-group">
+            <label>시작</label>
+            <input 
+              type="time" 
+              name="startTime" 
+              value={newForm.startTime} 
+              onChange={handleNewChange} 
+              required 
+              step="3600" 
+            />
+          </div>
+
+          <div className="form-group">
+            <label>종료</label>
+            <input 
+              type="time" 
+              name="endTime" 
+              value={newForm.endTime} 
+              onChange={handleNewChange} 
+              required 
+              step="3600" 
+            />
+          </div>
+
+          <div className="form-group">
+            <label>정원</label>
+            <input 
+              type="number" 
+              name="capacity" 
+              value={newForm.capacity} 
+              min={1} 
+              onChange={handleNewChange} 
+            />
+          </div>
+
+          <div className="form-group">
+            <label>활성</label>
+            <input 
+              type="checkbox" 
+              name="enabled" 
+              checked={newForm.enabled} 
+              onChange={handleNewChange} 
+            />
+          </div>
+
+          <button type="submit" className="ts-btn primary">추가</button>
         </form>
       </div>
 
       {/* 규칙 버튼 */}
       {selectedType === "LAND" && (
         <div className="ts-actions">
-          <button className="btn" onClick={() => clearAll("SMALL")}>소형견 전체 해제</button>
-          <button className="btn" onClick={() => clearAll("LARGE")}>대형견 전체 해제</button>
-          <button className="btn btn-primary" onClick={saveRules} disabled={savingRules}>
+          <button className="ts-btn" onClick={() => clearAll("SMALL")}>소형견 전체 해제</button>
+          <button className="ts-btn" onClick={() => clearAll("LARGE")}>대형견 전체 해제</button>
+          <button className="ts-btn ts-btn primary" onClick={saveRules} disabled={savingRules}>
             {savingRules ? "저장 중…" : "규칙 저장"}
           </button>
         </div>
       )}
 
       {/* 테이블 */}
-      <div className="ts-tablewrap">
+      <div className="table type2 responsive border">
         <table className={`ts-table ${selectedType === "LAND" ? "land" : "vol"}`}>
           <thead>
             <tr>
@@ -349,14 +387,15 @@ const TimeSlotManagePage = () => {
 
                 <td>
                   {editSlotId === s.timeSlotId ? (
-                    <>
-                      <button className="btn btn-primary" onClick={() => saveEdit(s.timeSlotId)}>저장</button>
-                      <button className="btn" onClick={cancelEdit}>취소</button>
+                    <><div className="button-group">
+                      <button className="ts-btn ts-btn primary" onClick={() => saveEdit(s.timeSlotId)}>저장</button>
+                      <button className="ts-btn" onClick={cancelEdit}>취소</button>
+                    </div>
                     </>
                   ) : (
-                    <>
+                    <><div className="button-group">
                        <button 
-                      className="btn" 
+                      className="ts-btn" 
                       style={{ opacity: s.hasFutureReserve ? 0.5 : 1 }} // 회색 느낌만 주기
                       onClick={() => {
                         if (s.hasFutureReserve) {
@@ -370,7 +409,7 @@ const TimeSlotManagePage = () => {
                     </button>
 
                     <button 
-                      className="btn btn-danger" 
+                      className="ts-btn danger" 
                       style={{ opacity: s.hasFutureReserve ? 0.5 : 1 }}
                       onClick={() => {
                         if (s.hasFutureReserve) {
@@ -382,6 +421,7 @@ const TimeSlotManagePage = () => {
                     >
                       삭제
                     </button>
+                    </div>
                     </>
                   )}
                 </td>

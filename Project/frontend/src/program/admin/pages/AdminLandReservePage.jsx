@@ -101,9 +101,9 @@ useEffect(() => {
           onChange={(e) => setFilters({ ...filters, reserveState: e.target.value })}
         >
           <option value="">상태 전체</option>
-          <option value="ING">진행중</option>
+          <option value="ING">대기중</option>
           <option value="REJ">거절</option>
-          <option value="DONE">완료</option>
+          <option value="DONE">승인</option>
           <option value="CANCEL">취소</option>
         </select>
         <button onClick={handleSearch}>검색</button>
