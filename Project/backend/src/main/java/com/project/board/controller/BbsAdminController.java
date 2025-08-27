@@ -49,24 +49,33 @@ public class BbsAdminController {
         return ResponseEntity.ok(result);
     }
 
-    // ---------------- 관리자 게시글 작성 (NORMAL 게시판) ----------------
+ // ---------------- 관리자 게시글 작성 (NORMAL 게시판) ----------------
     @PostMapping("/bbslist/bbsadd")
     public ResponseEntity<BbsDto> createBbs(
-            HttpSession session,
+            @RequestHeader("Authorization") String authorizationHeader,
             @RequestParam BoardType type,
             @RequestPart("bbsDto") BbsDto dto,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @RequestParam(value = "insertOptions", required = false) List<String> insertOptions
     ) {
-        // 세션에서 adminId 가져오기
-    	String adminId = (String) session.getAttribute("adminId");
-        if (adminId == null) {
-            throw new IllegalStateException("관리자 로그인 후 이용해주세요.");
+        String token = authorizationHeader.replace("Bearer ", "");
+        if (!jwtTokenProvider.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String role = jwtTokenProvider.getRoleFromToken(token);
+        String adminId = jwtTokenProvider.getMemberIdFromToken(token);
+
+        if (!"ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
         if (type != BoardType.NORMAL) {
             throw new IllegalArgumentException("관리자는 NORMAL 게시판만 작성할 수 있습니다.");
         }
+
+        // ✅ bulletinType null 방지
+        dto.setBulletinType(type);
 
         if (files != null && insertOptions != null) {
             int size = Math.min(files.size(), insertOptions.size());
@@ -85,6 +94,35 @@ public class BbsAdminController {
         BbsDto created = bbsService.createBbs(dto, null, adminId, files, insertOptions, null);
         return ResponseEntity.ok(created);
     }
+
+ // ---------------- 관리자 Normal 게시글 단건 조회 ----------------
+    @GetMapping("/normal/{id}")
+    public ResponseEntity<BbsDto> getNormalBbsDetail(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        String token = authorizationHeader.replace("Bearer ", "");
+        if (!jwtTokenProvider.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String role = jwtTokenProvider.getRoleFromToken(token);
+        if (!"ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        try {
+            BbsDto dto = bbsService.getBbs(id); // Normal 게시글 조회
+            if (dto == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
 
     //답변 작성
     @PostMapping("/qna/{bbsId}/answer")
@@ -173,16 +211,26 @@ public class BbsAdminController {
     @PutMapping("/admin/{id}")
     public ResponseEntity<BbsDto> updateAdminBbs(
             @PathVariable Long id,
-            HttpSession session,
+            @RequestHeader("Authorization") String authorizationHeader,
             @RequestPart("bbsDto") BbsDto dto,
-            @RequestParam String adminId,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @RequestParam(required = false) String deletedFileIds,
             @RequestParam(value = "insertOptions", required = false) List<String> insertOptions
     ) {
-        //String adminId = (String) session.getAttribute("adminId");
-        List<Long> deleteIds = parseDeleteIds(deletedFileIds);
+        String token = authorizationHeader.replace("Bearer ", "");
+        if (!jwtTokenProvider.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
 
+        String role = jwtTokenProvider.getRoleFromToken(token);
+        String adminId = jwtTokenProvider.getMemberIdFromToken(token);
+        if (!"ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        List<Long> deleteIds = parseDeleteIds(deletedFileIds);
+        
+        // 파일 insertOptions 처리 (이미지 여부)
         if (files != null && insertOptions != null) {
             int size = Math.min(files.size(), insertOptions.size());
             for (int i = 0; i < size; i++) {
