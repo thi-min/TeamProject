@@ -1,19 +1,21 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import routes from "../../../common/routes/router"; // 중앙 라우트 객체
 
-// 카카오 콜백에서 프리필 저장에 사용하는 세션 키 (KakaoCallbackPage와 동일해야 함)
+// KakaoCallbackPage와 동일 키
 const KAKAO_PREFILL_KEY = "kakao_prefill_v1";
 
 export default function Join() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // ✅ 1) 카카오 콜백에서 넘어온 state 우선 사용
-  //    구조 예: { from:"kakao", kakaoId, prefill:{...}, via:"kakao" }
-  const kakaoState = location.state;
+  // 1) 콜백 state
+  const kakaoState =
+    location.state && typeof location.state === "object"
+      ? location.state
+      : null;
 
-  // ✅ 2) 세션 백업에서 프리필 복구 (콜백에서 직접 /join으로 온 경우 등)
+  // 2) 세션 복구
   const sessionPrefill = useMemo(() => {
     try {
       const raw = sessionStorage.getItem(KAKAO_PREFILL_KEY);
@@ -23,27 +25,58 @@ export default function Join() {
     }
   }, []);
 
-  // ✅ 3) 최종적으로 다음 페이지에 전달할 state (우선순위: location.state > session)
-  const nextState = kakaoState ?? sessionPrefill ?? null;
+  // 3) 최종 전달 state (location.state > session)
+  const nextState = useMemo(() => {
+    if (kakaoState) {
+      // ✅ 프리필 전부 유지 (name 사용 / nickname 미사용)
+      return {
+        ...kakaoState,
+        via: kakaoState.via ?? "kakao",
+        kakaoId: kakaoState.kakaoId ?? null,
+        email: kakaoState.email ?? null,
+        name: kakaoState.name ?? null,
+        gender: kakaoState.gender ?? null,
+        birthday: kakaoState.birthday ?? null, // "MMDD"
+        birthyear: kakaoState.birthyear ?? null, // "YYYY"
+        phoneNumber: kakaoState.phoneNumber ?? null,
+      };
+    }
+    return sessionPrefill ?? null;
+  }, [kakaoState, sessionPrefill]);
 
   // (예시) 약관 상태
   const [agreeTerms, setAgreeTerms] = useState(false); // 필수
-  const [agreePrivacy, setAgreePrivacy] = useState(false); // 선택(예시), 필요 시 필수로 변경
+  const [agreePrivacy, setAgreePrivacy] = useState(false); // 선택
 
-  // ✅ 4) “다음” 클릭 → /join/signup 이동 + state 함께 전달
+  // 4) 마운트 시: state 있으면 세션 백업
+  useEffect(() => {
+    if (!kakaoState) return;
+    try {
+      sessionStorage.setItem(
+        KAKAO_PREFILL_KEY,
+        JSON.stringify({
+          ...kakaoState,
+          via: kakaoState.via ?? "kakao",
+        })
+      );
+    } catch {}
+  }, [kakaoState]);
+
+  // 5) 다음 단계 이동
   const handleGoSignup = () => {
-    // 필수 약관 검증 (지금은 '사용자 준수사항'을 필수로 본 예시)
     if (!agreeTerms) {
       alert("필수 약관에 동의해주세요.");
       return;
     }
-
-    // 라우트 객체가 있으면 사용, 없으면 문자열 경로로 폴백
+    if (nextState) {
+      try {
+        sessionStorage.setItem(KAKAO_PREFILL_KEY, JSON.stringify(nextState));
+      } catch {}
+    }
     const signupPath = routes?.member?.signup?.path || "/join/signup";
-
     navigate(signupPath, {
-      replace: false, // 뒤로가기 시 약관으로 돌아올 수 있게
-      state: nextState, // 카카오 프리필/메타 전달
+      replace: false,
+      state: nextState, // ✅ kakaoId/name/birthday/birthyear/gender/phoneNumber 모두 전달
     });
   };
 
@@ -166,7 +199,7 @@ export default function Join() {
             </ul>
           </div>
 
-          {/* 선택 약관 동의 라디오 → 상태 연결(프로젝트 정책에 맞춰 필수로 바꿀 수도 있음) */}
+          {/* 선택 약관 동의 라디오 */}
           <div className="margin_t_5">
             <span className="p-form-radio">
               <input
@@ -208,7 +241,7 @@ export default function Join() {
           </Link>
         </div>
 
-        {/* 🔑 Link 대신 버튼 + navigate로 state 전달 */}
+        {/* 버튼 + navigate로 state 전달 */}
         <div className="temp_btn md">
           <button type="button" className="btn" onClick={handleGoSignup}>
             다음
