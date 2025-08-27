@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
 
+import jakarta.servlet.http.HttpSession;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
@@ -25,7 +26,7 @@ public class BbsAdminController {
     @Autowired
     private BbsService bbsService;
 
- // ---------------- 관리자용 공지사항 게시글 조회 (최신순) ----------------
+    // ---------------- 관리자용 공지사항 게시글 조회 (최신순) ----------------
     @GetMapping("/notices")
     public ResponseEntity<Map<String, Object>> getNoticeBbsList(
             @RequestParam(defaultValue = "0") int page,
@@ -34,23 +35,26 @@ public class BbsAdminController {
             @RequestParam(required = false) String memberName,
             @RequestParam(required = false) String bbscontent
     ) {
-        // type은 무조건 NORMAL
         BoardType type = BoardType.NORMAL;
-
         Map<String, Object> result = bbsService.getBbsList(type, page, size, bbstitle, memberName, bbscontent);
         return ResponseEntity.ok(result);
     }
 
-    
     // ---------------- 관리자 게시글 작성 (NORMAL 게시판) ----------------
     @PostMapping("/bbslist/bbsadd")
     public ResponseEntity<BbsDto> createBbs(
-            @RequestParam Long adminId,
+            HttpSession session,
             @RequestParam BoardType type,
             @RequestPart("bbsDto") BbsDto dto,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @RequestParam(value = "insertOptions", required = false) List<String> insertOptions
     ) {
+        // 세션에서 adminId 가져오기
+        Long adminId = (Long) session.getAttribute("adminId");
+        if (adminId == null) {
+            throw new IllegalStateException("관리자 로그인 후 이용해주세요.");
+        }
+
         if (type != BoardType.NORMAL) {
             throw new IllegalArgumentException("관리자는 NORMAL 게시판만 작성할 수 있습니다.");
         }
@@ -79,7 +83,6 @@ public class BbsAdminController {
             @PathVariable Long bbsId,
             @RequestParam String adminId,
             @RequestBody QandADto dto) {
-
         QandADto saved = bbsService.saveQna(bbsId, dto, adminId);
         return ResponseEntity.ok(saved);
     }
@@ -89,7 +92,6 @@ public class BbsAdminController {
     public ResponseEntity<QandADto> updateQnaAnswer(
             @PathVariable Long qnaId,
             @RequestBody QandADto dto) {
-
         QandADto updated = bbsService.updateQna(qnaId, dto);
         return ResponseEntity.ok(updated);
     }
@@ -98,19 +100,19 @@ public class BbsAdminController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteBbs(
             @PathVariable Long id,
-            @RequestParam Long adminId) {
-
+            HttpSession session) {
+        Long adminId = (Long) session.getAttribute("adminId");
         bbsService.deleteBbs(id, null, adminId);
         return ResponseEntity.noContent().build();
     }
 
- // ---------------- 다중 삭제 ----------------
+    // ---------------- 다중 삭제 ----------------
     @DeleteMapping("/delete-multiple")
     public ResponseEntity<Void> deleteMultipleBbs(
             @RequestParam List<Long> ids,
-            @RequestParam Long adminId) {
-
-        bbsService.deleteBbsMultiple(ids, null, adminId); // requesterMemberNum은 null, adminId 전달
+            HttpSession session) {
+        Long adminId = (Long) session.getAttribute("adminId");
+        bbsService.deleteBbsMultiple(ids, null, adminId);
         return ResponseEntity.noContent().build();
     }
 
@@ -118,12 +120,13 @@ public class BbsAdminController {
     @PutMapping("/admin/{id}")
     public ResponseEntity<BbsDto> updateAdminBbs(
             @PathVariable Long id,
-            @RequestParam Long adminId,
+            HttpSession session,
             @RequestPart("bbsDto") BbsDto dto,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @RequestParam(required = false) String deletedFileIds,
             @RequestParam(value = "insertOptions", required = false) List<String> insertOptions
     ) {
+        Long adminId = (Long) session.getAttribute("adminId");
         List<Long> deleteIds = parseDeleteIds(deletedFileIds);
 
         if (files != null && insertOptions != null) {
@@ -180,7 +183,6 @@ public class BbsAdminController {
     }
 
     // ---------------- 관리자용 FAQ 게시글 조회 (최신순) ----------------
-
     @GetMapping("/bbslist")
     public ResponseEntity<Map<String, Object>> getFaqBbsList(
             @RequestParam BoardType type,
@@ -193,13 +195,11 @@ public class BbsAdminController {
         if (type != BoardType.FAQ) {
             throw new IllegalArgumentException("관리자 FAQ 조회는 FAQ 타입만 가능합니다.");
         }
-
-        // 기존 getBbsList 호출
         Map<String, Object> result = bbsService.getBbsList(type, page, size, bbstitle, memberName, bbscontent);
         return ResponseEntity.ok(result);
     }
-    
- // ---------------- 관리자용 이미지 게시글 조회 (최신순) ----------------
+
+    // ---------------- 관리자용 이미지 게시글 조회 (최신순) ----------------
     @GetMapping("/poto")
     public ResponseEntity<Map<String, Object>> getPotoBbsList(
             @RequestParam(defaultValue = "0") int page,
@@ -208,14 +208,12 @@ public class BbsAdminController {
             @RequestParam(required = false) String memberName,
             @RequestParam(required = false) String bbscontent
     ) {
-        // type은 무조건 POTO
         BoardType type = BoardType.POTO;
-
         Map<String, Object> result = bbsService.getBbsList(type, page, size, bbstitle, memberName, bbscontent);
         return ResponseEntity.ok(result);
     }
 
- // 관리자 이미지 게시글 단건 조회
+    // 관리자 이미지 게시글 단건 조회
     @GetMapping("/poto/{id}")
     public ResponseEntity<BbsDto> getPotoBbsDetail(@PathVariable Long id) {
         BbsDto dto = bbsService.getBbs(id);
