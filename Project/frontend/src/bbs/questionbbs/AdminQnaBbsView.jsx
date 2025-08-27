@@ -55,6 +55,7 @@ function AdminQnaBbsView() {
       // 저장 후 화면에 바로 반영
       setPost((prev) => ({ ...prev, answer: res.data.answer }));
       alert("답변이 저장되었습니다.");
+      navigate("/admin/bbs/qna");
     } catch (err) {
       console.error("답변 저장 실패:", err);
       alert("답변 저장에 실패했습니다. 다시 시도해주세요.");

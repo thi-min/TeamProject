@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import api from "../../common/api/axios";
 
 function MemberNormalBbsView() {
   const { id } = useParams(); // 게시글 번호
   const [post, setPost] = useState(null);
+
+  // --- 백엔드 URL 상수 ---
+  const BASE_URL = "http://127.0.0.1:8090";
 
   useEffect(() => {
     fetchPost();
@@ -12,7 +15,7 @@ function MemberNormalBbsView() {
 
   const fetchPost = async () => {
     try {
-      const res = await axios.get(`/bbs/${id}`); // 회원용 API
+      const res = await api.get(`/bbs/${id}`); // 회원용 API
       setPost(res.data);
     } catch (error) {
       console.error("게시글 조회 오류:", error);
@@ -24,11 +27,11 @@ function MemberNormalBbsView() {
 
   return (
     <div className="bbs-container">
-      <h2>{post.bbstitle}</h2>
+      <h2>{post.bbs?.bbsTitle}</h2>
 
       <div className="bbs-content">
-        <p>{post.bbscontent}</p>
-        <p>작성일: {new Date(post.createdAt).toLocaleDateString()}</p>
+        <p>{post.bbs?.bbsContent}</p>
+        <p>작성일: {post.bbs?.createdAt ? new Date(post.bbs.createdAt).toLocaleDateString() : ""}</p>
       </div>
 
       {/* 첨부파일 */}
@@ -37,16 +40,16 @@ function MemberNormalBbsView() {
           <h4>첨부파일</h4>
           <ul>
             {post.files.map((file) => (
-              <li key={file.id}>
-                {file.url.match(/\.(jpeg|jpg|gif|png)$/i) ? (
+              <li key={file.fileNum}>
+                {file.fileUrl.match(/\.(jpeg|jpg|gif|png)$/i) ? (
                   <img
-                    src={file.url}
-                    alt={file.name}
+                    src={file.fileUrl} // 이미 백엔드에서 BASE_URL 포함됨
+                    alt={file.originalName}
                     style={{ maxWidth: "200px" }}
                   />
                 ) : (
-                  <a href={file.url} download>
-                    {file.name}
+                  <a href={file.fileUrl} download>
+                    {file.originalName}
                   </a>
                 )}
               </li>
