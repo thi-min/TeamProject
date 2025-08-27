@@ -1,6 +1,6 @@
 package com.project.banner.dto;
 
-import com.project.banner.BannerEntity;
+import com.project.banner.entity.BannerEntity;
 import lombok.*;
 
 import java.time.LocalDate;

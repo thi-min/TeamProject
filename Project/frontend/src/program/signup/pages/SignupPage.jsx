@@ -1,10 +1,19 @@
 // src/program/signup/pages/SignupPage.jsx
-// 목적: 회원가입 폼 (휴대폰번호 + 문자 수신동의 + 카카오 주소 팝업)
-// - 휴대폰 인증 팝업에서 세션에 저장한 번호(+82...)를 010 숫자만으로 1회 주입
-// - 이미 사용자가 입력한 값이 있으면 덮어쓰지 않음(안전)
-// - 성별은 "MAN"/"WOMAN" 그대로 서버로 전송
+// 목적: 회원가입 폼 (휴대폰번호 + 문자 수신동의 + 카카오 주소 팝업 + 카카오 프리필 지원)
+// - ✅ 카카오 콜백에서 navigate('/join/sigup', { state: { kakaoId, prefill, via: 'kakao' } }) 로 넘어온 데이터를 폼에 주입
+// - ✅ 휴대폰 인증 팝업에서 세션에 저장한 번호(+82...)를 010 숫자만으로 1회 주입(이미 값 있으면 덮어쓰지 않음)
+// - ✅ 성별은 "MAN"/"WOMAN" 그대로 서버로 전송 (카카오에서 온 값이 M/F/male/female 이면 변환)
+// - ✅ 카카오 가입 경로(via === 'kakao')에서는 비밀번호 검증을 건너뛰고, 서버로 memberPw=null 전송
+// -   (일반 가입 경로에서는 기존과 동일하게 비밀번호 유효성/일치 검사 수행)
 
-import React, { useCallback, useMemo, useState, useRef, useEffect } from "react";
+import React, {
+  useCallback,
+  useMemo,
+  useState,
+  useRef,
+  useEffect,
+} from "react";
+import { useLocation } from "react-router-dom"; // ⬅ 카카오 프리필 수신
 import "../style/signup.css";
 import api from "../../../common/api/axios";
 import { apiCheckDuplicateId } from "../../member/services/memberApi";
@@ -30,7 +39,29 @@ function evaluatePassword(password, passwordCheck) {
 /** 간단 이메일 형식 체크 */
 const isEmail = (v) => /\S+@\S+\.\S+/.test(v || "");
 
+/** 카카오 성별 → 프로젝트 Enum 변환 (MAN/WOMAN) */
+const normalizeSexEnum = (v) => {
+  if (!v) return "";
+  const s = String(v).toUpperCase();
+  if (s === "M" || s === "MALE") return "MAN";
+  if (s === "F" || s === "FEMALE") return "WOMAN";
+  // 이미 "MAN"/"WOMAN" 이면 그대로
+  return s;
+};
+
+/** +82 국제번호 → 국내 010 형식 숫자만 반환 */
+const e164ToLocalDigits = (p) => {
+  if (!p) return "";
+  // 모든 숫자만 추출
+  let digits = String(p).replace(/[^0-9]/g, "");
+  // 82로 시작하면 0으로 치환
+  if (digits.startsWith("82")) digits = "0" + digits.slice(2);
+  return digits;
+};
+
 export default function SignupPage() {
+  const location = useLocation(); // ⬅ 카카오 콜백에서 전달된 state 접근
+
   /** 포커스 이동용 refs */
   const refs = {
     memberId: useRef(null),
@@ -48,14 +79,18 @@ export default function SignupPage() {
     memberPw: "",
     memberPwCheck: "",
     memberName: "",
-    memberBirth: "",
-    memberPhone: "",     // ✅ 여기에 인증된 번호를 1회 주입
+    memberBirth: "", // yyyy-MM-dd
+    memberPhone: "", // 010 숫자만
     postcode: "",
-    memberAddress: "",
-    roadAddress: "",
+    memberAddress: "", // 서버 전송용(기본+상세 합친 값)
+    roadAddress: "", // 화면 표시용
     detailAddress: "",
-    smsAgree: false,     // ✅ 문자 수신동의 체크박스
-    memberSex: "MAN",    // ✅ "MAN"/"WOMAN" 그대로 전송
+    smsAgree: false, // 문자 수신동의 체크박스
+    memberSex: "MAN", // "MAN"/"WOMAN"
+
+    // ⬇ 카카오 연동 정보 (숨김 필드로 서버에 함께 전송)
+    kakaoId: "",
+    via: "", // "kakao" | "" (일반가입)
   });
 
   /** 아이디(이메일) 중복체크 상태 */
@@ -78,16 +113,42 @@ export default function SignupPage() {
 
   /** 유틸 */
   const onlyDigits = useCallback((v) => (v || "").replace(/[^0-9]/g, ""), []);
-  const normalizeDate = useCallback((d) => (d ? String(d).slice(0, 10) : ""), []);
+  const normalizeDate = useCallback(
+    (d) => (d ? String(d).slice(0, 10) : ""),
+    []
+  );
 
-  /** ✅ +82(국제) → 010(국내) 변환 */
-  const e164ToLocal = useCallback((p) => {
-    if (!p) return "";
-    const m = String(p).trim().match(/^\+82(\d{9,10})$/);
-    return m ? `0${m[1]}` : p; // 예: +821012345678 → 01012345678
-  }, []);
+  /** ✅ [1] 카카오 프리필 주입: location.state에 담긴 값으로 초기 세팅 (이미 입력한 값은 덮어쓰지 않음) */
+  useEffect(() => {
+    const s = location.state;
+    const pf = s?.prefill;
+    if (!pf) return;
 
-  /** ✅ [추가] 인증된 번호 세션에서 1회 주입 */
+    setFormData((prev) => {
+      // 각 필드는 기존 값이 비어있을 때만 주입 (사용자가 이미 입력한 값은 유지)
+      const next = { ...prev };
+
+      if (!prev.kakaoId) next.kakaoId = s?.kakaoId || "";
+      if (!prev.via) next.via = s?.via || "kakao";
+
+      if (!prev.memberName) next.memberName = pf.memberName || "";
+      if (!prev.memberId) next.memberId = (pf.memberId || "").toLowerCase();
+      if (!prev.memberBirth) next.memberBirth = pf.memberBirth || "";
+      if (!prev.memberSex)
+        next.memberSex = normalizeSexEnum(pf.memberSex || "");
+
+      // 전화번호는 읽기전용이라 비어있을 때만 주입
+      if (!prev.memberPhone) {
+        const digits = e164ToLocalDigits(pf.memberPhone || "");
+        if (digits.length >= 10 && digits.length <= 11)
+          next.memberPhone = digits;
+      }
+
+      return next;
+    });
+  }, [location.state]);
+
+  /** ✅ [2] 인증된 번호 세션에서 1회 주입 (카카오 프리필보다 늦게 동작하더라도 비어있으면 주입) */
   useEffect(() => {
     try {
       const verified = sessionStorage.getItem("phoneVerified") === "true";
@@ -95,29 +156,22 @@ export default function SignupPage() {
       if (!verified || !e164) return;
 
       setFormData((prev) => {
-        // 이미 사용자가 입력해둔 값이 있으면 덮어쓰지 않음
         if (prev.memberPhone && prev.memberPhone.trim().length > 0) return prev;
-        const local = e164ToLocal(e164);
-        const digits = onlyDigits(local);
-        // 10~11자리일 때만 주입
-        if (digits.length >= 10 && digits.length <= 11) {
+        const digits = e164ToLocalDigits(e164);
+        if (digits.length >= 10 && digits <= 11) {
           return { ...prev, memberPhone: digits };
         }
         return prev;
       });
-
-      // 주입 후 플래그를 비워 반복 주입 방지(선택)
-      // sessionStorage.removeItem("phoneVerified");
-      // sessionStorage.removeItem("verifiedPhone");
     } catch {}
-  }, [e164ToLocal, onlyDigits]);
+  }, []);
 
   /** input 변경 핸들러 */
   const handleChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
 
     if (name === "memberPhone") {
-      // 전화번호는 숫자만 허용
+      // 전화번호는 숫자만 허용 (현재 readOnly라 실제 변경은 없지만 방어적으로 유지)
       const onlyNums = (value || "").replace(/[^0-9]/g, "");
       setFormData((prev) => ({ ...prev, memberPhone: onlyNums }));
       return;
@@ -139,7 +193,7 @@ export default function SignupPage() {
         });
       }
 
-      // 비밀번호 유효성 재평가
+      // 비밀번호 유효성 재평가 (카카오 경로라도 입력하면 평가는 해줌)
       if (name === "memberPw" || name === "memberPwCheck") {
         setPwState(evaluatePassword(next.memberPw, next.memberPwCheck));
       }
@@ -181,10 +235,17 @@ export default function SignupPage() {
         available,
         message:
           message ||
-          (available ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다."),
+          (available
+            ? "사용 가능한 아이디입니다."
+            : "이미 사용 중인 아이디입니다."),
         lastCheckedId: email,
       });
-      alert(message || (available ? "사용 가능한 아이디입니다." : "이미 사용 중인 아이디입니다."));
+      alert(
+        message ||
+          (available
+            ? "사용 가능한 아이디입니다."
+            : "이미 사용 중인 아이디입니다.")
+      );
     } catch (err) {
       console.error(err);
       setIdCheck({
@@ -203,7 +264,9 @@ export default function SignupPage() {
     return new Promise((resolve, reject) => {
       if (window.daum && window.daum.Postcode) return resolve();
 
-      const existing = document.querySelector('script[data-daum-postcode="true"]');
+      const existing = document.querySelector(
+        'script[data-daum-postcode="true"]'
+      );
       if (existing) {
         existing.addEventListener("load", () => resolve());
         existing.addEventListener("error", (e) => reject(e));
@@ -211,11 +274,13 @@ export default function SignupPage() {
       }
 
       const script = document.createElement("script");
-      script.src = "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
+      script.src =
+        "https://t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js";
       script.async = true;
       script.setAttribute("data-daum-postcode", "true");
       script.onload = () => resolve();
-      script.onerror = () => reject(new Error("Daum Postcode script load failed"));
+      script.onerror = () =>
+        reject(new Error("Daum Postcode script load failed"));
       document.head.appendChild(script);
     });
   }, []);
@@ -234,8 +299,8 @@ export default function SignupPage() {
           setFormData((prev) => ({
             ...prev,
             postcode: zonecode,
-            roadAddress: roadAddr,      // 화면표시용
-            memberAddress: baseAddress, // 서버전송용
+            roadAddress: roadAddr, // 화면표시용
+            memberAddress: baseAddress, // 서버전송용(기본주소)
           }));
         },
       }).open();
@@ -249,6 +314,8 @@ export default function SignupPage() {
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
+
+      const isKakao = formData.via === "kakao";
 
       // 기본 검증
       if (!formData.memberId || !isEmail(formData.memberId)) {
@@ -287,10 +354,14 @@ export default function SignupPage() {
         alert("주소를 입력해주세요.");
         return;
       }
-      if (!pwState.valid) {
-        alert(pwState.issues[0]);
-        refs.memberPw.current?.focus();
-        return;
+
+      // ⚠️ 비밀번호 검증: 카카오 경로는 비밀번호 입력/검증을 건너뜀 (서버에 null 전송)
+      if (!isKakao) {
+        if (!pwState.valid) {
+          alert(pwState.issues[0]);
+          refs.memberPw.current?.focus();
+          return;
+        }
       }
 
       // 전화번호 숫자/길이 검증
@@ -302,25 +373,30 @@ export default function SignupPage() {
       }
 
       // 주소 길이 방어(필요 시 길이 조정)
-      const safeAddress = `${formData.memberAddress || ""} ${formData.detailAddress || ""}`
+      const safeAddress = `${formData.memberAddress || ""} ${
+        formData.detailAddress || ""
+      }`
         .trim()
         .slice(0, 100);
 
-      // 서버 전송 payload
+      // 서버 전송 payload (일반 가입 + 카카오 연동 키 포함)
       const payload = {
-        memberId: normalizedId,
-        memberPw: (formData.memberPw || "").trim(),
+        memberId: normalizedId, // 로그인 ID(이메일)
+        memberPw: isKakao ? null : (formData.memberPw || "").trim(), // 카카오는 null
         memberName: (formData.memberName || "").trim(),
         memberBirth: normalizeDate(formData.memberBirth), // yyyy-MM-dd
-        memberPhone: phoneDigits,                         // 010 숫자만
-        memberAddress: safeAddress,
-        smsAgree: !!formData.smsAgree,                    // boolean
-        memberSex: formData.memberSex,                    // "MAN" | "WOMAN"
+        memberPhone: phoneDigits, // 010 숫자만
+        memberAddress: safeAddress, // 기본+상세 합본
+        smsAgree: !!formData.smsAgree, // boolean
+        memberSex: formData.memberSex, // "MAN" | "WOMAN"
+        kakaoId: formData.kakaoId || null, // ⬅ 중요: 연동키
+        via: formData.via || "", // 서버에서 분기 참고용(선택)
       };
 
       console.log("[SIGNUP payload]", payload);
 
       try {
+        // ✅ 기존 회원가입 API 사용 (백엔드에서 kakaoId 존재 시 소셜가입으로 분기하도록 처리)
         await api.post("/join/signup", payload, {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
@@ -346,7 +422,11 @@ export default function SignupPage() {
 
   return (
     <div className="signup-container">
+      {/* ⬇ via/kakaoId는 숨김 필드로도 포함 → 서버 디버깅 및 폼 직전 확인용 */}
       <form noValidate onSubmit={handleSubmit}>
+        <input type="hidden" name="via" value={formData.via || ""} />
+        <input type="hidden" name="kakaoId" value={formData.kakaoId || ""} />
+
         <div className="form_top_box">
           <div className="form_top_item">
             <div className="form_icon type2"></div>
@@ -407,6 +487,12 @@ export default function SignupPage() {
                       name="memberPw"
                       value={formData.memberPw}
                       onChange={handleChange}
+                      // 카카오 경로일 때는 선택 입력(빈 값이어도 전송 시 null 처리됨)
+                      placeholder={
+                        formData.via === "kakao"
+                          ? "카카오 가입은 비밀번호 없이 진행됩니다(선택 입력)."
+                          : ""
+                      }
                     />
                   </div>
                   <span className="form_winning">
@@ -426,9 +512,14 @@ export default function SignupPage() {
                       name="memberPwCheck"
                       value={formData.memberPwCheck}
                       onChange={handleChange}
+                      placeholder={
+                        formData.via === "kakao"
+                          ? "카카오 가입은 비밀번호 확인이 필요하지 않습니다."
+                          : ""
+                      }
                     />
                   </div>
-                  {formData.memberPwCheck && (
+                  {formData.memberPwCheck && formData.via !== "kakao" && (
                     <div
                       className={`hint ${pwState.same ? "ok" : "error"}`}
                       style={{ marginTop: 8 }}
@@ -550,7 +641,11 @@ export default function SignupPage() {
                       />
                     </div>
                     <div className="temp_btn md">
-                      <button type="button" className="btn" onClick={openPostcodePopup}>
+                      <button
+                        type="button"
+                        className="btn"
+                        onClick={openPostcodePopup}
+                      >
                         주소검색
                       </button>
                     </div>

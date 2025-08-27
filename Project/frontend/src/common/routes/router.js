@@ -71,6 +71,7 @@ const routes = {
     memberdata: { path: "/member/mypage/memberdata", label: "회원정보" },
     update: { path: "/member/mypage/memberdata/update", label: "회원정보 수정" },
     delete: { path: "/member/mypage/update/delete", label: "회원 탈퇴" },
+
     reserves: { path: "/member/mypage/reserves", label: "예약 내역 조회" },
     landReserveDetail: { path: "/member/mypage/reserves/land/:reserveCode", label: "놀이터 예약 상세보기" },
     volunteerReserveDetail: { path: "/member/mypage/reserves/volunteer/:reserveCode", label: "봉사 예약 상세보기" },
@@ -87,11 +88,28 @@ const routes = {
       detail: (id) => `/member/funds/${id}`,
     },
 
-    changepw: { path: "/update-password", label: "비밀번호 변경" },
-    mypage: { path: "/mypage", label: "마이페이지" },
-    update: { path: "/mypage/update", label: "회원정보 수정" },
-    delete: { path: "/mypage/update/delete", label: "회원 탈퇴" },
+    // changepw: { path: "/update-password", label: "비밀번호 변경" },
+    // mypage: { path: "/mypage", label: "마이페이지" },
+    // update: { path: "/mypage/update", label: "회원정보 수정" },
+    // delete: { path: "/mypage/update/delete", label: "회원 탈퇴" },
+
   },
+
+  //카카오 관련
+  kakao: {
+    callback: { path: "/oauth/kakao/callback", label: "카카오 콜백" },
+  },
+  // // 후원 경로
+  // fund: {
+  //   root: { path: "/fund", label: "후원 메인" },
+  //   fundForm: { path: "/fund/money", label: "후원금 신청" },
+  //   goodsForm: { path: "/fund/goods", label: "후원물품 신청" },
+  //   recurringForm: { path: "/fund/recurring", label: "정기후원 신청" },
+  //   fundDetails: { path: "/fund/money-details", label: "후원금 상세" },
+  //   goodsDetails: { path: "/fund/goods-details", label: "후원물품 상세" },
+  //   recurringDetails: { path: "/fund/recurring-details", label: "정기후원 상세" },
+
+  // },
 
   // ==============================
   // 후원(Fund) 관련
@@ -112,6 +130,7 @@ const routes = {
   admin: {
     admin: { path: "/admin", label: "관리자 페이지" },
     password: { path: "/admin/updatePw", label: "관리자 비밀번호 변경" },
+
     dashboard: { path: "/admin/dashboard", label: "관리자 홈" },
     members: { path: "/admin/members", label: "회원 관리" },
     memberDetail: (id) => `/admin/members/${id}`,
@@ -128,7 +147,15 @@ const routes = {
       detail: (id) => `/admin/adopt/detail/${id}`,
       regist: { path: "/admin/adopt/regist", label: "입양 신청서 작성" },
       update: (id) => `/admin/adopt/update/${id}`,
+
+    membersList: { path: "/admin/membersList", label: "회원 목록" },
+    memberDetail: {
+      path: "/admin/membersList/:memberNum",
+      build: (id) => `/admin/membersList/${id}`,
+      label: "회원 상세",
     },
+  },
+
 
     // 동물 관리
     animal: {
@@ -149,6 +176,7 @@ const routes = {
     volunteerReserveManage: { path: "/admin/reserve/volunteer", label: "봉사 예약 관리" },
     landReserveDetail: { path: "/admin/reserve/land/:reserveCode", label: "놀이터 예약 상세보기" },
     volunteerReserveDetail: { path: "/admin/reserve/volunteer/:reserveCode", label: "봉사 예약 상세보기" },
+
   },
 
   // ==============================

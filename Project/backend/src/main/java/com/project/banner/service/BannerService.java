@@ -1,6 +1,8 @@
-package com.project.banner;
+package com.project.banner.service;
 
 import com.project.banner.dto.*;
+import com.project.banner.entity.BannerEntity;
+import com.project.banner.repository.BannerRepository;
 import com.project.admin.entity.AdminEntity;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

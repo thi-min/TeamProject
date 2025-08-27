@@ -4,6 +4,8 @@ import { Route } from "react-router-dom";
 import routes from "./router";
 
 import { LogoutLink } from "../../program/login/pages/LogoutLink"; //로그아웃
+
+//권한 부여
 import { RequireMember } from "../components/RequireUser"; //사용자
 import RequireAdmin from "../components/RequireAdmin"; //관리자
 
@@ -24,9 +26,15 @@ import MyReserveListPage from "../../program/member/pages/MyReserveListPage";
 import LandReserveDetailPage from "../../program/member/pages/LandReserveDetailPage";
 import VolunteerReserveDetailPage from "../../program/member/pages/VolunteerReserveDetailPage";
 
+
 // ==============================
 // 후원(Fund) 관련 페이지
 // ==============================
+
+//카카오
+import KakaoCallbackPage from "../../program/login/pages/KakaoCallbackPage"; //카카오 로그인 콜백
+
+
 
 // 📌 layoutRoutes 정의
 
@@ -162,8 +170,8 @@ const layoutRoutes = [
   <Route key="qna-bbs-write" path="/bbs/qna/write" element={<QnaBbsWrite />} />,
   <Route key="qna-bbs-view" path="/bbs/qna/:id" element={<QnaBbsView />} />,
   <Route key="qna-bbs-edit" path="/bbs/qna/edit/:id" element={<QnaBbsEdit />} />,
-  <Route key="qna-bbs-admin" path="/admin/bbs/qna" element={<AdminQnaBbs />} />,
-  <Route key="qna-bbs-admin-view" path="/admin/qna/view/:id" element={<AdminQnaBbsView />} />,
+  <Route key="qna-bbs-admin" path="/admin/bbs/qna" element={ <RequireAdmin><AdminQnaBbs /></RequireAdmin>} />,
+  <Route key="qna-bbs-admin-view" path="/admin/qna/view/:id" element={ <RequireAdmin><AdminQnaBbsView /></RequireAdmin>} />,
   <Route key="qna-bbs-admin-dummy" path="/bbs/admin/qna/dummy" element={<AdminQnaBbsDummy />} />,
 
 
@@ -246,8 +254,11 @@ const layoutRoutes = [
   <Route
     key="update-password"
     path={routes.member.changepw.path}
+
     element={<RequireMember><ChangePw /></RequireMember>}
+
   />, //비밀번호 변경
+
 
 
   // ------------------------------
@@ -347,13 +358,40 @@ const layoutRoutes = [
   <Route key="mypage-reserve-volunteer-detail" path={routes.member.volunteerReserveDetail.path} element={<RequireMember><VolunteerReserveDetailPage /></RequireMember>} />,
 
 
+  //카카오
+  <Route
+    key="kakao-callback"
+    path={routes.kakao.callback.path}
+    element={<KakaoCallbackPage />}
+  />, //콜백 연결
+
+
   //관리자
   // <Route key="admin" path={routes.admin.admin.path} element={<Admin />} />, //관리자 로그인시 출력
+  // <Route
+  //   key="updatePw"
+  //   path={routes.admin.password.path}
+  //   element={<AdminPw />}
+  // />, //관리자 비밀번호 변경
+
   <Route
-    key="updatePw"
-    path={routes.admin.password.path}
-    element={<AdminPw />}
-  />, //관리자 비밀번호 변경
+    key="memberList"
+    path={routes.admin.membersList.path}
+    element={
+      <RequireAdmin>
+        <MemberList />
+      </RequireAdmin>
+    }
+  />, //관리자 회원목록
+  <Route
+    key="memberDetail"
+    path={routes.admin.memberDetail.path}
+    element={
+      <RequireAdmin>
+        <MemberDetail />
+      </RequireAdmin>
+    }
+  />, //관리자 회원상세보기
 
 ];
 

@@ -32,6 +32,7 @@ public interface MemberService {
     //아이디 중복체크
     MemberIdCheckResponseDto checkDuplicateMemberId(String memberId);
     boolean isDuplicatedMemberId(String memberId);
+    
     //로그인
     //@param - 로그인요청 - MemberLoginRequestDto
     //@return - 로그인응답 - MemberLoginResponseDto
@@ -81,8 +82,9 @@ public interface MemberService {
     //회원탈퇴
     MemberDeleteDto memberOut(Long memberNum, String requesterId, String message);
 	
-	//카카오 로그인 콜백 처리 (인가코드 → 토큰 → 회원 조회 or 신규)
+    //카카오 인가코드(code)를 받아 로그인 처리
 	MemberLoginResponseDto handleKakaoLogin(String code) throws Exception;
+
 
 	//카카오 회원가입
     MemberEntity kakaoSignUp(KakaoSignUpRequestDto dto);
@@ -91,6 +93,4 @@ public interface MemberService {
     //회원 번호로 회원 객체를 찾아 반환
     MemberEntity findByMemberNum(Long memberNum);
     
-    
-
 }

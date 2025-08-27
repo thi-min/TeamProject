@@ -1,7 +1,6 @@
 package com.project.member.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Optional;
 
 import org.springframework.dao.DataIntegrityViolationException;
@@ -14,7 +13,6 @@ import org.springframework.web.server.ResponseStatusException;
 import com.project.common.jwt.JwtTokenProvider;
 import com.project.common.util.JasyptUtil;
 import com.project.member.dto.AddressUpdateRequestDto;
-import com.project.member.dto.KakaoSignUpRequestDto;
 import com.project.member.dto.KakaoUserInfoDto;
 import com.project.member.dto.MemberAuthResult;
 import com.project.member.dto.MemberDeleteDto;
@@ -48,60 +46,160 @@ public class MemberServiceImpl implements MemberService {
 	private final JwtTokenProvider jwtTokenProvider;
 	
 	//회원가입
-	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
+	@Transactional // 하나의 트랜잭션으로 처리(중간 에러 시 전체 롤백)
 	@Override
 	public MemberSignUpResponseDto sigup(MemberSignUpRequestDto dto) {
 
-		//아이디 중복체크 2차 방어코드
-		if (memberRepository.existsByMemberId(dto.getMemberId())) {
-		    throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
-		}
-		
-		//비밀번호 암호화
-		String encodedPw = passwordEncoder.encode(dto.getMemberPw());
-		
-		//핸드폰번호 암호화
-		String encryptedPhone = JasyptUtil.encrypt(dto.getMemberPhone());
-        
-		//Entity 변환
-		MemberEntity newMember = MemberEntity.builder()
-				.memberId(dto.getMemberId())
-				.memberPw(encodedPw)
-//				.memberPw(dto.getMemberPw())
-				.memberName(dto.getMemberName())
-				.memberBirth(dto.getMemberBirth())
-//				.memberPhone(dto.getMemberPhone())
-				.memberPhone(encryptedPhone)
-				.memberAddress(dto.getMemberAddress())
-				.memberDay(LocalDate.now()) 
-				.memberSex(dto.getMemberSex())
-		        .memberState(MemberState.ACTIVE) // 기본 상태
-		        .memberLock(false)
-		        .smsAgree(dto.isSmsAgree())
-		        .kakaoId(dto.getKakaoId())
-		        .build();
-		//DB저장
-		MemberEntity saved = memberRepository.save(newMember);
-		
-		//응답 DTO 반환
-		return new MemberSignUpResponseDto(null, saved.getMemberId(), "회원가입 완료");
+	    // ─────────────────────────────────────────────────────────────
+	    // 0) 입력 정규화 및 카카오 가입 여부 판별
+	    //   - 이메일은 소문자/trim 정규화
+	    //   - kakaoId 존재 시 소셜 가입으로 분기 (비밀번호 null 저장)
+	    // ─────────────────────────────────────────────────────────────
+	    final String emailRaw = dto.getMemberId();
+	    final String email = (emailRaw == null ? "" : emailRaw.trim().toLowerCase());
+
+	    final String kakaoIdRaw = dto.getKakaoId();
+	    final String kakaoId = (kakaoIdRaw == null ? "" : kakaoIdRaw.trim());
+	    final boolean isKakaoSignup = !kakaoId.isEmpty();
+
+	    // ─────────────────────────────────────────────────────────────
+	    // 1) 2차 방어: 아이디(이메일) 중복 체크
+	    //    - 기존 로직 유지 (existsByMemberId)
+	    // ─────────────────────────────────────────────────────────────
+	    if (memberRepository.existsByMemberId(email)) {
+	        throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+	    }
+
+	    // (옵션) 이메일 형식 간단 검증
+	    if (!email.matches("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")) {
+	        throw new IllegalArgumentException("이메일 형식이 올바르지 않습니다.");
+	    }
+
+	    // ─────────────────────────────────────────────────────────────
+	    // 1-2) 카카오 가입일 경우: kakaoId 중복 방지
+	    //     - findFirstByKakaoId(...) 메서드가 Repository에 있어야 합니다.
+	    // ─────────────────────────────────────────────────────────────
+	    if (isKakaoSignup && memberRepository.findFirstByKakaoId(kakaoId).isPresent()) {
+	        throw new IllegalArgumentException("이미 카카오 계정으로 가입된 사용자입니다.");
+	    }
+
+	    // ─────────────────────────────────────────────────────────────
+	    // 2) 비밀번호 처리
+	    //    - 일반 가입: 평소대로 암호화
+	    //    - 카카오 가입: 비밀번호 없이 가입 → DB에 null 저장
+	    // ─────────────────────────────────────────────────────────────
+	    final String encodedPw;
+	    if (isKakaoSignup) {
+	        encodedPw = null; // 소셜 계정은 비번 없이 가입
+	    } else {
+	        if (dto.getMemberPw() == null || dto.getMemberPw().isBlank()) {
+	            throw new IllegalArgumentException("비밀번호를 입력해주세요.");
+	        }
+	        // 기존 로직 유지: 비밀번호 암호화
+	        encodedPw = passwordEncoder.encode(dto.getMemberPw());
+	    }
+
+	    // ─────────────────────────────────────────────────────────────
+	    // 3) 휴대폰번호 암호화 (기존 로직 + 숫자만 보정)
+	    //    - 카카오/일반 관계없이 숫자만 추출 후 Jasypt 암호화
+	    // ─────────────────────────────────────────────────────────────
+	    final String phoneDigits = dto.getMemberPhone() == null
+	            ? null
+	            : dto.getMemberPhone().replaceAll("[^0-9]", ""); // 숫자만
+	    final String encryptedPhone = JasyptUtil.encrypt(phoneDigits);
+
+	    // ─────────────────────────────────────────────────────────────
+	    // 4) 엔티티 변환 및 저장 (기존 필드 유지 + kakaoId 분기 세팅)
+	    //    - memberState: 기본 ACTIVE
+	    //    - memberLock: false
+	    //    - smsAgree: 기존 dto.isSmsAgree() 그대로 사용
+	    //    - kakaoId: 카카오 가입이면 값 세팅, 일반 가입이면 null
+	    // ─────────────────────────────────────────────────────────────
+	    MemberEntity newMember = MemberEntity.builder()
+	            .memberId(email)                            // (정규화된 이메일)
+	            .memberPw(encodedPw)                        // (카카오면 null)
+	            .memberName(dto.getMemberName())
+	            .memberBirth(dto.getMemberBirth())
+	            .memberPhone(encryptedPhone)                // (암호화 저장)
+	            .memberAddress(dto.getMemberAddress())
+	            .memberDay(LocalDate.now())
+	            .memberSex(dto.getMemberSex())
+	            .memberState(MemberState.ACTIVE)            // 기본 상태
+	            .memberLock(false)
+	            .smsAgree(dto.isSmsAgree())
+	            .kakaoId(isKakaoSignup ? kakaoId : null)    // 핵심: 소셜 연동 키
+	            .build();
+
+	    MemberEntity saved = memberRepository.save(newMember);
+
+	    // ─────────────────────────────────────────────────────────────
+	    // 5) 응답 DTO 반환 (기존 형식 유지)
+	    // ─────────────────────────────────────────────────────────────
+	    return new MemberSignUpResponseDto(
+	            null,                      // 필요 시 리턴 필드 확장
+	            saved.getMemberId(),       // 가입된 이메일(ID)
+	            "회원가입 완료"
+	    );
 	}
-	
-//	//아이디 중복체크
-//	@Override
-//	public MemberIdCheckResponseDto checkDuplicateMemberId(String memberId) {
-//	    boolean exists = memberRepository.existsByMemberId(memberId);
-//	    String message = exists ? "사용할 수 없는 아이디입니다." : "사용 가능한 아이디입니다.";
-//	    return new MemberIdCheckResponseDto(exists, message);
+
+//	public MemberSignUpResponseDto sigup(MemberSignUpRequestDto dto) {
+//
+//		//아이디 중복체크 2차 방어코드
+//		if (memberRepository.existsByMemberId(dto.getMemberId())) {
+//		    throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
+//		}
+//		
+//		//비밀번호 암호화
+//		String encodedPw = passwordEncoder.encode(dto.getMemberPw());
+//		
+//		//핸드폰번호 암호화
+//		String encryptedPhone = JasyptUtil.encrypt(dto.getMemberPhone());
+//        
+//		//Entity 변환
+//		MemberEntity newMember = MemberEntity.builder()
+//				.memberId(dto.getMemberId())
+//				.memberPw(encodedPw)
+////				.memberPw(dto.getMemberPw())
+//				.memberName(dto.getMemberName())
+//				.memberBirth(dto.getMemberBirth())
+////				.memberPhone(dto.getMemberPhone())
+//				.memberPhone(encryptedPhone)
+//				.memberAddress(dto.getMemberAddress())
+//				.memberDay(LocalDate.now()) 
+//				.memberSex(dto.getMemberSex())
+//		        .memberState(MemberState.ACTIVE) // 기본 상태
+//		        .memberLock(false)
+//		        .smsAgree(dto.isSmsAgree())
+//		        .kakaoId(dto.getKakaoId())
+//		        .build();
+//		//DB저장
+//		MemberEntity saved = memberRepository.save(newMember);
+//		
+//		//응답 DTO 반환
+//		return new MemberSignUpResponseDto(null, saved.getMemberId(), "회원가입 완료");
 //	}
 	
+	//아이디 중복체크
 	@Override
-    public MemberIdCheckResponseDto checkDuplicateMemberId(String memberId) {
-        log.info("[svc] existsByMemberId({}) 호출", memberId);
-        boolean exists = memberRepository.existsByMemberId(memberId); // 🔥 여기서 예외가 나면 500
-        String message = exists ? "사용할 수 없는 아이디입니다." : "사용 가능한 아이디입니다.";
-        return new MemberIdCheckResponseDto(exists, message);
+	public MemberIdCheckResponseDto checkDuplicateMemberId(String memberId) {
+	    boolean exists = memberRepository.existsByMemberId(memberId);
+	    String message = exists ? "사용할 수 없는 아이디입니다." : "사용 가능한 아이디입니다.";
+	    return new MemberIdCheckResponseDto(exists, message);
+	}
+	//아이디 중복체크 true false
+   @Override
+    public boolean isDuplicatedMemberId(String memberId) {
+        // 방어코드: null/blank는 중복 아님으로 처리(컨트롤러에서 이미 막지만 한 번 더)
+        if (memberId == null || memberId.isBlank()) return false;
+        return memberRepository.existsByMemberId(memberId);
     }
+//	@Override
+//    public MemberIdCheckResponseDto checkDuplicateMemberId(String memberId) {
+//        log.info("[svc] existsByMemberId({}) 호출", memberId);
+//        boolean exists = memberRepository.existsByMemberId(memberId); // 🔥 여기서 예외가 나면 500
+//        String message = exists ? "사용할 수 없는 아이디입니다." : "사용 가능한 아이디입니다.";
+//        return new MemberIdCheckResponseDto(exists, message);
+//    }
 //	//로그인
 //	 @Override
 //    public MemberLoginResponseDto login(MemberLoginRequestDto dto) {
@@ -454,108 +552,7 @@ public class MemberServiceImpl implements MemberService {
   		//4. 존재여부 판단 > 중복 확인 처리
 	}
 	
-	//카카오 회원가입
-	@Transactional
-	@Override
-	public MemberEntity kakaoSignUp(KakaoSignUpRequestDto dto) {
-		//중복방지 이미 kakaoID가 있는 경우 예외 처리
-		if (memberRepository.findByKakaoId(dto.getKakaoId()).isPresent()) {
-	        throw new IllegalArgumentException("이미 가입된 카카오 계정입니다.");
-	    }
-
-	    // LocalDate 생년월일 처리
-	    LocalDate birth = dto.getMemberBirth();
-
-	    MemberEntity newMember = MemberEntity.builder()
-    		.memberId(dto.getKakaoId())           // memberId로 kakaoId 사용
-            .kakaoId(dto.getKakaoId())            // 중복 방지를 위해 별도로 저장
-            .memberName(dto.getMemberName())
-            .memberBirth(dto.getMemberBirth())
-            .memberPhone(dto.getMemberPhone())
-            .memberAddress(dto.getMemberAddress())
-            .memberSex(dto.getMemberSex())
-            .smsAgree(dto.isSmsAgree())
-            .memberDay(LocalDate.now())
-            .smsAgree(true)                          // SNS 가입 여부
-            .memberPw(null)                       // 비밀번호 없음
-            .build();
-
-	    return memberRepository.save(newMember);
-	}
-	//카카오 로그인 처리 메서드
-    public MemberLoginResponseDto handleKakaoLogin(String code) throws Exception {
-        // 1️⃣ 카카오에서 받은 인가 코드(code)를 통해 access token 요청
-        String accessToken = kakaoApiService.getAccessToken(code);
-
-        // 2️⃣ access token을 사용하여 사용자 정보 요청 (kakaoId, email, nickname 등)
-        KakaoUserInfoDto userInfo = kakaoApiService.getUserInfo(accessToken);
-
-        // 3️⃣ DB에 해당 kakaoId로 등록된 회원이 있는지 확인
-        Optional<MemberEntity> existing = memberRepository.findByKakaoId(userInfo.getKakaoId());
-
-        // 4️⃣ 이미 등록된 회원이라면 → 로그인 처리 후 JWT 토큰 발급
-        if (existing.isPresent()) {
-            MemberEntity member = existing.get();
-
-            // ✅ access token, refresh token 생성 (사용자 고유 식별자는 kakaoId 사용)
-            String jwtAccess = jwtTokenProvider.generateAccessToken(member.getKakaoId());
-            String jwtRefresh = jwtTokenProvider.generateRefreshToken(member.getKakaoId());
-
-            // 🔁 로그인 응답 객체 반환
-            return MemberLoginResponseDto.builder()
-                    .memberId(member.getMemberId())           // 이메일(또는 kakaoId)
-                    .memberName(member.getMemberName())       // 회원 이름
-                    .accessToken(jwtAccess)                   // JWT Access Token
-                    .refreshToken(jwtRefresh)                 // JWT Refresh Token
-                    .requireSignup(false)                     // 추가 회원가입 불필요
-                    .build();
-        } else {
-            // 5️⃣ 등록된 회원이 없으면 → 회원가입 필요 플래그와 함께 사용자 정보 전달
-
-            // 🎯 yyyy-MM-dd 형식으로 생년월일 변환
-            String birth = parseBirth(userInfo.getBirthyear(), userInfo.getBirthday());
-
-            // 🎯 전화번호 하이픈 형식으로 변환
-            String phone = formatPhoneNumber(userInfo.getPhoneNumber());
-
-            // ➕ 프론트에서 추가 정보 입력 후 회원가입 진행을 위해 필요한 데이터 전달
-            return MemberLoginResponseDto.builder()
-                    .memberId(userInfo.getKakaoId())          // kakaoId → 회원 ID 대체
-                    .kakaoId(userInfo.getKakaoId())           // 고유 식별자
-                    .memberName(userInfo.getNickname())       // 사용자 닉네임
-                    .gender(userInfo.getGender())             // 성별 (male/female)
-                    .birth(birth)                             // 생년월일 (yyyy-MM-dd)
-                    .phone(phone)                             // 전화번호 (010-xxxx-xxxx)
-                    .requireSignup(true)                      // 회원가입 필요 플래그
-                    .build();
-        }
-    }
-    //생년월일 처리
-  	private String parseBirth(String year, String mmdd) {
-  		if(year != null && mmdd != null && mmdd.length() == 4) {
-  			return year + "-" + mmdd.substring(0,2) + "-" + mmdd.substring(2);
-  		}
-  		return null;
-  	}
-      //휴대폰 번호 데이터 처리(+82삭제)
-  	private String formatPhoneNumber(String rawPhone) {
-  		if(rawPhone == null) return null; //null방어
-  		
-  	    // 예시: +82 10-1234-5678 → 01012345678
-  	    String cleaned = rawPhone.replaceAll("[^0-9]", ""); // 숫자만 남김
-  	    if (cleaned.startsWith("82")) {
-  	        cleaned = "0" + cleaned.substring(2);
-  	    }
-  	    return cleaned;
-  	}
-
-    @Override
-    public boolean isDuplicatedMemberId(String memberId) {
-        // 방어코드: null/blank는 중복 아님으로 처리(컨트롤러에서 이미 막지만 한 번 더)
-        if (memberId == null || memberId.isBlank()) return false;
-        return memberRepository.existsByMemberId(memberId);
-    }
-    
+	
     //마이페이지 비밀번호 변경
     @Transactional
     @Override
@@ -602,11 +599,82 @@ public class MemberServiceImpl implements MemberService {
         m.setMemberPw(passwordEncoder.encode(dto.getNewPassword()));
         // (선택) 비번 만료 해제, 토큰 소거 등 후처리
     }
+
     @Override
     public MemberEntity findByMemberNum(Long memberNum) {
         // 회원 번호로 회원을 찾고, 없으면 예외 발생
         return memberRepository.findByMemberNum(memberNum)
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
     }
-    
-}
+
+  
+
+
+
+    /**
+     * 카카오 로그인 처리 (회원가입 제거 버전)
+     * 
+     * @param code 카카오에서 리다이렉트로 전달한 인가코드
+     * @return 기존 회원이면 JWT 토큰 포함 MemberLoginResponseDto
+     * @throws Exception 카카오 API 오류, 회원 미존재 시 예외
+     */
+    @Override
+    public MemberLoginResponseDto handleKakaoLogin(String code) throws Exception {
+        // 1) 인가코드 → access_token
+        String accessToken = kakaoApiService.getAccessToken(code);
+
+        // 2) access_token → 사용자 정보
+        KakaoUserInfoDto userInfo = kakaoApiService.getUserInfo(accessToken);
+
+        // 3) 카카오 ID 기반 회원 조회
+        Optional<MemberEntity> existing = memberRepository.findByKakaoId(userInfo.getKakaoId());
+
+        if (existing.isEmpty()) {
+            // 🚫 회원가입 로직 제거 → 미연동 시 바로 예외 던짐
+            throw new IllegalStateException("카카오 계정이 연결된 회원이 없습니다.");
+        }
+
+        MemberEntity member = existing.get();
+
+        // 4) JWT 발급
+        String jwtAccess = jwtTokenProvider.generateAccessToken(member.getMemberId());
+        String jwtRefresh = jwtTokenProvider.generateRefreshToken(member.getMemberId());
+
+        // 5) 로그인 성공 DTO 반환
+        return MemberLoginResponseDto.builder()
+                .memberId(member.getMemberId())
+                .memberName(member.getMemberName())
+                .accessToken(jwtAccess)
+                .refreshToken(jwtRefresh)
+                .build();
+    }
+
+     /**
+      * 카카오 birthyear("1995"), birthday("0214") → "1995-02-14"
+      */
+     private String parseBirth(String year, String mmdd) {
+         if (year == null || mmdd == null || year.isBlank() || mmdd.isBlank()) {
+             return null;
+         }
+         String month = mmdd.substring(0, 2);
+         String day = mmdd.substring(2, 4);
+         return year + "-" + month + "-" + day;
+     }
+
+     /**
+      * "+82 10-1234-5678" → "01012345678"
+      */
+     private String formatPhone(String raw) {
+         if (raw == null) return null;
+         String digits = raw.replaceAll("[^0-9]", "");
+         if (digits.startsWith("82")) {
+             digits = digits.substring(2); // "8210..." → "10..."
+         }
+         if (digits.startsWith("10")) {
+             digits = "0" + digits;
+         }
+         return digits;
+     }
+
+ }
+

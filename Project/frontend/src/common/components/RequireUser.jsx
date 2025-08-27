@@ -9,9 +9,11 @@ import { useAuth } from "../context/AuthContext";
 // 경로가 /member 또는 /member/** 인지 판별
 function isMemberRoot(pathname) {
   if (!pathname) return false;
-
     const protectedRoots = ["/member", "/reserve" ];
   return protectedRoots.some((root) => pathname === root || pathname.startsWith(root + "/"));
+
+  return pathname === "/member" || pathname.startsWith("/member/");
+
 }
 
 export function RequireMember({ children }) {

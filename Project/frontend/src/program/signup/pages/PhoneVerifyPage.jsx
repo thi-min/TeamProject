@@ -36,7 +36,7 @@ export default function PhoneVerifyPage() {
       }
 
       // 회원가입 페이지로 즉시 이동
-      navigate("/join/signup", {
+      navigate("/join", {
         // location.state로도 넘겨둠(새로고침 시엔 사라지니 세션 저장도 병행)
         state: { phoneVerified: true, verifiedPhone: phone },
         replace: true,

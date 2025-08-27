@@ -223,7 +223,7 @@ public class MemberController {
 		String result = memberService.findMemberPw(dto.getMemberId(), dto.getMemberName(), dto.getMemberPhone());
 		return ResponseEntity.ok(result);
 	}
-
+ 
 	//(로그인 상태) 내 비밀번호 변경
     @PutMapping(value = "/member/mypage/password", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Void> updatePasswordSelf(@RequestBody SelfPasswordUpdateRequestDto dto) {

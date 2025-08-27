@@ -164,7 +164,7 @@ export default function AdminImgBoard() {
                 {/* 게시글 이미지 + 클릭 이동 */}
                 <div
                   className="img-thumb"
-                  onClick={() => navigate(`/bbs/admin/image/Detail/${post.bulletinNum}`)} // ✅ 경로 수정
+                  onClick={() => navigate(`/admin/bbs/image/Detail/${post.bulletinNum}`)} // ✅ 경로 수정
                 >
                   {repImage ? (
                     <img src={repImage} alt={post.bbstitle} />
