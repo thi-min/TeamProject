@@ -99,6 +99,37 @@ export async function apiFindMemberPw({ memberId, memberName, memberPhone }) {
     );
   }
 }
+
+//비밀번호 변경
+/** (로그인 상태) 마이페이지에서 내 비밀번호 변경 */
+export function apiUpdatePasswordSelf({
+  currentPassword,
+  newPassword,
+  newPasswordCheck,
+}) {
+  return api.put("/member/mypage/password", {
+    currentPassword,
+    newPassword,
+    newPasswordCheck,
+  });
+}
+
+/** (비번찾기 성공 후) 인증된 사용자에 대한 비밀번호 재설정
+ *  - 서버 정책에 따라 resetToken을 사용할 수도 있고, memberId만으로 처리할 수도 있음
+ */
+export function apiResetPassword({
+  memberId,
+  newPassword,
+  newPasswordCheck,
+  resetToken,
+}) {
+  return api.put("/member/update-password", {
+    memberId,
+    newPassword,
+    newPasswordCheck,
+    resetToken, // 선택: 서버가 사용 안 하면 무시됨
+  });
+}
 /**
  * 🔐 비밀번호 변경
  * - 백엔드: @PutMapping("/update-password") 가정
@@ -106,37 +137,52 @@ export async function apiFindMemberPw({ memberId, memberName, memberPhone }) {
  * - 성공: "비밀번호가 변경되었습니다." (문자열)
  * - 주의: 이 파일은 axios 인스턴스 이름이 'api' 이므로 'client'가 아니라 'api'를 사용해야 함
  */
-export async function updatePassword({
-  memberId,
-  currentPassword,
-  newPassword,
-  newPasswordCheck,
-}) {
-  return api.put(
-    `${API_PREFIX}/update-password`,
-    {
-      memberId: memberId?.trim() ?? "",
-      currentPassword: currentPassword ?? "",
-      newPassword: newPassword ?? "",
-      newPasswordCheck: newPasswordCheck ?? "",
-    },
-    {
-      responseType: "text",
-      transformResponse: [(data) => data],
-    }
-  );
-}
+// export async function updatePassword({
+//   memberId,
+//   currentPassword,
+//   newPassword,
+//   newPasswordCheck,
+// }) {
+//   return api.put(
+//     `${API_PREFIX}/member/update-password`,
+//     {
+//       memberId: memberId?.trim() ?? "",
+//       currentPassword: currentPassword ?? "",
+//       newPassword: newPassword ?? "",
+//       newPasswordCheck: newPasswordCheck ?? "",
+//     },
+//     {
+//       responseType: "text",
+//       transformResponse: [(data) => data],
+//     }
+//   );
+// }
 /**
- * 🔎 마이페이지 조회
- * - GET /mypage
- * - 성공: MemberMyPageResponseDto(JSON)
- * - 실패: 401(인증 필요), 403(비번 만료), 그 외 서버 오류
+ * 마이페이지 조회
+ * GET /member/mypage/memberdata
+ * 성공: MemberMyPageResponseDto
+ * 실패:
+ *  - 401: 비로그인 → 로그인 페이지로 유도
+ *  - 403: 비번 만료 → 비번 변경 페이지로 유도
+ *  - 404: 회원 없음 → 에러 표시
  */
 export async function apiGetMyPage() {
-  // axios 인스턴스(api)에 Authorization 헤더 주입(인터셉터)되어 있다고 가정
-  return api.get(`${API_PREFIX}/mypage`, {
-    // JSON 응답 기본값이므로 별도 설정 불필요
-    // withCredentials: true 가 필요한 보안 정책이면 axios 인스턴스에서 이미 설정했을 것
+  return api.get(`${API_PREFIX}/member/mypage/memberdata`);
+}
+/**
+ * 마이페이지 주소 변경
+ * payload: { postcode, roadAddress, detailAddress, memberAddress } 중 하나
+ * 서버가 한 문자열(memberAddress)만 받으면 compose해서 memberAddress로 전송
+ */
+export async function apiUpdateMyAddress({
+  postcode = "",
+  roadAddress = "",
+  detailAddress = "",
+}) {
+  return api.put("/member/mypage/memberdata/address", {
+    postcode,
+    roadAddress,
+    detailAddress,
   });
 }
 /**
@@ -226,4 +272,15 @@ export async function apiCheckDuplicateId(memberId) {
     const msg = error?.message || "중복체크 중 오류가 발생했습니다.";
     throw new Error(msg);
   }
+}
+// 목적: 휴대전화 변경 API 추가
+export async function apiUpdateMyPhone(phone) {
+  return api.put("/member/mypage/memberdata/phone", { phone });
+}
+
+// 목적: SMS 수신동의 업데이트 API 추가
+export async function apiUpdateSmsAgree(smsAgree) {
+  // 백엔드와 경로/필드명 일치: PUT /member/mypage/memberdata/sms-agree
+  // 바디: { smsAgree: true/false }
+  return api.put("/member/mypage/memberdata/smsagree", { smsAgree });
 }

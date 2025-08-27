@@ -4191,6 +4191,54 @@ span.temp_form{display:inline-block;width:auto;}
 }
 /* --------팝업 끝 ------ */
 
+/* -----프로그램 css 시작 ----- */
+
+/* 동의하기 시작 */
+.p-wrap > h3:first-child{margin-top:0;}
+.p-wrap .p-agree .p-agree__condents{display:block;position:relative;max-height:none;margin:0;padding:34px 40px;background-color:#fff;border:1px solid #8e8e8e;border-radius:12px;box-sizing:border-box;overflow:visible;}
+.p-wrap .p-agree .p-agree__condents[tabindex]:focus{outline:2px solid #246beb;outline-offset:-2px;}
+.p-wrap .p-agree .p-agree__condents .p-agree__inner{display:block;position:relative;max-height:320px;padding-right:16px;box-sizing:border-box;overflow-x:hidden;overflow-y:auto;}
+.p-wrap .p-agree .p-agree__condents .p-agree__inner:focus{outline:2px solid #246beb;outline-offset:-2px;}
+.p-wrap .p-agree .p-agree__condents .p-agree__inner .p-agree__title,
+.p-wrap .p-agree .p-agree__condents .p-agree__inner .h0{display:block;margin-top:0;margin-bottom:0;font-size:18px;color:#1d1d1d;line-height:26px;letter-spacing:0;font-weight:600;font-family:'PretendardGOV';word-break:keep-all;box-sizing:border-box;}
+.p-wrap .p-agree .p-agree__condents .p-agree__inner * + .p-agree__title,
+.p-wrap .p-agree .p-agree__condents .p-agree__inner * + .h0{margin-top:28px;}
+.p-wrap .p-agree .p-agree__condents .p-agree__inner p{display:block;font-size:18px;color:#1d1d1d;line-height:26px;letter-spacing:0;font-weight:400;font-family:'PretendardGOV';word-break:keep-all;box-sizing:border-box;}
+.p-wrap .p-agree .p-agree__condents .p-agree__inner * + .p-agree__list{margin-top:10px;}
+.p-wrap .p-agree .p-agree__condents .p-agree__inner .p-agree__list > li{display:block;position:relative;margin:0;padding-left:13px;font-size:18px;color:#555;line-height:26px;letter-spacing:-0.02em;font-weight:400;font-family:'PretendardGOV';word-break:keep-all;box-sizing:border-box;}
+.p-wrap .p-agree .p-agree__condents .p-agree__inner .p-agree__list > li:before{display:block;position:absolute;top:10px;left:0;width:4px;height:4px;border-radius:100%;background-color:#555;content:'';}
+.p-wrap .p-agree .p-agree__condents .p-agree__inner .p-agree__list > li > ul{margin:5px 0;}
+.p-wrap .p-agree .p-agree__condents .p-agree__inner .p-agree__list > li > ul > li{display:block;position:relative;margin:0;padding-top:0;padding-left:13px;font-size:17px;color:#555;line-height:26px;letter-spacing:-0.02em;font-weight:400;font-family:'PretendardGOV';box-sizing:border-box;}
+.p-wrap .p-agree .p-agree__condents .p-agree__inner .p-agree__list > li > ul > li:before{display:block;position:absolute;top:14px;left:0;width:6px;height:2px;border-radius:0;background-color:#555;content:'';}
+.p-wrap .p-agree .p-agree__condents + div,
+.p-wrap .p-agree .p-agree__condents .p-agree__inner + div{margin:30px 0 0 !important;padding:22px 26px 12px;background-color:#f0f0f0;border-radius:8px;font-size:0;line-height:0;}
+.p-wrap .p-agree .p-form-radio{margin:0 15px 10px 0;font-size:0;line-height:0;}
+.p-wrap .p-agree .p-form-radio input[type="radio"]{display:block;position:absolute;top:0;left:0;width:0;height:0;background-color:transparent;border:none;font-size:0;line-height:0;}
+.p-wrap .p-agree .p-form-radio input[type="radio"] + label{display:inline-block;position:relative;height:auto;margin:0 !important;padding-right:5px;padding-left:28px;font-size:17px;line-height:20px;}
+.p-wrap .p-agree .p-form-radio input[type="radio"]:focus + label{outline:2px solid #246beb;outline-offset:2px;}
+.p-wrap .p-agree .p-form-radio input[type="radio"] + label:before{display:block;position:absolute;content:'';box-sizing:border-box;transition:background-color 400ms ease-in-out, border-color 400ms ease-in-out;box-shadow:none;}
+.p-wrap .p-agree .p-form-radio input[type="radio"]:focus + label:before{outline:none;box-shadow:none;}
+.p-wrap .p-agree .p-form-radio input[type="radio"] + label:before{top:calc(50% - 10px);left:0;width:20px;height:20px;background-color:#fff;border:1px solid #717171;border-radius:100%;}
+.p-wrap .p-agree .p-form-radio input[type="radio"]:checked + label:before{border-color:#246beb;}
+.p-wrap .p-agree .p-form-radio input[type="radio"] + label:after{display:block;position:absolute;content:'';box-sizing:border-box;visibility:hidden;opacity:0;transition:visibility 400ms ease-in-out, opacity 400ms ease-in-out;box-shadow:none;}
+.p-wrap .p-agree .p-form-radio input[type="radio"]:focus + label:after{outline:none;}
+.p-wrap .p-agree .p-form-radio input[type="radio"] + label:after{top:calc(50% - 5px);left:5px;width:10px;height:10px;background-color:#246beb;border-radius:100%;}
+.p-wrap .p-agree .p-form-radio input[type="radio"]:checked + label:after{visibility:visible;opacity:1;}
+.p-wrap > .p-agree + .row{margin:30px 0 0 !important;}
+.p-wrap > .p-agree + .row > div{width:50% !important;margin:0 !important;padding:0 5px !important;text-align:right;}
+.p-wrap > .p-agree + .row > div + div{text-align:left;}
+.p-wrap > .p-agree + .row .p-button{display:inline-block;position:relative;width:auto;height:auto;margin:0;padding:10px 16px;border:1px solid #1d1d1d;border-radius:8px;background-color:#FFF;font-size:17px;line-height:26px;letter-spacing:-0.03em;font-weight:400;font-family:'PretendardGOV';word-break:keep-all;vertical-align:top;box-sizing:border-box;transition:background-color 400ms ease-in-out, border-color 400ms ease-in-out;}
+.p-wrap > .p-agree + .row .p-button + .p-button{margin-left:5px;}
+.p-wrap > .p-agree + .row .p-button:before,
+.p-wrap > .p-agree + .row .p-button:after{display:none;}
+.p-wrap > .p-agree + .row .p-button:focus{outline:2px solid rgba(255, 255, 255, 0.9);outline-offset:-4px;}
+.p-wrap > .p-agree + .row .p-button.write{border-color:#264beb;background-color:#264beb;color:#fff;}
+.p-wrap > .p-agree + .row .p-button.write:hover{background-color:#1d56bc;border-color:#1d56bc;}
+@media all and (max-width:1000px){
+    .p-wrap .p-agree .p-agree__condents{padding:30px 6%;}
+}
+/* ----- 동의하기 종료 ----- */
+
 /* form 관련 레이아웃 */
 .form_flex{display:flex;align-items:center;gap:16px;}
 
@@ -4203,3 +4251,10 @@ span.temp_form{display:inline-block;width:auto;}
 .form_top_box .form_top_item .form_desc p{text-align:center;font-family:'NotoKr';color:#333;font-size:18px;font-weight:400;line-height:30px;letter-spacing:-0.02em;}
 
 .form_wrap{display:block;position:relative;padding:30px;border-radius:30px;box-sizing:border-box;background-color:#fff;box-shadow:0 0 30px 0px rgba(238,238,238,0.3);}
+/* 폼 버튼(이전, submit) */
+.form_center_box{display:flex;margin-top:50px;position:relative;box-sizing:border-box;justify-content:space-between;}
+.form_center_box.solo{justify-content:flex-end;}
+.form_center_box .right_btn_box{display:flex;gap:14px;}
+
+.table.border{overflow:hidden;border-radius:12px;margin:0;}
+.update_box{margin-top:50px;}

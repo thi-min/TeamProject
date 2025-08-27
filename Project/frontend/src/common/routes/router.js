@@ -33,15 +33,26 @@ const routes = {
   },
 
   member: {
-    signup: { path: "/signup", label: "회원가입" },
+    join: { path: "/join", label: "회원 약관" },
+    phone: { path: "/phonetest", label: "휴대폰 인증" },
+    signup: { path: "/join/signup", label: "회원가입" },
     login: { path: "/login", label: "로그인" },
     logout: { path: "/logout", label: "로그아웃" },
     findid: { path: "/find-id", label: "아이디 찾기" },
     findpw: { path: "/find-pw", label: "비밀번호 찾기" },
-    changepw: { path: "/update-password", label: "비밀번호 변경" },
-    mypage: { path: "/mypage", label: "마이페이지" },
-    update: { path: "/mypage/update", label: "회원정보 수정" },
-    delete: { path: "/mypage/update/delete", label: "회원 탈퇴" },
+    changepw: { path: "/member/update-password", label: "비밀번호 변경" },
+    mypage: { path: "/member/mypage", label: "마이페이지" },
+    memberdata: { path: "/member/mypage/memberdata", label: "회원정보" },
+    update: {
+      path: "/member/mypage/memberdata/update",
+      label: "회원정보 수정",
+    },
+    delete: { path: "/member/mypage/update/delete", label: "회원 탈퇴" },
+  },
+
+  //카카오 관련
+  kakao: {
+    callback: { path: "/oauth/kakao/callback", label: "카카오 콜백" },
   },
   // 후원 경로
   fund: {
@@ -57,23 +68,12 @@ const routes = {
   admin: {
     admin: { path: "/admin", label: "관리자 페이지" },
     password: { path: "/admin/updatePw", label: "관리자 비밀번호 변경" },
-    dashboard: { path: "/admin/dashboard", label: "관리자 홈" },
-    members: { path: "/admin/members", label: "회원 관리" },
-    memberDetail: (id) => `/admin/members/${id}`,
-    // 1:1 채팅 경로 추가
-    chat: {
-      list: { path: "/admin/chat/list", label: "채팅 목록" },
-      room: (id) => `/admin/chat/room/${id}`,
+    membersList: { path: "/admin/membersList", label: "회원 목록" },
+    memberDetail: {
+      path: "/admin/membersList/:memberNum",
+      build: (id) => `/admin/membersList/${id}`,
+      label: "회원 상세",
     },
-    // 입양 신청서 경로 추가
-      adopt: {
-          form: (memberNum) => `/admin/adopt/request/${memberNum}`,
-          label: "입양 신청서"
-      },
-    // 동물 관리 경로 추가
-      animal: {
-          register: { path: "/admin/animal/register", label: "동물 정보 기입" },
-      },
   },
 
   // frontend/src/common/routes/router.js

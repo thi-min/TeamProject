@@ -10,6 +10,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { loginUser } from "../services/auth"; // 로그인 API (백엔드: /auth/login)
 import { useAuth } from "../../../common/context/AuthContext"; // 전역 로그인 상태
 import { jwtDecode } from "jwt-decode"; // role fallback 용
+import KakaoLoginButton from "../components/KakaoLoginButton";
 import "../style/login.css";
 
 const LoginPage = () => {
@@ -94,12 +95,11 @@ const LoginPage = () => {
       login({ accessToken, refreshToken, role: upperRole });
 
       alert("로그인 성공");
-
       // ✅ role 기반 라우팅: 관리자면 /admin, 아니면 /
       if (upperRole === "ADMIN" || upperRole === "ROLE_ADMIN") {
         navigate("/admin");
       } else {
-        navigate("/");
+        navigate("/member/mypage");
       }
     } catch (err) {
       console.error("❌ 로그인 실패:", err);
@@ -184,11 +184,12 @@ const LoginPage = () => {
                 </Link>
               </div>
               <div className="signup bth_item">
-                <Link to="/signup" className="login_btn type2">
+                <Link to="/phonetest" className="login_btn type2">
                   <span>회원가입</span>
                 </Link>
               </div>
             </div>
+            <KakaoLoginButton fullWidth />
           </div>
         </div>
       </div>

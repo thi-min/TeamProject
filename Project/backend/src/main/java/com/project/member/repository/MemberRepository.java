@@ -52,7 +52,8 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
 
     //카카오 ID가 존재하는지 체크
 	boolean existsByKakaoId(String kakaoId);
-    
+	//카카오 고유 식별자(kakaoId)로 회원 1건 조회
+	Optional<MemberEntity> findFirstByKakaoId(String kakaoId);
 
     //상태 기준 조회시 필요할떄 사용
     //Page<MemberEntity> findByMemberState(MemberState state, Pageable pageable);

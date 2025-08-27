@@ -29,6 +29,7 @@
 
 /* 로그인 시작 */
 .form_top_box .form_top_item .form_icon.type1:before{background-image:url('../images/login_icon.png');background-repeat:no-repeat;background-position:0 0;content:'';}
+
 /* 로그인 폼영역 */
 .login_form_box{position:relative;width:100%;margin-top:74px;box-sizing:border-box;vertical-align:top;}
 .form_item{padding:100px 50px;border-radius:30px;box-sizing:border-box;background-color:#fff;box-shadow: 0 0 30px 0px rgba(238,238,238,0.3);}
@@ -143,3 +144,8 @@
     .login_form_wrap .form_item.type3 .login_form_box.injeung_box .out_login_box .out_login_item .out_login_btn{padding-top:20px;padding-bottom:20px;}
     .login_form_wrap .form_item.type3 .login_form_box.injeung_box .out_login_box .out_login_item:nth-child(2){margin-top:10px;}
 }
+
+/* 카카오 로그인 */
+.login_wrap .bth_item.kakao_login{display:block;min-width:auto;margin-top:10px;}
+.login_wrap .bth_item.kakao_login .kakao_btn{display:flex;justify-content:center;align-items:center;background-color:#fee500;border-color:#fee500;}
+.login_wrap .bth_item.kakao_login .kakao_btn span{color:#000;}
