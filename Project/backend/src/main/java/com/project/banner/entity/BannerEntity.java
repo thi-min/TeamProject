@@ -1,4 +1,4 @@
-package com.project.banner;
+package com.project.banner.entity;
 
 import com.project.admin.entity.AdminEntity;
 import jakarta.persistence.*;

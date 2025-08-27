@@ -6,11 +6,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.UUID;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.domain.Page;
@@ -34,8 +33,6 @@ import com.project.board.entity.ImageBbsEntity;
 import com.project.board.entity.QandAEntity;
 import com.project.board.exception.BbsException;
 import com.project.board.repository.BbsRepository;
-
-
 import com.project.board.repository.FileUpLoadRepository;
 import com.project.board.repository.ImageBbsRepository;
 import com.project.board.repository.QandARepository;
@@ -56,12 +53,11 @@ public class BbsServiceImpl implements BbsService {
     private final FileUpLoadRepository fileUploadRepository;
     private final MemberRepository memberRepository;
     private final AdminRepository adminRepository;
- 
     
     private final String uploadDir = "C:/photo"; // 공통 업로드 경로
 
     // ---------------- 게시글 저장 ----------------
-    private BbsDto saveOnlyBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId) {
+    private BbsDto saveOnlyBbs(BbsDto dto, Long requesterMemberNum, String requesterAdminId) {
         MemberEntity member = null;
 
         // ✅ memberNum이 null이면 엔티티에 세팅하지 않음
@@ -95,7 +91,7 @@ public class BbsServiceImpl implements BbsService {
     // ---------------- 최상위 생성 메소드 ----------------
     @Override
     @Transactional
-    public BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId,
+    public BbsDto createBbs(BbsDto dto, Long requesterMemberNum, String requesterAdminId,
                             List<MultipartFile> files, List<String> insertOptions,
                             List<String> isRepresentativeList) {
 
@@ -237,7 +233,7 @@ public class BbsServiceImpl implements BbsService {
 
     // ---------------- 일반 게시판 파일 처리 ----------------
     @Transactional
-    public BbsDto createBbsWithFiles(BbsDto savedBbs, Long requesterMemberNum, Long requesterAdminId,
+    public BbsDto createBbsWithFiles(BbsDto savedBbs, Long requesterMemberNum, String requesterAdminId,
                                     List<MultipartFile> files, List<String> insertOptions) {
 
         if (files != null && !files.isEmpty()) {
@@ -283,12 +279,12 @@ public class BbsServiceImpl implements BbsService {
     // ---------------- 게시글 수정 ----------------
     @Override
     @Transactional
-    public BbsDto updateBbs(Long id, BbsDto dto, Long userId, List<MultipartFile> newFiles, List<Long> deleteFileIds, boolean isAdmin, List<String> insertOptions) {
+    public BbsDto updateBbs(Long id, BbsDto dto, Long userId, String adminId, List<MultipartFile> newFiles, List<Long> deleteFileIds, boolean isAdmin, List<String> insertOptions) {
         BbsEntity bbs = bbsRepository.findById(id)
                 .orElseThrow(() -> new BbsException("게시글 없음: " + id));
 
         // 권한 체크
-        if (isAdmin && (bbs.getAdminId() == null || !bbs.getAdminId().getAdminId().equals(userId))) {
+        if (isAdmin && (bbs.getAdminId() == null || !bbs.getAdminId().getAdminId().equals(adminId))) {
             throw new BbsException("관리자 권한이 없습니다.");
         }
         if (!isAdmin && (bbs.getMemberNum() == null || !bbs.getMemberNum().getMemberNum().equals(userId))) {
@@ -307,16 +303,22 @@ public class BbsServiceImpl implements BbsService {
 
         // 새 파일 업로드 (본문 삽입 옵션 반영)
         if (newFiles != null && !newFiles.isEmpty()) {
-            createBbsWithFiles(convertToDto(bbs), isAdmin ? null : userId, isAdmin ? userId : null, newFiles, insertOptions);
+        	Long memberNumParam = isAdmin ? null : userId;       // userId는 Long 타입
+        	String adminIdParam = isAdmin ? adminId : null;     // adminId는 String 타입
+
+        	this.createBbsWithFiles(convertToDto(bbs), memberNumParam, adminIdParam, newFiles, insertOptions);
+
         }
 
         return convertToDto(bbsRepository.save(bbs));
     }
 
-    // ---------------- 게시글 단일 삭제 ----------------
+
+
+	// ---------------- 게시글 단일 삭제 ----------------
     @Override
     @Transactional
-    public void deleteBbs(Long id, Long requesterMemberNum, Long requesterAdminId) {
+    public void deleteBbs(Long id, Long requesterMemberNum, String requesterAdminId) {
         BbsEntity bbs = bbsRepository.findById(id).orElseThrow(() -> new BbsException("게시글 없음: " + id));
 
         boolean isAdmin = requesterAdminId != null;
@@ -334,7 +336,7 @@ public class BbsServiceImpl implements BbsService {
     // ---------------- 다중 삭제 ----------------
     @Override
     @Transactional
-    public void deleteBbsMultiple(List<Long> ids, Long requesterMemberNum, Long requesterAdminId) {
+    public void deleteBbsMultiple(List<Long> ids, Long requesterMemberNum, String requesterAdminId) {
         if (requesterAdminId == null) throw new BbsException("관리자 권한이 필요합니다.");
 
         for (Long id : ids) {
@@ -501,7 +503,7 @@ public class BbsServiceImpl implements BbsService {
 
         QandAEntity entity = QandAEntity.builder()
             .bbs(bbs)
-            .question(dto.getQuestion())
+            .question(bbs.getBbscontent())
             .answer(dto.getAnswer())
             .build();
 
@@ -509,7 +511,7 @@ public class BbsServiceImpl implements BbsService {
 
         return QandADto.builder()
             .bulletinNum(saved.getBbs().getBulletinNum())
-            .question(saved.getQuestion())
+            .question(bbs.getBbscontent())
             .answer(saved.getAnswer())
             .build();
     }
@@ -830,7 +832,15 @@ public class BbsServiceImpl implements BbsService {
         return result;
     }
 
-
+//
+//    //admin 아이디 생성(로그인한 관리자 id조회)
+//    public String getCurrentAdminId() {
+//        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+//        if(authentication != null && authentication.getPrincipal() instanceof UserDetails) {
+//            return ((UserDetails) authentication.getPrincipal()).getUsername(); // username이 adminId라면
+//        }
+//        return null;
+//    }
 
 
 

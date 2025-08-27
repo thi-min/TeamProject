@@ -7,21 +7,26 @@ import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+@Service
 public interface BbsService {
 	
-    BbsDto createBbs(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files, List<String> insertOptions, List<String> isRepresentativeList); // 게시글 생성 (회원 또는 관리자)
+	//requesterAdminId Long > String 타입 변경
+    BbsDto createBbs(BbsDto dto, Long requesterMemberNum, String requesterAdminId, List<MultipartFile> files, List<String> insertOptions, List<String> isRepresentativeList); // 게시글 생성 (회원 또는 관리자)
     
     BbsDto createPotoBbs( BbsDto dto, Long requesterMemberNum, List<MultipartFile> files, List<String> isRepresentativeList);
     
-    BbsDto createBbsWithFiles(BbsDto dto, Long requesterMemberNum, Long requesterAdminId, List<MultipartFile> files,  List<String> insertOptions); // 생성된 게시글 + 파일첨부 (회원 또는 관리자)
+    BbsDto createBbsWithFiles(BbsDto dto, Long requesterMemberNum, String requesterAdminId, List<MultipartFile> files,  List<String> insertOptions); // 생성된 게시글 + 파일첨부 (회원 또는 관리자)
     
-    BbsDto updateBbs(Long id, BbsDto dto, Long userId, List<MultipartFile> newFiles, List<Long> deleteFileIds, boolean isAdmin, List<String> insertOptions); // 게시글 수정 (작성자 본인만 가능)
+    BbsDto updateBbs(Long id, BbsDto dto, Long userId, String adminId, List<MultipartFile> newFiles, List<Long> deleteFileIds, boolean isAdmin, List<String> insertOptions); // 게시글 수정 (작성자 본인만 가능)
+    //BbsDto updateBbsAdmin(Long id, BbsDto dto, String adminId, List<MultipartFile> newFiles, List<Long> deleteFileIds, boolean isAdmin, List<String> insertOptions); // 게시글 수정 (작성자 본인만 가능)
+  //requesterAdminId Long > String 타입 변경
+    void deleteBbs(Long id, Long requesterMemberNum, String requesterAdminId);  // 게시글 단건 삭제 (작성자 본인 또는 관리자)
     
-    void deleteBbs(Long id, Long requesterMemberNum, Long requesterAdminId);  // 게시글 단건 삭제 (작성자 본인 또는 관리자)
-    
-    void deleteBbsMultiple(List<Long> ids, Long requesterMemberNum, Long requesterAdminId); //게시글 복수건 삭제(관리자)
+  //requesterAdminId Long > String 타입 변경
+    void deleteBbsMultiple(List<Long> ids, Long requesterMemberNum, String requesterAdminId); //게시글 복수건 삭제(관리자)
     
     BbsDto getBbs(Long id); // 게시글 단건 조회
     
@@ -57,6 +62,7 @@ public interface BbsService {
     
     // FAQ 게시글 리스트 조회
     Map<String, Object> getBbsList(BoardType type, int page, int size, String bbstitle, String memberName, String bbscontent);
+
 
 }
 

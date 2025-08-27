@@ -1,6 +1,6 @@
-package com.project.banner;
+package com.project.banner.controller;
 
-import com.project.banner.BannerService;
+import com.project.banner.service.BannerService;
 import com.project.banner.dto.BannerCreateDto;
 import com.project.banner.dto.BannerDeleteDto;
 import com.project.banner.dto.BannerListDto;

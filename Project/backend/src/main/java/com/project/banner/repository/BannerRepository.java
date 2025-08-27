@@ -1,6 +1,8 @@
-package com.project.banner;
+package com.project.banner.repository;
 
 import com.project.admin.entity.AdminEntity;
+import com.project.banner.entity.BannerEntity;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

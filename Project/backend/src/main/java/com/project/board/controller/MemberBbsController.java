@@ -27,7 +27,7 @@ import java.util.*;
 @RequestMapping("/bbs")
 public class MemberBbsController {
 
-    @Autowired
+@Autowired  
     private BbsService bbsService;
 
     private final String BACKEND_URL = "http://127.0.0.1:8090";
@@ -123,7 +123,7 @@ public class MemberBbsController {
         }
 
         BbsDto updated = bbsService.updateBbs(
-                id, dto, memberNum, files, deleteIds, false, insertOptions
+                id, dto, memberNum, null, files, deleteIds, false, insertOptions
         );
 
         Map<String, Object> response = new HashMap<>();

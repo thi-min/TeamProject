@@ -5,10 +5,16 @@ import com.project.board.dto.BbsDto;
 import com.project.board.dto.FileUpLoadDto;
 import com.project.board.dto.QandADto;
 import com.project.board.service.BbsService;
+import com.project.common.jwt.JwtTokenProvider;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.core.io.FileSystemResource;
@@ -23,8 +29,10 @@ import java.util.*;
 @RequestMapping("/admin/bbs")
 public class BbsAdminController {
 
-    @Autowired
+	@Autowired  
     private BbsService bbsService;
+	@Autowired 
+	private JwtTokenProvider jwtTokenProvider;
 
     // ---------------- 관리자용 공지사항 게시글 조회 (최신순) ----------------
     @GetMapping("/notices")
@@ -50,7 +58,7 @@ public class BbsAdminController {
             @RequestParam(value = "insertOptions", required = false) List<String> insertOptions
     ) {
         // 세션에서 adminId 가져오기
-        Long adminId = (Long) session.getAttribute("adminId");
+    	String adminId = (String) session.getAttribute("adminId");
         if (adminId == null) {
             throw new IllegalStateException("관리자 로그인 후 이용해주세요.");
         }
@@ -70,22 +78,39 @@ public class BbsAdminController {
                         insertOptions.set(i, "no-insert");
                     }
                 }
-            }
+            } 
         }
 
         BbsDto created = bbsService.createBbs(dto, null, adminId, files, insertOptions, null);
         return ResponseEntity.ok(created);
     }
 
-    // ---------------- QnA 답변 저장 ----------------
+    //답변 작성
     @PostMapping("/qna/{bbsId}/answer")
     public ResponseEntity<QandADto> saveQnaAnswer(
             @PathVariable Long bbsId,
-            @RequestParam String adminId,
-            @RequestBody QandADto dto) {
-        QandADto saved = bbsService.saveQna(bbsId, dto, adminId);
-        return ResponseEntity.ok(saved);
+            @RequestBody QandADto dto,
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        String token = authorizationHeader.replace("Bearer ", "");
+
+        if (!jwtTokenProvider.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new QandADto()); // 빈 DTO 반환
+        }
+
+        String role = jwtTokenProvider.getRoleFromToken(token);
+        String adminId = jwtTokenProvider.getMemberIdFromToken(token);
+
+        if (!"ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(new QandADto()); // 빈 DTO 반환
+        }
+
+        QandADto savedDto = bbsService.saveQna(bbsId, dto, adminId);
+        return ResponseEntity.ok(savedDto);
     }
+
 
     // ---------------- QnA 답변 수정 ----------------
     @PutMapping("/qna/{qnaId}")
@@ -101,7 +126,7 @@ public class BbsAdminController {
     public ResponseEntity<Void> deleteBbs(
             @PathVariable Long id,
             HttpSession session) {
-        Long adminId = (Long) session.getAttribute("adminId");
+    	String adminId = (String) session.getAttribute("adminId");
         bbsService.deleteBbs(id, null, adminId);
         return ResponseEntity.noContent().build();
     }
@@ -111,7 +136,7 @@ public class BbsAdminController {
     public ResponseEntity<Void> deleteMultipleBbs(
             @RequestParam List<Long> ids,
             HttpSession session) {
-        Long adminId = (Long) session.getAttribute("adminId");
+    	String adminId = (String) session.getAttribute("adminId");
         bbsService.deleteBbsMultiple(ids, null, adminId);
         return ResponseEntity.noContent().build();
     }
@@ -122,11 +147,12 @@ public class BbsAdminController {
             @PathVariable Long id,
             HttpSession session,
             @RequestPart("bbsDto") BbsDto dto,
+            @RequestParam String adminId,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
             @RequestParam(required = false) String deletedFileIds,
             @RequestParam(value = "insertOptions", required = false) List<String> insertOptions
     ) {
-        Long adminId = (Long) session.getAttribute("adminId");
+        //String adminId = (String) session.getAttribute("adminId");
         List<Long> deleteIds = parseDeleteIds(deletedFileIds);
 
         if (files != null && insertOptions != null) {
@@ -143,7 +169,7 @@ public class BbsAdminController {
             }
         }
 
-        BbsDto updated = bbsService.updateBbs(id, dto, adminId, files, deleteIds, true, insertOptions);
+        BbsDto updated = bbsService.updateBbs(id, dto, null, adminId, files, deleteIds, true, insertOptions);
         return ResponseEntity.ok(updated);
     }
 
@@ -198,6 +224,20 @@ public class BbsAdminController {
         Map<String, Object> result = bbsService.getBbsList(type, page, size, bbstitle, memberName, bbscontent);
         return ResponseEntity.ok(result);
     }
+ // ---------------- 관리자 QnA 게시글 단건 조회 ----------------
+    @GetMapping("/qna/{id}")
+    public ResponseEntity<QandADto> getQnaBbsDetail(@PathVariable Long id) {
+        try {
+            QandADto dto = bbsService.getQna(id);
+            if (dto == null) {
+                return ResponseEntity.notFound().build();
+            }
+            return ResponseEntity.ok(dto);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).build();
+        }
+    }
+
 
     // ---------------- 관리자용 이미지 게시글 조회 (최신순) ----------------
     @GetMapping("/poto")
