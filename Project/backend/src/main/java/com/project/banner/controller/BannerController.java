@@ -2,7 +2,6 @@ package com.project.banner.controller;
 
 import com.project.banner.dto.BannerRequestDto;
 import com.project.banner.dto.BannerResponseDto;
-import com.project.banner.dto.BannerDeleteDto;
 import com.project.banner.service.BannerService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -22,11 +21,10 @@ public class BannerController {
 
     // 배너 생성
     @PostMapping
-    public void createBanner(@RequestPart("data") String dtoJson,
-                             @RequestPart("file") MultipartFile file) throws IOException {
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.registerModule(new JavaTimeModule());
-        BannerRequestDto dto = mapper.readValue(dtoJson, BannerRequestDto.class);
+    public void createBanner(
+        @RequestPart("data") BannerRequestDto dto,
+        @RequestPart("file") MultipartFile file
+    ) throws IOException {
         bannerService.createBanner(dto, file);
     }
 
@@ -44,9 +42,11 @@ public class BannerController {
 
     // 배너 수정
     @PutMapping("/{id}")
-    public void updateBanner(@PathVariable Long id,
-                             @RequestPart("data") BannerRequestDto dto,
-                             @RequestPart(name = "file", required = false) MultipartFile file) throws IOException {
+    public void updateBanner(
+        @PathVariable Long id,
+        @RequestPart("data") BannerRequestDto dto,
+        @RequestPart(name = "file", required = false) MultipartFile file
+    ) throws IOException {
         bannerService.update(id, dto, file);
     }
 
@@ -55,10 +55,10 @@ public class BannerController {
     public void deleteBanner(@PathVariable Long id) {
         bannerService.delete(id);
     }
-
-    // 배너 복수건 삭제
+    // 복수 삭제
     @PostMapping("/delete-bulk")
-    public void deleteBulk(@RequestBody BannerDeleteDto dto) {
-        bannerService.deleteBulk(dto.getBannerIds());
+    public void deleteBulk(@RequestBody List<Long> bannerIds) {
+    	if (bannerIds == null || bannerIds.isEmpty()) return;
+        bannerService.deleteBulk(bannerIds);
     }
 }

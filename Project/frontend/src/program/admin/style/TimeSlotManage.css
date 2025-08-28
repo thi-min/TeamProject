@@ -1,5 +1,4 @@
 .tspage {
-  max-width: 1600px;           /* 팀 합의안 반영 */
   margin: 0 auto;
   padding: 24px;
   font-size: 14px;
@@ -18,8 +17,8 @@
 
 /* 제목 */
 .ts-title {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: bold;
   margin-bottom: 16px;
 }
 

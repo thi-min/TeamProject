@@ -18,7 +18,7 @@ public interface BannerRepository extends JpaRepository<BannerEntity, Long> {
     void deleteByBannerIdIn(List<Long> ids);
     
     // 사용자 노출용 (메인페이지)
-    List<BannerEntity> findByIsVisibleTrueAndStartDateBeforeAndEndDateAfter(LocalDate today1, LocalDate today2);
+    List<BannerEntity> findByVisibleTrueAndStartDateBeforeAndEndDateAfter(LocalDate today1, LocalDate today2);
     
     // 관리자용 전체배너 조회
     Page<BannerEntity> findAll(Pageable pageable);

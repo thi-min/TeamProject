@@ -71,6 +71,7 @@ public class VolunteerServiceImpl implements VolunteerService {
     
     //봉사 예약 생성(기본 정보랑 봉사 상세 정보 합친 예약)
     @Override
+    @Transactional
     public void createVolunteer(Reserve reserve, VolunteerRequestDto volunteerDto, TimeSlot timeSlot) {
         Volunteer volunteer = Volunteer.builder()
                 .reserve(reserve)

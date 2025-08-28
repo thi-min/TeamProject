@@ -98,6 +98,7 @@ public class LandServiceImpl implements LandService {
     
     //놀이터 예약 생성(기본 정보랑 놀이터 상세 정보 합친 예약)
     @Override
+    @Transactional
     public void createLand(Reserve reserve, LandRequestDto landDto, TimeSlot timeSlot) {
         int basePrice = 2000;
         int animalNumber = landDto.getAnimalNumber();

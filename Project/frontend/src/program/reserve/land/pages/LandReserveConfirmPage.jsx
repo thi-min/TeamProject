@@ -131,7 +131,7 @@ const LandReserveConfirmPage = () => {
              예약하기
             </button>
           </div>
-        </div>
+      </div>
     </div>
   );
 };

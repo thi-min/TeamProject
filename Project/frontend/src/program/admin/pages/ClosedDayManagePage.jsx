@@ -70,9 +70,13 @@ const ClosedDayManagePage = () => {
 
   return (
   <div className="closedday-page">
+    <h2 className="closedday-title">
+      휴무일 관리 - {year}년 {month}월
+    </h2>
+
+    <div className="closedday-content">
     {/* 달력 영역 */}
     <div className="card closedday-calendar">
-      <h2 className="card-title">휴무일 관리 - {year}년 {month}월</h2>
 
       <Calendar
         value={selectedDate}
@@ -166,6 +170,7 @@ const ClosedDayManagePage = () => {
       ) : (
         <p>날짜를 선택하세요</p>
       )}
+    </div>
     </div>
   </div>
 );

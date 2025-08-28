@@ -74,6 +74,9 @@ const routes = {
     volunteerReserveManage: { path: "/admin/reserve/volunteer", label: "봉사 예약 관리" },
     landReserveDetail: { path: "/admin/reserve/land/:reserveCode", label: "놀이터 예약 상세보기" },
     volunteerReserveDetail: { path: "/admin/reserve/volunteer/:reserveCode", label: "봉사 예약 상세보기" }, 
+    bannerManage: { path: "/admin/banner", label: "배너 관리"},
+    bannerCreate: { path: "/admin/banner/create", label: "배너 생성"},
+    bannerDetail: { path: "/admin/banner/:bannerId", label: "배너 수정 및 삭제"}
 
   },
 

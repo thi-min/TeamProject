@@ -1,11 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import "../style/TimeSlotManage.css";
-import {
-  fetchTimeSlotsByType,
-  createTimeSlot,
-  updateTimeSlot,
-  deleteTimeSlot,
-} from "../services/TimeSlotService";
+import TimeSlotService from "../services/TimeSlotService";
 
 const STORAGE_KEY = "landRules"; // { SMALL: number[], LARGE: number[] }
 
@@ -48,7 +43,7 @@ const TimeSlotManagePage = () => {
     try {
       setLoading(true);
       setError("");
-      const res = await fetchTimeSlotsByType(type);
+      const res = await TimeSlotService.fetchByType(type);
       setSlots(res.data || []);
 
       // localStorage 규칙 불러오기
@@ -138,7 +133,7 @@ const TimeSlotManagePage = () => {
         enabled: !!newForm.enabled,
         timeType: selectedType,
       };
-      await createTimeSlot(dto);
+      await TimeSlotService.create(dto);
       alert("추가되었습니다.");
       setNewForm({ startTime: "", endTime: "", capacity: 10, enabled: true });
       load(selectedType);
@@ -184,7 +179,7 @@ const TimeSlotManagePage = () => {
         timeType: selectedType,
       };
 
-      await updateTimeSlot(id, dto);
+      await TimeSlotService.update(id, dto);
       alert("수정되었습니다.");
       cancelEdit();
       load(selectedType);
@@ -198,7 +193,7 @@ const TimeSlotManagePage = () => {
   const remove = async (id) => {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
     try {
-      await deleteTimeSlot(id);
+      await TimeSlotService.delete(id);
       alert("삭제되었습니다.");
       load(selectedType);
     } catch {

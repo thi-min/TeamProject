@@ -3,6 +3,7 @@ import api from "../../../common/api/axios";
 import { useNavigate } from "react-router-dom";
 import "../style/ReserveManage.css";
 import "../../../common/styles/pagin.css";
+import AdminReserveService from "../services/AdminReserveService";
 
 const AdminLandReservePage = () => {
   const [reservations, setReservations] = useState([]);
@@ -17,7 +18,7 @@ const AdminLandReservePage = () => {
   // 목록 조회
   const fetchReservations = async () => {
   try {
-    const { data } = await api.get("/api/admin/reserve/land");
+    const { data } = await AdminReserveService.getLandReservations();
     setReservations(data);
   } catch (err) {
     console.error("예약 목록 조회 실패", err);
@@ -50,7 +51,7 @@ const handleSearch = async () => {
       return;
     }
 
-    const { data } = await api.post("/api/admin/reserve/land/search", payload);
+    const { data } = await AdminReserveService.searchLandReservations(payload);
     setReservations(data);
   } catch (err) {
     console.error("예약 검색 실패", err);

@@ -5,9 +5,12 @@ import { LogoutLink } from "../../program/login/pages/LogoutLink"; //로그아�
 import { RequireMember } from "../components/RequireUser"; //사용자
 import RequireAdmin from "../components/RequireAdmin"; //관리자
 
-// 관리자 - 시간관리 + 휴무일 관리
+// 관리자 - 시간관리 + 휴무일 관리 + 배너관리
 import TimeSlotManagePage from "../../program/admin/pages/TimeSlotManagePage";
 import ClosedDayManagePage from "../../program/admin/pages/ClosedDayManagePage";
+import BannerListPage from "../../program/admin/pages/BannerListPage";
+import BannerCreatePage from "../../program/admin/pages/BannerCreatePage";
+import BannerDetailPage from "../../program/admin/pages/BannerDetailPage";
 
 // ✅ Land 예약 플로우 페이지
 import LandReserveDatePage from "../../program/reserve/land/pages/LandReserveDatePage";
@@ -70,6 +73,10 @@ const layoutRoutes = [
   <Route key="admin-volunteer-manage" path={routes.admin.volunteerReserveManage.path} element={<RequireAdmin><AdminVolunteerReservePage /></RequireAdmin>} />,
   <Route key="admin-land-detail" path={routes.admin.landReserveDetail.path} element={<RequireAdmin><AdminLandReserveDetailPage /></RequireAdmin>} />,
   <Route key="admin-volunteer-detail" path={routes.admin.volunteerReserveDetail.path} element={<RequireAdmin><AdminVolunteerReserveDetailPage /></RequireAdmin>} />,
+  <Route key="admin-banner-manage" path={routes.admin.bannerManage.path} element={<RequireAdmin><BannerListPage /></RequireAdmin >} />,
+  <Route key="admin-banner-create" path={routes.admin.bannerCreate.path} element={<RequireAdmin><BannerCreatePage /></RequireAdmin >} />,
+  <Route key="admin-banner-detail" path={routes.admin.bannerDetail.path} element={<RequireAdmin><BannerDetailPage /></RequireAdmin >} />,
+
   //사용자
   <Route key="login" path={routes.member.login.path} element={<LoginPage />} />, //로그인
   <Route

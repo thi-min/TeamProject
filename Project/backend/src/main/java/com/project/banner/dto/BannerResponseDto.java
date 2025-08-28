@@ -2,7 +2,8 @@ package com.project.banner.dto;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.project.banner.entity.BannerEntity;
 
 import lombok.*;
@@ -19,9 +20,12 @@ public class BannerResponseDto {
     private String imageUrl;	//이미지 경로
     private String altText;		//이미지 대체 텍스트
     private String linkUrl;		//링크 경로
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate startDate;	//배너 노출 시작일
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate endDate;		//배너 노출 종료일
-    private Boolean isVisible;		//배너 노출 여부
+    @JsonProperty("visible")
+    private Boolean visible;		//배너 노출 여부
     private LocalDateTime createdAt;	//배너 생성일시
     private LocalDateTime updatedAt;	//배너 수정일시
     
@@ -35,7 +39,7 @@ public class BannerResponseDto {
                 .linkUrl(banner.getLinkUrl())
                 .startDate(banner.getStartDate())
                 .endDate(banner.getEndDate())
-                .isVisible(banner.getIsVisible())
+                .visible(banner.getVisible())
                 .createdAt(banner.getCreatedAt())
                 .updatedAt(banner.getUpdatedAt())
                 .build();

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../../common/api/axios";
 import "../style/ReserveManage.css";
+import AdminReserveService from "../services/AdminReserveService";
 
 const AdminLandReserveDetailPage = () => {
   const { reserveCode } = useParams();
@@ -12,7 +13,7 @@ const AdminLandReserveDetailPage = () => {
   useEffect(() => {
     async function fetchDetail() {
       try {
-        const { data } = await api.get(`/api/admin/reserve/land/${reserveCode}`);
+        const { data } = await AdminReserveService.getLandReservationDetail(reserveCode);
         setDetail(data);
         setNewState(data.reserveState);
       } catch (err) {
@@ -34,9 +35,7 @@ const AdminLandReserveDetailPage = () => {
     }
 
       try {
-        await api.patch(`/api/admin/reserve/${reserveCode}/state`, {
-          reserveState: newState,
-        });
+        await AdminReserveService.updateReserveState(reserveCode, newState);
         alert("상태가 변경되었습니다.");
         navigate("/admin/reserve/land");
       } catch (err) {

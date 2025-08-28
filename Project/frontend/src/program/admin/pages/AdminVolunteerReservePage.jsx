@@ -3,6 +3,7 @@ import api from "../../../common/api/axios";
 import { useNavigate } from "react-router-dom";
 import "../style/ReserveManage.css";
 import "../../../common/styles/pagin.css";
+import AdminReserveService from "../services/AdminReserveService";
 
 const AdminVolunteerReservePage = () => {
   const [reservations, setReservations] = useState([]);
@@ -18,7 +19,7 @@ const AdminVolunteerReservePage = () => {
   // 봉사 예약 목록 조회
   const fetchReservations = async () => {
     try {
-      const { data } = await api.get("/api/admin/reserve/volunteer");
+      const { data } = await AdminReserveService.getVolunteerReservations(); 
       setReservations(data);
     } catch (err) {
       console.error("예약 목록 조회 실패", err);
@@ -49,10 +50,7 @@ const AdminVolunteerReservePage = () => {
         return;
       }
 
-      const { data } = await api.post(
-        "/api/admin/reserve/volunteer/search",
-        payload
-      );
+      const { data } = await AdminReserveService.searchVolunteerReservations(payload);
       setReservations(data);
     } catch (err) {
       console.error("봉사 예약 검색 실패", err);

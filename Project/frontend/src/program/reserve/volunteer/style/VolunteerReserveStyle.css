@@ -15,7 +15,13 @@ body {
   margin: 0;
   padding: 20px 0;
 }
-
+.volunteer-date-page h2 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 600;
+  padding-left: 10px;
+  color: #333;
+}
 .calendar-wrapper {
   width: 100%;
   max-width: 1200px;
@@ -194,9 +200,12 @@ body {
 }
 
 .form-title {
-  font-size: 24px;
   text-align: center;
   margin-bottom: 24px;
+  font-size: 24px;
+  font-weight: 600;
+  padding-left: 10px;
+  color: #333;
 }
 
 .required-info {

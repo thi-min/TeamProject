@@ -50,7 +50,7 @@ public class BannerEntity {
 
     // 배너 노출 여부
     @Column(name = "visible", nullable = false)
-    private Boolean isVisible;
+    private Boolean visible;
 
     // 배너 생성일시
     @Column(name = "created_at", nullable = false)
@@ -61,6 +61,6 @@ public class BannerEntity {
     private LocalDateTime updatedAt;
 
     @ManyToOne(fetch = FetchType.LAZY) //N:1관계
-    @JoinColumn(name = "admin_num", nullable = false) // 외래키(FK) 설정
+    @JoinColumn(name = "admin_num", referencedColumnName = "admin_num", nullable = false) // 외래키(FK) 설정
     private AdminEntity admin; // 배너를 등록한 관리자
 }
