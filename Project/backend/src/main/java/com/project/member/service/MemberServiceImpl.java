@@ -669,6 +669,12 @@ public class MemberServiceImpl implements MemberService {
          }
          return digits;
      }
+     @Override
+     public MemberEntity findByMemberNum(Long memberNum) {
+         // 회원 번호로 회원을 찾고, 없으면 예외 발생
+         return memberRepository.findByMemberNum(memberNum)
+                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+     }
 
  }
 

@@ -136,18 +136,20 @@ import VolunteerReserveSuccessPage from "../../program/reserve/volunteer/pages/V
 // ==============================
 const layoutRoutes = [
 
-
-  <Route key="adminbbstab" path="/admin/bbs" element={<AdminBbs />} />,
-
-   // 🔹 Land 예약: 날짜 → 폼 → 확인 → 완료
+  // 🔹 Land 예약: 날짜 → 폼 → 확인 → 완료
   <Route key="reserve-land-date" path={routes.reserve.land.date.path} element={<RequireMember><LandReserveDatePage /></RequireMember>} />,
   <Route key="reserve-land-form" path={routes.reserve.land.form.path} element={<RequireMember><LandReserveFormPage /></RequireMember>} />,
   <Route key="reserve-land-confirm" path={routes.reserve.land.confirm.path} element={<RequireMember><LandReserveConfirmPage /></RequireMember>} />,
   <Route key="reserve-land-success" path={routes.reserve.land.success.path} element={<RequireMember><LandReserveSuccessPage /></RequireMember>} />,
 
+  // 🔹 Volunteer 예약: 날짜 → 폼 → 확인 → 완료
+  <Route key="reserve-volunteer-date" path={routes.reserve.volunteer.date.path} element={<RequireMember><VolunteerReserveDatePage /></RequireMember>} />,
+  <Route key="reserve-volunteer-form" path={routes.reserve.volunteer.form.path} element={<RequireMember><VolunteerReserveFormPage /></RequireMember>} />,
+  <Route key="reserve-volunteer-confirm" path={routes.reserve.volunteer.confirm.path} element={<RequireMember><VolunteerReserveConfirmPage /></RequireMember>} />,
+  <Route key="reserve-volunteer-success" path={routes.reserve.volunteer.success.path} element={<RequireMember><VolunteerReserveSuccessPage /></RequireMember>} />,
 
-
-  // 일반 게시판
+  // 게시판
+  <Route key="adminbbstab" path="/admin/bbs" element={<AdminBbs />} />,
   <Route key="normal" path="/admin/bbs/normal" element={<Normal />} />,
   <Route key="normal-bbs-view" path="/admin/bbs/normal/:id" element={<NormalBbsView />} />,
   <Route key="normal-bbs-write" path="/admin/bbs/normal/write" element={<NormalBbsWrite />} />,
@@ -156,15 +158,7 @@ const layoutRoutes = [
   <Route key="Membernormal-view" path="/bbs/member/normal/view" element={<MemberNormalBbsView />} />,
   <Route key="Membernormal-dummy" path="/bbs/member/normal/dummy" element={<MemberNormalBbsDummy/>} />,
   <Route key="Adminnormal-dummy" path="/bbs/Admin/normal/dummy" element={<AdminNormalBbsdummy/>} />,
-
-  // 🔹 Volunteer 예약: 날짜 → 폼 → 확인 → 완료
-  <Route key="reserve-volunteer-date" path={routes.reserve.volunteer.date.path} element={<RequireMember><VolunteerReserveDatePage /></RequireMember>} />,
-  <Route key="reserve-volunteer-form" path={routes.reserve.volunteer.form.path} element={<RequireMember><VolunteerReserveFormPage /></RequireMember>} />,
-  <Route key="reserve-volunteer-confirm" path={routes.reserve.volunteer.confirm.path} element={<RequireMember><VolunteerReserveConfirmPage /></RequireMember>} />,
-  <Route key="reserve-volunteer-success" path={routes.reserve.volunteer.success.path} element={<RequireMember><VolunteerReserveSuccessPage /></RequireMember>} />,
-
-
-
+  
   // QnA 게시판
   <Route key="qna-bbs" path="/bbs/qna" element={<QnaBbs />} />,
   <Route key="qna-bbs-write" path="/bbs/qna/write" element={<QnaBbsWrite />} />,
@@ -174,7 +168,6 @@ const layoutRoutes = [
   <Route key="qna-bbs-admin-view" path="/admin/qna/view/:id" element={ <RequireAdmin><AdminQnaBbsView /></RequireAdmin>} />,
   <Route key="qna-bbs-admin-dummy" path="/bbs/admin/qna/dummy" element={<AdminQnaBbsDummy />} />,
 
-
   // 이미지 게시판
   <Route key="img-list" path="/bbs/image" element={<ImgList />} />,
   <Route key="img-detail" path="/bbs/image/:id" element={<ImgDetail />} />,
@@ -183,83 +176,6 @@ const layoutRoutes = [
   <Route key="img-Admin-ImgBoard" path="/admin/bbs/image" element={<AdminImgBoard />} />,
   <Route key="img-Admin-ImgDetail" path="/admin/bbs/image/Detail/:id" element={<AdminImgDetail />} />,
   <Route key="img-Admin-ImgDummy" path="/bbs/admin/image/Dummy" element={<ImgBoardDummy />} />,
-
-  // // 후원 route
-  // // 각 후원 페이지를 별도의 경로로 라우팅합니다.
-  // <Route key="fundMainPage" path={routes.fund.root.path} element={<FundMainPage />} />,
-  // <Route key="fundForm" path={routes.fund.fundForm.path} element={<FundApplicationForm />} />,
-  // <Route key="goodsForm" path={routes.fund.goodsForm.path} element={<GoodsApplicationForm />} />,
-  // <Route key="recurringForm" path={routes.fund.recurringForm.path} element={<RecurringApplicationForm />} />,
-  // <Route key="fundDetails" path={routes.fund.fundDetails.path} element={<FundApplicationDetails />} />,
-  // <Route key="goodsDetails" path={routes.fund.goodsDetails.path} element={<GoodsApplicationDetails />} />,
-  // <Route key="recurringDetails" path={routes.fund.recurringDetails.path} element={<RecurringApplicationDetails />} />,
-
-  // 1:1 채팅 route 추가
-  //<Route key="chatList" path={routes.admin.chat.list.path} element={<ChatList />} />,
-  //<Route key="chatRoom" path={routes.admin.chat.room(':roomId')} element={<ChatRoom />} />,
-
-  // 입양 신청서 route 추가
-    //<Route key="adoptForm" path={routes.admin.adopt.form(':memberNum')} element={<AdoptApplicationForm />} />,
-  // 동물 정보 기입 route 추가
-    //<Route key="animalRegister" path={routes.admin.animal.register.path} element={<AnimalForm />} />,
-
-  // 맵 관련 route 추가
-    //<Route key="mapPage" path={routes.mapdata.map.path} element={<MapPage />} />,
-   // <Route key="mapRegister" path={routes.mapdata.register.path} element={<MapForm />} />,
-
-
-
-  // 🔹 관리자 페이지 - 
-  <Route key="admin-timeslot-manage" path={routes.admin.timeSlotManage.path} element={<RequireAdmin><TimeSlotManagePage /></RequireAdmin>} />,
-  <Route key="admin" path={routes.admin.admin.path} element={<RequireAdmin><Admin /></RequireAdmin>} />,
-  <Route key="updatePw" path={routes.admin.password.path} element={<RequireAdmin><AdminPw /></RequireAdmin>} />,
-  <Route key="admin-closedday-manage" path={routes.admin.closedDayManage.path} element={<RequireAdmin><ClosedDayManagePage /></RequireAdmin>} />,
-  <Route key="admin-land-manage" path={routes.admin.landReserveManage.path} element={<RequireAdmin><AdminLandReservePage /></RequireAdmin>} />,
-  <Route key="admin-volunteer-manage" path={routes.admin.volunteerReserveManage.path} element={<RequireAdmin><AdminVolunteerReservePage /></RequireAdmin>} />,
-  <Route key="admin-land-detail" path={routes.admin.landReserveDetail.path} element={<RequireAdmin><AdminLandReserveDetailPage /></RequireAdmin>} />,
-  <Route key="admin-volunteer-detail" path={routes.admin.volunteerReserveDetail.path} element={<RequireAdmin><AdminVolunteerReserveDetailPage /></RequireAdmin>} />,
-
-  //사용자
-  <Route key="login" path={routes.member.login.path} element={<LoginPage />} />, //로그인
-  <Route
-    key="logout"
-    path={routes.member.logout.path}
-    element={<LogoutLink />}
-  />, //로그아웃
-  <Route key="signup" path={routes.member.signup.path} element={<Signup />} />, //회원가입
-
-  <Route key="find-pw" path={routes.member.mypage.path} element={<MyPage />} />, //마이페이지
-
-  <Route
-    key="mypage"
-    path={routes.member.mypage.path}
-    element={
-      <RequireMember>
-        <MyPage />
-      </RequireMember>
-    }
-  />, //마이페이지
-  <Route
-    key="memberdata"
-    path={routes.member.memberdata.path}
-    element={
-      <RequireMember>
-        <MemberPage />
-      </RequireMember>
-    }
-  />, //회원정보
-
-  <Route key="find-id" path={routes.member.findid.path} element={<FindId />} />, //아이디 찾기
-  <Route key="find-pw" path={routes.member.findpw.path} element={<FindPw />} />, //비밀번호 찾기
-  <Route
-    key="update-password"
-    path={routes.member.changepw.path}
-
-    element={<RequireMember><ChangePw /></RequireMember>}
-
-  />, //비밀번호 변경
-
-
 
   // ------------------------------
   // 후원(Fund) 관련 Route
@@ -285,37 +201,25 @@ const layoutRoutes = [
   // ------------------------------
   // 입양 신청서 Route
   // ------------------------------
-  <Route key="memberAdoptList" path={routes.member.adopt.list.path} element={<AdoptApplicationForm />} />,
-  <Route key="memberAdoptDetail" path={routes.member.adopt.detail(':id')} element={<AdoptApplicationForm />} />,
-  <Route key="adminAdoptList" path={routes.admin.adopt.list.path} element={<AdoptApplicationForm />} />,
-  <Route key="adminAdoptDetail" path={routes.admin.adopt.detail(':id')} element={<AdoptApplicationForm />} />,
-  <Route key="adminAdoptRegist" path={routes.admin.adopt.regist.path} element={<AdoptApplicationForm />} />,
-  <Route key="adminAdoptUpdate" path={routes.admin.adopt.update(':id')} element={<AdoptApplicationForm />} />,
+  <Route key="memberAdoptList" path={routes.member.adopt.list.path} element={<RequireMember><AdoptApplicationForm /></RequireMember>} />,
+  <Route key="memberAdoptDetail" path={routes.member.adopt.detail(':id')} element={<RequireMember><AdoptApplicationForm /></RequireMember>} />,
+  <Route key="adminAdoptList" path={routes.admin.adopt.list.path} element={<RequireAdmin><AdoptApplicationForm /></RequireAdmin>} />,
+  <Route key="adminAdoptDetail" path={routes.admin.adopt.detail(':id')} element={<RequireAdmin><AdoptApplicationForm /></RequireAdmin>} />,
+  <Route key="adminAdoptRegist" path={routes.admin.adopt.regist.path} element={<RequireAdmin><AdoptApplicationForm /></RequireAdmin>} />,
+  <Route key="adminAdoptUpdate" path={routes.admin.adopt.update(':id')} element={<RequireAdmin><AdoptApplicationForm /></RequireAdmin>} />,
 
   // ------------------------------
   // 동물 정보 Route (관리자)
   // ------------------------------
-  <Route key="adminAnimalList" path={routes.admin.animal.list.path} element={<AnimalForm />} />,
-  <Route key="adminAnimalDetail" path={routes.admin.animal.detail(':id')} element={<AnimalForm />} />,
-  <Route key="adminAnimalRegist" path={routes.admin.animal.regist.path} element={<AnimalForm />} />,
-  <Route key="adminAnimalUpdate" path={routes.admin.animal.update(':id')} element={<AnimalForm />} />,
+  <Route key="adminAnimalList" path={routes.admin.animal.list.path} element={<RequireAdmin><AnimalForm /></RequireAdmin>} />,
+  <Route key="adminAnimalDetail" path={routes.admin.animal.detail(':id')} element={<RequireAdmin><AnimalForm /></RequireAdmin>} />,
+  <Route key="adminAnimalRegist" path={routes.admin.animal.regist.path} element={<RequireAdmin><AnimalForm /></RequireAdmin>} />,
+  <Route key="adminAnimalUpdate" path={routes.admin.animal.update(':id')} element={<RequireAdmin><AnimalForm /></RequireAdmin>} />,
 
   // ------------------------------
   // 지도 관련 Route
   // ------------------------------
   <Route key="map" path={routes.map.root.path} element={<MapForm />} />,
-
-  // // ------------------------------
-  // // 예약 플로우 Route
-  // // ------------------------------
-  // <Route key="reserve-land-date" path={routes.reserve.land.date.path} element={<LandReserveDatePage />} />,
-  // <Route key="reserve-land-form" path={routes.reserve.land.form.path} element={<LandReserveFormPage />} />,
-  // <Route key="reserve-land-confirm" path={routes.reserve.land.confirm.path} element={<LandReserveConfirmPage />} />,
-  // <Route key="reserve-land-success" path={routes.reserve.land.success.path} element={<LandReserveSuccessPage />} />,
-  // <Route key="reserve-volunteer-date" path={routes.reserve.volunteer.date.path} element={<VolunteerReserveDatePage />} />,
-  // <Route key="reserve-volunteer-form" path={routes.reserve.volunteer.form.path} element={<VolunteerReserveFormPage />} />,
-  // <Route key="reserve-volunteer-confirm" path={routes.reserve.volunteer.confirm.path} element={<VolunteerReserveConfirmPage />} />,
-  // <Route key="reserve-volunteer-success" path={routes.reserve.volunteer.success.path} element={<VolunteerReserveSuccessPage />} />,
 
   // ------------------------------
   // 사용자 관련 Route
@@ -326,21 +230,21 @@ const layoutRoutes = [
   <Route key="phonetest" path={routes.member.phone.path} element={<PhoneVerifyPage />} />,
   <Route key="signup" path={routes.member.signup.path} element={<Signup />} />,
   <Route key="find-id" path={routes.member.findid.path} element={<FindId />} />,
-  // <Route key="find-pw" path={routes.member.findpw.path} element={<FindPw />} />,
-  // <Route key="update-password" path={routes.member.changepw.path} element={<ChangePw />} />,
+  <Route key="find-pw" path={routes.member.findpw.path} element={<FindPw />} />, // Corrected path
+  <Route key="update-password" path={routes.member.changepw.path} element={<RequireMember><ChangePw /></RequireMember>} />, // Corrected path
 
-  // // 마이페이지 관련 라우트 (로그인 필요)
-  // <Route key="mypage" path={routes.member.mypage.path} element={<RequireUserOnMember><MyPage /></RequireUserOnMember>} />,
-  // <Route key="memberdata" path={routes.member.memberdata.path} element={<RequireUserOnMember><MemberPage /></RequireUserOnMember>} />,
-  // <Route key="mypage-reserves" path={routes.member.reserves.path} element={<RequireUserOnMember><MyReserveListPage /></RequireUserOnMember>} />,
-  // <Route key="mypage-reserve-land-detail" path={routes.member.landReserveDetail.path} element={<RequireUserOnMember><LandReserveDetailPage /></RequireUserOnMember>} />,
-  // <Route key="mypage-reserve-volunteer-detail" path={routes.member.volunteerReserveDetail.path} element={<RequireUserOnMember><VolunteerReserveDetailPage /></RequireUserOnMember>} />,
+  // 마이페이지 관련 라우트 (로그인 필요)
+  <Route key="mypage" path={routes.member.mypage.path} element={<RequireMember><MyPage /></RequireMember>} />,
+  <Route key="memberdata" path={routes.member.memberdata.path} element={<RequireMember><MemberPage /></RequireMember>} />,
+  <Route key="mypage-reserves" path={routes.member.reserves.path} element={<RequireMember><MyReserveListPage /></RequireMember>} />,
+  <Route key="mypage-reserve-land-detail" path={routes.member.landReserveDetail.path} element={<RequireMember><LandReserveDetailPage /></RequireMember>} />,
+  <Route key="mypage-reserve-volunteer-detail" path={routes.member.volunteerReserveDetail.path} element={<RequireMember><VolunteerReserveDetailPage /></RequireMember>} />,
   
   // ------------------------------
   // 관리자 관련 Route (관리자 권한 필요)
   // ------------------------------
-  // <Route key="admin" path={routes.admin.admin.path} element={<RequireAdmin><Admin /></RequireAdmin>} />,
-  <Route key="updatePw" path={routes.admin.password.path} element={<RequireAdmin><AdminPw /></RequireAdmin>} />,
+  <Route key="admin" path={routes.admin.admin.path} element={<RequireAdmin><Admin /></RequireAdmin>} />,
+  <Route key="admin-updatePw" path={routes.admin.password.path} element={<RequireAdmin><AdminPw /></RequireAdmin>} />,
   <Route key="memberList" path={routes.admin.members.path} element={<RequireAdmin><MemberList /></RequireAdmin>} />,
   <Route key="memberDetail" path={routes.admin.memberDetail.path} element={<RequireAdmin><MemberDetail /></RequireAdmin>} />,
   <Route key="admin-timeslot-manage" path={routes.admin.timeSlotManage.path} element={<RequireAdmin><TimeSlotManagePage /></RequireAdmin>} />,
@@ -350,49 +254,10 @@ const layoutRoutes = [
   <Route key="admin-land-detail" path={routes.admin.landReserveDetail.path} element={<RequireAdmin><AdminLandReserveDetailPage /></RequireAdmin>} />,
   <Route key="admin-volunteer-detail" path={routes.admin.volunteerReserveDetail.path} element={<RequireAdmin><AdminVolunteerReserveDetailPage /></RequireAdmin>} />,
 
-  // 마이페이지 예약내역조회
-  <Route key="mypage-reserves" path={routes.member.reserves.path} element={<RequireMember><MyReserveListPage /></RequireMember>} />,
-  // 놀이터 예약 상세보기
-  <Route key="mypage-reserve-land-detail" path={routes.member.landReserveDetail.path} element={<RequireMember><LandReserveDetailPage /></RequireMember>} />,
-  // 봉사 예약 상세보기
-  <Route key="mypage-reserve-volunteer-detail" path={routes.member.volunteerReserveDetail.path} element={<RequireMember><VolunteerReserveDetailPage /></RequireMember>} />,
-
-
-  //카카오
-  <Route
-    key="kakao-callback"
-    path={routes.kakao.callback.path}
-    element={<KakaoCallbackPage />}
-  />, //콜백 연결
-
-
-  //관리자
-  // <Route key="admin" path={routes.admin.admin.path} element={<Admin />} />, //관리자 로그인시 출력
-  // <Route
-  //   key="updatePw"
-  //   path={routes.admin.password.path}
-  //   element={<AdminPw />}
-  // />, //관리자 비밀번호 변경
-
-  <Route
-    key="memberList"
-    path={routes.admin.membersList.path}
-    element={
-      <RequireAdmin>
-        <MemberList />
-      </RequireAdmin>
-    }
-  />, //관리자 회원목록
-  <Route
-    key="memberDetail"
-    path={routes.admin.memberDetail.path}
-    element={
-      <RequireAdmin>
-        <MemberDetail />
-      </RequireAdmin>
-    }
-  />, //관리자 회원상세보기
+  // 카카오
+  <Route key="kakao-callback" path={routes.kakao.callback.path} element={<KakaoCallbackPage />} />, // 콜백 연결
 
 ];
+
 
 export default layoutRoutes;

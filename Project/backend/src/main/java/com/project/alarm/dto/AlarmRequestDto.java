@@ -2,9 +2,6 @@ package com.project.alarm.dto;
 
 import java.time.LocalDateTime;
 
-import com.project.alarm.entity.AlarmCheck;
-import com.project.alarm.entity.AlarmType;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,12 +14,8 @@ import lombok.Setter;
 @AllArgsConstructor
 @Builder
 public class AlarmRequestDto {
-    private Long alarmId; //알림 번호
-    private Long memberNum; // 회원 번호
-    private AlarmType alarmType; //알림 유형
-    private String alarmTitle; // 알림 제목
-    private String alarmContent; // 알림 내용
-    private String alarmUrl; // 알림 링크
-    private LocalDateTime alarmTime; // 알림 시간
-    private AlarmCheck alarmCheck; // 알림 확인
+	private Long memberNum;       // 알람 대상 회원 번호
+	private String message;       // 알람 내용
+	private String url;           // 클릭 시 이동 링크
+	private LocalDateTime alarmTime; // 알람 생성 시각
 }

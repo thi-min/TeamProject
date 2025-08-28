@@ -1,44 +1,35 @@
 package com.project.alarm.service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.project.alarm.entity.AlarmEntity;
+import com.project.alarm.dto.AlarmResponseDto;
 import com.project.alarm.repository.AlarmRepository;
+import com.project.reserve.entity.ReserveState;
 
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class AlarmService {
-    private final AlarmRepository alarmRepository;
-    
-    // 특정 회원 번호의 데이터 내림차순으로 정렬 반환
-    @Transactional(readOnly = true)
-    public List<AlarmEntity> listByMember(Long memberNum) {
-        return alarmRepository.findByMemberMemberNumOrderByAlarmTimeDesc(memberNum);
-    }
-    //알림 데이터 조회
-    @Transactional(readOnly = true)
-    public AlarmEntity get(Long id) {
-        return alarmRepository.findById(id).orElse(null);
-    }
-    // 알림 데이터 저장
-    @Transactional
-    public AlarmEntity create(AlarmEntity e) {
-        return alarmRepository.save(e);
-    }
-    // 알림 데이터 갱신
-    @Transactional
-    public AlarmEntity update(AlarmEntity e) {
-        return alarmRepository.save(e);
-    }
-    // 알림 제거
-    @Transactional
-    public void delete(Long id) {
-        alarmRepository.deleteById(id);
-    }
 
+    private final AlarmRepository alarmRepository;
+
+    @Transactional(readOnly = true)
+    public List<AlarmResponseDto> getRecentAlarms(Long memberNum) {
+        return alarmRepository.findTop5ByMember_MemberNumOrderByUpdateTimeDesc(memberNum)
+                .stream()
+                .filter(r -> r.getReserveState() == ReserveState.DONE
+                          || r.getReserveState() == ReserveState.REJ) // DONE, REJ만
+                .map(r -> {
+                    String message = r.getReserveState() == ReserveState.DONE
+                            ? "예약이 변경되었습니다."
+                            : "예약이 변경되었습니다.";
+                    return new AlarmResponseDto(message, r.getUpdateTime());
+                })
+                .collect(Collectors.toList());
+    }
 }

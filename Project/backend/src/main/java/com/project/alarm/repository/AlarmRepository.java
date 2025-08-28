@@ -5,11 +5,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.project.alarm.entity.AlarmEntity;
+import com.project.reserve.entity.Reserve;
 
 @Repository
-public interface AlarmRepository extends JpaRepository<AlarmEntity, Long> {
-	
-    List<AlarmEntity> findByMemberMemberNumOrderByAlarmTimeDesc(Long memberNum);
-    // 회원번호를 조회해 alarmtime 필드 기준을 내림차순으로 정렬 (최근 알람)
+public interface AlarmRepository extends JpaRepository<Reserve, Long> {
+
+	List<Reserve> findTop5ByMember_MemberNumOrderByUpdateTimeDesc(Long memberNum);
 }
