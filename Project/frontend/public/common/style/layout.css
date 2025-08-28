@@ -21,7 +21,7 @@ body{font-size:16px;line-height:28px;letter-spacing:0;font-weight:400;font-famil
 .header_inner .nav_box .depth_area .depth_list{height:100%;display:flex;align-items:center;gap:16px;box-sizing:border-box;}
 .header_inner .nav_box .depth_area .depth_list .depth1_item{position:relative;display:block;min-width:120px;}
 .header_inner .nav_box .depth_area .depth_list .depth1_item a{width:100%;font-size:22px;line-height:30px;text-align:center;color:#333;}
-.header_inner .nav_box .depth_area .depth_list .depth1_item .depth2_item{opacity:0;visibility:hidden;background-color:#fff;width:calc(100% + 20px);padding:10px;border:1px solid #333;border-radius:12px;position:absolute;top:46px;left:-10px;box-sizing:border-box;transition-property:opacity,visibility,height;transition-duration:0.3s;transition-timing-function:ease-in-out;z-index:1;}
+.header_inner .nav_box .depth_area .depth_list .depth1_item .depth2_item{opacity:0;visibility:hidden;background-color:#fff;width:calc(100% + 20px);padding:10px;border:1px solid #333;border-radius:12px;position:absolute;top:46px;left:-10px;box-sizing:border-box;transition-property:opacity,visibility,height;transition-duration:0.3s;transition-timing-function:ease-in-out;z-index:51;}
 .header_inner .nav_box .depth_area .depth_list .depth1_item:hover .depth2_item{visibility:visible;opacity:1;}
 .header_inner .nav_box .depth_area .depth_list .depth1_item .depth2_item a{padding:6px 0;font-size:20px;line-height:28px;}
 

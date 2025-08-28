@@ -8,6 +8,9 @@ import { LogoutLink } from "../../program/login/pages/LogoutLink"; //로그아�
 import { RequireMember } from "../components/RequireUser"; //사용자
 import RequireAdmin from "../components/RequireAdmin"; //관리자
 
+//메인페이지
+import Main from "../../main/pages/MainPage";
+
 // 📌 각 페이지 컴포넌트 import
 //회원
 import LoginPage from "../../program/login/pages/LoginPage"; //로그인
@@ -31,6 +34,9 @@ import KakaoCallbackPage from "../../program/login/pages/KakaoCallbackPage"; //�
 
 // 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
+  //메인페이지
+  <Route key="main" path={routes.main.path} element={<Main />} />, //메인
+
   //사용자
   <Route key="login" path={routes.member.login.path} element={<LoginPage />} />, //로그인
   <Route

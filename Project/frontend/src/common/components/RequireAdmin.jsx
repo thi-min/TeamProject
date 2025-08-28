@@ -1,89 +1,75 @@
-// 개선: 사용자 가드와 동일하게 레이스 보정(GRACE_MS) + auth 이벤트 구독
-//       토큰이 생기면 즉시 통과, 없으면 잠시 기다렸다가 최종 판정
-
-import React, { useEffect, useMemo, useState } from "react";
-import { Navigate, useLocation } from "react-router-dom";
+// src/common/guards/RequireAdmin.jsx
+import React, { useMemo } from "react";
+import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useAuth } from "../context/AuthContext";
 
-const GRACE_MS = 400;
+/** 다양한 형태의 권한 클레임을 안전하게 파싱해서 ADMIN 여부 판단 */
+function hasAdminFromClaims(claims) {
+  if (!claims) return false;
 
-function getValidAccessToken() {
-  try {
-    const tok =
-      localStorage.getItem("accessToken") ||
-      localStorage.getItem("adminAccessToken") ||
-      "";
-    if (!tok) return "";
-    const p = jwtDecode(tok);
-    const now = Math.floor(Date.now() / 1000);
-    if (p?.exp && p.exp > now) return tok;
-    return "";
-  } catch {
-    return "";
-  }
-}
+  // 후보군 수집: 문자열/배열/객체배열 모두 대응
+  const bag = [];
 
-function tokenHasAdmin(tok) {
-  try {
-    if (!tok) return false;
-    const payload = jwtDecode(tok);
-    const raw = payload?.role ?? payload?.roles ?? payload?.authorities ?? "";
-    const s = Array.isArray(raw) ? raw.join(",") : String(raw || "");
-    return /(^|,)ROLE?_?ADMIN(,|$)/i.test(s);
-  } catch {
-    return false;
-  }
+  const push = (v) => {
+    if (!v) return;
+    if (Array.isArray(v)) {
+      for (const el of v) push(el);
+    } else if (typeof v === "string") {
+      // 콤마/공백 구분
+      v.split(/[,\s]+/).forEach((s) => s && bag.push(s));
+    } else if (typeof v === "object") {
+      // {authority:"ROLE_ADMIN"} | {role:"ADMIN"} | {name:"ADMIN"}
+      bag.push(v.authority || v.role || v.name);
+    }
+  };
+
+  push(claims.role);
+  push(claims.roles);
+  push(claims.authorities);
+  push(claims.auth);
+  push(claims.permissions);
+
+  // 최종 문자열로 합쳐서 ADMIN 패턴 검사
+  const joined = bag.filter(Boolean).join(",");
+  return /(^|,|\s)ROLE?_?ADMIN(,|\s|$)/i.test(joined);
 }
 
 const RequireAdmin = ({ children }) => {
-  const location = useLocation();
+  const { isLogin, role: ctxRole } = useAuth();
 
-  // 최초 스냅샷
-  const initialTok = useMemo(() => getValidAccessToken(), []);
-  const initialReady = useMemo(
-    () => !!initialTok && tokenHasAdmin(initialTok),
-    [initialTok]
-  );
+  // 1) 컨텍스트의 role을 최우선 사용 (로그인 직후에도 신뢰 가능)
+  const ctxIsAdmin = useMemo(() => {
+    if (!ctxRole) return false;
+    return /(^|,|\s)ROLE?_?ADMIN(,|\s|$)/i.test(String(ctxRole).toUpperCase());
+  }, [ctxRole]);
 
-  const [ready, setReady] = useState(initialReady);
-  const [grace, setGrace] = useState(!initialReady);
+  // 2) 토큰으로 보강 판정 (컨텍스트가 아직 초기화 중인 첫 렌더 레이스 등 대비)
+  const token =
+    localStorage.getItem("accessToken") ||
+    localStorage.getItem("adminAccessToken");
 
-  // 로그인/로그아웃 이벤트 구독
-  useEffect(() => {
-    const recheck = () => {
-      const tok = getValidAccessToken();
-      setReady(!!tok && tokenHasAdmin(tok));
-    };
-    window.addEventListener("auth:login", recheck);
-    window.addEventListener("auth:logout", recheck);
-    return () => {
-      window.removeEventListener("auth:login", recheck);
-      window.removeEventListener("auth:logout", recheck);
-    };
-  }, []);
+  let jwtIsAdmin = false;
+  if (token) {
+    try {
+      const claims = jwtDecode(token);
+      jwtIsAdmin = hasAdminFromClaims(claims);
+    } catch {
+      jwtIsAdmin = false;
+    }
+  }
 
-  // 짧은 유예 후 최종 판정
-  useEffect(() => {
-    if (!grace) return;
-    const t = setTimeout(() => {
-      setGrace(false);
-      const tok = getValidAccessToken();
-      setReady(!!tok && tokenHasAdmin(tok));
-    }, GRACE_MS);
-    return () => clearTimeout(t);
-  }, [grace]);
+  const isAdmin = ctxIsAdmin || jwtIsAdmin;
 
-  if (grace) return null;
+  // 로그인 자체가 아니면 → 로그인 페이지로
+  if (!isLogin && !token) {
+    return <Navigate to="/login" replace />;
+  }
 
-  if (!ready) {
-    // 권한 없음 또는 비로그인 → 로그인 페이지로
-    return (
-      <Navigate
-        to="/login"
-        replace
-        state={{ from: location.pathname || "/" }}
-      />
-    );
+  // 로그인은 했지만 관리자 권한이 없다면 경고 후 홈으로
+  if (!isAdmin) {
+    alert("관리자만 접근할 수 있는 페이지입니다.");
+    return <Navigate to="/" replace />;
   }
 
   return children;

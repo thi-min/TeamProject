@@ -109,7 +109,7 @@ export default function Mypage() {
       <div className="title_box">
         <div className="title">마이 페이지</div>
         {/* 로그인 유형 뱃지 표출 */}
-        <div className="sub_title" style={{ marginTop: 8, fontSize: 14 }}>
+        <div className="sub_title">
           로그인 유형: <strong>{loginTypeLabel}</strong>
         </div>
       </div>

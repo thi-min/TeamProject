@@ -2,7 +2,7 @@
 
 const routes = {
   // 메인/홈
-  home: { path: "/", label: "홈" },
+  main: { path: "/", label: "메인페이지" },
 
   // 센터 소개
   about: {
