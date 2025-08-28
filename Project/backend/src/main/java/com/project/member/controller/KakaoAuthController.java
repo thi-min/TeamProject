@@ -1,3 +1,4 @@
+// KakaoAuthController.java
 package com.project.member.controller;
 
 import com.project.common.jwt.JwtTokenProvider;
@@ -7,29 +8,17 @@ import com.project.member.repository.MemberRepository;
 import com.project.member.service.KakaoApiService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseCookie;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.util.UriUtils;
 
+import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
-/**
- * 카카오 로그인 콜백 컨트롤러
- *
- * 분기:
- *  - 회원 존재(O): 기존 로그인 로직과 동일하게 토큰 발급 → 프론트가 /member/mypage 로 이동
- *  - 회원 존재(X): /join 으로 이동할 수 있게 프리필 전체(kakaoId, email, name, gender, birthday, birthyear, phoneNumber) 반환
- *
- * ⚠ 주의
- *  - 팀 규칙: "카카오 회원가입 시 kakaoId를 memberId로 사용"
- *  - JwtTokenProvider는 프로젝트에 맞춘 createAccessToken/createRefreshToken 사용
- */
 @Slf4j
 @RestController
 @RequiredArgsConstructor
@@ -40,81 +29,109 @@ public class KakaoAuthController {
     private final JwtTokenProvider jwtTokenProvider;
 
     @GetMapping("/kakao/callback")
-    public ResponseEntity<?> handleKakaoCallback(@RequestParam("code") String code) {
-        try {
-            // 1) code → access_token
-            final String kakaoAccessToken = kakaoApiService.getAccessToken(code);
+    public ResponseEntity<?> handleKakaoCallback(String code) throws Exception {
+        log.info("[KakaoCallback] code={}", code);
 
-            // 2) access_token → 사용자 정보 DTO
-            final KakaoUserInfoDto profile = kakaoApiService.getUserInfo(kakaoAccessToken);
+        // 1) 토큰 발급
+        final String kakaoAccessToken = kakaoApiService.getAccessToken(code);
 
-            // 팀 규칙: kakaoId = memberId
-            final String kakaoId    = nz(profile.getKakaoId());
-            final String email      = nz(profile.getEmail());
-            final String name       = nz(profile.getName());
-            final String gender     = nz(profile.getGender());     // "male"/"female"
-            final String birthday   = nz(profile.getBirthday());   // "MMDD"
-            final String birthyear  = nz(profile.getBirthyear());  // "YYYY"
-            final String phone      = nz(profile.getPhoneNumber()); // "+82 10-...."
+        // 2) 사용자 정보 조회
+        final KakaoUserInfoDto info = kakaoApiService.getUserInfo(kakaoAccessToken);
+        final String rawEmail  = info.getEmail();                                // 카카오가 내려준 이메일
+        final String email     = rawEmail == null ? null : rawEmail.toLowerCase(); // 🔑 비교 안정성 위해 소문자 정규화
+        final String kakaoId   = info.getKakaoId();
 
-            // 3) 회원 존재 여부
-            final MemberEntity member = memberRepository.findByMemberId(kakaoId).orElse(null);
+        log.info("[KakaoCallback] email={}, kakaoId={}", email, kakaoId);
 
-            // ────────────────────────────────────────────────
-            // (A) 회원 없음 → 회원가입 필요: 프리필 '모두' 내려줌
-            // ────────────────────────────────────────────────
-            if (member == null) {
-                Map<String, Object> body = new HashMap<>();
-                body.put("login", false);
-                body.put("signupRequired", true);
-                // ✅ 프리필 전체 전달 (요청하신 phone/birthday/birthyear 포함)
-                body.put("kakaoId", kakaoId);
-                body.put("email", email);
-                body.put("name", name);
-                body.put("gender", gender);
-                body.put("birthday", birthday);
-                body.put("birthyear", birthyear);
-                body.put("phoneNumber", phone);
-                return ResponseEntity.ok(body);
+        // 3) 기존 회원 조회: 이메일 우선 → 없으면 kakaoId로도 시도
+        Optional<MemberEntity> found = Optional.empty();
+        if (email != null && !email.isBlank()) {
+            found = memberRepository.findByMemberId(email);
+        }
+        if (found.isEmpty() && kakaoId != null && !kakaoId.isBlank()) {
+            // 스키마에 kakaoId 컬럼이 없다면, memberId==kakaoId 로 저장한 경우를 대비해 memberId로도 조회
+            // (kakaoId 컬럼이 있다면 findByKakaoId 로 바꾸세요)
+            Optional<MemberEntity> byMemberId = memberRepository.findByMemberId(kakaoId);
+            if (byMemberId.isPresent()) {
+                found = byMemberId;
+            } else if (hasKakaoIdColumn()) {
+                // ⚠️ kakaoId 전용 컬럼이 있는 프로젝트라면 아래 메서드를 MemberRepository에 추가하고 사용
+                found = memberRepository.findByKakaoId(kakaoId);
             }
+        }
 
-            // ────────────────────────────────────────────────
-            // (B) 회원 있음 → 즉시 로그인 처리 (프로젝트 로그인 포맷 준수)
-            // ────────────────────────────────────────────────
-            final String subject = member.getMemberId(); // JWT subject 규칙: 이메일(=ID) → 현재 kakaoId
-            final String role    = "USER";               // 카카오는 일반 회원
+        if (found.isPresent()) {
+            // 4) 로그인 처리: JWT 발급 + HttpOnly 쿠키 세팅
+            MemberEntity m = found.get();
 
-            // 기존 로그인과 동일 포맷으로 토큰 발급
-            final String accessToken  = jwtTokenProvider.createAccessToken(subject, role);
-            final String refreshToken = jwtTokenProvider.createRefreshToken(subject, role);
+            final String subject = m.getMemberId();              // 토큰 subject는 "로그인 ID(이메일)"로 통일
+            final String role    = "USER";                       // 필요 시 m.getRole() 등에서 읽어오세요
+            final String at = jwtTokenProvider.createAccessToken(subject, role);
+            final String rt = jwtTokenProvider.createRefreshToken(subject, role);
 
-            // RefreshToken은 HttpOnly 쿠키(7일)로 전달 (프로젝트 정책 맞춤)
-            ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", refreshToken)
+            // HttpOnly 쿠키(도메인/secure/sameSite는 환경에 맞게 조정)
+            ResponseCookie atCookie = ResponseCookie.from("accessToken", at)
                     .httpOnly(true)
-                    .secure(false)  // 운영 https면 true 권장
+                    .secure(false)             // HTTPS면 true 권장
+                    .path("/")
+                    .maxAge(Duration.ofMinutes(30))
+                    .sameSite("Lax")
+                    .build();
+            ResponseCookie rtCookie = ResponseCookie.from("refreshToken", rt)
+                    .httpOnly(true)
+                    .secure(false)
                     .path("/")
                     .maxAge(Duration.ofDays(7))
                     .sameSite("Lax")
                     .build();
 
             Map<String, Object> body = new HashMap<>();
-            body.put("login", true);
-            body.put("signupRequired", false);
-            body.put("accessToken", accessToken);
-            body.put("memberId", subject);
-            body.put("memberName", member.getMemberName());
-            body.put("role", role);
+            body.put("action", "signin_ok");
+            body.put("redirect", "/member/mypage"); // 프론트에서 이 경로로 navigate
 
             return ResponseEntity.ok()
-                    .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                    .header(HttpHeaders.SET_COOKIE, atCookie.toString())
+                    .header(HttpHeaders.SET_COOKIE, rtCookie.toString())
                     .body(body);
-
-        } catch (Exception e) {
-            log.error("[KakaoCallback] error: {}", e.getMessage(), e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Kakao callback error: " + e.getMessage());
         }
+
+        // 5) 회원 없음 → /join 으로 보내기 위한 프리필 구성
+        Map<String, Object> prefill = new HashMap<>();
+        prefill.put("memberId", email != null ? email : "");          // 현재 정책: ID=이메일 (이전에 ID=카카오ID였다면 맞춰 수정)
+        prefill.put("memberName", info.getName());
+        prefill.put("memberBirth", toIsoBirth(info.getBirthyear(), info.getBirthday())); // YYYY-MM-DD
+        prefill.put("memberSex", normalizeSex(info.getGender()));                       // MAN/WOMAN
+        prefill.put("memberPhone", info.getPhoneNumber());                              // +82 ... → 프론트에서 포맷팅
+
+        Map<String, Object> res = new HashMap<>();
+        res.put("action", "go_join");
+        res.put("via", "kakao");
+        res.put("kakaoId", kakaoId);
+        res.put("prefill", prefill);
+
+        return ResponseEntity.ok(res);
     }
 
-    private String nz(String s) { return s == null ? null : s; }
+    private String toIsoBirth(String birthyear, String birthday) {
+        String y = birthyear == null ? "" : birthyear.trim();
+        String mmdd = birthday == null ? "" : birthday.trim();
+        if (y.length() == 4 && mmdd.length() == 4) {
+            return y + "-" + mmdd.substring(0, 2) + "-" + mmdd.substring(2, 4);
+        }
+        return "";
+    }
+
+    private String normalizeSex(String gender) {
+        if (gender == null) return "";
+        String g = gender.toLowerCase();
+        if ("male".equals(g) || "m".equals(g)) return "MAN";
+        if ("female".equals(g) || "f".equals(g)) return "WOMAN";
+        return "";
+    }
+
+    /** 프로젝트에 kakaoId 전용 컬럼이 있는지 여부를 상황에 맞게 리턴하세요.
+     *  없으면 false로 유지하고, findByMemberId(kakaoId)만 사용해도 됩니다. */
+    private boolean hasKakaoIdColumn() {
+        return false; // kakaoId 컬럼이 있으면 true 로 바꾸고, Repository 메서드도 추가
+    }
 }

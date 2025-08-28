@@ -8,6 +8,9 @@ import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 import routes from "../../../common/routes/router";
 
+// 카카오 프리필 세션 백업 키 (Join/Signup과 동일)
+const KAKAO_PREFILL_KEY = "kakao_prefill_v1";
+
 export default function KakaoCallbackPage() {
   const navigate = useNavigate();
   const { search } = useLocation();
