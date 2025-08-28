@@ -84,12 +84,4 @@ public interface MemberService {
     //카카오 인가코드(code)를 받아 로그인 처리
 	MemberLoginResponseDto handleKakaoLogin(String code) throws Exception;
 
-
-	//카카오 회원가입
-    MemberEntity kakaoSignUp(KakaoSignUpRequestDto dto);
-	//MemberSignUpResponseDto kakaoSignup(KakaoSignUpRequestDto dto);
-    
-    //회원 번호로 회원 객체를 찾아 반환
-    MemberEntity findByMemberNum(Long memberNum);
-    
 }
