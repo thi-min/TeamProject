@@ -1,24 +1,29 @@
-// src/program/signup/pages/SignupPage.jsx
-// 목적: 회원가입 폼 (휴대폰번호 + 문자 수신동의 + 카카오 주소 팝업 + 카카오 프리필 지원)
-// - ✅ 카카오 콜백에서 navigate('/join/sigup', { state: { kakaoId, prefill, via: 'kakao' } }) 로 넘어온 데이터를 폼에 주입
-// - ✅ 휴대폰 인증 팝업에서 세션에 저장한 번호(+82...)를 010 숫자만으로 1회 주입(이미 값 있으면 덮어쓰지 않음)
-// - ✅ 성별은 "MAN"/"WOMAN" 그대로 서버로 전송 (카카오에서 온 값이 M/F/male/female 이면 변환)
-// - ✅ 카카오 가입 경로(via === 'kakao')에서는 비밀번호 검증을 건너뛰고, 서버로 memberPw=null 전송
-// -   (일반 가입 경로에서는 기존과 동일하게 비밀번호 유효성/일치 검사 수행)
+/**
+ * 목적: /join/signup 페이지
+ * - 카카오 콜백 → /join → 약관동의 후 진입 시, 프리필 정보를 화면 인풋에 그대로 표출
+ * - 비밀번호 행은 카카오 유입(via === "kakao")이면 숨김(.kakao-hidden)
+ * - 제출 시 카카오 가입은 비밀번호 없이 진행(백엔드에서 null 처리)
+ *
+ * UI는 "현재 적용된 코드" 원형 유지, 로직/검증/제출은 "기존 로직" 이식
+ */
 
 import React, {
   useCallback,
-  useMemo,
-  useState,
-  useRef,
   useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
-import { useLocation } from "react-router-dom"; // ⬅ 카카오 프리필 수신
+import { useLocation } from "react-router-dom";
 import "../style/signup.css";
+
 import api from "../../../common/api/axios";
 import { apiCheckDuplicateId } from "../../member/services/memberApi";
 
-/** 비밀번호 유효성 검사 */
+// KakaoCallback/Join과 동일 세션 키
+const KAKAO_PREFILL_KEY = "kakao_prefill_v1";
+
+/** 비밀번호 유효성 검사(기존 로직) */
 function evaluatePassword(password, passwordCheck) {
   const result = { valid: true, issues: [], same: password === passwordCheck };
   if (!password || password.length < 8) {
@@ -36,7 +41,7 @@ function evaluatePassword(password, passwordCheck) {
   return result;
 }
 
-/** 간단 이메일 형식 체크 */
+/** 간단 이메일 형식 체크(기존 로직) */
 const isEmail = (v) => /\S+@\S+\.\S+/.test(v || "");
 
 /** 카카오 성별 → 프로젝트 Enum 변환 (MAN/WOMAN) */
@@ -45,22 +50,36 @@ const normalizeSexEnum = (v) => {
   const s = String(v).toUpperCase();
   if (s === "M" || s === "MALE") return "MAN";
   if (s === "F" || s === "FEMALE") return "WOMAN";
-  // 이미 "MAN"/"WOMAN" 이면 그대로
-  return s;
+  return s; // 이미 MAN/WOMAN이면 그대로
 };
 
-/** +82 국제번호 → 국내 010 형식 숫자만 반환 */
+/** +82 국제번호 → 국내 010 숫자만(전송용) */
 const e164ToLocalDigits = (p) => {
   if (!p) return "";
-  // 모든 숫자만 추출
   let digits = String(p).replace(/[^0-9]/g, "");
-  // 82로 시작하면 0으로 치환
   if (digits.startsWith("82")) digits = "0" + digits.slice(2);
   return digits;
 };
 
+/** 화면 표시용 한국 전화번호 포맷(010-XXXX-XXXX 등) */
+const formatPhoneKR = (raw) => {
+  if (!raw) return "";
+  let d = String(raw).replace(/\D/g, "");
+  if (d.startsWith("82")) d = "0" + d.slice(2);
+  if (d.startsWith("010") && d.length >= 11) {
+    return `010-${d.slice(3, 7)}-${d.slice(7, 11)}`;
+  }
+  if (/^01[1-9]/.test(d)) {
+    if (d.length === 10)
+      return `${d.slice(0, 3)}-${d.slice(3, 6)}-${d.slice(6, 10)}`;
+    if (d.length >= 11)
+      return `${d.slice(0, 3)}-${d.slice(3, 7)}-${d.slice(7, 11)}`;
+  }
+  return d;
+};
+
 export default function SignupPage() {
-  const location = useLocation(); // ⬅ 카카오 콜백에서 전달된 state 접근
+  const location = useLocation();
 
   /** 포커스 이동용 refs */
   const refs = {
@@ -69,31 +88,85 @@ export default function SignupPage() {
     memberPwCheck: useRef(null),
     memberName: useRef(null),
     memberBirth: useRef(null),
-    memberSex: useRef(null),
+    memberSex: useRef(null), // 첫 라디오에만 ref
     memberPhone: useRef(null),
   };
 
-  /** 폼 상태 */
+  // =========================
+  // 프리필 로딩 (location.state > session)
+  // =========================
+  const kakaoPrefill = useMemo(() => {
+    const s =
+      location.state && typeof location.state === "object"
+        ? location.state
+        : null;
+    if (s?.via === "kakao" || s?.kakaoId) return s;
+    try {
+      const raw = sessionStorage.getItem(KAKAO_PREFILL_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch {
+      return null;
+    }
+  }, [location.state]);
+
+  // =========================
+  // 화면 상태 (컨트롤드 인풋)
+  // =========================
   const [formData, setFormData] = useState({
-    memberId: "",
+    via: "", // "" | "kakao"
+    kakaoId: "", // 카카오 고유 ID (서버 연동용)
+    memberId: "", // 이메일(ID)
     memberPw: "",
     memberPwCheck: "",
     memberName: "",
-    memberBirth: "", // yyyy-MM-dd
-    memberPhone: "", // 010 숫자만
+    memberBirth: "", // "YYYY-MM-DD"
+    memberSex: "", // "MAN" | "WOMAN" | ""
+    memberPhone: "", // 화면 표시: 010-XXXX-XXXX
+    smsAgree: false,
     postcode: "",
-    memberAddress: "", // 서버 전송용(기본+상세 합친 값)
     roadAddress: "", // 화면 표시용
     detailAddress: "",
-    smsAgree: false, // 문자 수신동의 체크박스
-    memberSex: "MAN", // "MAN"/"WOMAN"
-
-    // ⬇ 카카오 연동 정보 (숨김 필드로 서버에 함께 전송)
-    kakaoId: "",
-    via: "", // "kakao" | "" (일반가입)
+    memberAddress: "", // 서버 전송용(기본주소)
   });
 
-  /** 아이디(이메일) 중복체크 상태 */
+  const isKakao = formData.via === "kakao" || !!formData.kakaoId;
+
+  // =========================
+  // 카카오 프리필 → 화면에 표출 (전화번호는 하이픈 포맷)
+  // =========================
+  useEffect(() => {
+    if (!kakaoPrefill) return;
+
+    // 생년월일 가공
+    const yyyy = kakaoPrefill.birthyear || "";
+    const mmdd = kakaoPrefill.birthday || ""; // "MMDD"
+    const mm = mmdd?.slice(0, 2) || "";
+    const dd = mmdd?.slice(2, 4) || "";
+    const isoBirth = yyyy && mm && dd ? `${yyyy}-${mm}-${dd}` : "";
+
+    // 성별 매핑
+    const sex = normalizeSexEnum(kakaoPrefill.gender);
+
+    setFormData((prev) => ({
+      ...prev,
+      via: "kakao",
+      kakaoId: kakaoPrefill.kakaoId || "",
+      memberId: (kakaoPrefill.email || "").toLowerCase(), // 현재 규칙: 이메일 사용
+      memberName: kakaoPrefill.name || "",
+      memberBirth: isoBirth,
+      memberSex: sex,
+      memberPhone: formatPhoneKR(kakaoPrefill.phoneNumber) || "", // 화면 포맷: 010-XXXX-XXXX
+      // 주소는 팝업에서 선택
+    }));
+
+    try {
+      sessionStorage.setItem(KAKAO_PREFILL_KEY, JSON.stringify(kakaoPrefill));
+    } catch {}
+  }, [kakaoPrefill]);
+
+  // =========================
+  // 유틸/상태
+  // =========================
   const [idCheck, setIdCheck] = useState({
     loading: false,
     done: false,
@@ -102,87 +175,39 @@ export default function SignupPage() {
     lastCheckedId: "",
   });
 
-  /** 비밀번호 유효성 */
-  const [pwState, setPwState] = useState(() => evaluatePassword("", ""));
+  const pwState = useMemo(
+    () => evaluatePassword(formData.memberPw, formData.memberPwCheck),
+    [formData.memberPw, formData.memberPwCheck]
+  );
 
-  /** 이메일 정규화 */
   const normalizedId = useMemo(
     () => (formData.memberId || "").trim().toLowerCase(),
     [formData.memberId]
   );
 
-  /** 유틸 */
   const onlyDigits = useCallback((v) => (v || "").replace(/[^0-9]/g, ""), []);
   const normalizeDate = useCallback(
     (d) => (d ? String(d).slice(0, 10) : ""),
     []
   );
 
-  /** ✅ [1] 카카오 프리필 주입: location.state에 담긴 값으로 초기 세팅 (이미 입력한 값은 덮어쓰지 않음) */
-  useEffect(() => {
-    const s = location.state;
-    const pf = s?.prefill;
-    if (!pf) return;
-
-    setFormData((prev) => {
-      // 각 필드는 기존 값이 비어있을 때만 주입 (사용자가 이미 입력한 값은 유지)
-      const next = { ...prev };
-
-      if (!prev.kakaoId) next.kakaoId = s?.kakaoId || "";
-      if (!prev.via) next.via = s?.via || "kakao";
-
-      if (!prev.memberName) next.memberName = pf.memberName || "";
-      if (!prev.memberId) next.memberId = (pf.memberId || "").toLowerCase();
-      if (!prev.memberBirth) next.memberBirth = pf.memberBirth || "";
-      if (!prev.memberSex)
-        next.memberSex = normalizeSexEnum(pf.memberSex || "");
-
-      // 전화번호는 읽기전용이라 비어있을 때만 주입
-      if (!prev.memberPhone) {
-        const digits = e164ToLocalDigits(pf.memberPhone || "");
-        if (digits.length >= 10 && digits.length <= 11)
-          next.memberPhone = digits;
-      }
-
-      return next;
-    });
-  }, [location.state]);
-
-  /** ✅ [2] 인증된 번호 세션에서 1회 주입 (카카오 프리필보다 늦게 동작하더라도 비어있으면 주입) */
-  useEffect(() => {
-    try {
-      const verified = sessionStorage.getItem("phoneVerified") === "true";
-      const e164 = sessionStorage.getItem("verifiedPhone"); // 예: +8210...
-      if (!verified || !e164) return;
-
-      setFormData((prev) => {
-        if (prev.memberPhone && prev.memberPhone.trim().length > 0) return prev;
-        const digits = e164ToLocalDigits(e164);
-        if (digits.length >= 10 && digits <= 11) {
-          return { ...prev, memberPhone: digits };
-        }
-        return prev;
-      });
-    } catch {}
-  }, []);
-
-  /** input 변경 핸들러 */
+  // =========================
+  // 이벤트 핸들러
+  // =========================
   const handleChange = useCallback((e) => {
     const { name, value, type, checked } = e.target;
 
     if (name === "memberPhone") {
-      // 전화번호는 숫자만 허용 (현재 readOnly라 실제 변경은 없지만 방어적으로 유지)
-      const onlyNums = (value || "").replace(/[^0-9]/g, "");
-      setFormData((prev) => ({ ...prev, memberPhone: onlyNums }));
+      // 화면 입력 시에도 하이픈 포맷 유지(표시는 포맷, 전송 시 숫자만)
+      const display = formatPhoneKR(value);
+      setFormData((prev) => ({ ...prev, memberPhone: display }));
       return;
     }
 
     const nextValue = type === "checkbox" ? !!checked : value;
-
     setFormData((prev) => {
       const next = { ...prev, [name]: nextValue };
 
-      // 아이디가 바뀌면 중복체크 결과 무효화
       if (name === "memberId") {
         setIdCheck({
           loading: false,
@@ -192,16 +217,13 @@ export default function SignupPage() {
           lastCheckedId: "",
         });
       }
-
-      // 비밀번호 유효성 재평가 (카카오 경로라도 입력하면 평가는 해줌)
-      if (name === "memberPw" || name === "memberPwCheck") {
-        setPwState(evaluatePassword(next.memberPw, next.memberPwCheck));
-      }
       return next;
     });
   }, []);
 
-  /** 아이디 중복체크 */
+  // =========================
+  // 아이디 중복체크(기존 로직 이식)
+  // =========================
   const handleCheckDuplicateId = useCallback(async () => {
     const email = normalizedId;
 
@@ -259,7 +281,7 @@ export default function SignupPage() {
     }
   }, [normalizedId]);
 
-  /** 카카오(다음) 우편번호 스크립트 1회 로드 */
+  /** 카카오(다음) 우편번호 스크립트 1회 로드(현재 코드 유지) */
   const loadDaumPostcodeScript = useCallback(() => {
     return new Promise((resolve, reject) => {
       if (window.daum && window.daum.Postcode) return resolve();
@@ -285,7 +307,7 @@ export default function SignupPage() {
     });
   }, []);
 
-  /** 카카오 주소검색 팝업 */
+  /** 주소검색 팝업(현재 코드 유지 + 서버전송용 memberAddress 설정) */
   const openPostcodePopup = useCallback(async () => {
     try {
       await loadDaumPostcodeScript();
@@ -310,12 +332,14 @@ export default function SignupPage() {
     }
   }, [loadDaumPostcodeScript]);
 
-  /** 제출 */
+  // =========================
+  // 제출(기존 로직 이식)
+  // =========================
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
 
-      const isKakao = formData.via === "kakao";
+      const kakaoFlow = formData.via === "kakao";
 
       // 기본 검증
       if (!formData.memberId || !isEmail(formData.memberId)) {
@@ -355,8 +379,8 @@ export default function SignupPage() {
         return;
       }
 
-      // ⚠️ 비밀번호 검증: 카카오 경로는 비밀번호 입력/검증을 건너뜀 (서버에 null 전송)
-      if (!isKakao) {
+      // 비밀번호 검증: 카카오는 스킵, 일반 가입만 검사
+      if (!kakaoFlow) {
         if (!pwState.valid) {
           alert(pwState.issues[0]);
           refs.memberPw.current?.focus();
@@ -364,39 +388,36 @@ export default function SignupPage() {
         }
       }
 
-      // 전화번호 숫자/길이 검증
-      const phoneDigits = onlyDigits(formData.memberPhone);
+      // 전화번호: 전송 시 숫자만
+      const phoneDigits = onlyDigits(e164ToLocalDigits(formData.memberPhone));
       if (phoneDigits.length < 10 || phoneDigits.length > 11) {
         alert("전화번호는 10~11자리 숫자만 입력해주세요.");
         refs.memberPhone.current?.focus();
         return;
       }
 
-      // 주소 길이 방어(필요 시 길이 조정)
+      // 주소 합본(기본+상세, 길이 방어)
       const safeAddress = `${formData.memberAddress || ""} ${
         formData.detailAddress || ""
       }`
         .trim()
         .slice(0, 100);
 
-      // 서버 전송 payload (일반 가입 + 카카오 연동 키 포함)
+      // 서버 전송 payload (카카오 연동 키 포함)
       const payload = {
         memberId: normalizedId, // 로그인 ID(이메일)
-        memberPw: isKakao ? null : (formData.memberPw || "").trim(), // 카카오는 null
+        memberPw: kakaoFlow ? null : (formData.memberPw || "").trim(),
         memberName: (formData.memberName || "").trim(),
         memberBirth: normalizeDate(formData.memberBirth), // yyyy-MM-dd
-        memberPhone: phoneDigits, // 010 숫자만
-        memberAddress: safeAddress, // 기본+상세 합본
-        smsAgree: !!formData.smsAgree, // boolean
+        memberPhone: phoneDigits, // 숫자만
+        memberAddress: safeAddress,
+        smsAgree: !!formData.smsAgree,
         memberSex: formData.memberSex, // "MAN" | "WOMAN"
         kakaoId: formData.kakaoId || null, // ⬅ 중요: 연동키
-        via: formData.via || "", // 서버에서 분기 참고용(선택)
+        via: formData.via || "", // 서버 분기 참고용
       };
 
-      console.log("[SIGNUP payload]", payload);
-
       try {
-        // ✅ 기존 회원가입 API 사용 (백엔드에서 kakaoId 존재 시 소셜가입으로 분기하도록 처리)
         await api.post("/join/signup", payload, {
           headers: { "Content-Type": "application/json" },
           withCredentials: true,
@@ -420,9 +441,12 @@ export default function SignupPage() {
     [formData, idCheck, normalizedId, onlyDigits, normalizeDate, pwState]
   );
 
+  // =========================
+  // 렌더 (현재 UI 유지)
+  // =========================
   return (
     <div className="signup-container">
-      {/* ⬇ via/kakaoId는 숨김 필드로도 포함 → 서버 디버깅 및 폼 직전 확인용 */}
+      {/* 숨김 필드 (서버/디버깅용) */}
       <form noValidate onSubmit={handleSubmit}>
         <input type="hidden" name="via" value={formData.via || ""} />
         <input type="hidden" name="kakaoId" value={formData.kakaoId || ""} />
@@ -441,6 +465,7 @@ export default function SignupPage() {
         <div className="form_wrap">
           <table className="table type2 responsive">
             <tbody>
+              {/* 아이디 */}
               <tr>
                 <th scope="row">아이디</th>
                 <td>
@@ -453,6 +478,7 @@ export default function SignupPage() {
                       value={formData.memberId}
                       onChange={handleChange}
                       placeholder="예: user@example.com"
+                      readOnly={isKakao} // 카카오 유입 시 수정 잠금(원하면 제거)
                     />
                   </span>
                   <span className="temp_btn md id_check_btn">
@@ -476,7 +502,8 @@ export default function SignupPage() {
                 </td>
               </tr>
 
-              <tr>
+              {/* 비밀번호 (카카오면 숨김) */}
+              <tr className={isKakao ? "kakao-hidden" : ""}>
                 <th scope="row">비밀번호</th>
                 <td>
                   <div className="temp_form md w40p">
@@ -487,12 +514,12 @@ export default function SignupPage() {
                       name="memberPw"
                       value={formData.memberPw}
                       onChange={handleChange}
-                      // 카카오 경로일 때는 선택 입력(빈 값이어도 전송 시 null 처리됨)
                       placeholder={
-                        formData.via === "kakao"
+                        isKakao
                           ? "카카오 가입은 비밀번호 없이 진행됩니다(선택 입력)."
                           : ""
                       }
+                      autoComplete="new-password"
                     />
                   </div>
                   <span className="form_winning">
@@ -501,7 +528,8 @@ export default function SignupPage() {
                 </td>
               </tr>
 
-              <tr>
+              {/* 비밀번호 확인 (카카오면 숨김) */}
+              <tr className={isKakao ? "kakao-hidden" : ""}>
                 <th scope="row">비밀번호 확인</th>
                 <td>
                   <div className="temp_form md w40p">
@@ -513,13 +541,14 @@ export default function SignupPage() {
                       value={formData.memberPwCheck}
                       onChange={handleChange}
                       placeholder={
-                        formData.via === "kakao"
+                        isKakao
                           ? "카카오 가입은 비밀번호 확인이 필요하지 않습니다."
                           : ""
                       }
+                      autoComplete="new-password"
                     />
                   </div>
-                  {formData.memberPwCheck && formData.via !== "kakao" && (
+                  {formData.memberPwCheck && !isKakao && (
                     <div
                       className={`hint ${pwState.same ? "ok" : "error"}`}
                       style={{ marginTop: 8 }}
@@ -532,6 +561,7 @@ export default function SignupPage() {
                 </td>
               </tr>
 
+              {/* 이름 */}
               <tr>
                 <th scope="row">이름</th>
                 <td>
@@ -549,6 +579,7 @@ export default function SignupPage() {
                 </td>
               </tr>
 
+              {/* 생년월일 (date) */}
               <tr>
                 <th scope="row">생년월일</th>
                 <td>
@@ -558,13 +589,14 @@ export default function SignupPage() {
                       className="temp_input"
                       type="date"
                       name="memberBirth"
-                      value={formData.memberBirth}
+                      value={formData.memberBirth || ""}
                       onChange={handleChange}
                     />
                   </div>
                 </td>
               </tr>
 
+              {/* 성별 (라디오) */}
               <tr>
                 <th scope="row">성별</th>
                 <td>
@@ -608,7 +640,7 @@ export default function SignupPage() {
                       name="memberPhone"
                       value={formData.memberPhone}
                       onChange={handleChange}
-                      readOnly
+                      readOnly // 카카오 유입이면 서버 값 그대로 사용(원하면 편집 허용)
                     />
                   </div>
                   <span className="temp_form">
@@ -617,7 +649,7 @@ export default function SignupPage() {
                       id="smsYn"
                       name="smsAgree"
                       className="temp_check"
-                      checked={formData.smsAgree}
+                      checked={!!formData.smsAgree}
                       onChange={handleChange}
                     />
                     <label htmlFor="smsYn">수신동의</label>

@@ -9,3 +9,5 @@
 .phone_box .phone_inner .phone_btn span{display:block;position:absolute;width:100%;bottom:60px;font-size:28px;line-height:30px;letter-spacing:0;color:#333;font-weight:400;}
 
 .form_top_box .form_top_item .form_icon.type5:before{background-image:url('../images/phone_icon.png');background-repeat:no-repeat;background-position:0 0;content:'';}
+
+.kakao-hidden{display:none !important; }
