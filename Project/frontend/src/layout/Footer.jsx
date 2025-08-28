@@ -1,6 +1,6 @@
 import React from "react";
-
-import { Link } from "react-router-dom"; // 페이지 이동용
+import { Link } from "react-router-dom";
+import ChatBanner from "../program/chat/services/ChatBanner";
 
 const Footer = () => {
   return (
@@ -10,6 +10,7 @@ const Footer = () => {
           <button type="button" className="top_btn">
             맨위로 이동하기 버튼
           </button>
+          <ChatBanner />
         </div>
         <div className="nav_box">
           <ul className="nav_list">

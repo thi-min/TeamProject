@@ -1,26 +1,11 @@
 package com.project.chat.entity;
 
+import com.project.admin.entity.AdminEntity;
+import com.project.member.entity.MemberEntity;
+import jakarta.persistence.*;
+import lombok.*;
 import java.time.LocalDateTime;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-/**
- * WebSocket 연결(세션) 관리용 엔티티.
- * - 1:1 채팅 시스템에서 특정 채팅방(chatRoom)과 WebSocket sessionId를 연계하여
- *   연결/종료/재연결을 관리할 수 있게 함.
- */
 @Entity
 @Table(name = "chat_socket_session")
 @Getter
@@ -32,28 +17,21 @@ public class ChatSocketSessionEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "session_id_pk")
-    private Long id; // 기본키
+    @Column(name = "session_id")
+    private Long sessionId;
 
-    @ManyToOne
-    @JoinColumn(name = "chat_room_id", nullable = false)
-    private ChatRoomEntity chatRoom; // 채팅방 번호
+    @Column(name = "socket_id", nullable = false, unique = true)
+    private String socketId;
 
-    @Column(name = "ws_session_id", nullable = false, unique = true)
-    private String wsSessionId; // WebSocket 세션 아이디 (예: SimpMessageHeaderAccessor.getSessionId())
+    // 세션은 한 명의 회원 또는 관리자와 연결됩니다.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_num")
+    private MemberEntity member;
 
-    @Column(name = "principal_type", length = 20)
-    private String principalType; // "MEMBER" or "ADMIN" (간단하게 String 사용, 필요 시 enum으로 교체)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admin_num")
+    private AdminEntity admin;
 
-    @Column(name = "principal_value")
-    private String principalValue; // 회원번호(memberNum) 또는 adminId 등 식별자(문자열형태)
-
-    @Column(name = "connected_at")
-    private LocalDateTime connectedAt; //세션 생성 시간
-
-    @Column(name = "last_ping")
-    private LocalDateTime lastPing; // 마지막 활동 감지 (연결 정리)
-
-    @Column(name = "closed")
-    private boolean closed; // 세션 종료 체크
+    @Column(name = "connected_at", nullable = false)
+    private LocalDateTime connectedAt;
 }

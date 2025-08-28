@@ -1,6 +1,6 @@
 package com.project.chat.entity;
 
 public enum CheckState {
-    Y, N
-    // y 확인, n 미확인
+    Y, // 확인
+    N  // 미확인
 }

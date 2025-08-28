@@ -35,23 +35,14 @@ const routes = {
     reserve: { path: "/land/reserve", label: "예약하기" },
   },
 
-
   // ==============================
   // 게시판 관련
   // ==============================
-  // board: {
-  //   root: { path: "/board", label: "게시판" },
-  //   notice: { path: "/board/notice", label: "공지사항" },
-  //   qna: { path: "/board/qna", label: "질문 게시판" },
-  //   photo: { path: "/board/photo", label: "포토 게시판" },
-
-  // 게시판
-   board: {
+  board: {
     root: { path: "/bbs", label: "게시판" },
     notice: { path: "/bbs/normalbbs", label: "공지사항" },
     qna: { path: "/bbs/questionbbs", label: "질문 게시판" },
     photo: { path: "/bbs/imagebbs", label: "포토 게시판" },
-
   },
 
   // ==============================
@@ -75,41 +66,29 @@ const routes = {
     reserves: { path: "/member/mypage/reserves", label: "예약 내역 조회" },
     landReserveDetail: { path: "/member/mypage/reserves/land/:reserveCode", label: "놀이터 예약 상세보기" },
     volunteerReserveDetail: { path: "/member/mypage/reserves/volunteer/:reserveCode", label: "봉사 예약 상세보기" },
-    
+
     // 개인 입양 신청서
     adopt: {
       list: { path: "/member/adopt/list", label: "나의 입양 신청서" },
       detail: (id) => `/member/adopt/detail/${id}`,
     },
-    
+
     // 나의 후원
     fund: {
       list: { path: "/member/funds/list", label: "나의 후원 목록" },
       detail: (id) => `/member/funds/${id}`,
     },
-
-    // changepw: { path: "/update-password", label: "비밀번호 변경" },
-    // mypage: { path: "/mypage", label: "마이페이지" },
-    // update: { path: "/mypage/update", label: "회원정보 수정" },
-    // delete: { path: "/mypage/update/delete", label: "회원 탈퇴" },
-
+    // 1:1 채팅
+    chat: {
+      list: { path: "/member/chat/list", label: "나의 채팅 목록" },
+      room: (roomId = ":roomId") => `/member/chat/room/${roomId}`,
+    },
   },
 
   //카카오 관련
   kakao: {
     callback: { path: "/oauth/kakao/callback", label: "카카오 콜백" },
   },
-  // // 후원 경로
-  // fund: {
-  //   root: { path: "/fund", label: "후원 메인" },
-  //   fundForm: { path: "/fund/money", label: "후원금 신청" },
-  //   goodsForm: { path: "/fund/goods", label: "후원물품 신청" },
-  //   recurringForm: { path: "/fund/recurring", label: "정기후원 신청" },
-  //   fundDetails: { path: "/fund/money-details", label: "후원금 상세" },
-  //   goodsDetails: { path: "/fund/goods-details", label: "후원물품 상세" },
-  //   recurringDetails: { path: "/fund/recurring-details", label: "정기후원 상세" },
-
-  // },
 
   // ==============================
   // 후원(Fund) 관련
@@ -140,13 +119,14 @@ const routes = {
       list: { path: "/admin/chat/list", label: "채팅 목록" },
       room: (id = ":roomId") => `/admin/chat/room/${id}`,
     },
-    
+
     // 입양 신청서 관리
     adopt: {
       list: { path: "/admin/adopt/list", label: "입양 신청서 관리" },
       detail: (id) => `/admin/adopt/detail/${id}`,
       regist: { path: "/admin/adopt/regist", label: "입양 신청서 작성" },
       update: (id) => `/admin/adopt/update/${id}`,
+    },
 
     membersList: { path: "/admin/membersList", label: "회원 목록" },
     memberDetail: {
@@ -154,8 +134,6 @@ const routes = {
       build: (id) => `/admin/membersList/${id}`,
       label: "회원 상세",
     },
-  },
-
 
     // 동물 관리
     animal: {
@@ -164,11 +142,12 @@ const routes = {
       regist: { path: "/admin/animal/regist", label: "동물 정보 등록" },
       update: (id) => `/admin/animal/update/${id}`,
     },
-    fund:{
+
+    fund: {
       list: { path: "/admin/funds/list", label: " 후원 정보 관리" },
       detail: (id) => `/admin/funds/detail/${id}`,
     },
-    
+
     // 예약 관리
     timeSlotManage: { path: "/admin/timeslots", label: "시간대 관리" },
     closedDayManage: { path: "/admin/closedday", label: "휴무일 관리" },
@@ -176,7 +155,6 @@ const routes = {
     volunteerReserveManage: { path: "/admin/reserve/volunteer", label: "봉사 예약 관리" },
     landReserveDetail: { path: "/admin/reserve/land/:reserveCode", label: "놀이터 예약 상세보기" },
     volunteerReserveDetail: { path: "/admin/reserve/volunteer/:reserveCode", label: "봉사 예약 상세보기" },
-
   },
 
   // ==============================
@@ -204,7 +182,7 @@ const routes = {
       success: { path: "/reserve/volunteer/success", label: "신청 완료" },
     },
   },
-  
+
   // ==============================
   // 봉사 관련
   // ==============================

@@ -1,47 +1,35 @@
 package com.project.chat.entity;
 
-import java.time.LocalDateTime;
-import java.util.Set;
-
 import com.project.admin.entity.AdminEntity;
 import com.project.member.entity.MemberEntity;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "chat_room")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ChatRoomEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "chat_room_id")
-    private Long chatRoomId;//채팅방 번호
+    @Column(name = "room_num")
+    private Long roomNum; // 채팅방 번호
 
-    @ManyToOne
-    @JoinColumn(name = "member_num")
-    private MemberEntity member;//회원 번호
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_num", nullable = false)
+    private MemberEntity member; // 채팅방에 참여한 회원 (N:1 관계)
 
-    @ManyToOne
-    @JoinColumn(name = "admin_id")
-    private AdminEntity admin; //관리자 id
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "admin_num", nullable = false)
+    private AdminEntity admin; // 채팅방에 참여한 관리자 (N:1 관계)
 
-    @Column(name = "create_at")
-    private LocalDateTime createAt; //채팅방 생성 시간
-
-    @OneToMany(mappedBy = "chatRoom", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<ChatMessageEntity> messages; //채팅messageentity 연결
+    @Column(name = "created_date", nullable = false)
+    private LocalDateTime createdDate; // 채팅방 생성 시간
 }
