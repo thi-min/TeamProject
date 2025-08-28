@@ -1,4 +1,17 @@
-import React, { useEffect, useState } from "react";
+// src/program/member/pages/Mypage.jsx
+// 목적:
+//  - 내 정보 호출 결과로 "카카오 로그인 회원" 여부를 판별
+//  - 카카오 회원이면 "비밀번호 변경" 링크를 클릭 불가로 막고, 클릭 시 알림 표출
+//  - 화면에 로그인 유형(카카오/일반)도 함께 노출
+//
+// 판별 로직:
+//  - myInfo.snsYn === true / "Y"
+//  - 또는 myInfo.kakaoId 존재
+//  - 또는 myInfo.snsType / provider 가 "KAKAO"
+//
+// ※ 백엔드 응답 필드명이 프로젝트마다 다를 수 있어 다중 키를 안전하게 체크합니다.
+
+import React, { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import MemberDeleteButton from "./MemberDeleteButton";
 import { useAuth } from "../../../common/context/AuthContext";
@@ -12,13 +25,11 @@ export default function Mypage() {
   const nav = useNavigate();
 
   // 화면 상태
-  const [myInfo, setMyInfo] = useState(null); // { memberNum, memberId, memberName, memberState }
+  const [myInfo, setMyInfo] = useState(null); // { memberNum, memberId, memberName, ... }
   const [loading, setLoading] = useState(true);
 
   /**
    * 1) 비로그인 즉시 "/"로 이동
-   * - 버튼 로그아웃, 토큰 만료, 재발급 실패 등으로 isLogin=false가 되면 즉시 홈으로
-   * - replace:true로 히스토리에 남기지 않음
    */
   useEffect(() => {
     if (!isLogin) {
@@ -28,11 +39,8 @@ export default function Mypage() {
 
   /**
    * 2) 로그인 상태에서만 내 정보 요청
-   * - 비로그인이라면 요청 자체를 skip (401/재시도/알림 중복 방지)
-   * - StrictMode(개발)로 인한 효과 2회 실행에 대비해 cancelled 플래그 사용
    */
   useEffect(() => {
-    // 로그인 아니면 네트워크 호출 생략하고 로딩 종료
     if (!isLogin) {
       setLoading(false);
       return;
@@ -43,11 +51,10 @@ export default function Mypage() {
 
     (async () => {
       try {
-        const res = await api.get("/member/mypage/me"); // Authorization은 인터셉터가 자동 부착
+        // Authorization은 axios 인터셉터가 자동 부착
+        const res = await api.get("/member/mypage/me");
         if (!cancelled) setMyInfo(res.data);
       } catch (e) {
-        // 401/403 → 인터셉터가 재발급 시도, 실패 시 isLogin=false가 되어 위 useEffect가 "/"로 이동 처리
-        // 여기서 알림을 띄우면 두 번 뜰 수 있으니 콘솔만.
         console.error(
           "[MyPage] /member/mypage/me 실패:",
           e?.response?.status,
@@ -58,18 +65,41 @@ export default function Mypage() {
       }
     })();
 
-    // 언마운트/재마운트 시 setState 방지
     return () => {
       cancelled = true;
     };
   }, [isLogin]);
+
+  // ✅ 카카오 회원 여부 판별 (다중 키를 안전하게 체크)
+  const isKakaoMember = useMemo(() => {
+    if (!myInfo) return false;
+
+    const snsYn =
+      myInfo.snsYn === true || String(myInfo.snsYn || "").toUpperCase() === "Y";
+
+    const kakaoId = !!myInfo.kakaoId;
+
+    const provider =
+      String(myInfo.provider || myInfo.snsType || "").toUpperCase() === "KAKAO";
+
+    return snsYn || kakaoId || provider;
+  }, [myInfo]);
+
+  // 화면용 라벨
+  const loginTypeLabel = isKakaoMember ? "카카오 로그인" : "일반 로그인";
+
+  // 카카오 회원의 비밀번호 변경 클릭 차단 + 알림
+  const handleBlockedPwChange = (e) => {
+    e.preventDefault();
+    window.alert("카카오회원은 비밀번호 변경을 사용하실 수 없습니다.");
+  };
 
   // 로딩 중 UI
   if (loading) {
     return <div className="admin_page">로딩중...</div>;
   }
 
-  // (안전) 정보 없을 때의 가드 — 보통은 isLogin 가드가 먼저 작동하여 "/"로 이동함
+  // 안전 가드
   if (!myInfo) {
     return <div className="admin_page">정보를 불러올 수 없습니다.</div>;
   }
@@ -78,14 +108,28 @@ export default function Mypage() {
     <div className="my_page">
       <div className="title_box">
         <div className="title">마이 페이지</div>
+        {/* 로그인 유형 뱃지 표출 */}
+        <div className="sub_title" style={{ marginTop: 8, fontSize: 14 }}>
+          로그인 유형: <strong>{loginTypeLabel}</strong>
+        </div>
       </div>
+
       <div className="member_area">
         <ul className="my_menu">
           <li className="link_item type1">
-            <Link to="/member/update-password" state={{ mode: "self" }}>
-              비밀번호 변경
-            </Link>
+            {isKakaoMember ? (
+              // 🔒 카카오 회원 → 클릭 시 알림만, 페이지 이동 막음
+              <a href="#!" onClick={handleBlockedPwChange}>
+                비밀번호 변경
+              </a>
+            ) : (
+              // 🔓 일반 회원 → 정상 이동
+              <Link to="/member/update-password" state={{ mode: "self" }}>
+                비밀번호 변경
+              </Link>
+            )}
           </li>
+
           <li className="link_item type2">
             <Link to="/member/mypage/memberdata">회원 정보</Link>
           </li>

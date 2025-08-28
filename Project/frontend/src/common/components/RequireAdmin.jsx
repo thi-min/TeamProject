@@ -1,32 +1,91 @@
-import React from "react";
-import { Navigate } from "react-router-dom";
+// 개선: 사용자 가드와 동일하게 레이스 보정(GRACE_MS) + auth 이벤트 구독
+//       토큰이 생기면 즉시 통과, 없으면 잠시 기다렸다가 최종 판정
+
+import React, { useEffect, useMemo, useState } from "react";
+import { Navigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
-const RequireAdmin = ({ children }) => {
-  const token =
-    localStorage.getItem("accessToken") ||
-    localStorage.getItem("adminAccessToken");
+const GRACE_MS = 400;
 
-  if (!token) {
-    // 토큰 없으면 로그인 페이지로 이동
-    return <Navigate to="/login" replace />;
-  }
-
+function getValidAccessToken() {
   try {
-    const payload = jwtDecode(token);
-    const role = payload.role || payload.roles || payload.authorities;
+    const tok =
+      localStorage.getItem("accessToken") ||
+      localStorage.getItem("adminAccessToken") ||
+      "";
+    if (!tok) return "";
+    const p = jwtDecode(tok);
+    const now = Math.floor(Date.now() / 1000);
+    if (p?.exp && p.exp > now) return tok;
+    return "";
+  } catch {
+    return "";
+  }
+}
 
-    // role 값이 ADMIN 이 아니면 접근 불가
-    if (!role || !String(role).includes("ADMIN")) {
-      alert("관리자만 접근할 수 있는 페이지입니다.");
-      return <Navigate to="/" replace />;
-    }
-  } catch (err) {
-    console.error("토큰 검증 실패:", err);
-    return <Navigate to="/login" replace />;
+function tokenHasAdmin(tok) {
+  try {
+    if (!tok) return false;
+    const payload = jwtDecode(tok);
+    const raw = payload?.role ?? payload?.roles ?? payload?.authorities ?? "";
+    const s = Array.isArray(raw) ? raw.join(",") : String(raw || "");
+    return /(^|,)ROLE?_?ADMIN(,|$)/i.test(s);
+  } catch {
+    return false;
+  }
+}
+
+const RequireAdmin = ({ children }) => {
+  const location = useLocation();
+
+  // 최초 스냅샷
+  const initialTok = useMemo(() => getValidAccessToken(), []);
+  const initialReady = useMemo(
+    () => !!initialTok && tokenHasAdmin(initialTok),
+    [initialTok]
+  );
+
+  const [ready, setReady] = useState(initialReady);
+  const [grace, setGrace] = useState(!initialReady);
+
+  // 로그인/로그아웃 이벤트 구독
+  useEffect(() => {
+    const recheck = () => {
+      const tok = getValidAccessToken();
+      setReady(!!tok && tokenHasAdmin(tok));
+    };
+    window.addEventListener("auth:login", recheck);
+    window.addEventListener("auth:logout", recheck);
+    return () => {
+      window.removeEventListener("auth:login", recheck);
+      window.removeEventListener("auth:logout", recheck);
+    };
+  }, []);
+
+  // 짧은 유예 후 최종 판정
+  useEffect(() => {
+    if (!grace) return;
+    const t = setTimeout(() => {
+      setGrace(false);
+      const tok = getValidAccessToken();
+      setReady(!!tok && tokenHasAdmin(tok));
+    }, GRACE_MS);
+    return () => clearTimeout(t);
+  }, [grace]);
+
+  if (grace) return null;
+
+  if (!ready) {
+    // 권한 없음 또는 비로그인 → 로그인 페이지로
+    return (
+      <Navigate
+        to="/login"
+        replace
+        state={{ from: location.pathname || "/" }}
+      />
+    );
   }
 
-  // 조건 통과 → 관리자 페이지 보여줌
   return children;
 };
 
