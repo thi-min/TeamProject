@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import axios from "axios";
+import api from "../../common/api/axios";
 import "./Gallery.css";
 
 export default function ImgDetail() {
@@ -14,7 +14,7 @@ export default function ImgDetail() {
   // 게시글 조회
   const fetchPost = async () => {
     try {
-      const res = await axios.get(`${backendUrl}/bbs/${id}`);
+      const res = await api.get(`${backendUrl}/bbs/${id}`);
       // 백엔드 반환 데이터 구조 확인 후 맞춤
       setPost(res.data.bbs || res.data); 
       setFiles(res.data.files || []);
@@ -39,7 +39,7 @@ export default function ImgDetail() {
     if (!window.confirm("정말 삭제하시겠습니까?")) return;
 
     try {
-      await axios.delete(`${backendUrl}/bbs/${id}?memberNum=${memberNum}`);
+      await api.delete(`${backendUrl}/bbs/${id}?memberNum=${memberNum}`);
       alert("게시글이 삭제되었습니다.");
       navigate("/imgbbs"); // 목록 페이지 이동
     } catch (error) {

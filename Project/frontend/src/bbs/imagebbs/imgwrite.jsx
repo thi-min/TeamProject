@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import axios from "axios";
+import api from "../../common/api/axios";
 import { useNavigate } from "react-router-dom";
 import "./Gallery.css";
 
@@ -59,7 +59,7 @@ export default function ImgWrite() {
     });
 
     try {
-      await axios.post(baseUrl, formData, { headers: { "Content-Type": "multipart/form-data" } });
+      await api.post(baseUrl, formData, { headers: { "Content-Type": "multipart/form-data" } });
       alert("게시글이 등록되었습니다.");
       navigate("/imgbbs");
     } catch (error) {

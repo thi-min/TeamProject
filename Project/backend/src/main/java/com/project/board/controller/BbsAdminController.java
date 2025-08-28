@@ -262,7 +262,108 @@ public class BbsAdminController {
         return ids;
     }
 
-    // ---------------- 첨부파일 다운로드 ----------------
+    
+
+    // ---------------- 관리자용 FAQ 게시글 조회 (최신순) ----------------
+    @GetMapping("/bbslist")
+    public ResponseEntity<Map<String, Object>> getFaqBbsList(
+            @RequestParam BoardType type,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String bbstitle,
+            @RequestParam(required = false) String memberName,
+            @RequestParam(required = false) String bbscontent
+    ) {
+        if (type != BoardType.FAQ) {
+            throw new IllegalArgumentException("관리자 FAQ 조회는 FAQ 타입만 가능합니다.");
+        }
+        Map<String, Object> result = bbsService.getBbsList(type, page, size, bbstitle, memberName, bbscontent);
+        return ResponseEntity.ok(result);
+    }
+    // ---------------- 관리자 QnA 게시글 단건 조회 ----------------
+ // 관리자 QnA 게시글 단건 조회 (BbsDto + answer)
+    @GetMapping("/qna/{id}")
+    public ResponseEntity<Map<String, Object>> getQnaBbsDetail(@PathVariable Long id) {
+        BbsDto bbsDto = bbsService.getBbs(id);
+        QandADto qnaDto = bbsService.getQna(id);
+
+        if (bbsDto == null) return ResponseEntity.notFound().build();
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("bbs", bbsDto);
+        response.put("answer", qnaDto != null ? qnaDto.getAnswer() : null);
+
+        return ResponseEntity.ok(response);
+    }
+
+
+
+
+    // ---------------- 관리자용 이미지 게시글 조회 (최신순) ----------------
+    @GetMapping("/poto")
+    public ResponseEntity<Map<String, Object>> getPotoBbsList(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size,
+            @RequestParam(required = false) String bbstitle,
+            @RequestParam(required = false) String memberName,
+            @RequestParam(required = false) String bbscontent
+    ) {
+        BoardType type = BoardType.POTO;
+        Map<String, Object> result = bbsService.getBbsList(type, page, size, bbstitle, memberName, bbscontent);
+
+        // ---------------- bbsList에서 content 꺼내기 ----------------
+        List<BbsDto> content = (List<BbsDto>) result.get("list");  // <-- key 수정
+        if (content == null) content = new ArrayList<>();
+
+        // ---------------- 대표 이미지 추가 ----------------
+        Map<String, Object> repImages = new HashMap<>();
+        for (BbsDto dto : content) {
+            var repImg = bbsService.getRepresentativeImage(dto.getBulletinNum());
+            Map<String, Object> imgMap = new HashMap<>();
+            if (repImg != null) {
+                imgMap.put("bulletinNum", dto.getBulletinNum());
+                imgMap.put("thumbnailPath", repImg.getThumbnailPath());
+                imgMap.put("imagePath", repImg.getImagePath() != null ? "http://127.0.0.1:8090" + repImg.getImagePath() : "");
+            }
+            repImages.put(dto.getBulletinNum().toString(), imgMap);
+        }
+
+        result.put("representativeImages", repImages);
+        return ResponseEntity.ok(result);
+    }
+
+
+
+
+    // 관리자 이미지 게시글 단건 조회
+    @GetMapping("/poto/{id}")
+    public ResponseEntity<BbsDto> getPotoBbsDetail(@PathVariable Long id) {
+        BbsDto dto = bbsService.getBbs(id);
+        return ResponseEntity.ok(dto);
+    }
+
+ // ---------------- 관리자 게시글 첨부파일 조회 ----------------
+    @GetMapping("/{id}/files")
+    public ResponseEntity<List<Map<String, Object>>> getFilesByBbs(@PathVariable Long id) {
+        List<FileUpLoadDto> filesList = bbsService.getFilesByBbs(id);
+        List<Map<String, Object>> fileMapList = new ArrayList<>();
+
+        for (FileUpLoadDto f : filesList) {
+            Map<String, Object> fileMap = new HashMap<>();
+            fileMap.put("fileNum", f.getFileNum());
+            fileMap.put("originalName", f.getOriginalName());
+            fileMap.put("savedName", f.getSavedName());
+            fileMap.put("path", f.getPath());
+            fileMap.put("size", f.getSize());
+            fileMap.put("extension", f.getExtension());
+            fileMap.put("fileUrl", "http://127.0.0.1:8090/admin/bbs/files/" + f.getFileNum() + "/download");
+            fileMapList.add(fileMap);
+        }
+
+        return ResponseEntity.ok(fileMapList);
+    }
+
+    // ---------------- 관리자 게시글 첨부파일 다운로드 ----------------
     @GetMapping("/files/{fileId}/download")
     public ResponseEntity<Resource> downloadFile(@PathVariable Long fileId) {
         FileUpLoadDto fileDto = bbsService.getFileById(fileId);
@@ -282,59 +383,6 @@ public class BbsAdminController {
                 .contentType(mediaType)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileDto.getOriginalName() + "\"")
                 .body(resource);
-    }
-
-    // ---------------- 관리자용 FAQ 게시글 조회 (최신순) ----------------
-    @GetMapping("/bbslist")
-    public ResponseEntity<Map<String, Object>> getFaqBbsList(
-            @RequestParam BoardType type,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String bbstitle,
-            @RequestParam(required = false) String memberName,
-            @RequestParam(required = false) String bbscontent
-    ) {
-        if (type != BoardType.FAQ) {
-            throw new IllegalArgumentException("관리자 FAQ 조회는 FAQ 타입만 가능합니다.");
-        }
-        Map<String, Object> result = bbsService.getBbsList(type, page, size, bbstitle, memberName, bbscontent);
-        return ResponseEntity.ok(result);
-    }
- // ---------------- 관리자 QnA 게시글 단건 조회 ----------------
-    @GetMapping("/qna/{id}")
-    public ResponseEntity<QandADto> getQnaBbsDetail(@PathVariable Long id) {
-        try {
-        	
-            QandADto dto = bbsService.getQna(id);
-            if (dto == null) {
-                return ResponseEntity.notFound().build();
-            }
-            return ResponseEntity.ok(dto);
-        } catch (Exception e) {
-            return ResponseEntity.status(500).build();
-        }
-    }
-
-
-    // ---------------- 관리자용 이미지 게시글 조회 (최신순) ----------------
-    @GetMapping("/poto")
-    public ResponseEntity<Map<String, Object>> getPotoBbsList(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size,
-            @RequestParam(required = false) String bbstitle,
-            @RequestParam(required = false) String memberName,
-            @RequestParam(required = false) String bbscontent
-    ) {
-        BoardType type = BoardType.POTO;
-        Map<String, Object> result = bbsService.getBbsList(type, page, size, bbstitle, memberName, bbscontent);
-        return ResponseEntity.ok(result);
-    }
-
-    // 관리자 이미지 게시글 단건 조회
-    @GetMapping("/poto/{id}")
-    public ResponseEntity<BbsDto> getPotoBbsDetail(@PathVariable Long id) {
-        BbsDto dto = bbsService.getBbs(id);
-        return ResponseEntity.ok(dto);
     }
 
 }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../common/api/axios";
 import { useNavigate } from "react-router-dom";
 import "./Gallery.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -27,7 +27,7 @@ export default function ImgBoard() {
         if (searchType === "writer") params.memberName = keyword.trim();
       }
 
-      const res = await axios.get(baseUrl, { params });
+      const res = await api.get(baseUrl, { params });
 
       const pageData = res.data.bbsList;
       setPosts(pageData.content || []);
