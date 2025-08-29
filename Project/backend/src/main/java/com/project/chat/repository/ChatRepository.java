@@ -22,4 +22,5 @@ public interface ChatRepository extends JpaRepository<ChatEntity, Long> {
     // 3. 삭제
     @Modifying
     void deleteAllByChatRoom(ChatRoomEntity chatRoom);
+    
 }

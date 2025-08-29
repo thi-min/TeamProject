@@ -3,6 +3,7 @@ package com.project.admin.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -272,5 +273,9 @@ public class AdminServiceImpl implements AdminService {
 				.message(resultMessage)
 				.build();
 	}
+	@Override
+    public Optional<AdminEntity> findByAdminId(String adminId) {
+        return adminRepository.findFirstByAdminId(adminId);
+    }
 	
 }

@@ -131,6 +131,10 @@ import AnimalForm from "../../program/animal/services/AnimalForm";
 // ==============================
 import MapForm from '../../program/mapdata/services/MapForm.jsx';
 
+import ChatList from "../../program/chat/services/ChatList.jsx";
+import ChatDetail from "../../program/chat/services/ChatDetail.jsx";
+
+
 
 
 // 📌 routes 객체 기반으로 Route 구성
@@ -330,6 +334,9 @@ const layoutRoutes = [
   // 지도 관련 Route
   // ------------------------------
   <Route key="map" path={routes.map.root.path} element={<MapForm />} />,
+// 1:1 채팅 라우터
+  <Route key="chatList" path={routes.admin.chat.path} element={<RequireAdmin><ChatList /></RequireAdmin>} />,
+  <Route key="chatDetail" path={routes.admin.chatDetail(":id")} element={<RequireAdmin><ChatDetail /></RequireAdmin>} />,
 ];
 
 export default layoutRoutes;

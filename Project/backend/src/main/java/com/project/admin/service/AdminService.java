@@ -1,11 +1,14 @@
 package com.project.admin.service;
 
+import java.util.Optional;
+
 import com.project.admin.dto.AdminLoginRequestDto;
 import com.project.admin.dto.AdminLoginResponseDto;
 import com.project.admin.dto.AdminMemberDetailResponseDto;
 import com.project.admin.dto.AdminMemberListResponseDto;
 import com.project.admin.dto.AdminMemberUpdateRequestDto;
 import com.project.admin.dto.AdminPasswordUpdateRequestDto;
+import com.project.admin.entity.AdminEntity;
 import com.project.member.dto.MemberPageRequestDto;
 import com.project.member.dto.MemberPageResponseDto;
 import com.project.member.entity.MemberState;
@@ -38,4 +41,7 @@ public interface AdminService {
     //관리자 비밀번호 변경
     void updatePassword(String adminId, AdminPasswordUpdateRequestDto dto);
 	
+    //관리자 ID로 관리자 정보를 찾는 메서드 추가
+    Optional<AdminEntity> findByAdminId(String adminId);
+    
 }
