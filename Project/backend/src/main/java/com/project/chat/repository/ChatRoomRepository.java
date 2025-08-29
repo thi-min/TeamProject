@@ -21,4 +21,5 @@ public interface ChatRoomRepository extends JpaRepository<ChatRoomEntity, Long> 
     // 3. 마지막 메시지 시간으로 정렬된 모든 채팅방 목록을 조회합니다.
     // 관리자 페이지에서 최근 대화가 있는 채팅방을 상단에 표시할 때 유용합니다.
     List<ChatRoomEntity> findAllByOrderByLastMessageTimeDesc();
+    
 }

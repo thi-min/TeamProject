@@ -16,7 +16,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.project.chat.entity.ChatEntity;
+import com.project.chat.dto.ChatDto;
+import com.project.chat.dto.ChatRoomDto;
 import com.project.chat.entity.ChatRoomEntity;
 import com.project.chat.service.ChatService;
 import com.project.member.entity.MemberEntity;
@@ -36,26 +37,23 @@ public class ChatRestController {
      * [관리자용] 모든 채팅방 목록을 페이지네이션하여 조회합니다.
      */
     @GetMapping("/admin/list")
-    public ResponseEntity<Page<ChatRoomEntity>> getAllChatRooms(
+    public ResponseEntity<Page<ChatRoomDto>> getAllChatRooms(
             @PageableDefault(sort = "lastMessageTime", direction = Sort.Direction.DESC) Pageable pageable) {
-        Page<ChatRoomEntity> chatRoomsPage = chatService.findAllChatRoomsByPage(pageable);
+        Page<ChatRoomDto> chatRoomsPage = chatService.findAllChatRoomsByPage(pageable);
         return ResponseEntity.ok(chatRoomsPage);
     }
 
-    /**
-     * [관리자/회원용] 특정 채팅방의 모든 메시지 기록을 조회합니다.
-     */
-    @GetMapping("/history/{chatRoomNum}")
-    public ResponseEntity<List<ChatEntity>> getChatHistory(@PathVariable Long chatRoomNum, Principal principal) {
-        // TODO: Principal 객체를 사용하여 요청한 사용자가 채팅방에 접근할 권한이 있는지 확인
-        List<ChatEntity> chatHistory = chatService.getChatHistory(chatRoomNum);
+    @GetMapping("/detail/{chatRoomNum}")
+    public ResponseEntity<List<ChatDto>> getChatHistory(@PathVariable Long chatRoomNum, Principal principal) {
+        List<ChatDto> chatHistory = chatService.getChatHistory(chatRoomNum);
         return ResponseEntity.ok(chatHistory);
     }
+
     
     /**
      * [회원용] 첫 채팅 시작 시 채팅방을 찾거나 새로 생성합니다.
      */
-    @PostMapping("/room")
+    @PostMapping("/detail")
     public ResponseEntity<ChatRoomEntity> findOrCreateChatRoomForMember(Principal principal) {
         // Principal 객체에서 회원 ID(이메일)를 가져옵니다.
         String memberId = principal.getName();
@@ -81,7 +79,7 @@ public class ChatRestController {
     /**
      * [관리자용] 특정 채팅방을 제거합니다.
      */
-    @DeleteMapping("/admin/room/{chatRoomNum}")
+    @DeleteMapping("/admin/detail/{chatRoomNum}")
     public ResponseEntity<Void> deleteChatRoom(@PathVariable Long chatRoomNum) {
         chatService.deleteChatRoom(chatRoomNum);
         return ResponseEntity.noContent().build();
