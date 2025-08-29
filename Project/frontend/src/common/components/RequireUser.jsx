@@ -36,15 +36,9 @@ function hasValidLocalToken() {
 // 경로가 /member 또는 /member/** 인지 판별
 function isMemberRoot(pathname) {
   if (!pathname) return false;
-<<<<<<< HEAD
-    const protectedRoots = ["/member", "/reserve" ];
-  return protectedRoots.some((root) => pathname === root || pathname.startsWith(root + "/"));
 
   return pathname === "/member" || pathname.startsWith("/member/");
 
-=======
-  return pathname === "/member" || pathname.startsWith("/member/");
->>>>>>> refs/remotes/origin/main
 }
 
 export function RequireMember({ children }) {
