@@ -676,6 +676,10 @@ public class MemberServiceImpl implements MemberService {
                  .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
      }
 
+     @Override
+     public Optional<MemberEntity> findByMemberId(String memberId) {
+         return memberRepository.findByMemberId(memberId);
+     }
  }
 
     

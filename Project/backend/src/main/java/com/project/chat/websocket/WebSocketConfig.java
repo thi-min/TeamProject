@@ -1,47 +1,79 @@
 package com.project.chat.websocket;
 
+import com.project.common.jwt.JwtTokenProvider;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.messaging.Message;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.simp.config.ChannelRegistration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.messaging.simp.stomp.StompCommand;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
+import org.springframework.messaging.support.ChannelInterceptor;
+import org.springframework.messaging.support.MessageHeaderAccessor;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 import org.springframework.web.socket.config.annotation.WebSocketMessageBrokerConfigurer;
+import java.security.Principal;
+import java.util.Arrays;
+import java.util.stream.Collectors;
+import java.util.List;
 
 @Configuration
 @EnableWebSocketMessageBroker
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 
+    private final JwtTokenProvider jwtTokenProvider;
 
-    public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**") // 모든 경로에 대해
-                .allowedOrigins("http://localhost:3000") // 특정 Origin 허용
-                .allowedMethods("GET", "POST", "PUT", "DELETE") // 허용할 HTTP 메서드
-                .allowedHeaders("*"); // 모든 헤더 허용
+    public WebSocketConfig(JwtTokenProvider jwtTokenProvider) {
+        this.jwtTokenProvider = jwtTokenProvider;
     }
-    /**
-     * 클라이언트가 WebSocket 서버에 연결할 엔드포인트를 등록합니다.
-     * SockJS를 사용하여 WebSocket을 지원하지 않는 브라우저에서도 연결할 수 있도록 합니다.
-     * @param registry STOMP 엔드포인트 등록 관리자
-     */
+
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws")
-                .setAllowedOriginPatterns("*") // 모든 Origin에서 접근 허용
-                .withSockJS(); // SockJS 지원 추가
+                .setAllowedOriginPatterns("http://localhost:3000");
     }
 
-    /**
-     * 인메모리 메시지 브로커를 설정합니다.
-     * @param registry 메시지 브로커 등록 관리자
-     */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        // 메시지를 구독하는 클라이언트에게 메시지를 전달할 destination(prefix) 설정
-        // /sub/chat/room/{roomNum} 형태의 구독을 허용
         registry.enableSimpleBroker("/sub");
-
-        // 클라이언트가 서버로 메시지를 보낼 때 사용할 destination(prefix) 설정
-        // /pub/chat/message 형태의 메시지 전송을 허용
         registry.setApplicationDestinationPrefixes("/pub");
+    }
+
+    @Override
+    public void configureClientInboundChannel(ChannelRegistration registration) {
+        registration.interceptors(new ChannelInterceptor() {
+            @Override
+            public Message<?> preSend(Message<?> message, MessageChannel channel) {
+                StompHeaderAccessor accessor = MessageHeaderAccessor.getAccessor(message, StompHeaderAccessor.class);
+
+                if (StompCommand.CONNECT.equals(accessor.getCommand())) {
+                    String authToken = accessor.getFirstNativeHeader("Authorization");
+                    if (authToken != null && authToken.startsWith("Bearer ")) {
+                        String token = authToken.substring(7);
+                        if (jwtTokenProvider.validateToken(token)) {
+                            // 1. 토큰에서 사용자 ID와 역할 정보 추출
+                            String memberId = jwtTokenProvider.getMemberIdFromToken(token);
+                            String role = jwtTokenProvider.getRoleFromToken(token);
+                            
+                            // 2. 권한 정보로 SimpleGrantedAuthority 리스트 생성
+                            List<SimpleGrantedAuthority> authorities = Arrays.asList(new SimpleGrantedAuthority("ROLE_" + role));
+                            
+                            // 3. UsernamePasswordAuthenticationToken 객체 생성 (Principal)
+                            // 첫 번째 매개변수: Principal 객체로 사용될 사용자 ID
+                            // 세 번째 매개변수: 권한 리스트
+                            Authentication authentication = new UsernamePasswordAuthenticationToken(memberId, null, authorities);
+                            
+                            // 4. 웹소켓 세션에 Principal 설정
+                            accessor.setUser(authentication);
+                        }
+                    }
+                }
+                return message;
+            }
+        });
     }
 }

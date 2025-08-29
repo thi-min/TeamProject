@@ -78,11 +78,11 @@ const routes = {
       list: { path: "/member/funds/list", label: "나의 후원 목록" },
       detail: (id) => `/member/funds/${id}`,
     },
-    // 1:1 채팅
-    chat: {
-      list: { path: "/member/chat/list", label: "나의 채팅 목록" },
-      room: (roomId = ":roomId") => `/member/chat/room/${roomId}`,
-    },
+    // // 1:1 채팅
+    // chat: {
+    //   list: { path: "/member/chat/list", label: "나의 채팅 목록" },
+    //   room: (roomId = ":roomId") => `/member/chat/room/${roomId}`,
+    // },
   },
 
   //카카오 관련
@@ -114,11 +114,11 @@ const routes = {
     members: { path: "/admin/members", label: "회원 관리" },
     memberDetail: (id) => `/admin/members/${id}`,
 
-    // 1:1 채팅
-    chat: {
-      list: { path: "/admin/chat/list", label: "채팅 목록" },
-      room: (id = ":roomId") => `/admin/chat/room/${id}`,
-    },
+    // // 1:1 채팅
+    // chat: {
+    //   list: { path: "/admin/chat/list", label: "채팅 목록" },
+    //   room: (id = ":roomId") => `/admin/chat/room/${id}`,
+    // },
 
     // 입양 신청서 관리
     adopt: {

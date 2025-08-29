@@ -1,120 +1,126 @@
 package com.project.chat.service;
 
-import com.project.admin.entity.AdminEntity;
-import com.project.chat.dto.ChatMessageRequestDto;
-import com.project.chat.dto.ChatMessageResponseDto;
-import com.project.chat.dto.ChatRoomResponseDto;
-import com.project.chat.entity.ChatMessageEntity;
-import com.project.chat.entity.ChatRoomEntity;
-import com.project.chat.entity.CheckState;
-import com.project.chat.repository.ChatMessageRepository;
-import com.project.chat.repository.ChatRoomRepository;
-import com.project.member.entity.MemberEntity;
-import com.project.member.repository.MemberRepository;
-import com.project.admin.repository.AdminRepository;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.project.chat.dto.ChatDto;
+import com.project.chat.entity.ChatEntity;
+import com.project.chat.entity.ChatRoomEntity;
+import com.project.chat.repository.ChatRepository;
+import com.project.chat.repository.ChatRoomRepository;
+import com.project.member.entity.MemberEntity;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class ChatService {
 
+    private final ChatRepository chatRepository;
     private final ChatRoomRepository chatRoomRepository;
-    private final ChatMessageRepository chatMessageRepository;
-    private final MemberRepository memberRepository;
-    private final AdminRepository adminRepository;
+    
+    // MemberEntity와 AdminEntity는 예시이므로, 실제 프로젝트 구조에 맞게 수정해야 합니다.
+    // private final MemberRepository memberRepository;
+    // private final AdminRepository adminRepository;
 
     /**
-     * 특정 회원의 채팅방을 조회하거나 새로 생성합니다.
-     * 회원이 첫 채팅을 시도할 때 사용됩니다.
-     * 관리자는 시스템 내 고정된 관리자를 사용한다고 가정합니다.
-     * @param memberNum 회원 번호
-     * @return ChatRoomResponseDto
+     * 특정 회원의 채팅방을 찾거나, 없으면 새로 생성합니다.
+     * @param member 채팅방을 찾거나 생성할 회원
+     * @return ChatRoomEntity
      */
     @Transactional
-    public ChatRoomResponseDto findOrCreateChatRoom(Long memberNum) {
-        // 1. 해당 회원의 채팅방이 이미 존재하는지 확인
-        return chatRoomRepository.findByMember_MemberNum(memberNum)
-                .map(ChatRoomResponseDto::fromEntity) // 존재하면 DTO로 변환하여 반환
+    public ChatRoomEntity findOrCreateChatRoom(MemberEntity member) {
+        return chatRoomRepository.findByMember(member)
                 .orElseGet(() -> {
-                    // 2. 채팅방이 존재하지 않으면, 새로운 채팅방 생성
-                    MemberEntity member = memberRepository.findById(memberNum)
-                            .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
-                    
-                    // 관리자는 시스템 내 유일한 한 명이라고 가정
-                    AdminEntity admin = adminRepository.findById(1L) // 예시: ID가 1L인 관리자
-                            .orElseThrow(() -> new IllegalArgumentException("관리자를 찾을 수 없습니다."));
-
-                    ChatRoomEntity newRoom = ChatRoomEntity.builder()
-                            .member(member)
-                            .admin(admin)
-                            .createdDate(LocalDateTime.now())
-                            .build();
-
-                    ChatRoomEntity savedRoom = chatRoomRepository.save(newRoom);
-                    return ChatRoomResponseDto.fromEntity(savedRoom);
+                    // 채팅방이 없을 경우 새로운 채팅방을 생성합니다.
+                    ChatRoomEntity newChatRoom = new ChatRoomEntity();
+                    newChatRoom.setMember(member);
+                    newChatRoom.setLastMessage("채팅방이 생성되었습니다.");
+                    newChatRoom.setLastMessageTime(LocalDateTime.now());
+                    return chatRoomRepository.save(newChatRoom);
                 });
     }
 
     /**
-     * 클라이언트로부터 받은 메시지를 데이터베이스에 저장합니다.
-     * @param roomNum 채팅방 번호
-     * @param requestDto 메시지 요청 DTO
-     * @return 저장된 메시지 정보 DTO
+     * 새로운 채팅 메시지를 저장하고, 채팅방의 마지막 메시지 정보를 업데이트합니다.
+     * @param chatDto 클라이언트로부터 받은 메시지 정보
      */
     @Transactional
-    public ChatMessageResponseDto saveMessage(Long roomNum, ChatMessageRequestDto requestDto) {
-        ChatRoomEntity chatRoom = chatRoomRepository.findById(roomNum)
-                .orElseThrow(() -> new IllegalArgumentException("채팅방을 찾을 수 없습니다."));
+    public void saveMessage(ChatDto chatDto) {
+        // 채팅방 찾기
+        Optional<ChatRoomEntity> optionalChatRoom = chatRoomRepository.findById(chatDto.getChatRoomNum());
+        if (optionalChatRoom.isEmpty()) {
+            // 해당 채팅방이 존재하지 않으면 예외 처리
+            throw new IllegalArgumentException("Chat room not found with ID: " + chatDto.getChatRoomNum());
+        }
+        
+        ChatRoomEntity chatRoom = optionalChatRoom.get();
 
-        // 발신자 정보 설정 (회원 또는 관리자)
-        MemberEntity memberSender = requestDto.isMemberSender() ?
-                memberRepository.findById(requestDto.getSenderId())
-                        .orElseThrow(() -> new IllegalArgumentException("발신자(회원)를 찾을 수 없습니다.")) : null;
-
-        AdminEntity adminSender = !requestDto.isMemberSender() ?
-                adminRepository.findById(requestDto.getSenderId())
-                        .orElseThrow(() -> new IllegalArgumentException("발신자(관리자)를 찾을 수 없습니다.")) : null;
-
-        ChatMessageEntity chatMessage = ChatMessageEntity.builder()
-                .chatRoom(chatRoom)
-                .memberSender(memberSender)
-                .adminSender(adminSender)
-                .messageContent(requestDto.getMessageContent())
-                .sentDate(LocalDateTime.now())
-                .checkState(CheckState.N) // 새 메시지는 항상 '미확인' 상태로 저장
-                .build();
-
-        ChatMessageEntity savedMessage = chatMessageRepository.save(chatMessage);
-        return ChatMessageResponseDto.fromEntity(savedMessage);
+        // ChatEntity 생성 및 저장
+        ChatEntity chatMessage = new ChatEntity();
+        chatMessage.setChatRoom(chatRoom);
+        chatMessage.setSenderNum(chatDto.getSenderNum());
+        chatMessage.setSenderRole(chatDto.getSenderRole());
+        chatMessage.setMessage(chatDto.getMessage());
+        chatRepository.save(chatMessage);
+        
+        // 채팅방의 마지막 메시지 정보 업데이트
+        chatRoom.setLastMessage(chatDto.getMessage());
+        chatRoom.setLastMessageTime(LocalDateTime.now());
+        chatRoomRepository.save(chatRoom);
     }
 
     /**
-     * 특정 채팅방의 메시지 목록을 조회합니다.
-     * @param roomNum 채팅방 번호
-     * @return 최신순으로 정렬된 메시지 목록 DTO 리스트
+     * 특정 채팅방의 모든 대화 기록을 조회합니다.
+     * @param chatRoomNum 채팅방 번호
+     * @return 해당 채팅방의 메시지 리스트
      */
-    public List<ChatMessageResponseDto> getChatMessages(Long roomNum) {
-        List<ChatMessageEntity> messages = chatMessageRepository.findByChatRoom_RoomNumOrderBySentDateDesc(roomNum);
-        return messages.stream()
-                .map(ChatMessageResponseDto::fromEntity)
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<ChatEntity> getChatHistory(Long chatRoomNum) {
+        Optional<ChatRoomEntity> optionalChatRoom = chatRoomRepository.findById(chatRoomNum);
+        if (optionalChatRoom.isEmpty()) {
+            return List.of(); // 채팅방이 없으면 빈 리스트 반환
+        }
+        
+        ChatRoomEntity chatRoom = optionalChatRoom.get();
+        // 최신순으로 정렬된 메시지 리스트를 반환합니다.
+        return chatRepository.findByChatRoomOrderByTimestampAsc(chatRoom);
     }
-
+    
     /**
-     * 특정 채팅방의 모든 메시지 상태를 '확인됨(Y)'으로 업데이트합니다.
-     * 일반적으로 사용자가 채팅방에 진입했을 때 호출됩니다.
-     * @param roomNum 채팅방 번호
+     * [관리자용] 모든 채팅방 목록을 마지막 메시지 시간 순으로 조회합니다.
+     * @return 마지막 메시지 시간 내림차순으로 정렬된 ChatRoomEntity 리스트
      */
-    @Transactional
-    public void markMessagesAsRead(Long roomNum) {
-        List<ChatMessageEntity> unreadMessages = chatMessageRepository.findByChatRoom_RoomNumAndCheckState(roomNum, CheckState.N);
-        unreadMessages.forEach(message -> message.setCheckState(CheckState.Y));
-        chatMessageRepository.saveAll(unreadMessages);
+    @Transactional(readOnly = true)
+    public List<ChatRoomEntity> findAllChatRoomsOrderByTime() {
+        return chatRoomRepository.findAllByOrderByLastMessageTimeDesc();
     }
+    
+    @Transactional
+    public void deleteChatRoom(Long chatRoomNum) {
+        ChatRoomEntity chatRoom = chatRoomRepository.findById(chatRoomNum)
+                .orElseThrow(() -> new IllegalArgumentException("Chat room not found with ID: " + chatRoomNum));
+        
+        // 해당 채팅방의 모든 메시지 삭제
+        chatRepository.deleteAllByChatRoom(chatRoom);
+        
+        // 채팅방 삭제
+        chatRoomRepository.delete(chatRoom);
+    }
+    /**
+     * [관리자용] 모든 채팅방 목록을 페이지네이션하여 조회합니다.
+     * @param pageable 페이징 및 정렬 정보
+     * @return ChatRoomEntity의 페이지 객체
+     */
+    @Transactional(readOnly = true)
+    public Page<ChatRoomEntity> findAllChatRoomsByPage(Pageable pageable) {
+        return chatRoomRepository.findAll(pageable);
+    }
+    
 }

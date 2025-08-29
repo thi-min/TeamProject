@@ -1,9 +1,10 @@
 package com.project.member.service;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Service;
 
 import com.project.member.dto.AddressUpdateRequestDto;
-import com.project.member.dto.KakaoSignUpRequestDto;
 import com.project.member.dto.MemberAuthResult;
 import com.project.member.dto.MemberDeleteDto;
 import com.project.member.dto.MemberIdCheckResponseDto;
@@ -14,7 +15,6 @@ import com.project.member.dto.MemberMyPageResponseDto;
 import com.project.member.dto.MemberMyPageUpdateRequestDto;
 import com.project.member.dto.MemberSignUpRequestDto;
 import com.project.member.dto.MemberSignUpResponseDto;
-import com.project.member.dto.SelfPasswordUpdateRequestDto;
 import com.project.member.dto.PhoneUpdateRequestDto;
 import com.project.member.dto.ResetPasswordUpdateRequestDto;
 import com.project.member.dto.SelfPasswordUpdateRequestDto;
@@ -86,4 +86,8 @@ public interface MemberService {
 
     //회원 번호로 회원 객체를 찾아 반환
     MemberEntity findByMemberNum(Long memberNum);
+    
+    //회원 id로 회원 객체를 찾아 반환
+    Optional<MemberEntity> findByMemberId(String memberId);
+
 }

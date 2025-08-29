@@ -1,35 +1,42 @@
 package com.project.chat.entity;
 
-import com.project.admin.entity.AdminEntity;
-import com.project.member.entity.MemberEntity;
-
-import jakarta.persistence.*;
-import lombok.*;
-
 import java.time.LocalDateTime;
 
+import com.project.member.entity.MemberEntity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 @Entity
-@Table(name = "chat_room")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Table(name = "chat_rooms")
 public class ChatRoomEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "room_num")
-    private Long roomNum; // 채팅방 번호
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long chatRoomNum;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_num", nullable = false)
-    private MemberEntity member; // 채팅방에 참여한 회원 (N:1 관계)
+    private MemberEntity member;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "admin_num", nullable = false)
-    private AdminEntity admin; // 채팅방에 참여한 관리자 (N:1 관계)
+    @Column(nullable = false)
+    private String lastMessage;
 
-    @Column(name = "created_date", nullable = false)
-    private LocalDateTime createdDate; // 채팅방 생성 시간
+    @Column(nullable = false)
+    private LocalDateTime lastMessageTime;
+
+    // 생성자 및 편의 메서드 추가 가능
 }

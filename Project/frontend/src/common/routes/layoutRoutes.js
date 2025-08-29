@@ -56,8 +56,8 @@ import {
 // ==============================
 // 1:1 채팅 관련 페이지
 // ==============================
-import ChatList from "../../program/chat/services/ChatList";
-import ChatRoom from "../../program/chat/services/ChatRoom"; // ChatRoom 컴포넌트 추가
+// import ChatList from "../../program/chat/services/ChatList";
+// import ChatRoom from "../../program/chat/services/ChatRoom"; // ChatRoom 컴포넌트 추가
 
 
 // ==============================
@@ -194,14 +194,14 @@ const layoutRoutes = [
   // ------------------------------
   // 1:1 채팅 Route (관리자)
   // ------------------------------
-  <Route key="adminChatList" path={routes.admin.chat.list.path} element={<RequireAdmin><ChatList isAdmin={true} /></RequireAdmin>} />,
-  <Route key="adminChatRoom" path={routes.admin.chat.room()} element={<RequireAdmin><ChatRoom isAdmin={true} /></RequireAdmin>} />,
+//   <Route key="adminChatList" path={routes.admin.chat.list.path} element={<RequireAdmin><ChatList isAdmin={true} /></RequireAdmin>} />,
+//   <Route key="adminChatRoom" path={routes.admin.chat.room()} element={<RequireAdmin><ChatRoom isAdmin={true} /></RequireAdmin>} />,
   
   // ------------------------------
   // 1:1 채팅 Route (회원) - 추가
   // ------------------------------
-  <Route key="memberChatList" path={routes.member.chat.list.path} element={<RequireMember><ChatList isAdmin={false} /></RequireMember>} />,
-  <Route key="memberChatRoom" path={routes.member.chat.room()} element={<RequireMember><ChatRoom isAdmin={false} /></RequireMember>} />,
+//   <Route key="memberChatList" path={routes.member.chat.list.path} element={<RequireMember><ChatList isAdmin={false} /></RequireMember>} />,
+//   <Route key="memberChatRoom" path={routes.member.chat.room()} element={<RequireMember><ChatRoom isAdmin={false} /></RequireMember>} />,
 
   // ------------------------------
   // 입양 신청서 Route
