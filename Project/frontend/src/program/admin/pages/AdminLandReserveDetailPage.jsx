@@ -48,7 +48,7 @@ const AdminLandReserveDetailPage = () => {
 
   return (
     <div className="admin-reserve-detail">
-      <h2>놀이터 예약 상세</h2>
+      <h3>놀이터 예약 상세</h3>
       <table className="table type2 responsive border">
         <colgroup>
           <col className="w20p" />
@@ -77,7 +77,7 @@ const AdminLandReserveDetailPage = () => {
         </tbody>
       </table>
 
-      <h2>결제 정보</h2>
+      <h3>결제 정보</h3>
       <table className="table type2 responsive border">
         <colgroup>
           <col className="w20p" />

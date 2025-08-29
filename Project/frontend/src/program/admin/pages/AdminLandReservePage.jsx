@@ -77,7 +77,7 @@ useEffect(() => {
 
   return (
     <div className="admin-reserve-page">
-      <h2>놀이터 예약 관리</h2>
+      <h3>놀이터 예약 관리</h3>
 
       {/* 검색 영역 */}
       <div className="search-bar">

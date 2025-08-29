@@ -69,7 +69,7 @@ const AdminBannerDetailPage = () => {
 
   return (
     <div className="admin-banner-detail">
-      <h2>배너 상세</h2>
+      <h3>배너 상세</h3>
 
       {!isEditing ? (
         // ---------------------- 상세보기 모드 ----------------------

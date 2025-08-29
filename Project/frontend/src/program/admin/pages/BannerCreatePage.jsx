@@ -63,7 +63,7 @@ const BannerCreatePage = () => {
 
   return (
     <div className="admin-banner-page">
-      <h2>배너 등록</h2>
+      <h3>배너 등록</h3>
       
       <div className="required-info">
         <span className="required">*</span> 표시는 필수 입력항목입니다.

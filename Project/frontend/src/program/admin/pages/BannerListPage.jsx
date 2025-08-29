@@ -24,7 +24,7 @@ const BannerListPage = () => {
 
   return (
     <div className="admin-banner-page">
-      <h2>배너 관리</h2>
+      <h3>배너 관리</h3>
 
       {/* 결과 테이블 */}
       <table className="table type2 responsive border">
@@ -38,23 +38,20 @@ const BannerListPage = () => {
           </tr>
         </thead>
         <tbody className="text_center">
-          {banners.map((b) => {
-            console.log("visible 값:", b.visible, typeof b.visible);
-            return (
+          {banners.map((b) => (
                 <tr
                 key={b.bannerId}
                 onClick={() => navigate(`/admin/banner/${b.bannerId}`)}
                 style={{ cursor: "pointer" }}
-                className={!Boolean(Number(b.visible)) ? "row-disabled" : ""}
+                className={!b.visible ? "row-disabled" : ""}
                 >
                 <td>{b.bannerId}</td>
                 <td>{b.title}</td>
                 <td>{b.startDate} ~ {b.endDate}</td>
                 <td>{b.visible ? "활성" : "비활성"}</td>
                 </tr>
-            );
-            })}
-        </tbody>
+            ))}
+            </tbody>
       </table>
 
       {/* 등록 버튼 */}

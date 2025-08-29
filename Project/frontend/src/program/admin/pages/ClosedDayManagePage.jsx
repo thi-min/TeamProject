@@ -70,9 +70,9 @@ const ClosedDayManagePage = () => {
 
   return (
   <div className="closedday-page">
-    <h2 className="closedday-title">
+    <h3 className="closedday-title">
       휴무일 관리 - {year}년 {month}월
-    </h2>
+    </h3>
 
     <div className="closedday-content">
     {/* 달력 영역 */}

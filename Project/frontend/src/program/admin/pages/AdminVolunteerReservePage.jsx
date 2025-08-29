@@ -75,7 +75,7 @@ const AdminVolunteerReservePage = () => {
 
   return (
     <div className="admin-reserve-page">
-      <h2>봉사 예약 관리</h2>
+      <h3>봉사 예약 관리</h3>
 
       {/* 검색 영역 */}
       <div className="search-bar">

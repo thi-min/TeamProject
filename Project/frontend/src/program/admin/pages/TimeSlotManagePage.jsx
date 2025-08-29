@@ -206,7 +206,7 @@ const TimeSlotManagePage = () => {
 
   return (
     <div className="tspage">
-      <h2 className="ts-title">시간대 운영 관리</h2>
+      <h3 className="ts-title">시간대 운영 관리</h3>
 
       {/* 탭 */}
       <div className="ts-tabs" style={{ marginBottom: "1rem" }}>

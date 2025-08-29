@@ -49,7 +49,7 @@ const AdminVolunteerReserveDetailPage = () => {
 
   return (
     <div className="admin-reserve-detail">
-      <h2>봉사 예약 상세</h2>
+      <h3>봉사 예약 상세</h3>
       <table className="table type2 responsive border">
          <colgroup>
           <col className="w20p" />
