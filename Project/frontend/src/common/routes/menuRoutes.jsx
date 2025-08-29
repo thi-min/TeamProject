@@ -41,9 +41,9 @@ const menuRoutes = [
     title: "게시판",
     access: "ALL",
     children: [
-      { title: "공지사항", path: "/board/notice", access: "ALL" },
-      { title: "질문 게시판", path: "/board/qna", access: "ALL" },
-      { title: "포토 게시판", path: "/board/photo", access: "ALL" },
+      { title: "공지사항", path: "/bbs/normal", access: "ALL" },
+      { title: "질문 게시판", path: "/bbs/qna", access: "ALL" },
+      { title: "포토 게시판", path: "/bbs/image", access: "ALL" },
     ],
   },
   {

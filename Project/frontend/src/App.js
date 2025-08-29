@@ -1,7 +1,11 @@
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes } from "react-router-dom";
 
+<<<<<<< HEAD
 import Layout from "./layout/Layout";
 import React from "react";
+=======
+import Layout from './layout/Layout';
+>>>>>>> refs/remotes/origin/youseungjupage
 
 import Mainpage from "./main/pages/MainPage";
 import layoutRoutes from "./common/routes/layoutRoutes";

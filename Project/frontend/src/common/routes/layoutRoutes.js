@@ -1,4 +1,5 @@
 // 📁 src/router/layoutRoutes.js
+import React from "react";
 import { Route } from "react-router-dom";
 import routes from "./router";
 import { LogoutLink } from "../../program/login/pages/LogoutLink"; //로그아웃
@@ -57,6 +58,51 @@ import MemberDetail from "../../program/admin/pages/MemberDetailPage"; //관리�
 //카카오
 import KakaoCallbackPage from "../../program/login/pages/KakaoCallbackPage"; //카카오 로그인 콜백
 
+
+// 📌 layoutRoutes 정의
+
+// FundPage.js에서 기본 내보내기가 없으므로, FundMainPage를 이름으로 불러옵니다.
+// 이제 FundPage.js에서 내보내는 모든 컴포넌트를 불러옵니다.
+import {
+  FundApplicationDetails,
+  FundApplicationForm,
+  FundMainPage,
+  GoodsApplicationDetails,
+  GoodsApplicationForm,
+  RecurringApplicationDetails,
+  RecurringApplicationForm
+} from "../../program/fund/services/FundPage";
+
+
+// 게시판 관련
+import AdminBbs from "../../bbs/adminbbs";
+
+import Normal from "../../bbs/normalbbs/Normal";
+import NormalBbsView from "../../bbs/normalbbs/NormalBbsview";
+import NormalBbsWrite from "../../bbs/normalbbs/NormalBbsWrite";
+import NormalBbsEdit from "../../bbs/normalbbs/NormalBbsEdit";
+import MemberNormalBbs from "../../bbs/normalbbs/MemberNormalBbs";
+import MemberNormalBbsView from "../../bbs/normalbbs/MemberNormalBbsView";
+import MemberNormalBbsDummy from "../../bbs/normalbbs/MemberNormalBbsdummy";
+import AdminNormalBbsdummy from "../../bbs/normalbbs/AdminNormalBbsdummy";
+
+import QnaBbs from "../../bbs/questionbbs/QnaBbs";
+import QnaBbsWrite from "../../bbs/questionbbs/QnaBbsWrite";
+import QnaBbsView from "../../bbs/questionbbs/QnaBbsView";
+import QnaBbsEdit from "../../bbs/questionbbs/QnaBbsEdit";
+import AdminQnaBbs from "../../bbs/questionbbs/AdminQnaBbs";
+import AdminQnaBbsView from "../../bbs/questionbbs/AdminQnaBbsView";
+import AdminQnaBbsDummy from "../../bbs/questionbbs/AdminQnaBbsDummy";
+
+
+import ImgList from "../../bbs/imagebbs/imgList";
+import ImgDetail from "../../bbs/imagebbs/imgdetail";
+import ImgEdit from "../../bbs/imagebbs/imgedit";
+import ImgWrite from "../../bbs/imagebbs/imgwrite";
+import AdminImgBoard from "../../bbs/imagebbs/AdminImgBoard";
+import AdminImgDetail from "../../bbs/imagebbs/AdminImgDetail";
+import ImgBoardDummy from "../../bbs/imagebbs/ImgBoardDummy";
+
 // 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
 
@@ -87,6 +133,46 @@ const layoutRoutes = [
   <Route key="admin-banner-manage" path={routes.admin.bannerManage.path} element={<RequireAdmin><BannerListPage /></RequireAdmin >} />,
   <Route key="admin-banner-create" path={routes.admin.bannerCreate.path} element={<RequireAdmin><BannerCreatePage /></RequireAdmin >} />,
   <Route key="admin-banner-detail" path={routes.admin.bannerDetail.path} element={<RequireAdmin><BannerDetailPage /></RequireAdmin >} />,
+  <Route key="adminbbstab" path="/admin/bbs" element={<AdminBbs />} />,
+
+  // 일반 게시판
+  <Route key="normal" path="/admin/bbs/normal" element={<Normal />} />,
+  <Route key="normal-bbs-view" path="/admin/bbs/normal/:id" element={<NormalBbsView />} />,
+  <Route key="normal-bbs-write" path="/admin/bbs/normal/write" element={<NormalBbsWrite />} />,
+  <Route key="normal-bbs-edit" path="admin/bbs/normal/edit/:id" element={<NormalBbsEdit />} />,
+  <Route key="Membernormal" path="/bbs/normal" element={<MemberNormalBbs />} />,
+  <Route key="Membernormal-view" path="/bbs/normal/view/:id" element={<MemberNormalBbsView />} />,
+  <Route key="Membernormal-dummy" path="/bbs/member/normal/dummy" element={<MemberNormalBbsDummy/>} />,
+  <Route key="Adminnormal-dummy" path="/bbs/Admin/normal/dummy" element={<AdminNormalBbsdummy/>} />,
+
+  // QnA 게시판
+  <Route key="qna-bbs" path="/bbs/qna" element={<QnaBbs />} />,
+  <Route key="qna-bbs-write" path="/bbs/qna/write" element={<QnaBbsWrite />} />,
+  <Route key="qna-bbs-view" path="/bbs/qna/:id" element={<QnaBbsView />} />,
+  <Route key="qna-bbs-edit" path="/bbs/qna/edit/:id" element={<QnaBbsEdit />} />,
+  <Route key="qna-bbs-admin" path="/admin/bbs/qna" element={ <RequireAdmin><AdminQnaBbs /></RequireAdmin>} />,
+  <Route key="qna-bbs-admin-view" path="/admin/qna/view/:id" element={ <RequireAdmin><AdminQnaBbsView /></RequireAdmin>} />,
+  <Route key="qna-bbs-admin-dummy" path="/bbs/admin/qna/dummy" element={<AdminQnaBbsDummy />} />,
+
+
+  // 이미지 게시판
+  <Route key="img-list" path="/bbs/image" element={<ImgList />} />,
+  <Route key="img-detail" path="/bbs/image/:id" element={<ImgDetail />} />,
+  <Route key="img-edit" path="/bbs/image/edit/:id" element={<ImgEdit />} />,
+  <Route key="img-write" path="/bbs/image/write" element={<ImgWrite />} />,
+  <Route key="img-Admin-ImgBoard" path="/admin/bbs/image" element={<AdminImgBoard />} />,
+  <Route key="img-Admin-ImgDetail" path="/admin/bbs/image/Detail/:id" element={<AdminImgDetail />} />,
+  <Route key="img-Admin-ImgDummy" path="/bbs/admin/image/Dummy" element={<ImgBoardDummy />} />,
+
+  // 후원 route
+  // 각 후원 페이지를 별도의 경로로 라우팅합니다.
+  <Route key="fundMainPage" path={routes.fund.root.path} element={<FundMainPage />} />,
+  <Route key="fundForm" path={routes.fund.fundForm.path} element={<FundApplicationForm />} />,
+  <Route key="goodsForm" path={routes.fund.goodsForm.path} element={<GoodsApplicationForm />} />,
+  <Route key="recurringForm" path={routes.fund.recurringForm.path} element={<RecurringApplicationForm />} />,
+  <Route key="fundDetails" path={routes.fund.fundDetails.path} element={<FundApplicationDetails />} />,
+  <Route key="goodsDetails" path={routes.fund.goodsDetails.path} element={<GoodsApplicationDetails />} />,
+  <Route key="recurringDetails" path={routes.fund.recurringDetails.path} element={<RecurringApplicationDetails />} />,
 
   //사용자
   <Route key="login" path={routes.member.login.path} element={<LoginPage />} />, //로그인

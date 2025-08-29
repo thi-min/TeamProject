@@ -1,10 +1,10 @@
-// 🛣 모든 경로를 중앙에서 관리하는 라우터 모음
+// src/common/routes/router.js
+// 모든 경로를 중앙에서 관리하는 라우터 모음
 
 const routes = {
   // 메인/홈
   main: { path: "/", label: "메인페이지" },
 
-  // 센터 소개
   about: {
     root: { path: "/about/signup", label: "센터소개" },
     greeting: { path: "/about/greeting", label: "인사말" },
@@ -12,14 +12,12 @@ const routes = {
     location: { path: "/about/location", label: "오시는 길" },
   },
 
-  // 입양 소식
   adoption: {
     list: { path: "/about/list", label: "센터 아이들" },
     process: { path: "/about/process", label: "입양 절차 안내" },
     review: { path: "/about/review", label: "입양 후기" },
   },
 
-  // 동물 놀이터
   land: {
     root: { path: "/land", label: "동물 놀이터" },
     info: { path: "/land/info", label: "놀이터 소개" },
@@ -27,14 +25,13 @@ const routes = {
   },
 
   // 게시판
-  board: {
-    root: { path: "/board", label: "게시판" },
-    notice: { path: "/board/notice", label: "공지사항" },
-    qna: { path: "/board/qna", label: "질문 게시판" },
-    photo: { path: "/board/photo", label: "포토 게시판" },
+   board: {
+    root: { path: "/bbs", label: "게시판" },
+    notice: { path: "/bbs/normalbbs", label: "공지사항" },
+    qna: { path: "/bbs/questionbbs", label: "질문 게시판" },
+    photo: { path: "/bbs/imagebbs", label: "포토 게시판" },
   },
 
-  // 회원 관련
   member: {
     join: { path: "/join", label: "회원 약관" },
     phone: { path: "/phonetest", label: "휴대폰 인증" },
@@ -61,8 +58,17 @@ const routes = {
   kakao: {
     callback: { path: "/oauth/kakao/callback", label: "카카오 콜백" },
   },
+  // 후원 경로
+  fund: {
+    root: { path: "/fund", label: "후원 메인" },
+    fundForm: { path: "/fund/money", label: "후원금 신청" },
+    goodsForm: { path: "/fund/goods", label: "후원물품 신청" },
+    recurringForm: { path: "/fund/recurring", label: "정기후원 신청" },
+    fundDetails: { path: "/fund/money-details", label: "후원금 상세" },
+    goodsDetails: { path: "/fund/goods-details", label: "후원물품 상세" },
+    recurringDetails: { path: "/fund/recurring-details", label: "정기후원 상세" },
+  },
 
-  // 관리자
   admin: {
     admin: { path: "/admin", label: "관리자 페이지" },
     password: { path: "/admin/updatePw", label: "관리자 비밀번호 변경" },
@@ -99,14 +105,14 @@ const routes = {
       confirm: { path: "/reserve/volunteer/confirm", label: "신청 확인" },
       success: { path: "/reserve/volunteer/success", label: "신청 완료" },
     },
+
   },
-  // 봉사활동
+
   volunteer: {
     list: { path: "/volunteer/list", label: "봉사 목록" },
     detail: (id) => `/volunteer/${id}`,
   },
 
-  // 404 등 기타
   common: {
     notFound: { path: "*", label: "페이지를 찾을 수 없습니다" },
   },

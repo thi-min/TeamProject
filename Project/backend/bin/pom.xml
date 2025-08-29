@@ -52,7 +52,8 @@
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>
 			<artifactId>mariadb-java-client</artifactId>
-			<scope>runtime</scope>
+			<version>3.3.3</version> <!-- 👈 버전 명시 -->
+			<!-- <scope>runtime</scope> -->
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -69,7 +70,11 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+		<!-- websocket사용 -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
 		<!-- phone사용
 	    유효성 검사 (Validation) 어노테이션 사용을 위한 의존성.
 	    예: @NotBlank, @NotNull, @Pattern 등의 입력값 검증 어노테이션을 DTO에서 사용 가능하게 해줌.
@@ -79,6 +84,36 @@
 		    <artifactId>jakarta.validation-api</artifactId>
 	    	<version>3.0.2</version>
 	    </dependency>
+	    
+	    <!-- 보안관련 JasyPt 라이브러리 설치 코드 -->
+	    <dependency>
+		    <groupId>com.github.ulisesbocchio</groupId>
+		    <artifactId>jasypt-spring-boot-starter</artifactId>
+		    <version>3.0.5</version>
+		</dependency>
+		<!-- JWT 의존성 추가 -->
+		<dependency>
+		    <groupId>io.jsonwebtoken</groupId>
+		    <artifactId>jjwt-api</artifactId>
+		    <version>0.11.5</version>
+		</dependency>
+		<dependency>
+		    <groupId>io.jsonwebtoken</groupId>
+		    <artifactId>jjwt-impl</artifactId>
+		    <version>0.11.5</version>
+		    <scope>runtime</scope>
+		</dependency>
+		<dependency>
+		    <groupId>io.jsonwebtoken</groupId>
+		    <artifactId>jjwt-jackson</artifactId> <!-- or jjwt-gson -->
+		    <version>0.11.5</version>
+		    <scope>runtime</scope>
+		</dependency>
+<!--	<dependency>
+			<groupId>com.springboot</groupId>
+			<artifactId>advanced_jpa</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency> -->
 	</dependencies>
 
 	<build>
