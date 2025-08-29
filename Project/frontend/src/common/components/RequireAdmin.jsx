@@ -4,23 +4,31 @@ import { Navigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 import { useAuth } from "../context/AuthContext";
 
-/** 다양한 형태의 권한 클레임을 안전하게 파싱해서 ADMIN 여부 판단 */
-function hasAdminFromClaims(claims) {
-  if (!claims) return false;
+// ADMIN 문자열 판정 (ADMIN 또는 ROLE_ADMIN 모두 허용)
+const ADMIN_REGEX = /(^|[,\s])(?:ROLE_)?ADMIN(?![A-Za-z_])(?!\w)/i;
 
-  // 후보군 수집: 문자열/배열/객체배열 모두 대응
-  const bag = [];
+function isAdminString(s) {
+  if (!s) return false;
+  return ADMIN_REGEX.test(String(s));
+}
+
+function extractRolesFromClaims(claims) {
+  if (!claims) return [];
+  const out = [];
 
   const push = (v) => {
     if (!v) return;
     if (Array.isArray(v)) {
-      for (const el of v) push(el);
-    } else if (typeof v === "string") {
-      // 콤마/공백 구분
-      v.split(/[,\s]+/).forEach((s) => s && bag.push(s));
+      v.forEach(push);
     } else if (typeof v === "object") {
-      // {authority:"ROLE_ADMIN"} | {role:"ADMIN"} | {name:"ADMIN"}
-      bag.push(v.authority || v.role || v.name);
+      // 객체 배열/객체 지원: {authority:"ROLE_ADMIN"}, {role:"ADMIN"}, {name:"ADMIN"}, ...
+      push(v.authority || v.role || v.name || v.value);
+    } else {
+      // 문자열 "ADMIN", "ROLE_ADMIN", "ADMIN,USER" 등
+      String(v)
+        .split(/[,\s]+/)
+        .filter(Boolean)
+        .forEach((p) => out.push(p));
     }
   };
 
@@ -30,21 +38,23 @@ function hasAdminFromClaims(claims) {
   push(claims.auth);
   push(claims.permissions);
 
-  // 최종 문자열로 합쳐서 ADMIN 패턴 검사
-  const joined = bag.filter(Boolean).join(",");
-  return /(^|,|\s)ROLE?_?ADMIN(,|\s|$)/i.test(joined);
+  return out;
 }
 
 const RequireAdmin = ({ children }) => {
   const { isLogin, role: ctxRole } = useAuth();
 
-  // 1) 컨텍스트의 role을 최우선 사용 (로그인 직후에도 신뢰 가능)
+  // 1) 컨텍스트 role 최우선
   const ctxIsAdmin = useMemo(() => {
-    if (!ctxRole) return false;
-    return /(^|,|\s)ROLE?_?ADMIN(,|\s|$)/i.test(String(ctxRole).toUpperCase());
+    if (Array.isArray(ctxRole)) return ctxRole.some(isAdminString);
+    return isAdminString(ctxRole);
   }, [ctxRole]);
 
-  // 2) 토큰으로 보강 판정 (컨텍스트가 아직 초기화 중인 첫 렌더 레이스 등 대비)
+  // 2) LS role 보강(혹시 컨텍스트 초기화 전 첫 렌더 레이스)
+  const lsRole = localStorage.getItem("role");
+  const lsIsAdmin = isAdminString(lsRole);
+
+  // 3) 토큰 클레임에서 보강
   const token =
     localStorage.getItem("accessToken") ||
     localStorage.getItem("adminAccessToken");
@@ -53,20 +63,21 @@ const RequireAdmin = ({ children }) => {
   if (token) {
     try {
       const claims = jwtDecode(token);
-      jwtIsAdmin = hasAdminFromClaims(claims);
+      const roles = extractRolesFromClaims(claims);
+      jwtIsAdmin = roles.some(isAdminString);
     } catch {
       jwtIsAdmin = false;
     }
   }
 
-  const isAdmin = ctxIsAdmin || jwtIsAdmin;
+  const isAdmin = ctxIsAdmin || lsIsAdmin || jwtIsAdmin;
 
-  // 로그인 자체가 아니면 → 로그인 페이지로
+  // 로그인 자체가 아니면 로그인 페이지로
   if (!isLogin && !token) {
     return <Navigate to="/login" replace />;
   }
 
-  // 로그인은 했지만 관리자 권한이 없다면 경고 후 홈으로
+  // 로그인은 했지만 관리자 권한이 없으면 차단
   if (!isAdmin) {
     alert("관리자만 접근할 수 있는 페이지입니다.");
     return <Navigate to="/" replace />;

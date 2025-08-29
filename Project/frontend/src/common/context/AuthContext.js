@@ -44,6 +44,8 @@ function decodeAndCheck(accessToken) {
 // 로컬스토리지 키(이름) — 오타 방지용 상수
 const ACCESS_KEY = "accessToken";
 const REFRESH_KEY = "refreshToken";
+const ADMIN_ACCESS_TOKEN = "adminAccessToken";
+const MEMBER_NUM = "memberNum";
 
 /**
  * 3) Provider 컴포넌트
@@ -126,6 +128,8 @@ export function AuthProvider({ children }) {
   const logout = useCallback(() => {
     localStorage.removeItem(ACCESS_KEY);
     localStorage.removeItem(REFRESH_KEY);
+    localStorage.removeItem(ADMIN_ACCESS_TOKEN);
+    localStorage.removeItem(MEMBER_NUM);
     sessionStorage.clear();
     setAccessToken(null);
     setRefreshToken(null);
