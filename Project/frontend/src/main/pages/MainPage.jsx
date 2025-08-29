@@ -212,12 +212,12 @@ export default function MainPage() {
       </div>
       <div className="rowgroup3">
         <section>
-          <div className="bbs_list_box">
-            <div className="bbs_list_item">
-              <div className="bbs_title_box">
-                <span>공지사항</span>
-              </div>
-              <div className="bbs_desc">
+          <div className="bbs_box">
+            <div className="bbs_title_box">
+              <span>공지사항</span>
+            </div>
+            <div className="bbs_text_list">
+              <div className="bbs_text_item">
                 <Link to="">
                   <span className="link_title">
                     <em className="title">공지/소식 게시글 제목</em>
