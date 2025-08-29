@@ -1,103 +1,136 @@
 import React from "react";
+import api from "../../../../common/api/axios";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
 import "./../style/LandReserveStyle.css";
 
 const LandReserveConfirmPage = () => {
   const { state } = useLocation();
   const navigate = useNavigate();
 
-  if (!state) return <p>예약 정보가 없습니다.</p>;
+  if (!state || !state.formData) {
+    return <p>예약 신청 정보가 없습니다.</p>;
+  }
 
-  const {
-    name, phone, landType, animalNumber, guardianNumber, note,
-    selectedDate, selectedSlotId, timeSlots
-  } = state;
-  const timeLabel = timeSlots?.find(
-  (slot) => slot.timeSlotId === selectedSlotId
-  )?.label || "시간대 정보 없음";
+  const { formData, selectedDate, selectedSlotId, timeSlots } = state;
 
-    const basePrice = 2000;
+  const selectedSlot = timeSlots?.find((slot) => slot.timeSlotId === selectedSlotId);
 
-    // 추가 요금 계산
-    const additionalDogPrice = animalNumber > 1 ? (animalNumber - 1) * 1000 : 0;
-    const guardianPrice = guardianNumber * 1000;
+  // ✅ 프론트에서 금액 계산
+  const basePrice = 2000; // 반려견 1마리 기준
+  const animalNumber = Number(formData.animalNumber) || 0;
+  const reserveNumber = Number(formData.reserveNumber) || 0;
 
-    const additionalPrice = additionalDogPrice + guardianPrice;
+  const additionalPrice =
+    (animalNumber > 1 ? (animalNumber - 1) * 1000 : 0) + reserveNumber * 1000;
+  const totalPrice = basePrice + additionalPrice;
 
-    // 총 결제 금액
-    const totalAmount = basePrice + additionalPrice;
+  const basePriceDetail = `${basePrice}원 (반려견 1마리 기준)`;
+  const extraPriceDetail = `추가 반려견 수 : ${Math.max(animalNumber - 1, 0)}(마리) x 1000원 + 보호자 수 : ${reserveNumber}(명) x 1000원`;
 
-    // 설명 텍스트
-    const basePriceDetail = `기본 (${landType === "SMALL" ? "소형견" : "대형견"} x 1마리)`;
-    const extraPriceDetail = `추가반려견 ${animalNumber > 1 ? (animalNumber - 1) : 0}마리, (1,000원 x ${animalNumber > 1 ? (animalNumber - 1 + guardianNumber) : guardianNumber}) → ${additionalPrice.toLocaleString()}원`;
+  const handleConfirm = async () => {
+  try {
+    const memberNum = localStorage.getItem("memberNum");
+    if (!memberNum) return alert("로그인이 필요합니다.");
 
-  const handleReserveSubmit = async () => {
-    try {
-      const requestDto = {
-        reserveDto: {
-          memberNum: 1,
-          reserveType: 1,
-          reserveNumber: guardianNumber,
-          note,
-        },
-        landDto: {
-          landDate: selectedDate,
-          timeSlotId: selectedSlotId,
-          landType,
-          animalNumber,
-        },
-        volunteerDto: null,
-      };
+    // ✅ 토큰도 같이 가져오기
+    const token = localStorage.getItem("accessToken");
 
-      const response = await axios.post("/api/reserve", requestDto);
-      const reserveCode = response.data.reserveCode;
+    // 1) 프론트에서 한번 더 유효성 체크
+    if (!selectedSlotId) return alert("시간대를 선택해 주세요.");
+    if (!Number(formData.reserveNumber)) return alert("보호자 수를 입력해 주세요.");
 
-      navigate("/reserve/land/success", {
-        state: {
-          reserveCode: "1", 
-        },
-      });
-    } catch (error) {
-      console.error("예약 실패", error);
-      alert("예약 처리 중 오류가 발생했습니다.");
+    // 2) 서버에 보낼 payload (로그로 확인)
+    const payload = {
+      reserveDto: {
+        memberNum: Number(memberNum),         // 회원번호
+        reserveType: 1,                        // LAND
+        reserveNumber: Number(formData.reserveNumber), // 보호자 수
+        note: formData.note || "",
+      },
+      landDto: {
+        landType: formData.landType,           // "SMALL" | "LARGE"
+        animalNumber: Number(formData.animalNumber),
+        landDate: selectedDate,                // "YYYY-MM-DD"
+        timeSlotId: selectedSlotId,            // 선택한 슬롯 ID
+      },
+    };
+    console.log("[POST] /api/reserve payload:", payload);
+
+    const { data } = await api.post("/api/reserve", payload, {
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+
+    console.log("[POST] /api/reserve response:", data);
+    const reserveCode = data.reserveCode;
+
+    navigate("/reserve/land/success", {
+      state: {
+        reserveCode,
+        formData,
+        selectedSlot,
+        calculated: { basePrice, additionalPrice, totalPrice, basePriceDetail, extraPriceDetail },
+      },
+    });
+  } catch (err) {
+      console.error("예약 생성 실패", err.response?.data || err.message);
+      alert("예약 생성에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
   return (
-    <div className="land-confirm-page">
-      <h2 className="page-title">놀이터 예약 신청서</h2>
+    <div>
+      <h3 className="page-title">놀이터 예약 신청서</h3>
 
+      {/* 예약 신청서 */}
       <section className="info-section">
         <h3>예약 신청서</h3>
-        <table className="info-table">
+        <table className="table type2 responsive border">
+          <colgroup>
+            <col className="w30p" />
+            <col />
+          </colgroup>
           <tbody>
-            <tr><th>신청자명</th><td>{name}</td></tr>
-            <tr><th>연락처</th><td>{phone}</td></tr>
-            <tr><th>놀이터 유형</th><td>{landType === "SMALL" ? "소형견" : "대형견"}</td></tr>
-            <tr><th>반려견 수</th><td>{animalNumber}</td></tr>
-            <tr><th>사람 수</th><td>{guardianNumber}</td></tr>
-            <tr><th>예약 시간</th><td>{selectedDate} {timeLabel || "시간 정보 없음"}</td></tr>
-            <tr><th>비고</th><td>{note}</td></tr>
+            <tr><th scope="row">신청자명</th><td>{formData.name}</td></tr>
+            <tr><th scope="row">연락처</th><td>{formData.phone}</td></tr>
+            <tr><th scope="row">놀이터 유형</th><td>{formData.landType === "SMALL" ? "소형견" : "대형견"}</td></tr>
+            <tr><th scope="row">반려견 수</th><td>{animalNumber}</td></tr>
+            <tr><th scope="row">보호자 수</th><td>{reserveNumber}</td></tr>
+            <tr><th scope="row">예약 날짜</th><td>{selectedDate}</td></tr>
+            <tr><th scope="row">예약 시간</th><td>{selectedSlot?.label || "-"}</td></tr>
+            <tr><th scope="row">비고</th><td>{formData.note || "-"}</td></tr>
           </tbody>
         </table>
       </section>
 
+      {/* 결제 정보 */}
       <section className="payment-section">
         <h3>결제 정보</h3>
-        <table className="info-table">
+        <table className="table type2 responsive border">
+          <colgroup>
+            <col className="w30p" />
+            <col />
+          </colgroup>
           <tbody>
-            <tr><th>총 이용금액</th><td>{totalAmount}원</td></tr>
-            <tr><th>기본</th><td>{basePriceDetail} (2,000원 x 1) → 2,000원</td></tr>
-            <tr><th>추가</th><td>{extraPriceDetail} (1,000원 x {guardianNumber}) → {guardianNumber * 1000}원</td></tr>
-            <tr className="total-row"><th>총 결제금액</th><td><strong>{totalAmount.toLocaleString()}원</strong></td></tr>
+            <tr><th>기본금액</th><td>{basePriceDetail}</td></tr>
+            <tr><th>추가금액</th><td>{extraPriceDetail} → {additionalPrice}원</td></tr>
+            <tr className="total-row"><th>총 결제금액</th><td><strong>{totalPrice.toLocaleString()}원</strong></td></tr>
           </tbody>
         </table>
       </section>
 
-      <div className="form-action-buttons">
-        <button className="prev-button" type="button"  onClick={() => navigate(-1)}>이전</button>
-        <button className="next-button" type="button"  onClick={handleReserveSubmit}>다음</button>
+      {/* 버튼 */}
+      <div className="form_center_box">
+
+          <div className="temp_btn white md">
+            <button type="button" className="btn" onClick={() => navigate(-1)}>
+              이전
+            </button>
+          </div>
+          <div className="temp_btn md">
+            <button type="submit" className="btn" onClick={handleConfirm} >
+             예약하기
+            </button>
+          </div>
       </div>
     </div>
   );

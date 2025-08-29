@@ -1,0 +1,10 @@
+.pagination_box{display:flex;position:relative;margin-top:50px;gap:30px;justify-content:center}
+.pagination_box .page_btn{position:relative;width:40px;height:40px;border:1px solid #333;border-radius:6px;font-size:0;line-height:0"";color:transparent;}
+.pagination_box .page_btn:before{display:block;position:absolute;top:calc(50% - 12px);left:calc(50% - 12px);width:24px;height:24px;content:'';background-image:url("../../common/images/array.svg");}
+.pagination_box .page_btn.prev:before{transform:rotate(90deg);}
+.pagination_box .page_btn.next:before{transform:rotate(270deg);}
+.pagination_box .page_btn_box{display:block;position:relative;box-sizing:border-box;}
+.pagination_box .page_btn_box .page{display:inline-block;margin:0 2px;position:relative;width:40px;height:40px;background-color:transparent;vertical-align:top;box-sizing:border-box;text-align:center;border:none;font-size:18px;line-height:20px;color:#333;}
+.pagination_box .page_btn_box .page{transition-property:background-color,color;transition-duration:0.3s;transition-timing-function:ease-in-out;border-radius:8px;}
+.pagination_box .page_btn_box .page:hover{background-color:#246beb;color:#fff;}
+.pagination_box .page_btn_box .page.active{background-color:#246beb;color:#fff;}

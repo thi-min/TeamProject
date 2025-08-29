@@ -6,86 +6,188 @@ body {
 /* ---------- 봉사 예약 날짜 선택 페이지 ---------- */
 .volunteer-date-page {
   width: 100%;
-  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: flex-start;
   background-color: #fff;
   box-sizing: border-box;
   margin: 0;
   padding: 20px 0;
-  overflow-y: auto;
 }
-
+.volunteer-date-page h2 {
+  margin-bottom: 20px;
+  font-size: 20px;
+  font-weight: 600;
+  padding-left: 10px;
+  color: #333;
+}
 .calendar-wrapper {
   width: 100%;
-  max-width: 1600px;
+  max-width: 1200px;
   display: flex;
   justify-content: center;
   align-items: center;
   box-sizing: border-box;
 }
 
-.react-calendar {
+/* Volunteer 전용 react-calendar */
+.volunteer-date-page .react-calendar {
   width: 100%;
-  height: auto;
-  display: flex;
-  flex-direction: column;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 8px;
 }
 
-.react-calendar__month-view__weekdays {
+/* 네비게이션 */
+.volunteer-date-page .react-calendar__navigation {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.volunteer-date-page .react-calendar__navigation button {
+  min-width: 44px;
+  height: 36px;
+  border: 1px solid #e5e7eb;
+  background: #fff;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.volunteer-date-page .react-calendar__navigation button:enabled:hover {
+  background: #f3f4f6;
+}
+
+/* 요일 헤더 */
+.volunteer-date-page .react-calendar__month-view__weekdays {
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 6px 0;
+  font-weight: 700;
+  color: #374151;
   height: 60px;
   display: flex;
 }
-
-.calendar-wrapper .react-calendar__month-view__days {
+.weekday-disabled {
+  background: #f5f5f5;
+  color: #aaa;
+  pointer-events: none; /* 클릭 불가 */
+}
+/* 날짜 셀 영역 */
+.volunteer-date-page .react-calendar__month-view__days {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   grid-template-rows: repeat(6, 1fr);
 }
 
-.calendar-wrapper .react-calendar__tile {
-  height: 100px;
+/* 날짜 셀 */
+.volunteer-date-page .react-calendar__tile {
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 0;
+  border-radius: 2px;
+  transition: background 0.2s;
 }
 
-.react-calendar__tile.closed-date abbr {
+/* 비활성 */
+.volunteer-date-page .react-calendar__tile:disabled {
+  background: #f5f5f5;
+  color: #aaa;
+  cursor: not-allowed;
+  border-radius: 0;
+}
+
+/* hover */
+.volunteer-date-page .react-calendar__tile:hover {
+  background: #f3f4f6;
+}
+
+/* 오늘 */
+.volunteer-date-page .react-calendar__tile--now {
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+}
+
+/* 선택된 날짜 */
+.volunteer-date-page .react-calendar__tile--active {
+  background: #2563eb !important;
+  color: #fff !important;
+}
+
+/* 휴무일 날짜표시 지우기  */
+.volunteer-date-page .react-calendar__tile.closed-date abbr {
+  display: none;
+}
+/* 평일 날짜표시 지우기 */
+.volunteer-date-page .react-calendar__tile.weekday-disabled abbr {
+  display: none;
+}
+/* 예약마감일 날짜표시 지우기*/
+.volunteer-date-page .react-calendar__tile.full-booked abbr {
   display: none;
 }
 
-/* 버튼 영역 */
-.form-action-buttons {
-  display: flex;
-  justify-content: flex-start;
-  width: 100%;
-  gap: 10px;
-  margin-top: 400px;
+.volunteer-date-page .disabled-day {
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fecaca !important;
 }
 
-.form-action-buttons .prev-button,
-.form-action-buttons .next-button {
-  padding: 12px 24px;
-  font-size: 1rem;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  min-width: 100px;
+.volunteer-date-page .closed-text {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 700;
+  text-align: center;
+  margin-top: 4px;
+}
+
+.weekday-disabled {
+  background: #f5f5f5 !important;
+  color: #9ca3af !important;
+  cursor: not-allowed !important;
+}
+.disabled-text {
+  color: #6b7280;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* 휴무일(예약마감) */
+.closed-date {
+  background: #fef2f2 !important;
+  color: #b91c1c !important;
+  border: 1px solid #fecaca !important;
+}
+.closed-text {
+  color: #ef4444;
+  font-size: 12px;
   font-weight: bold;
-  color: #fff;
+  text-align: center;
 }
 
-.form-action-buttons .prev-button {
-  background-color: #6c757d;
+/* 정원마감 */
+.full-booked {
+  background: #f3f4f6 !important;
+  color: #9ca3af !important;
+  border: 1px solid #d1d5db !important;
+  cursor: not-allowed !important;
+}
+.full-text {
+  color: #9ca3af;
+  font-size: 12px;
+  font-weight: bold;
+  text-align: center;
 }
 
-.form-action-buttons .next-button {
-  background-color: #007bff;
-  margin-left: auto;
+/* 버튼 영역 */
+.my-btn-wrap {
+  display: flex;
+  justify-content: flex-end; /* 오른쪽 정렬 */
+  width: 100%;
 }
-
 
 /* ---------- 봉사 예약 신청 폼 페이지 ---------- */
 .volunteer-form-page {
@@ -98,9 +200,12 @@ body {
 }
 
 .form-title {
-  font-size: 24px;
   text-align: center;
   margin-bottom: 24px;
+  font-size: 24px;
+  font-weight: 600;
+  padding-left: 10px;
+  color: #333;
 }
 
 .required-info {
@@ -207,7 +312,7 @@ textarea {
   border-radius: 10px;
   background-color: #fff;
   font-size: 15px;
-  min-width: 280px;
+  min-width: 250px;
   cursor: pointer;
   transition: 0.2s ease-in-out;
 }

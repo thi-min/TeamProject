@@ -1,0 +1,221 @@
+import React, { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import BannerService from "../services/BannerService";
+import "../style/BannerManage.css";
+
+const AdminBannerDetailPage = () => {
+  const { bannerId } = useParams();
+  const navigate = useNavigate();
+  const [banner, setBanner] = useState(null);
+  const [formData, setFormData] = useState({});
+  const [file, setFile] = useState(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  // 상세 조회
+  const fetchBannerDetail = async () => {
+    try {
+      const { data } = await BannerService.getById(bannerId);
+      setBanner(data);
+    } catch (err) {
+      console.error("배너 상세 조회 실패", err);
+      alert("상세 정보를 불러오지 못했습니다.");
+    }
+  };
+
+  useEffect(() => {
+    fetchBannerDetail();
+  }, [bannerId]);
+
+  // 수정 모드 진입
+  const handleEdit = () => {
+    setFormData(banner);
+    setIsEditing(true);
+  };
+
+  // 수정 저장
+  const handleUpdate = async () => {
+    try {
+      const requestData = new FormData();
+      requestData.append(
+        "data",
+        new Blob([JSON.stringify(formData)], { type: "application/json" })
+      );
+      if (file) requestData.append("file", file);
+
+      await BannerService.update(banner.bannerId, requestData);
+      alert("수정 완료");
+      setIsEditing(false);
+      fetchBannerDetail(); // 최신 데이터 다시 로드
+    } catch (err) {
+      console.error("수정 실패", err);
+      alert("수정 실패");
+    }
+  };
+
+  // 삭제
+  const handleDelete = async () => {
+    if (!window.confirm("정말 삭제하시겠습니까?")) return;
+    try {
+      await BannerService.delete(bannerId);
+      alert("삭제되었습니다.");
+      navigate("/admin/banner");
+    } catch (err) {
+      console.error("삭제 실패", err);
+      alert("삭제 실패");
+    }
+  };
+
+  if (!banner) return <p>로딩 중...</p>;
+
+  return (
+    <div className="admin-banner-detail">
+      <h2>배너 상세</h2>
+
+      {!isEditing ? (
+        // ---------------------- 상세보기 모드 ----------------------
+        <table className="table type2 responsive border">
+          <tbody>
+            <tr><th>ID</th><td>{banner.bannerId}</td></tr>
+            <tr><th>제목</th><td>{banner.title}</td></tr>
+            <tr><th>부제목</th><td>{banner.subTitle || "-"}</td></tr>
+            <tr><th>노출 기간</th><td>{banner.startDate} ~ {banner.endDate}</td></tr>
+            <tr>
+              <th>이미지</th>
+              <td>
+                <img
+                  src={`http://localhost:8090/banner-uploads/${banner.imageUrl}`}
+                  alt={banner.altText || "배너 이미지"}
+                  style={{ maxWidth: "300px", borderRadius: "8px" }}
+                />
+              </td>
+            </tr>
+            <tr><th>이미지 설명</th><td>{banner.altText || "-"}</td></tr>
+            <tr><th>링크 URL</th><td>{banner.linkUrl || "-"}</td></tr>
+            <tr><th>노출 여부</th><td>{banner.visible ? "활성" : "비활성"}</td></tr>
+          </tbody>
+        </table>
+      ) : (
+        // ---------------------- 수정 모드 ----------------------
+        <form className="banner-edit-form">
+          <table className="table type2 responsive border">
+            <tbody>
+              <tr>
+                <th>제목</th>
+                <td>
+                  <input
+                    type="text"
+                    value={formData.title || ""}
+                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>부제목</th>
+                <td>
+                  <input
+                    type="text"
+                    value={formData.subTitle || ""}
+                    onChange={(e) => setFormData({ ...formData, subTitle: e.target.value })}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>노출 기간</th>
+                <td>
+                  <input
+                    type="date"
+                    value={formData.startDate || ""}
+                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
+                  />
+                  <span> ~ </span>
+                  <input
+                    type="date"
+                    value={formData.endDate || ""}
+                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>이미지</th>
+                <td>
+
+                    {/* 새 이미지 업로드 */}
+                    <input
+                    type="file"
+                    onChange={(e) => setFile(e.target.files[0])}
+                    />
+                    <p style={{ fontSize: "12px", color: "#666" }}>
+                    새 이미지를 선택하지 않으면 기존 이미지가 유지됩니다.
+                    </p>
+                </td>
+              </tr>
+              <tr>
+                <th>이미지 설명</th>
+                <td>
+                  <input
+                    type="text"
+                    value={formData.altText || ""}
+                    onChange={(e) => setFormData({ ...formData, altText: e.target.value })}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>링크 URL</th>
+                <td>
+                  <input
+                    type="text"
+                    value={formData.linkUrl || ""}
+                    onChange={(e) => setFormData({ ...formData, linkUrl: e.target.value })}
+                  />
+                </td>
+              </tr>
+              <tr>
+                <th>노출 여부</th>
+                <td>
+                  <select
+                    value={formData.visible}
+                    onChange={(e) => setFormData({ ...formData, visible: e.target.value === "true" })}
+                  >
+                    <option value="true">활성</option>
+                    <option value="false">비활성</option>
+                  </select>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </form>
+      )}
+
+      {/* 버튼 영역 */}
+      <div className="form_center_box">
+        <div className="temp_btn white md">
+          <button type="button" className="btn" onClick={() => navigate(-1)}>목록보기</button>
+        </div>
+
+        <div className="right_btn_box">
+          {!isEditing ? (
+            <>
+              <div className="temp_btn md">
+                <button type="button" className="btn" onClick={handleEdit}>수정</button>
+              </div>
+              <div className="temp_btn danger md">
+                <button type="button" className="btn" onClick={handleDelete}>삭제</button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="temp_btn md">
+                <button type="button" className="btn" onClick={handleUpdate}>저장</button>
+              </div>
+              <div className="temp_btn white md">
+                <button type="button" className="btn" onClick={() => setIsEditing(false)}>취소</button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AdminBannerDetailPage;

@@ -1,0 +1,90 @@
+.admin-reserve-page {
+  width: 100%;
+  margin: 0 auto;
+  padding: 30px;
+  background: #fff;
+  font-family: "Noto Sans KR", sans-serif;
+}
+
+.admin-reserve-page h2 {
+  font-size: 22px;
+  font-weight: bold;
+  margin-bottom: 25px;
+}
+
+/* 🔎 검색 영역 */
+.search-bar {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 25px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background: #fafafa;
+}
+
+.search-bar input,
+.search-bar select {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.search-bar button {
+  padding: 8px 16px;
+  background: #007bff;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.search-bar button:hover {
+  background: #0056b3;
+}
+
+/* 📋 예약 목록 테이블 */
+.reservation-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+.reservation-table th,
+.reservation-table td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: center;
+}
+
+.reservation-table th {
+  background: #f8f9fa;
+  font-weight: 600;
+}
+
+.reservation-table tr:nth-child(even) {
+  background: #fdfdfd;
+}
+
+.reservation-table tr:hover {
+  background: #f1f7ff;
+}
+
+.ui-select {
+  height: 36px;
+  padding: 6px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 15px;
+  line-height: 1.2;
+
+  background-image: url("data:image/svg+xml;utf8,<svg fill='black' height='24' viewBox='0 0 24 24' width='24'><path d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 14px;
+}

@@ -24,7 +24,6 @@ const routes = {
     root: { path: "/land", label: "동물 놀이터" },
     info: { path: "/land/info", label: "놀이터 소개" },
     gallery: { path: "/land/gallery", label: "놀이터 둘러보기" },
-    reserve: { path: "/land/reserve", label: "예약하기" }, // USER 전용
   },
 
   // 게시판
@@ -46,12 +45,16 @@ const routes = {
     findpw: { path: "/find-pw", label: "비밀번호 찾기" },
     changepw: { path: "/member/update-password", label: "비밀번호 변경" },
     mypage: { path: "/member/mypage", label: "마이페이지" },
+    reserves: { path: "/member/mypage/reserves", label: "예약 내역 조회" },
+    landReserveDetail: { path: "/member/mypage/reserves/land/:reserveCode", label: "놀이터 예약 상세보기" },
+    volunteerReserveDetail: { path: "/member/mypage/reserves/volunteer/:reserveCode", label: "봉사 예약 상세보기"},
     memberdata: { path: "/member/mypage/memberdata", label: "회원정보" },
     update: {
       path: "/member/mypage/memberdata/update",
       label: "회원정보 수정",
     },
     delete: { path: "/member/mypage/update/delete", label: "회원 탈퇴" },
+
   },
 
   //카카오 관련
@@ -69,20 +72,38 @@ const routes = {
       build: (id) => `/admin/membersList/${id}`,
       label: "회원 상세",
     },
+    timeSlotManage: { path: "/admin/timeslots", label: "시간대 관리" },
+    closedDayManage: { path: "/admin/closedday", label: "휴무일 관리"}, 
+    landReserveManage: { path: "/admin/reserve/land", label: "놀이터 예약 관리" },
+    volunteerReserveManage: { path: "/admin/reserve/volunteer", label: "봉사 예약 관리" },
+    landReserveDetail: { path: "/admin/reserve/land/:reserveCode", label: "놀이터 예약 상세보기" },
+    volunteerReserveDetail: { path: "/admin/reserve/volunteer/:reserveCode", label: "봉사 예약 상세보기" }, 
+    bannerManage: { path: "/admin/banner", label: "배너 관리"},
+    bannerCreate: { path: "/admin/banner/create", label: "배너 생성"},
+    bannerDetail: { path: "/admin/banner/:bannerId", label: "배너 수정 및 삭제"}
+
   },
 
-  // 예약
-  reservation: {
-    list: { path: "/reservation/list", label: "예약 목록" },
-    create: { path: "/reservation/create", label: "예약 생성" },
-    detail: (id) => `/reservation/${id}`,
+  //예약
+  reserve: {
+    root:   { path: "/reserve", label: "예약하기" },
+    land: {
+      date:    { path: "/reserve/land/date",    label: "날짜/시간 선택" }, 
+      form:    { path: "/reserve/land/form",    label: "놀이터 예약" },
+      confirm: { path: "/reserve/land/confirm", label: "예약 확인" },
+      success: { path: "/reserve/land/success", label: "예약 완료" },
+    },
+    volunteer: {
+      date:    { path: "/reserve/volunteer/date",    label: "날짜/시간 선택" },
+      form:    { path: "/reserve/volunteer/form",    label: "봉사 신청" },
+      confirm: { path: "/reserve/volunteer/confirm", label: "신청 확인" },
+      success: { path: "/reserve/volunteer/success", label: "신청 완료" },
+    },
   },
-
   // 봉사활동
   volunteer: {
     list: { path: "/volunteer/list", label: "봉사 목록" },
     detail: (id) => `/volunteer/${id}`,
-    apply: { path: "/volunteer/apply", label: "봉사 신청" },
   },
 
   // 404 등 기타
