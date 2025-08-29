@@ -24,7 +24,13 @@ const BannerListPage = () => {
 
   return (
     <div className="admin-banner-page">
-      <h3>배너 관리</h3>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon banner"></div>
+          <div className="form_title">배너 관리</div>
+        </div>
+      </div>
+      <h3>배너 목록</h3>
 
       {/* 결과 테이블 */}
       <table className="table type2 responsive border">

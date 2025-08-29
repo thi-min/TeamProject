@@ -2,7 +2,6 @@
   width: 100%;
   margin: 0 auto;
   padding: 30px;
-  background: #fff;
   font-family: "Noto Sans KR", sans-serif;
 }
 
@@ -10,6 +9,12 @@
   font-size: 22px;
   font-weight: bold;
   margin-bottom: 25px;
+}
+
+.admin-reserve-detail h3 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 
 /* 🔎 검색 영역 */

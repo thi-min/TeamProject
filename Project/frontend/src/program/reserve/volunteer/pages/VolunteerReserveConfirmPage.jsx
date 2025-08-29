@@ -65,10 +65,15 @@ const VolunteerReserveConfirmPage = () => {
 
   return (
     <div>
-      <h3 className="page-title">봉사활동 신청서</h3>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon land"></div>
+          <div className="form_title">봉사 예약 신청</div>
+        </div>
+      </div>
 
-      <section className="info-section">
-        <h3>봉사 신청서</h3>
+      <div className="info-section">
+      <h3>봉사활동 신청서</h3>
         <table className="table type2 responsive border">
           <colgroup>
             <col className="w30p" />
@@ -84,7 +89,7 @@ const VolunteerReserveConfirmPage = () => {
             <tr><th>비고</th><td>{formData.note || "-"}</td></tr>
           </tbody>
         </table>
-      </section>
+      </div>
 
       <div className="form_center_box">
 

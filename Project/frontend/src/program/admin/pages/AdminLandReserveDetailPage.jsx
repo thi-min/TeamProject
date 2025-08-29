@@ -48,7 +48,14 @@ const AdminLandReserveDetailPage = () => {
 
   return (
     <div className="admin-reserve-detail">
-      <h3>놀이터 예약 상세</h3>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon land"></div>
+          <div className="form_title">놀이터 예약 상세</div>
+        </div>
+      </div>
+      <h3>놀이터 예약 정보</h3>
+      <div className="form_wrap">
       <table className="table type2 responsive border">
         <colgroup>
           <col className="w20p" />
@@ -76,8 +83,9 @@ const AdminLandReserveDetailPage = () => {
           </tr>
         </tbody>
       </table>
-
+      </div>
       <h3>결제 정보</h3>
+      <div className="form_wrap">
       <table className="table type2 responsive border">
         <colgroup>
           <col className="w20p" />
@@ -89,7 +97,7 @@ const AdminLandReserveDetailPage = () => {
           <tr><th>총 결제금액</th><td><b>{detail.totalPrice}원</b></td></tr>
         </tbody>
       </table>
-
+      </div>
       <div className="form_center_box">
           <div className="temp_btn white md">
             <button type="button" className="btn" onClick={() => navigate(-1)}>

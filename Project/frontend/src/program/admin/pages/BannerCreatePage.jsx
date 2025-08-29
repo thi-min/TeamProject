@@ -63,6 +63,12 @@ const BannerCreatePage = () => {
 
   return (
     <div className="admin-banner-page">
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon banner"></div>
+          <div className="form_title">배너 등록</div>
+        </div>
+      </div>
       <h3>배너 등록</h3>
       
       <div className="required-info">

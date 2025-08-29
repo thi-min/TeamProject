@@ -49,7 +49,13 @@ const AdminVolunteerReserveDetailPage = () => {
 
   return (
     <div className="admin-reserve-detail">
-      <h3>봉사 예약 상세</h3>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon vol"></div>
+          <div className="form_title">봉사 예약 상세</div>
+        </div>
+      </div>
+      <h3>봉사 예약 정보</h3>
       <table className="table type2 responsive border">
          <colgroup>
           <col className="w20p" />

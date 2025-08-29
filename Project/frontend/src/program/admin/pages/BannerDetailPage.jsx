@@ -69,7 +69,13 @@ const AdminBannerDetailPage = () => {
 
   return (
     <div className="admin-banner-detail">
-      <h3>배너 상세</h3>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon banner"></div>
+          <div className="form_title">배너 상세</div>
+        </div>
+      </div>
+      <h3>배너 상세 정보</h3>
 
       {!isEditing ? (
         // ---------------------- 상세보기 모드 ----------------------

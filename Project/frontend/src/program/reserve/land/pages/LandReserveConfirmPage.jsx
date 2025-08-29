@@ -79,10 +79,15 @@ const LandReserveConfirmPage = () => {
 
   return (
     <div>
-      <h3 className="page-title">놀이터 예약 신청서</h3>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon land"></div>
+          <div className="form_title">놀이터 예약 신청</div>
+        </div>
+      </div>
 
       {/* 예약 신청서 */}
-      <section className="info-section">
+      <div className="info-section">
         <h3>예약 신청서</h3>
         <table className="table type2 responsive border">
           <colgroup>
@@ -100,10 +105,10 @@ const LandReserveConfirmPage = () => {
             <tr><th scope="row">비고</th><td>{formData.note || "-"}</td></tr>
           </tbody>
         </table>
-      </section>
+      </div>
 
       {/* 결제 정보 */}
-      <section className="payment-section">
+      <div className="payment-section">
         <h3>결제 정보</h3>
         <table className="table type2 responsive border">
           <colgroup>
@@ -116,7 +121,7 @@ const LandReserveConfirmPage = () => {
             <tr className="total-row"><th>총 결제금액</th><td><strong>{totalPrice.toLocaleString()}원</strong></td></tr>
           </tbody>
         </table>
-      </section>
+      </div>
 
       {/* 버튼 */}
       <div className="form_center_box">

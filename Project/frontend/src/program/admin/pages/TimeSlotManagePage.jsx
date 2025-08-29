@@ -206,7 +206,12 @@ const TimeSlotManagePage = () => {
 
   return (
     <div className="tspage">
-      <h3 className="ts-title">시간대 운영 관리</h3>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon timeslot"></div>
+          <div className="form_title">시간대 운영 관리</div>
+        </div>
+      </div>
 
       {/* 탭 */}
       <div className="ts-tabs" style={{ marginBottom: "1rem" }}>

@@ -77,7 +77,13 @@ useEffect(() => {
 
   return (
     <div className="admin-reserve-page">
-      <h3>놀이터 예약 관리</h3>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon land"></div>
+          <div className="form_title">놀이터 예약 관리</div>
+        </div>
+      </div>
+      <h3>놀이터 예약 목록</h3>
 
       {/* 검색 영역 */}
       <div className="search-bar">

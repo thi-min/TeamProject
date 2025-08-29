@@ -97,8 +97,13 @@ const VolunteerReserveDatePage = () => {
 
   return (
     <div className="volunteer-date-page">
-      <h2>봉사활동 예약 신청</h2>
-      <p>예약하실 날짜를 선택해주세요 (※ 주말만 가능)</p>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon vol"></div>
+          <div className="form_title">봉사 예약 신청</div>
+        </div>
+      </div>
+      <h3>예약하실 날짜를 선택해주세요 (※ 주말만 가능)</h3>
 
       <div className="calendar-wrapper">
         {loading ? (
