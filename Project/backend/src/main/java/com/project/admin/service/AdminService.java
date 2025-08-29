@@ -6,8 +6,8 @@ import com.project.admin.dto.AdminMemberDetailResponseDto;
 import com.project.admin.dto.AdminMemberListResponseDto;
 import com.project.admin.dto.AdminMemberUpdateRequestDto;
 import com.project.admin.dto.AdminPasswordUpdateRequestDto;
-import com.project.common.dto.PageRequestDto;
-import com.project.common.dto.PageResponseDto;
+import com.project.member.dto.MemberPageRequestDto;
+import com.project.member.dto.MemberPageResponseDto;
 import com.project.member.entity.MemberState;
 
 public interface AdminService {
@@ -26,7 +26,8 @@ public interface AdminService {
     //회원 목록 조회 (관리자용) 
     //여러명의 회원(각각 기본키 보유)을 한번에 조회하기 떄문에 List사용
     //페이징 + 검색까지 구현
-    PageResponseDto<AdminMemberListResponseDto> getMemberList(PageRequestDto pageRequestDto);
+    MemberPageResponseDto<AdminMemberListResponseDto> getMemberList(MemberPageRequestDto req);
+
     
     //회원 정보 상세 조회(관리자용)
     AdminMemberDetailResponseDto adminMemberDetailView(Long memberNum);

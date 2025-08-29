@@ -1,8 +1,11 @@
 package com.project.admin.controller;
 
+
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -21,9 +24,9 @@ import com.project.admin.dto.AdminPasswordUpdateRequestDto;
 import com.project.admin.entity.AdminEntity;
 import com.project.admin.repository.AdminRepository;
 import com.project.admin.service.AdminService;
-import com.project.common.dto.PageRequestDto;
-import com.project.common.dto.PageResponseDto;
 import com.project.common.jwt.JwtTokenProvider;
+import com.project.member.dto.MemberPageRequestDto;
+import com.project.member.dto.MemberPageResponseDto;
 import com.project.member.entity.MemberState;
 
 import lombok.RequiredArgsConstructor;
@@ -37,9 +40,10 @@ public class AdminController {
 	private final AdminRepository adminRepository;
 	private final JwtTokenProvider jwtTokenProvider;
 	
-	//관리자 로그인
+	//관리자 로그인 
 	//param : dto 관리자 로그인 요청 정보(아이디, 비밀번호)
 	//return : 관리자 정보 + 로그인 성공 메시지 + 토큰
+	// ✅ 컨트롤러는 DTO 수신 → 서비스 위임 → 결과만 반환(얇게 유지)
 	@PostMapping("login")
 	public AdminLoginResponseDto login(@RequestBody AdminLoginRequestDto dto) {
 		
@@ -62,7 +66,6 @@ public class AdminController {
 
 	    return AdminLoginResponseDto.builder()
 	            .adminId(admin.getAdminId())
-	            .adminEmail(admin.getAdminEmail())
 	            .accessToken(accessToken)	// ⬅️ 발급한 토큰 포함
 	            .refreshToken(refreshToken)
 	            .message("관리자 로그인 성공")
@@ -95,22 +98,48 @@ public class AdminController {
 	//관리자 비밀번호 변경
 	//param dto 비밀번호 변경 요청 정보(아이디, 현재 비밀번호, 새 비밀번호)
 	//return 성공 메시지
-	@PutMapping("/update-password")
-	public ResponseEntity<String> updatePassword(@RequestBody AdminPasswordUpdateRequestDto dto){
-		adminService.updatePassword(dto.getAdminId(), dto);
-		return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+//	@PutMapping("/updatePw")
+//	public ResponseEntity<String> updatePassword(@RequestBody AdminPasswordUpdateRequestDto dto){
+//		adminService.updatePassword(dto.getAdminId(), dto);
+//		return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
+//	}
+	@PutMapping("/updatePw")
+	public ResponseEntity<String> updatePassword(@RequestBody AdminPasswordUpdateRequestDto dto,
+	                                             Authentication authentication) {
+	    String adminId = authentication.getName(); // ✅ 토큰 subject 사용
+	    adminService.updatePassword(adminId, dto);
+	    return ResponseEntity.ok("비밀번호가 성공적으로 변경되었습니다.");
 	}
-	
+
+	// ✅ 전체 회원목록 조회(페이징 + 검색)
+//    @GetMapping("/membersList")
+//    public ResponseEntity<MemberPageResponseDto<AdminMemberListResponseDto>> getPagedMembers(
+//            @ModelAttribute MemberPageRequestDto memberPageRequestDto // 바인딩 명시
+//    ){
+//    	MemberPageResponseDto<AdminMemberListResponseDto> page = adminService.getMemberList(memberPageRequestDto);
+//        return ResponseEntity.ok(page);
+//    }
+    
+	@GetMapping("/membersList")
+	public ResponseEntity<MemberPageResponseDto<AdminMemberListResponseDto>> getPagedMembers(
+	        @ModelAttribute MemberPageRequestDto pageRequestDto // ← 여기를 기준으로
+	) {
+	    MemberPageResponseDto<AdminMemberListResponseDto> page =
+	            adminService.getMemberList(pageRequestDto); // ← 동일 변수명 사용
+	    return ResponseEntity.ok(page);
+	}
+
+    
 	//전체 회원목록 조회(페이징 + 검색 포함)
 	//param pageRequestDto 페이지번호, 크기, 검색키워드
 	//return pageResponseDto 형태로 페이지 정보 + 회원 목록 반환
-	@GetMapping("/membersList")
-	public ResponseEntity<PageResponseDto<AdminMemberListResponseDto>> getPagedMembers(PageRequestDto pageRequestDto){
-		PageResponseDto<AdminMemberListResponseDto> page = adminService.getMemberList(pageRequestDto);
-		
-		return ResponseEntity.ok(page);
-	}
-	
+//	@GetMapping("/membersList")
+//	public ResponseEntity<PageResponseDto<AdminMemberListResponseDto>> getPagedMembers(MemberPageRequestDto pageRequestDto){
+//		PageResponseDto<AdminMemberListResponseDto> page = adminService.getMemberList(pageRequestDto);
+//		
+//		return ResponseEntity.ok(page);
+//	}
+//	
 	//회원 상세 조회(관리자용
 	//param : memberNum 조회할 회원 번호
 	//return : AdminMemberDetailResponseDto

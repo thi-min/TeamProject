@@ -1,151 +1,189 @@
 package com.project.member.service;
 
-import java.io.IOException;
-import java.util.Optional;
-
+import com.project.member.dto.KakaoUserInfoDto;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestTemplate;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.project.common.jwt.JwtTokenProvider;
-import com.project.member.dto.KakaoUserInfoDto;
-import com.project.member.dto.MemberLoginResponseDto;
-import com.project.member.entity.MemberEntity;
-import com.project.member.repository.MemberRepository;
+import java.util.Map;
 
-import lombok.RequiredArgsConstructor;
-
+/**
+ * Kakao OAuth2 연동 서비스 구현
+ *
+ * 핵심 포인트
+ * - KOE320(invalid_grant) 회피:
+ *   1) 토큰 교환 시 redirect_uri가 "인가 코드 발급에 사용된 것"과 '완전히' 동일해야 함
+ *      (ex. http://127.0.0.1:3000/oauth/kakao/callback)
+ *   2) React StrictMode로 콜백이 2번 호출되면 code가 재사용되어 실패 → 프론트에서 중복호출 가드 필요
+ * - Kakao 앱에 Client Secret이 "사용"으로 되어 있으면 반드시 함께 전송해야 함.
+ */
+@Slf4j
 @Service
 @RequiredArgsConstructor
-public class KakaoApiServiceImpl implements KakaoApiService{
-	
-	private final ObjectMapper objectMapper;
-	private final RestTemplate restTemplate;
-	
-	//application.properties에서 주입받는 설정 값들
-    @Value("${kakao.client-id}")
+public class KakaoApiServiceImpl implements KakaoApiService {
+
+    // ✅ RestTemplate를 간단히 내부 생성(Bean 주입 형태도 무방)
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    // =========================================
+    // 🔧 application.properties / yml 설정 값
+    //    (네가 기존에 쓰던 키 이름 그대로 유지)
+    // =========================================
+    @Value("${kakao.client-id}")                 // ex) REST API 키
     private String clientId;
-    //@Value("${kakao.redirect-uri}")
-    //private String redirectUri;
-    @Value("${kakao.token-uri}")
-    private String tokenUri;
-    @Value("${kakao.user-info-uri}")
-    private String userInfoUri;
-    
-    //카카오로부터 전달받은 인가코드를 통해 access_token을 요청하는 메서드
-    //param : code 카카오 로그인 후 전달받은 인가 코드(REST API)
-    //return : access token 문자열
-    //throws : Exception JSON 파싱 실패시 예외 발생
-    public String getAccessToken(String code) throws Exception{
 
-    	try {
-    		System.out.println("🧪 getAccessToken 파라미터 확인");
-    		System.out.println("🧪 code: " + code);
+    // ⚠ redirect-uri는 "카카오 개발자 콘솔에 등록된 것"과 '완전히 동일'해야 한다.
+    //    (localhost vs 127.0.0.1, http vs https, 포트/경로 한 글자라도 다르면 실패)
+    @Value("${kakao.redirect-uri}")
+    private String redirectUri;
 
-    		
-	    	//요청 헤더 설정
-	    	HttpHeaders headers = new HttpHeaders();
-	    	headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-	    	
-	    	//요청 파라미터 설정
-	    	MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
-	    	params.add("grant_type", "authorization_code");		//고정값
-	    	params.add("client_id", clientId);					//카카오 REST API 키값
-	    	params.add("redirect_uri", "http://localhost:8090/oauth/kakao/callback");
-	    	//params.add("redirect_uri", redirectUri);			//카카오에 등록된 리다이렉트 URI
-	    	params.add("code", code);							//인가코드
-	    	
-	    	//요청 생성
-	    	HttpEntity<MultiValueMap<String, String>> request = new HttpEntity<>(params, headers);
-	    	
-	    	//POST 요청 보내고 응답 받기
-	    	ResponseEntity<String> response = restTemplate.postForEntity(tokenUri, request, String.class);
-	    	System.out.println("응답: " + response);
-	    	System.out.println("본문: " + response.getBody());
-	    	
-	    	//응답 본문이 비어있는경우 예외처리
-	    	String responseBody = response.getBody();
-	    	if(responseBody == null) {
-	    		throw new RuntimeException("카카오로부터 받은 응답이 비어 있습니다.");
-	    	}
-	    	
-	    	//응답 JSON 파싱
-	    	JsonNode json = objectMapper.readTree(response.getBody());
-	    	
-	    	//access_token 추출 후 반환
-	    	return json.get("access_token").asText();
-	    	
-    	}catch(HttpClientErrorException  | HttpServerErrorException e) {
-    		System.out.println("🔴 카카오 API 오류 코드: " + e.getStatusCode());
-    	    System.out.println("🔴 카카오 API 오류 내용: " + e.getResponseBodyAsString());
-    		throw new RuntimeException("카카오 API 요청 실패: " + e.getResponseBodyAsString(), e);
-    	}catch(IOException e) {
-    		throw new RuntimeException("카카오 응답파싱 중 오류 발생", e);
-    	}catch(Exception e) {
-    		e.printStackTrace(); // ✅ 콘솔에 실제 원인 출력
-    		throw new RuntimeException("알 수 없는 오류 발생", e);
-    	}
+    // 카카오 토큰 엔드포인트 (기본값을 안전하게 제공)
+    @Value("${kakao.token-uri:https://kauth.kakao.com/oauth/token}")
+    private String tokenUrl;
+
+    // 카카오 유저정보 엔드포인트 (기본값 제공)
+    @Value("${kakao.user-info-uri:https://kapi.kakao.com/v2/user/me}")
+    private String userInfoUrl;
+
+    // ✅ (선택) Kakao 앱에서 Client Secret을 "사용"으로 설정했다면 반드시 필요
+    //    사용하지 않을 경우 properties에 키를 비워두면 됨(기본 빈 문자열).
+    @Value("${kakao.client-secret:}")
+    private String clientSecret;
+
+    // ============================
+    // 🔑 인가코드 → Access Token
+    // ============================
+    @Override
+    public String getAccessToken(String code) throws Exception {
+        try {
+            // 1) 요청 헤더 (x-www-form-urlencoded)
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+            headers.setAccept(java.util.List.of(MediaType.APPLICATION_JSON));
+
+            // 2) 요청 바디
+            MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+            form.add("grant_type", "authorization_code");
+            form.add("client_id", clientId);              // ← null/빈값이면 반드시 실패
+            form.add("redirect_uri", redirectUri);        // ← 프론트/콘솔과 '한 글자도' 다르면 실패(KOE320)
+            form.add("code", code);
+
+            // ⚠ Kakao 앱에서 Client Secret 사용 중이라면 반드시 포함
+            if (clientSecret != null && !clientSecret.isBlank()) {
+                form.add("client_secret", clientSecret);
+            }
+
+            HttpEntity<MultiValueMap<String, String>> req = new HttpEntity<>(form, headers);
+
+            // 3) 토큰 요청
+            ResponseEntity<Map> res = restTemplate.postForEntity(tokenUrl, req, Map.class);
+
+            if (res.getStatusCode() != HttpStatus.OK || res.getBody() == null) {
+                throw new RuntimeException("Kakao token http error: " + res.getStatusCode());
+            }
+
+            // 4) access_token 추출
+            Object at = res.getBody().get("access_token");
+            if (at == null) {
+                // 카카오가 OK를 주더라도 바디에 에러 구조일 수 있으므로 바디 전체 로깅
+                log.error("[KAKAO TOKEN ERROR] body={}", res.getBody());
+                throw new RuntimeException("Kakao token error: " + res.getBody());
+            }
+
+            // 디버깅용 참고 로그 (운영에서는 레벨 조정 권장)
+            log.debug("[KAKAO TOKEN OK] redirectUri={}, hasSecret={}, scope={}",
+                    redirectUri, (clientSecret != null && !clientSecret.isBlank()),
+                    res.getBody().get("scope"));
+
+            return String.valueOf(at);
+
+        } catch (HttpStatusCodeException e) {
+            // 카카오 에러 바디 그대로 노출 → 프론트/로그에서 원인 파악 쉬움 (ex. KOE320)
+            log.error("[KAKAO TOKEN EXCEPTION] status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new Exception("Kakao token request failed: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("[KAKAO TOKEN EXCEPTION] {}", e.getMessage(), e);
+            throw e;
+        }
     }
-    
-    //access_token을 사용해 카카오 사용자 정보를 조회하는 메서드
-    //param : accessToken 카카오로부터 받은 access_token
-    //return : 사용자 정보(kakaoUserInfoDto) 객체
-    //throws : Exception JSON 파싱 실패시 예외 발생
-    public KakaoUserInfoDto getUserInfo(String accessToken) throws Exception{
-    	System.out.println("🟢 사용자 정보 조회용 AccessToken: " + accessToken); // 추가
-    	
-    	//요청 헤더 설정
-    	HttpHeaders headers = new HttpHeaders();
-    	//Authorization: Bearer {access_token}
-    	headers.setBearerAuth(accessToken);		
-    	headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-    	
-    	//요청생성
-    	HttpEntity<?> entity = new HttpEntity<>(headers);
-    	
-    	//사용자 정보 요청
-    	ResponseEntity<String> response = restTemplate.exchange(userInfoUri, HttpMethod.GET, entity, String.class);
-    	System.out.println("🟢 사용자 정보 응답: " + response);
-        System.out.println("🟢 사용자 정보 바디: " + response.getBody());
-    	
-    	//응답 JSON 파싱
-    	JsonNode json = objectMapper.readTree(response.getBody());
-    	
-    	//사용자 정보 객체 생성 및 값 설정
-    	KakaoUserInfoDto userInfo = new KakaoUserInfoDto();
-    	userInfo.setKakaoId(json.get("id").asText());	//카카오 ID
-    	
-    	//kakao_account 내부 정보 파싱(카카오계정(이메일), 이름, 성별, 생일, 출생연도, 카카오계정(전화번호))
-    	// ✅ kakao_account 노드에서 사용자 정보 파싱
-    	JsonNode account = json.get("kakao_account");
-    	
-    	if (account != null) {
-    	    if (account.has("email")) userInfo.setEmail(account.get("email").asText()); // 카카오 이메일
-    	    if (account.has("gender")) userInfo.setGender(account.get("gender").asText()); // 성별
-    	    if (account.has("birthday")) userInfo.setBirthday(account.get("birthday").asText()); // 생일 MMDD
-    	    if (account.has("birthyear")) userInfo.setBirthyear(account.get("birthyear").asText()); // 출생연도 YYYY
-            
-    	    // 닉네임은 profile 하위에 있음
-    	    JsonNode profile = account.get("profile");
-    	    if (profile != null && profile.has("nickname")) {
-    	        userInfo.setNickname(profile.get("nickname").asText()); // 사용자 닉네임
-    	    }
-    	}
 
-    	return userInfo;	//kakaoUserInfoDto
+    // ============================
+    // 🧑 Access Token → 사용자 정보
+    // ============================
+    @Override
+    public KakaoUserInfoDto getUserInfo(String accessToken) throws Exception {
+        try {
+            // 1) 요청 헤더
+            HttpHeaders headers = new HttpHeaders();
+            headers.setBearerAuth(accessToken);                  // Authorization: Bearer {token}
+            headers.setAccept(java.util.List.of(MediaType.APPLICATION_JSON));
+            HttpEntity<Void> req = new HttpEntity<>(headers);
+
+            // 2) 사용자 정보 요청
+            ResponseEntity<Map> res = restTemplate.exchange(userInfoUrl, HttpMethod.GET, req, Map.class);
+            if (res.getStatusCode() != HttpStatus.OK || res.getBody() == null) {
+                throw new RuntimeException("Kakao userinfo http error: " + res.getStatusCode());
+            }
+
+            Map body = res.getBody();
+
+            // ========== 필드 파싱 ==========
+            // id (필수)
+            String kakaoId = body.get("id") == null ? null : String.valueOf(body.get("id"));
+
+            // kakao_account (옵션 필드 존재 가능)
+            Map acc = (Map) body.get("kakao_account");
+            String email       = acc == null ? null : (String) acc.get("email");
+            String gender      = acc == null ? null : (String) acc.get("gender");        // "male" / "female"
+            String birthday    = acc == null ? null : (String) acc.get("birthday");      // "MMDD"
+            String birthyear   = acc == null ? null : (String) acc.get("birthyear");     // "YYYY"
+            String phoneNumber = acc == null ? null : (String) acc.get("phone_number");  // "+82 10-...."
+            String name        = acc == null ? null : (String) acc.get("name");          // scope 동의 필요
+
+            // nickname은 properties 또는 kakao_account.profile에서 가져올 수 있음
+            String nickname = null;
+            Map profile = acc == null ? null : (Map) acc.get("profile");
+            if (profile != null && profile.get("nickname") != null) {
+                nickname = String.valueOf(profile.get("nickname"));
+            } else {
+                Map props = (Map) body.get("properties");
+                if (props != null && props.get("nickname") != null) {
+                    nickname = String.valueOf(props.get("nickname"));
+                }
+            }
+
+            // 이름(name)이 비어있으면 nickname으로 대체(프리필 UX 보완)
+            if (name == null || name.isBlank()) {
+                name = nickname;
+            }
+
+            // 3) DTO 구성
+            KakaoUserInfoDto dto = new KakaoUserInfoDto();
+            dto.setKakaoId(kakaoId);     // ✔ 카카오 고유 ID → 우리 프로젝트에선 memberId로 사용
+            dto.setEmail(email);
+            dto.setName(name);
+            dto.setGender(gender);
+            dto.setBirthday(birthday);
+            dto.setBirthyear(birthyear);
+            dto.setPhoneNumber(phoneNumber);
+
+            // 디버깅용 참고 로그 (운영에서는 레벨 조정 권장)
+            log.debug("[KAKAO USERINFO OK] id={}, email={}, name={}", kakaoId, email, name);
+
+            return dto;
+
+        } catch (HttpStatusCodeException e) {
+            log.error("[KAKAO USERINFO EXCEPTION] status={}, body={}", e.getStatusCode(), e.getResponseBodyAsString());
+            throw new Exception("Kakao userinfo failed: " + e.getResponseBodyAsString(), e);
+        } catch (Exception e) {
+            log.error("[KAKAO USERINFO EXCEPTION] {}", e.getMessage(), e);
+            throw e;
+        }
     }
-    
-    
-
 }

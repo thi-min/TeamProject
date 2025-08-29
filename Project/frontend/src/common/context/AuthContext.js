@@ -4,24 +4,22 @@
  * - 초보자도 한눈에 이해할 수 있도록 주석을 자세히 달아둠
  */
 
-
 import React, {
   createContext,
   useContext,
   useEffect,
   useState,
   useCallback,
-} from 'react';
+} from "react";
 
 // ⚠️ 주의: jwt-decode v4부터는 named export만 제공 → {}로 감싸서 import
 // 설치가 안 돼 있다면: npm i jwt-decode
-import { jwtDecode } from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 
 if (!window.__AUTH_CTX_ID__) {
   window.__AUTH_CTX_ID__ = Math.random().toString(36).slice(2);
-  console.log('[AuthContext] instance id =', window.__AUTH_CTX_ID__);
+  console.log("[AuthContext] instance id =", window.__AUTH_CTX_ID__);
 }
-
 
 // 1) Context(빈 그릇) 만들기 — 나중에 Provider로 "값"을 채워서 자식들이 꺼내 씀
 const AuthContext = createContext(null);
@@ -38,14 +36,16 @@ function decodeAndCheck(accessToken) {
     const isValid = !!payload.exp && payload.exp > nowSec; // exp가 있고, 현재보다 미래면 유효
     return { isValid, payload };
   } catch (e) {
-    console.error('[Auth] 토큰 해석 실패:', e);
+    console.error("[Auth] 토큰 해석 실패:", e);
     return { isValid: false, payload: null };
   }
 }
 
 // 로컬스토리지 키(이름) — 오타 방지용 상수
-const ACCESS_KEY = 'accessToken';
-const REFRESH_KEY = 'refreshToken';
+const ACCESS_KEY = "accessToken";
+const REFRESH_KEY = "refreshToken";
+const ADMIN_ACCESS_TOKEN = "adminAccessToken";
+const MEMBER_NUM = "memberNum";
 
 /**
  * 3) Provider 컴포넌트
@@ -53,12 +53,16 @@ const REFRESH_KEY = 'refreshToken';
  */
 export function AuthProvider({ children }) {
   // (A) 토큰 원본을 보관
-  const [accessToken, setAccessToken] = useState(() => localStorage.getItem(ACCESS_KEY));
-  const [refreshToken, setRefreshToken] = useState(() => localStorage.getItem(REFRESH_KEY));
+  const [accessToken, setAccessToken] = useState(() =>
+    localStorage.getItem(ACCESS_KEY)
+  );
+  const [refreshToken, setRefreshToken] = useState(() =>
+    localStorage.getItem(REFRESH_KEY)
+  );
 
   // (B) 토큰에서 뽑아낸 "파생 상태" (보는 사람 입장에서 더 직관적)
   const [isLogin, setIsLogin] = useState(false);
-  const [role, setRole] = useState(null);   // 예: 'USER' / 'ADMIN'
+  const [role, setRole] = useState(null); // 예: 'USER' / 'ADMIN'
   const [userId, setUserId] = useState(null); // 일반적으로 JWT의 sub 사용
 
   // (C) accessToken이 바뀔 때마다 → 해석해서(isLogin/role/userId) 갱신
@@ -71,56 +75,62 @@ export function AuthProvider({ children }) {
 
   // (D) 로그인 함수 — 서버에서 받은 토큰을 저장
   //const login = useCallback(({ accessToken: at, refreshToken: rt }) => {
-    const login = useCallback((raw) => {
-      // 1) 인자가 없을 수도 있으니 기본값 방어
-      const input = raw ?? {};
+  const login = useCallback((raw) => {
+    // 1) 인자가 없을 수도 있으니 기본값 방어
+    const input = raw ?? {};
 
-      // 2) 응답 스키마가 제각각일 때를 대비해 토큰을 "정규화"해서 추출
-      //    (프로젝트 백엔드 실제 키에 맞춰 위쪽 줄부터 채택됨)
-      const at =
-        input.accessToken ??
-        input.token ??
-        input.jwt ??
-        input?.data?.accessToken ??
-        input?.member?.accessToken ??
-        null;
+    // 2) 응답 스키마가 제각각일 때를 대비해 토큰을 "정규화"해서 추출
+    //    (프로젝트 백엔드 실제 키에 맞춰 위쪽 줄부터 채택됨)
+    const at =
+      input.accessToken ??
+      input.token ??
+      input.jwt ??
+      input?.data?.accessToken ??
+      input?.member?.accessToken ??
+      null;
 
-      const rt =
-        input.refreshToken ??
-        input?.data?.refreshToken ??
-        input?.member?.refreshToken ??
-        null;
-      if (!at && !rt) {
-        console.error('[Auth] login()에 유효한 토큰이 없습니다. 받은 값:', JSON.parse(JSON.stringify(input)));
-        return; // 토큰 없으면 종료
+    const rt =
+      input.refreshToken ??
+      input?.data?.refreshToken ??
+      input?.member?.refreshToken ??
+      null;
+    if (!at && !rt) {
+      console.error(
+        "[Auth] login()에 유효한 토큰이 없습니다. 받은 값:",
+        JSON.parse(JSON.stringify(input))
+      );
+      return; // 토큰 없으면 종료
+    }
+
+    if (at) {
+      localStorage.setItem(ACCESS_KEY, at);
+      setAccessToken(at);
+
+      // 🔹 여기서 즉시 로그인 상태 반영
+      try {
+        const { payload } = decodeAndCheck(at); // 토큰 해석
+        setIsLogin(true); // 바로 true로
+        setUserId(payload?.sub ?? null); // JWT sub → 사용자 ID
+        setRole(payload?.role ?? null); // JWT role → 역할
+      } catch (e) {
+        console.error("[Auth] 토큰 해석 오류", e);
+        //해석실패시 로그인 상태 true로 할지
+        setIsLogin(!!at);
       }
-
-      if (at) {
-        localStorage.setItem(ACCESS_KEY, at);
-        setAccessToken(at);
-
-        // 🔹 여기서 즉시 로그인 상태 반영
-        try{
-          const { payload } = decodeAndCheck(at); // 토큰 해석
-          setIsLogin(true);                       // 바로 true로
-          setUserId(payload?.sub ?? null);        // JWT sub → 사용자 ID
-          setRole(payload?.role ?? null);         // JWT role → 역할
-        }catch(e){
-          console.error('[Auth] 토큰 해석 오류',e);
-          //해석실패시 로그인 상태 true로 할지
-          setIsLogin(!!at);
-        }
-      }
-      if (rt) {
-        localStorage.setItem(REFRESH_KEY, rt);
-        setRefreshToken(rt);
-      }
-    }, []);
+    }
+    if (rt) {
+      localStorage.setItem(REFRESH_KEY, rt);
+      setRefreshToken(rt);
+    }
+  }, []);
 
   // (E) 로그아웃 함수 — 저장된 토큰을 지움
   const logout = useCallback(() => {
     localStorage.removeItem(ACCESS_KEY);
     localStorage.removeItem(REFRESH_KEY);
+    localStorage.removeItem(ADMIN_ACCESS_TOKEN);
+    localStorage.removeItem(MEMBER_NUM);
+    sessionStorage.clear();
     setAccessToken(null);
     setRefreshToken(null);
     // 파생 상태도 초기화
@@ -135,13 +145,13 @@ export function AuthProvider({ children }) {
     if (!refreshToken) return false;
 
     try {
-      const res = await fetch('/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ refreshToken }),
       });
 
-      if (!res.ok) throw new Error('토큰 재발급 실패');
+      if (!res.ok) throw new Error("토큰 재발급 실패");
 
       const data = await res.json(); // { accessToken, refreshToken } 라고 가정
       if (data.accessToken) {
@@ -154,7 +164,7 @@ export function AuthProvider({ children }) {
       }
       return true;
     } catch (e) {
-      console.error('[Auth] 재발급 에러:', e);
+      console.error("[Auth] 재발급 에러:", e);
       logout(); // 재발급 실패 → 강제 로그아웃
       return false;
     }
@@ -206,7 +216,7 @@ export function useAuth() {
   const ctx = useContext(AuthContext);
   if (!ctx) {
     // Provider로 감싸지 않은 곳에서 사용하면 에러로 알려줌 (디버깅 편하게)
-    throw new Error('useAuth는 <AuthProvider> 내부에서만 사용해야 합니다.');
+    throw new Error("useAuth는 <AuthProvider> 내부에서만 사용해야 합니다.");
   }
   return ctx;
 }

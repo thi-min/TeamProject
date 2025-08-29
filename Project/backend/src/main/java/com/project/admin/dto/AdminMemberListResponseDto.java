@@ -1,10 +1,16 @@
 package com.project.admin.dto;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
+@Getter
+@Setter
 @Builder
+@AllArgsConstructor
 //전체사용자 목록+필터링
 public class AdminMemberListResponseDto {
 	private Long memberNum; //회원 번호

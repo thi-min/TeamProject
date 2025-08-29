@@ -29,16 +29,17 @@
 
 /* 로그인 시작 */
 .form_top_box .form_top_item .form_icon.type1:before{background-image:url('../images/login_icon.png');background-repeat:no-repeat;background-position:0 0;content:'';}
+
 /* 로그인 폼영역 */
 .login_form_box{position:relative;width:100%;margin-top:74px;box-sizing:border-box;vertical-align:top;}
 .form_item{padding:100px 50px;border-radius:30px;box-sizing:border-box;background-color:#fff;box-shadow: 0 0 30px 0px rgba(238,238,238,0.3);}
 .form_item .form_login_wrap{position:relative;width:615px;margin:0 auto;;box-sizing:border-box;}
 .form_item .form_login_wrap .float_box{position:relative;box-sizing:border-box;font-size:0;line-height:0;}
 .form_item .form_login_wrap .float_box .left_box{display:inline-block;width:440px;margin-right:15px;box-sizing:border-box;vertical-align:top;}
-.form_item .form_login_wrap .float_box .left_box .id_pw_form{width:100%;box-sizing:border-box;}
-.form_item .form_login_wrap .float_box .left_box .id_pw_form:nth-child(n+2){margin-top:10px;}
-.form_item .form_login_wrap .float_box .left_box .id_pw_form .id_pw_text{display:inline-block;width:85px;padding-top:16px;padding-bottom:16px;box-sizing:border-box;color:#464646;font-size:18px;font-weight:300;line-height:28px;letter-spacing:-0.02em;}
-.form_item .form_login_wrap .float_box .left_box .id_pw_form .form_input{display:inline-block;width:calc(100% - 85px);}
+.form_item .form_login_wrap .float_box .left_box .left_from{width:100%;box-sizing:border-box;}
+.form_item .form_login_wrap .float_box .left_box .left_from:nth-child(n+2){margin-top:10px;}
+.form_item .form_login_wrap .float_box .left_box .left_from .from_text{display:inline-block;width:85px;padding-top:16px;padding-bottom:16px;box-sizing:border-box;color:#464646;font-size:18px;font-weight:300;line-height:28px;letter-spacing:-0.02em;}
+.form_item .form_login_wrap .float_box .left_box .left_from .form_input{display:inline-block;width:calc(100% - 85px);}
 .form_item .form_login_wrap .float_box .right_box{display:inline-block;box-sizing:border-box;vertical-align:top;}
 .form_item .form_login_wrap .float_box .right_box .login_btn_box{min-width:160px;border-radius:5px;background-color:#4469e2;text-align:center;vertical-align:top;}
 .form_item .form_login_wrap .float_box .right_box .login_btn_box .login_btn{width:100%;padding-top:50px;padding-bottom:50px;border:none;color:#fff;font-size:18px;font-weight:300;line-height:30px;letter-spacing:-0.02em;text-align:center;}
@@ -143,3 +144,8 @@
     .login_form_wrap .form_item.type3 .login_form_box.injeung_box .out_login_box .out_login_item .out_login_btn{padding-top:20px;padding-bottom:20px;}
     .login_form_wrap .form_item.type3 .login_form_box.injeung_box .out_login_box .out_login_item:nth-child(2){margin-top:10px;}
 }
+
+/* 카카오 로그인 */
+.login_wrap .bth_item.kakao_login{display:block;min-width:auto;margin-top:10px;}
+.login_wrap .bth_item.kakao_login .kakao_btn{display:flex;justify-content:center;align-items:center;background-color:#fee500;border-color:#fee500;}
+.login_wrap .bth_item.kakao_login .kakao_btn span{color:#000;}

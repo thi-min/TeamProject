@@ -33,15 +33,15 @@ public class AdminEntity {
 	@Column(name = "admin_num",nullable = false)
 	private Long adminNum; //관리자 번호
 	
-	@Column(name = "admin_id",nullable = false)
+	@Column(nullable = false, unique = true, length = 100)
 	private String adminId; //관리자 아이디
 	
 	@ManyToOne
 	@JoinColumn(name = "member_num")
 	private MemberEntity member; // ✅ 필드명도 가능하면 의미 있는 이름으로
 	
-	@Column(name = "admin_email",nullable = false)
-	private String adminEmail; //이메일
+//	@Column(name = "admin_email",nullable = false)
+//	private String adminEmail; //이메일
 	@Column(name = "admin_pw",nullable = false)
 	private String adminPw; //비밀번호
 	@Column(name = "admin_name",nullable = false)
