@@ -18,5 +18,5 @@ public class AdminMemberListResponseDto {
 	private String memberName; //이름
 	private String memberDay; //가입일시
 	private String memberState; //회원상태("ACTIVE","REST","OUT")
-	private boolean memberLock; //계정 잠금여부(true/flase)
+	private boolean memberLock; //계정 잠금여부(true/flase)//계정
 }

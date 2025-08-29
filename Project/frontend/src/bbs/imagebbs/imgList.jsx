@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../../common/api/axios";
 import { useNavigate } from "react-router-dom";
 import "./Gallery.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -21,13 +21,15 @@ export default function ImgBoard() {
   const fetchPosts = async (page = 0, keyword = "") => {
     try {
       const params = { type: "POTO", page, size: 12 };
+
+      // 검색 키워드와 타입에 따라 파라미터 설정
       if (searchType !== "all" && keyword.trim() !== "") {
         if (searchType === "title") params.bbstitle = keyword.trim();
         if (searchType === "content") params.bbscontent = keyword.trim();
-        if (searchType === "writer") params.memberName = keyword.trim();
+        // 작성자 검색 관련 조건 삭제
       }
 
-      const res = await axios.get(baseUrl, { params });
+      const res = await api.get(baseUrl, { params });
 
       const pageData = res.data.bbsList;
       setPosts(pageData.content || []);
@@ -77,7 +79,6 @@ export default function ImgBoard() {
           <option value="all">전체</option>
           <option value="title">제목</option>
           <option value="content">내용</option>
-          <option value="writer">작성자</option>
         </select>
         <input
           type="text"

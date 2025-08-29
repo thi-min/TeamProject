@@ -10,6 +10,10 @@ import com.project.volunteer.entity.Volunteer;
 
 import java.time.LocalDate;
 import java.util.Date;
+
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -45,9 +49,11 @@ public class Reserve {
     @Column(name = "reserve_number")
     private Integer reserveNumber;		//인원수
     
+    @CreationTimestamp
     @Column(name = "update_time")
     private LocalDateTime updateTime;	// 상태변경 시간
     
+    @UpdateTimestamp
     @Column(name = "note")
     private String note;		//비고
 

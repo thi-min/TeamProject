@@ -1,10 +1,9 @@
 // 🛣 모든 경로를 중앙에서 관리하는 라우터 모음
 
 const routes = {
-  // ==============================
-  // 홈
-  // ==============================
-  home: { path: "/", label: "홈" },
+  // 메인/홈
+  main: { path: "/", label: "메인페이지" },
+
 
   // ==============================
   // 센터 소개 관련
@@ -32,7 +31,6 @@ const routes = {
     root: { path: "/land", label: "동물 놀이터" },
     info: { path: "/land/info", label: "놀이터 소개" },
     gallery: { path: "/land/gallery", label: "놀이터 둘러보기" },
-    reserve: { path: "/land/reserve", label: "예약하기" },
   },
 
   // ==============================
@@ -154,19 +152,22 @@ const routes = {
     landReserveManage: { path: "/admin/reserve/land", label: "놀이터 예약 관리" },
     volunteerReserveManage: { path: "/admin/reserve/volunteer", label: "봉사 예약 관리" },
     landReserveDetail: { path: "/admin/reserve/land/:reserveCode", label: "놀이터 예약 상세보기" },
-    volunteerReserveDetail: { path: "/admin/reserve/volunteer/:reserveCode", label: "봉사 예약 상세보기" },
+
+    volunteerReserveDetail: { path: "/admin/reserve/volunteer/:reserveCode", label: "봉사 예약 상세보기" }, 
+    bannerManage: { path: "/admin/banner", label: "배너 관리"},
+    bannerCreate: { path: "/admin/banner/create", label: "배너 생성"},
+    bannerDetail: { path: "/admin/banner/:bannerId", label: "배너 수정 및 삭제"}
+
+
   },
 
-  // ==============================
-  // 지도 관련
-  // ==============================
+
   map: {
     root: { path: "/map", label: "지도 검색" },
   },
 
-  // ==============================
-  // 예약 관련
-  // ==============================
+  //예약
+
   reserve: {
     root: { path: "/reserve", label: "예약하기" },
     land: {
@@ -181,15 +182,12 @@ const routes = {
       confirm: { path: "/reserve/volunteer/confirm", label: "신청 확인" },
       success: { path: "/reserve/volunteer/success", label: "신청 완료" },
     },
+
   },
 
-  // ==============================
-  // 봉사 관련
-  // ==============================
   volunteer: {
     list: { path: "/volunteer/list", label: "봉사 목록" },
     detail: (id) => `/volunteer/${id}`,
-    apply: { path: "/volunteer/apply", label: "봉사 신청" },
   },
 
   // ==============================

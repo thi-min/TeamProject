@@ -4,7 +4,7 @@ import axios from "axios";
 
 function QnaBbsView() {
   const { id } = useParams();
-  const [post, setPost] = useState(null);
+  const [post, setPost] = useState(null);   // 게시글 + 답변 포함
   const [files, setFiles] = useState([]);
   const navigate = useNavigate();
   const baseUrl = "http://127.0.0.1:8090/bbs";
@@ -14,17 +14,19 @@ function QnaBbsView() {
     fetchFiles();
   }, [id]);
 
+  // ---------------- 게시글 조회 ----------------
   const fetchPost = async () => {
     try {
       const res = await axios.get(`${baseUrl}/${id}`);
       console.log("게시글 데이터:", res.data);
-      setPost(res.data.bbs); // 서버 구조 맞춤
+      setPost(res.data); // { bbs: {...}, answer: "관리자 답변" }
     } catch (error) {
       console.error("게시글 조회 오류:", error);
       alert("게시글 조회 실패");
     }
   };
 
+  // ---------------- 첨부파일 조회 ----------------
   const fetchFiles = async () => {
     try {
       const res = await axios.get(`${baseUrl}/${id}/files`);
@@ -35,6 +37,7 @@ function QnaBbsView() {
     }
   };
 
+  // ---------------- 게시글 삭제 ----------------
   const handleDelete = async () => {
     const memberNum = localStorage.getItem("memberNum");
     if (!memberNum) {
@@ -53,43 +56,50 @@ function QnaBbsView() {
     }
   };
 
+  // ---------------- 게시글 수정 이동 ----------------
   const handleEdit = () => {
     navigate(`/bbs/qna/edit/${id}`);
   };
 
   if (!post) return <div>로딩 중...</div>;
 
+  const bbs = post.bbs || {};
+
   return (
     <div className="bbs-container">
-      <h2>{post.bbsTitle}</h2>
+      <h2>{bbs.bbsTitle}</h2>
+
       <div className="bbs-content">
-        <div dangerouslySetInnerHTML={{ __html: post.bbsContent }} />
-        <p>작성일: {post.registDate ? new Date(post.registDate).toLocaleDateString() : ""}</p>
+        <div dangerouslySetInnerHTML={{ __html: bbs.bbsContent }} />
+        <p>
+          작성일: {bbs.registDate ? new Date(bbs.registDate).toLocaleDateString() : ""}
+        </p>
       </div>
 
+      {/* 첨부파일 */}
       {files.length > 0 && (
         <div className="bbs-files">
           <h4>첨부파일</h4>
           <ul>
             {files.map((file) => (
               <li key={file.fileNum}>
-                {file.savedName.match(/\.(jpeg|jpg|gif|png)$/i) ? (
-                  <img
-                    src={`${baseUrl}/files/${file.fileNum}/download`}
-                    alt={file.originalName}
-                    style={{ maxWidth: "200px" }}
-                  />
-                ) : (
-                  <a
-                    href={`${baseUrl}/files/${file.fileNum}/download`}
-                    download={file.originalName}
-                  >
-                    {file.originalName}
-                  </a>
-                )}
+                <a
+                  href={`${baseUrl}/files/${file.fileNum}/download`}
+                  download={file.originalName}
+                >
+                  {file.originalName}
+                </a>
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {/* 관리자 답변 표시 */}
+      {post.answer && (
+        <div className="answer-section">
+          <h4>관리자 답변</h4>
+          <p>{post.answer}</p>
         </div>
       )}
 

@@ -17,7 +17,7 @@ const VolunteerReserveSuccessPage = () => {
   return (
     <div className="box reserve_box">
       <div className="reserve_header">
-        <h2>봉사 신청 완료</h2>
+        <h3>봉사 신청 완료</h3>
       </div>
 
       <div className="reserve_code">
@@ -30,7 +30,7 @@ const VolunteerReserveSuccessPage = () => {
       </div>
 
       <div className="btn_group">
-        <span className="temp_btn white md">
+        <span className="temp_btn md">
           <button type="button" className="btn" onClick={handleGoMyReserves}>
             예약 내역 확인
           </button>

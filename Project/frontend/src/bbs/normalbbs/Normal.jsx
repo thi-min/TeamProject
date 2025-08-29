@@ -24,7 +24,6 @@ function NoticeBbs() {
       const params = {
         page: pageNumber,
         size: 10,
-        type: "NORMAL",
       };
 
       if (searchKeyword.trim() !== "" && searchType !== "all") {
@@ -36,7 +35,6 @@ function NoticeBbs() {
       // 🔹 공지사항 전용 API 호출
       const response = await api.get(`${BASE_URL}/admin/bbs/notices`, { params });
 
-      // 🔑 백엔드 구조에 맞게 처리
       const data = response.data;
       setPosts(data.list || []);
       setTotalPages(Math.ceil((data.total || 0) / (data.size || 10)));
@@ -51,9 +49,8 @@ function NoticeBbs() {
     fetchNotices(page);
   }, [page]);
 
-  // ✍ 글쓰기 버튼 클릭 시
   const handleWrite = () => {
-    navigate("/admin/bbs/normal/write"); // Route에 맞춰 수정
+    navigate("/admin/bbs/normal/write"); // 글쓰기 페이지로 이동
   };
 
   const handleSearch = () => {
@@ -103,44 +100,44 @@ function NoticeBbs() {
 
       {/* 📄 게시글 테이블 */}
       <table className="bbs-table">
-        <div className="table responsive">
-          <colgroup>
-            <col style={{ width: "10%" }} />
-            <col style={{ width: "70%" }} />
-            <col style={{ width: "10%" }} />
-            <col style={{ width: "10%" }} />
-          </colgroup>
-          <thead>
-            <tr>
-              <th>번호</th>
-              <th>제목</th>
-              <th>작성자</th>
-              <th>작성일</th>
-            </tr>
-          </thead>
-          <tbody>
-            {posts.length > 0 ? (
-              posts.map((post) => (
-                <tr
-                  key={post.bulletinNum}
-                  onClick={() => navigate(`/admin/notice/view/${post.bulletinNum}`)}
-                  style={{ cursor: "pointer" }}
+        <colgroup>
+          <col style={{ width: "10%" }} />
+          <col style={{ width: "70%" }} />
+          <col style={{ width: "10%" }} />
+          <col style={{ width: "10%" }} />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>번호</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>작성일</th>
+          </tr>
+        </thead>
+        <tbody>
+          {posts.length > 0 ? (
+            posts.map((post) => (
+              <tr key={post.bulletinNum}>
+                <td>{post.bulletinNum}</td>
+                {/* 제목 클릭 시 상세 페이지로 이동 */}
+                <td
+                  style={{ cursor: "pointer", color: "#007bff" }}
+                  onClick={() => navigate(`/admin/bbs/normal/${post.bulletinNum}`)}
                 >
-                  <td>{post.bulletinNum}</td>
-                  <td>{post.bbstitle}</td>
-                  <td>{post.memberName}</td>
-                  <td>{new Date(post.createdAt).toLocaleDateString()}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={4} style={{ textAlign: "center", padding: "90px 0" }}>
-                  등록된 공지가 없습니다.
+                  {post.bbsTitle}
                 </td>
+                <td>관리자</td>
+                <td>{new Date(post.registDate).toLocaleDateString()}</td>
               </tr>
-            )}
-          </tbody>
-        </div>
+            ))
+          ) : (
+            <tr>
+              <td colSpan={4} style={{ textAlign: "center", padding: "90px 0" }}>
+                등록된 공지가 없습니다.
+              </td>
+            </tr>
+          )}
+        </tbody>
       </table>
 
       {/* 📌 페이지네이션 */}

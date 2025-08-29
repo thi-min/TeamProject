@@ -1,9 +1,12 @@
 // src/pages/LoginPage.jsx
 // ✅ 로그인 페이지 (InputFieId 컴포넌트 사용 X, 순수 input 태그 사용)
-// - UI: temp_form/md 래퍼 + temp_input 클래스로 스타일 적용
-// - 로직: 전역 AuthContext의 login() 호출, loginUser API 연동
-// - 접근성/사용성: autoComplete, required, Enter 제출, 로딩 중 버튼 비활성화
-// - 보강: 토큰 추출 형태 다양성 대응, refreshToken 저장, role 기반 이동, 관리자 토큰 호환 저장
+// - 성공 시 alert: "로그인 되었습니다."
+// - 실패 시 상태코드 기반 alert:
+//    • 401/400  → "아이디와 비밀번호가 맞지 않습니다."
+//    • 404      → "존재하지 않는 계정입니다."
+//    • 기타     → 서버 메시지 또는 일반 오류 문구
+// - Kakao/일반 로그인 모두 가드 레이스 방지를 위해 auth:login 이벤트 발행
+// - 토큰 저장: localStorage + (선택) adminAccessToken 동기화
 
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -16,7 +19,7 @@ import "../style/login.css";
 const LoginPage = () => {
   // ✅ 폼 상태
   const [form, setForm] = useState({ memberId: "", memberPw: "" });
-  // ✅ 에러 메시지 상태
+  // ✅ 에러 메시지 상태 (화면에 표시할 때 사용)
   const [error, setError] = useState("");
   // ✅ 로딩 상태 (중복 제출 방지/버튼 비활성화)
   const [loading, setLoading] = useState(false);
@@ -39,7 +42,6 @@ const LoginPage = () => {
 
     try {
       // ⛳ 공용 로그인 API 호출 (/auth/login)
-      //  - loginUser가 axios로 호출하여 { data } 형태를 반환한다고 가정
       const result = await loginUser({
         memberId: form.memberId, // ⚠️ 서버 DTO 키명과 반드시 일치
         memberPw: form.memberPw, // 예: username/password 라면 여기도 맞춰 변경
@@ -76,7 +78,7 @@ const LoginPage = () => {
       // 대소문자/접두어 정규화
       const upperRole = String(role).toUpperCase();
 
-      // ✅ 로컬스토리지 저장 (axios 인터셉터에서 이 키를 사용)
+      // ✅ 로컬스토리지 저장
       localStorage.setItem("accessToken", accessToken);
       if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
 
@@ -84,7 +86,7 @@ const LoginPage = () => {
       if (data.member?.memberNum) {
         localStorage.setItem("memberNum", data.member.memberNum);
       }
-      // 📌 호환용: 예전 코드가 adminAccessToken을 참조할 수 있어 ADMIN이면 같이 저장
+      // 📌 호환용: ADMIN이면 adminAccessToken도 같이 저장
       if (upperRole === "ADMIN" || upperRole === "ROLE_ADMIN") {
         localStorage.setItem("adminAccessToken", accessToken);
       } else {
@@ -94,22 +96,38 @@ const LoginPage = () => {
       // ✅ 전역 컨텍스트에도 반영 (컨텍스트 구현에 맞춰 전달)
       login({ accessToken, refreshToken, role: upperRole });
 
-      alert("로그인 성공");
-      // ✅ role 기반 라우팅: 관리자면 /admin, 아니면 /
+      // ✅ 가드(RequireMember/RequireAdmin) 레이스 방지: 즉시 로그인 이벤트 발행
+      try {
+        window.dispatchEvent(new Event("auth:login"));
+      } catch {}
+
+      // ✅ 성공 알림
+      alert("로그인 되었습니다.");
+
+      // ✅ role 기반 라우팅: 관리자면 /admin, 아니면 /member/mypage
       if (upperRole === "ADMIN" || upperRole === "ROLE_ADMIN") {
-        navigate("/admin");
+        navigate("/admin", { replace: true });
       } else {
-        navigate("/member/mypage");
+        navigate("/member/mypage", { replace: true });
       }
     } catch (err) {
       console.error("❌ 로그인 실패:", err);
-      // 서버 메시지가 있으면 우선 표시
-      const msg =
+
+      // 상태코드 기반 사용자 친화 메시지
+      const status = err?.response?.status;
+      let msg =
         err?.response?.data?.message ||
         err?.message ||
-        "로그인 실패: 아이디 또는 비밀번호를 확인하세요.";
+        "로그인에 실패했습니다. 잠시 후 다시 시도해주세요.";
+
+      if (status === 401 || status === 400) {
+        msg = "아이디와 비밀번호가 맞지 않습니다.";
+      } else if (status === 404) {
+        msg = "존재하지 않는 계정입니다.";
+      }
+
       setError(msg);
-      alert("로그인 실패");
+      alert(msg);
     } finally {
       setLoading(false);
     }
@@ -140,8 +158,8 @@ const LoginPage = () => {
                   value={form.memberId}
                   onChange={handleChange}
                   placeholder="아이디 입력"
-                  autoComplete="username" // ✅ 브라우저 자동완성
-                  required // ✅ 빈값 제출 방지
+                  autoComplete="username"
+                  required
                 />
               </div>
               <div className="left_from">
@@ -171,6 +189,14 @@ const LoginPage = () => {
               </div>
             </div>
           </div>
+
+          {/* 서버/검증 에러를 화면에도 보여주고 싶다면 아래 문구를 활성화하세요 */}
+          {/* {error && (
+            <div className="hint error" style={{ marginTop: 12 }}>
+              {error}
+            </div>
+          )} */}
+
           <div className="form_btn_box">
             <div className="login_more">
               <div className="id_find bth_item">

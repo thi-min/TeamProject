@@ -4,14 +4,16 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./qnabbs.css";
 
+const BACKEND_URL = "http://127.0.0.1:8090"; // 파일 절대경로용
+
 const QnaBbsEdit = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const editorRef = useRef(null);
-  const baseUrl = "http://127.0.0.1:8090/bbs";
+  const baseUrl = `${BACKEND_URL}/bbs`;
 
   const [title, setTitle] = useState("");
-  const [files, setFiles] = useState([]); // 기존 파일 + 새 파일
+  const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // ---------------- 게시글 조회 ----------------
@@ -20,21 +22,18 @@ const QnaBbsEdit = () => {
       try {
         const res = await axios.get(`${baseUrl}/${id}`);
         const data = res.data;
-        console.log("게시글 데이터:", data);
-
         const bbs = data.bbs;
         const existingFiles = data.files || [];
 
         setTitle(bbs.bbsTitle || "");
         if (editorRef.current) editorRef.current.innerHTML = bbs.bbsContent || "";
 
-        // 기존 파일은 file: null, isNew: false
         setFiles(
           existingFiles.map(f => ({
             id: f.fileNum,
             file: null,
             name: f.originalName,
-            url: `${baseUrl}/files/${f.fileNum}/download`,
+            url: `${BACKEND_URL}/bbs/files/${f.fileNum}/download`,
             insertOption: "no-insert",
             isDeleted: false,
             isNew: false
@@ -65,30 +64,36 @@ const QnaBbsEdit = () => {
     const file = fileObj?.file;
 
     if (option === "insert") {
-      if (!file && !fileObj.url) {
-        alert("먼저 파일을 선택해주세요.");
-        return;
-      }
-
-      if (file && !["image/jpeg", "image/jpg"].includes(file.type)) {
-        alert("본문 삽입은 jpg/jpeg 이미지 파일만 가능합니다.");
-        return;
-      }
+      if (!file && !fileObj.url) return alert("먼저 파일을 선택해주세요.");
+      if (file && !["image/jpeg", "image/jpg"].includes(file.type))
+        return alert("본문 삽입은 jpg/jpeg 이미지 파일만 가능합니다.");
 
       if (editorRef.current) {
-        const imgSrc = file ? URL.createObjectURL(file) : fileObj.url;
-        const imgTag = `<img src="${imgSrc}" data-id="${id}" style="max-width:600px;" />`;
-        const el = document.createElement("span");
-        el.innerHTML = imgTag;
+        editorRef.current.focus();
 
+        // 커서 위치가 없으면 끝으로 이동
         const sel = window.getSelection();
-        if (!sel.rangeCount) return;
+        if (!sel.rangeCount) {
+          const range = document.createRange();
+          range.selectNodeContents(editorRef.current);
+          range.collapse(false);
+          sel.removeAllRanges();
+          sel.addRange(range);
+        }
+
+        const img = document.createElement("img");
+        img.src = file ? URL.createObjectURL(file) : fileObj.url;
+        img.dataset.id = id;
+        img.style.maxWidth = "600px";
+
         const range = sel.getRangeAt(0);
-        range.insertNode(el);
-        range.setStartAfter(el);
-        range.setEndAfter(el);
+        range.insertNode(img);
+        range.setStartAfter(img);
+        range.setEndAfter(img);
         sel.removeAllRanges();
         sel.addRange(range);
+
+        if (file) URL.revokeObjectURL(img.src);
       }
     } else {
       if (editorRef.current) {
@@ -102,7 +107,7 @@ const QnaBbsEdit = () => {
     );
   };
 
-  // ---------------- 파일 추가 ----------------
+  // ---------------- 파일 추가/삭제 ----------------
   const addFileInput = () => {
     setFiles(prev => [
       ...prev,
@@ -110,7 +115,6 @@ const QnaBbsEdit = () => {
     ]);
   };
 
-  // ---------------- 파일 삭제 ----------------
   const removeFileInput = id => {
     setFiles(prev =>
       prev.map(f => (f.id === id ? { ...f, isDeleted: true } : f))
@@ -134,10 +138,7 @@ const QnaBbsEdit = () => {
         })
       );
     });
-
-    if (editorRef.current) {
-      observer.observe(editorRef.current, { childList: true, subtree: true });
-    }
+    if (editorRef.current) observer.observe(editorRef.current, { childList: true, subtree: true });
     return () => observer.disconnect();
   }, []);
 
@@ -145,29 +146,29 @@ const QnaBbsEdit = () => {
   const handleSubmit = async e => {
     e.preventDefault();
     const memberNum = localStorage.getItem("memberNum");
-    if (!memberNum) {
-      alert("회원 로그인 후 이용해주세요.");
-      return;
-    }
+    if (!memberNum) return alert("회원 로그인 후 이용해주세요.");
 
     const contentHTML = editorRef.current?.innerHTML || "";
     const formData = new FormData();
-    formData.append("memberNum", memberNum);
-    formData.append(
-      "bbsDto",
-      new Blob([JSON.stringify({ bbsTitle: title, bbsContent: contentHTML })], { type: "application/json" })
-    );
 
+    formData.append("memberNum", new Blob([JSON.stringify(memberNum)], { type: "application/json" }));
+    formData.append("bbsDto", new Blob([JSON.stringify({ bbsTitle: title, bbsContent: contentHTML, bulletinType: "FAQ" })], { type: "application/json" }));
+
+    // 삭제된 파일
     const deletedFileIds = files.filter(f => f.isDeleted && !f.isNew).map(f => f.id);
-    formData.append("deletedFileIds", JSON.stringify(deletedFileIds));
+    formData.append("deletedFileIds", new Blob([JSON.stringify(deletedFileIds)], { type: "application/json" }));
 
+    // insertOption 상태
+    const insertOptionsList = files.map(f => f.insertOption);
+    formData.append("insertOptions", new Blob([JSON.stringify(insertOptionsList)], { type: "application/json" }));
+
+    // 새 파일 첨부
     files.forEach(f => {
       if (f.file && f.isNew && !f.isDeleted) formData.append("files", f.file);
-      formData.append("insertOptions", f.insertOption);
     });
 
     try {
-      await axios.put(`${baseUrl}/member/${id}?memberNum=${memberNum}`, formData, {
+      await axios.put(`${baseUrl}/member/${id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
       alert("게시글 수정 완료!");
@@ -213,19 +214,15 @@ const QnaBbsEdit = () => {
           <div className="bbs-file-list">
             {files.map(f => (
               <div key={f.id} className="bbs-file-row" style={{ opacity: f.isDeleted ? 0.5 : 1 }}>
-                {/* 기존 파일 링크 표시 */}
                 {!f.isDeleted && f.url && !f.isNew ? (
                   <>
                     <a href={f.url} target="_blank" rel="noreferrer">{f.name}</a>
                     <button type="button" onClick={() => removeFileInput(f.id)}>삭제</button>
                   </>
                 ) : (
-                  !f.isDeleted && (
-                    <input type="file" onChange={e => handleFileChange(f.id, e.target.files[0])} />
-                  )
+                  !f.isDeleted && <input type="file" onChange={e => handleFileChange(f.id, e.target.files[0])} />
                 )}
 
-                {/* 본문 삽입 옵션 */}
                 {!f.isDeleted && (
                   <div className="bbs-file-options">
                     <label>

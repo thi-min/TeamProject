@@ -9,7 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
+ 
 import com.project.common.jwt.JwtTokenProvider;
 import com.project.common.util.JasyptUtil;
 import com.project.member.dto.AddressUpdateRequestDto;
@@ -676,10 +676,16 @@ public class MemberServiceImpl implements MemberService {
                  .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
      }
 
+
      @Override
      public Optional<MemberEntity> findByMemberId(String memberId) {
          return memberRepository.findByMemberId(memberId);
      }
+
+     
+     
+     
+
  }
 
     

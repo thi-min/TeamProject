@@ -1,6 +1,5 @@
-// 📁 src/gallery/GalleryEdit.jsx
 import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
+import api from "../../common/api/axios";
 import { useNavigate, useParams } from "react-router-dom";
 import "./Gallery.css";
 
@@ -8,35 +7,38 @@ export default function GalleryEdit() {
   const { id } = useParams();
   const navigate = useNavigate();
   const editorRef = useRef(null);
-
   const baseUrl = "http://127.0.0.1:8090/bbs";
 
   const [title, setTitle] = useState("");
   const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // ---------------- 게시글 조회 ----------------
+  // 게시글 조회
   useEffect(() => {
     const fetchPost = async () => {
       try {
-        const res = await axios.get(`${baseUrl}/${id}`);
+        const res = await api.get(`${baseUrl}/${id}`);
         const data = res.data;
 
         setTitle(data.bbs.bbsTitle || "");
         if (editorRef.current) editorRef.current.innerHTML = data.bbs.bbsContent || "";
 
-        // 기존 파일 처리
         const existingFiles = (data.files || []).map(f => ({
-          id: f.fileNum,
+          id: f.fileNum, // 기존 파일은 DB filenum
           file: null,
           name: f.originalName,
-          url: f.fileUrl ? `${baseUrl}${f.fileUrl}` : null,
+          url: f.fileUrl || null,
           isRepresentative: f.isRepresentative === "Y",
           isNew: false,
-          isDeleted: false
+          isDeleted: false,
+          overwrite: false
         }));
-        setFiles(existingFiles);
 
+        if (!existingFiles.some(f => f.isRepresentative) && existingFiles.length > 0) {
+          existingFiles[0].isRepresentative = true;
+        }
+
+        setFiles(existingFiles);
       } catch (error) {
         console.error(error);
         alert("게시글 불러오기 실패");
@@ -47,64 +49,103 @@ export default function GalleryEdit() {
     fetchPost();
   }, [id]);
 
-  // ---------------- 파일 선택 ----------------
+  // 파일 선택 (새 파일 또는 덮어쓰기)
   const handleFileChange = (id, newFile) => {
     if (newFile && !["image/jpeg", "image/jpg"].includes(newFile.type.toLowerCase())) {
       alert("jpg/jpeg 파일만 첨부 가능합니다.");
       return;
     }
+
     setFiles(prev =>
-      prev.map(f => (f.id === id ? { ...f, file: newFile, isNew: true } : f))
+      prev.map(f =>
+        f.id === id
+          ? { ...f, file: newFile, isNew: f.isNew || true, overwrite: true, name: newFile.name }
+          : f
+      )
     );
   };
 
-  // ---------------- 대표 이미지 선택 ----------------
-  const handleRepresentativeChange = (id, value) => {
-    if (value) {
-      const alreadyRep = files.find(f => f.isRepresentative && f.id !== id);
-      if (alreadyRep) {
-        alert("대표이미지는 하나만 선택할 수 있습니다.");
-        return;
+  // 대표 이미지 선택
+  const handleRepresentativeChange = (id) => {
+    setFiles(prev =>
+      prev.map(f => ({ ...f, isRepresentative: f.id === id && !f.isDeleted }))
+    );
+  };
+
+  // 새 파일 추가
+  const addFileInput = () => {
+    const tempId = `new_${Date.now()}`;
+    setFiles(prev => [
+      ...prev,
+      {
+        id: tempId,
+        file: null,
+        name: "",
+        url: null,
+        isRepresentative: prev.filter(f => !f.isDeleted).length === 0,
+        isNew: true,
+        isDeleted: false,
+        overwrite: false
       }
-    }
-    setFiles(prev =>
-      prev.map(f => ({ ...f, isRepresentative: f.id === id ? value : f.isRepresentative }))
-    );
+    ]);
   };
 
-  // ---------------- 파일 추가/삭제 ----------------
-  const addFileInput = () => setFiles(prev => [...prev, { id: Date.now(), file: null, isRepresentative: false, isNew: true, isDeleted: false }]);
-  const removeFileInput = (id) => setFiles(prev => prev.map(f => f.id === id ? { ...f, isDeleted: true } : f));
+  // 삭제 처리
+  const removeFileInput = (id) => {
+    setFiles(prev => {
+      const updated = prev.map(f =>
+        f.id === id ? { ...f, isDeleted: true, isRepresentative: false } : f
+      );
 
-  // ---------------- 게시글 수정 ----------------
+      const aliveFiles = updated.filter(f => !f.isDeleted);
+      if (!aliveFiles.some(f => f.isRepresentative) && aliveFiles.length > 0) {
+        aliveFiles[0].isRepresentative = true;
+      }
+
+      return [...updated];
+    });
+  };
+
+  // 제출
   const handleSubmit = async (e) => {
     e.preventDefault();
     const memberNum = localStorage.getItem("memberNum");
     if (!memberNum) return alert("로그인이 필요합니다.");
 
-    const formData = new FormData();
-    formData.append("memberNum", memberNum);
+    const aliveFiles = files.filter(f => !f.isDeleted);
+    const repFile = aliveFiles.find(f => f.isRepresentative);
+    if (!repFile) return alert("대표 이미지는 반드시 1장 선택해야 합니다.");
 
+    const formData = new FormData();
+
+    // bbsDto
     const contentHTML = editorRef.current?.innerHTML || "";
     const bbsDtoPayload = { bbsTitle: title, bbsContent: contentHTML, bulletinType: "POTO" };
     formData.append("bbsDto", new Blob([JSON.stringify(bbsDtoPayload)], { type: "application/json" }));
 
-    const deletedFileIds = files.filter(f => f.isDeleted && !f.isNew).map(f => f.id);
-    formData.append("deletedFileIds", JSON.stringify(deletedFileIds));
+    // memberNum
+    formData.append("memberNum", new Blob([JSON.stringify(memberNum)], { type: "application/json" }));
 
-    files.forEach(f => {
-      if (f.file && !f.isDeleted) {
-        formData.append("files", f.file);
-        formData.append("isRepresentative", f.isRepresentative ? "Y" : "N");
-      }
-    });
+    // 삭제된 기존 파일
+    const deletedFileIds = files.filter(f => f.isDeleted && !f.isNew).map(f => f.id);
+    formData.append("deletedFileIds", new Blob([JSON.stringify(deletedFileIds)], { type: "application/json" }));
+
+    // 덮어쓰기 파일 (기존 파일만 해당)
+    const overwriteFileIds = files.filter(f => f.overwrite && !f.isNew).map(f => f.id);
+    formData.append("overwriteFileIds", new Blob([JSON.stringify(overwriteFileIds)], { type: "application/json" }));
+
+    // 새 파일 업로드
+    const newFiles = files.filter(f => !f.isDeleted && f.isNew && f.file);
+    newFiles.forEach(f => formData.append("files", f.file));
+
+    // 대표 이미지 전송
+    // 기존 파일이면 그대로 ID, 새 파일이면 임시ID
+    formData.append("isRepresentativeList", repFile.id.toString());
 
     try {
-      await axios.put(`${baseUrl}/member/${id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" }
-      });
+      await api.put(`${baseUrl}/member/${id}`, formData, { headers: { "Content-Type": "multipart/form-data" } });
       alert("게시글이 수정되었습니다.");
-      navigate("/imgbbs");
+      navigate(`/bbs/image/${id}`);
     } catch (error) {
       console.error("수정 오류:", error);
       alert("수정 실패: " + (error.response?.data?.message || "서버 오류"));
@@ -118,24 +159,13 @@ export default function GalleryEdit() {
       <form className="bbs-write-form" onSubmit={handleSubmit}>
         <div className="bbs-row">
           <div className="bbs-label">제목</div>
-          <input
-            type="text"
-            className="bbs-title-input"
-            placeholder="제목을 입력하세요"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
-          />
+          <input type="text" className="bbs-title-input" value={title} onChange={e => setTitle(e.target.value)} required />
         </div>
 
         <div className="bbs-row">
           <div className="bbs-label">내용</div>
-          <div
-            ref={editorRef}
-            contentEditable
-            className="bbs-content-input"
-            style={{ minHeight: "200px", border: "1px solid #ccc", padding: "10px", whiteSpace: "pre-wrap" }}
-          />
+          <div ref={editorRef} contentEditable className="bbs-content-input"
+               style={{ minHeight: "200px", border: "1px solid #ccc", padding: "10px", whiteSpace: "pre-wrap" }} />
         </div>
 
         <div className="bbs-row">
@@ -143,42 +173,38 @@ export default function GalleryEdit() {
           <div className="bbs-file-list">
             {files.map(f => !f.isDeleted && (
               <div className="bbs-file-row" key={f.id}>
-                <input
-                  type="file"
-                  accept=".jpg,.jpeg,image/jpeg"
-                  onChange={e => handleFileChange(f.id, e.target.files[0])}
-                />
-                {f.url && !f.file && <a href={f.url} target="_blank" rel="noreferrer">{f.name}</a>}
-                <div className="bbs-file-options">
-                  <label>
-                    <input
-                      type="radio"
-                      name={`repOption-${f.id}`}
-                      checked={f.isRepresentative}
-                      onChange={() => handleRepresentativeChange(f.id, true)}
-                    /> 대표이미지 삽입
-                  </label>
-                  <label>
-                    <input
-                      type="radio"
-                      name={`repOption-${f.id}`}
-                      checked={!f.isRepresentative}
-                      onChange={() => handleRepresentativeChange(f.id, false)}
-                    /> 대표이미지 미삽입
-                  </label>
-                </div>
-                {files.length > 1 && (
-                  <button type="button" className="bbs-file-remove" onClick={() => removeFileInput(f.id)}>❌</button>
+                {f.isNew || f.overwrite ? (
+                  <input
+                    type="file"
+                    accept=".jpg,.jpeg,image/jpeg"
+                    onChange={e => handleFileChange(f.id, e.target.files[0])}
+                  />
+                ) : (
+                  <span>{f.name} <button type="button" onClick={() => setFiles(prev => prev.map(file =>
+                      file.id === f.id ? { ...file, overwrite: true } : file
+                  ))}>파일 변경</button></span>
                 )}
+
+                {f.url && !f.overwrite && <a href={f.url} target="_blank" rel="noreferrer">보기</a>}
+
+                <label>
+                  <input
+                    type="radio"
+                    checked={f.isRepresentative}
+                    onChange={() => handleRepresentativeChange(f.id)}
+                  /> 대표이미지
+                </label>
+
+                <button type="button" onClick={() => removeFileInput(f.id)}>❌</button>
               </div>
             ))}
-            <button type="button" className="bbs-file-add" onClick={addFileInput}>➕ 파일 추가</button>
+            <button type="button" onClick={addFileInput}>➕ 파일 추가</button>
           </div>
         </div>
 
         <div className="bbs-btn-area">
-          <button type="button" className="bbs-cancel-btn" onClick={() => navigate("/imgbbs")}>취소</button>
-          <button type="submit" className="bbs-save-btn">수정</button>
+          <button type="button" onClick={() => navigate(`/bbs/image/${id}`)}>취소</button>
+          <button type="submit">수정</button>
         </div>
       </form>
     </div>

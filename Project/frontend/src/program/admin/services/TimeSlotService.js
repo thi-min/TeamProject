@@ -1,19 +1,23 @@
-import axios from "axios";
+import api from "../../../common/api/axios";
 
-const api = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE || "",
-});
+const TimeSlotService = {
+  // 관리(ADMIN)
+  create(dto) {
+    return api.post("/api/admin/timeslots", dto);
+  },
 
-// 관리(ADMIN)
-export const createTimeSlot = (dto) =>
-  api.post("/api/admin/timeslots", dto);
+  update(id, dto) {
+    return api.put(`/api/admin/timeslots/${id}`, dto);
+  },
 
-export const updateTimeSlot = (id, dto) =>
-  api.put(`/api/admin/timeslots/${id}`, dto);
+  delete(id) {
+    return api.delete(`/api/admin/timeslots/${id}`);
+  },
 
-export const deleteTimeSlot = (id) =>
-  api.delete(`/api/admin/timeslots/${id}`);
+  // 조회(공용)
+  fetchByType(timeType) {
+    return api.get(`/api/admin/timeslots/${timeType}`);
+  },
+};
 
-// 조회(공용)
-export const fetchTimeSlotsByType = (timeType) =>
-  api.get(`/api/admin/timeslots/${timeType}`);
+export default TimeSlotService;

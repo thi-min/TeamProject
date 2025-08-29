@@ -1,16 +1,20 @@
 .admin-reserve-page {
   width: 100%;
-  max-width: 1600px;
   margin: 0 auto;
   padding: 30px;
-  background: #fff;
   font-family: "Noto Sans KR", sans-serif;
 }
 
-.admin-reserve-page h2 {
+.admin-reserve-page h3 {
   font-size: 22px;
   font-weight: bold;
   margin-bottom: 25px;
+}
+
+.admin-reserve-detail h3 {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
 }
 
 /* 🔎 검색 영역 */

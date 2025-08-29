@@ -268,7 +268,13 @@ const LandReserveFormPage = () => {
 
   return (
     <div className="land-form-page">
-      <h2 className="form-title">놀이터 예약신청</h2>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon land"></div>
+          <div className="form_title">놀이터 예약 신청</div>
+        </div>
+      </div>
+      <h3 className="form-title">놀이터 예약 신청 폼</h3>
       <div className="required-info">
         <span className="required">*</span> 표시는 필수 입력항목입니다.
       </div>

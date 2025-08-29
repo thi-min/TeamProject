@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import axios from "axios";
+import api from "../../common/api/axios";
 import { useNavigate } from "react-router-dom";
 import "./Gallery.css";
 
@@ -59,9 +59,9 @@ export default function ImgWrite() {
     });
 
     try {
-      await axios.post(baseUrl, formData, { headers: { "Content-Type": "multipart/form-data" } });
+      await api.post(baseUrl, formData, { headers: { "Content-Type": "multipart/form-data" } });
       alert("게시글이 등록되었습니다.");
-      navigate("/imgbbs");
+      navigate("/bbs/image");
     } catch (error) {
       console.error("등록 오류:", error);
       alert("등록 실패: " + (error.response?.data?.message || "서버 오류"));
@@ -137,7 +137,7 @@ export default function ImgWrite() {
         </div>
 
         <div className="bbs-btn-area">
-          <button type="button" className="bbs-cancel-btn" onClick={() => navigate("/imgbbs")}>
+          <button type="button" className="bbs-cancel-btn" onClick={() => navigate("/bbs/image")}>
             취소
           </button>
           <button type="submit" className="bbs-save-btn">

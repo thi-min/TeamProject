@@ -5,12 +5,12 @@
 // - 권한: access(ALL/USER/ADMIN) 를 role로 필터링
 
 import { Link } from "react-router-dom";
-import { useAuth } from "../../common/context/AuthContext";     // 전역 로그인 상태
-import menuRoutes from "../../common/routes/menuRoutes";        // 메뉴 데이터
+import { useAuth } from "../../common/context/AuthContext"; // 전역 로그인 상태
+import menuRoutes from "../../common/routes/menuRoutes"; // 메뉴 데이터
 
 const canAccess = (access, isLogin, userRole) => {
-  if (access === "ALL") return true;                 // 누구나
-  if (access === "USER") return !!isLogin;           // 로그인 사용자(ADMIN 포함)
+  if (access === "ALL") return true; // 누구나
+  if (access === "USER") return !!isLogin; // 로그인 사용자(ADMIN 포함)
   if (access === "ADMIN") return userRole === "ADMIN";
   return false;
 };
@@ -19,7 +19,7 @@ const NavLinks = () => {
   const { isLogin, userRole } = useAuth();
 
   // 1차 메뉴 필터링
-  const visibleMenus = (menuRoutes || []).filter(menu =>
+  const visibleMenus = (menuRoutes || []).filter((menu) =>
     canAccess(menu.access, isLogin, userRole)
   );
 
@@ -28,11 +28,14 @@ const NavLinks = () => {
       <div className="depth_area">
         <div className="depth_list">
           {visibleMenus.map((menu) => {
-            const hasChildren = Array.isArray(menu.children) && menu.children.length > 0;
+            const hasChildren =
+              Array.isArray(menu.children) && menu.children.length > 0;
 
             // 2차 메뉴 필터
             const visibleChildren = hasChildren
-              ? menu.children.filter(sub => canAccess(sub.access, isLogin, userRole))
+              ? menu.children.filter((sub) =>
+                  canAccess(sub.access, isLogin, userRole)
+                )
               : [];
 
             // 1차 메뉴 path 없으면 2차 메뉴 첫 번째 path로 폴백

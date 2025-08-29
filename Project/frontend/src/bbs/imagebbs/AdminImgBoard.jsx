@@ -18,6 +18,7 @@ export default function AdminImgBoard() {
   const navigate = useNavigate();
   const baseUrl = "http://127.0.0.1:8090/admin/bbs/poto";
   const pageSize = 12;
+  const backendUrl = "http://127.0.0.1:8090";
 
   // ---------------- 게시글 + 대표 이미지 조회 ----------------
   const fetchPosts = async (page = 0, keyword = "") => {
@@ -30,16 +31,26 @@ export default function AdminImgBoard() {
       }
 
       const res = await api.get(baseUrl, { params });
-      const postsArray = Array.isArray(res.data.list) ? res.data.list : [];
+
+      // ---------------- 게시글 배열 가져오기 ----------------
+      const postsArray = res.data.list || []; // 백엔드 key: list
       setPosts(postsArray);
 
-      setTotalPages(res.data.totalPages ?? 1);
-      setCurrentPage(res.data.page ?? 0);
+      // totalPages 계산 (백엔드에서 total과 size 기준)
+      const totalItems = res.data.total || 0;
+      setTotalPages(Math.ceil(totalItems / pageSize));
+      setCurrentPage(res.data.page || 0);
 
+      // ---------------- 대표 이미지 Map 처리 ----------------
       const repMap = {};
-      (res.data.representativeImages || []).forEach((img) => {
-        if (img.bulletinNum && img.imagePath) {
-          repMap[img.bulletinNum] = `http://127.0.0.1:8090${img.imagePath}`;
+      const repImagesFromBack = res.data.representativeImages || {};
+      Object.entries(repImagesFromBack).forEach(([key, value]) => {
+        if (value && value.imagePath) {
+          repMap[key] = value.imagePath.startsWith("http")
+            ? value.imagePath
+            : `${backendUrl}${value.imagePath}`;
+        } else {
+          repMap[key] = null;
         }
       });
       setRepImages(repMap);
@@ -120,9 +131,6 @@ export default function AdminImgBoard() {
           <button className="delete-btn" onClick={handleDeleteSelected}>
             선택 삭제
           </button>
-          <button className="write-btn" onClick={() => navigate("/bbs/image/write")}>
-            글쓰기
-          </button>
         </div>
       </div>
 
@@ -147,13 +155,13 @@ export default function AdminImgBoard() {
       {posts.length > 0 ? (
         <div className="img-board-grid">
           {posts.map((post) => {
-            const repImage = repImages[post.bulletinNum];
+            const repImage = repImages[post.bulletinNum?.toString()];
             return (
               <div
                 className={`img-board-item ${selectedPosts.includes(post.bulletinNum) ? "selected" : ""}`}
                 key={post.bulletinNum}
               >
-                {/* ✅ 개별 체크박스 - 카드 왼쪽 상단 */}
+                {/* 개별 체크박스 */}
                 <input
                   type="checkbox"
                   className="item-checkbox"
@@ -164,7 +172,7 @@ export default function AdminImgBoard() {
                 {/* 게시글 이미지 + 클릭 이동 */}
                 <div
                   className="img-thumb"
-                  onClick={() => navigate(`/admin/bbs/image/Detail/${post.bulletinNum}`)} // ✅ 경로 수정
+                  onClick={() => navigate(`/admin/bbs/image/Detail/${post.bulletinNum}`)}
                 >
                   {repImage ? (
                     <img src={repImage} alt={post.bbstitle} />

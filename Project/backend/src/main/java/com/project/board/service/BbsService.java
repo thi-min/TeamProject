@@ -46,7 +46,7 @@ public interface BbsService {
     
     List<ImageBbsDto> getImageBbsList(Long bbsId); // 특정 게시글에 등록된 이미지 리스트 조회
     
-    ImageBbsDto updateImage(Long imageId, ImageBbsDto dto, MultipartFile newFile); // 이미지 수정 (예: alt 텍스트나 순서 등 정보 변경)
+    BbsDto updatePotoBbs(Long bulletinNum, BbsDto dto, List<MultipartFile> newFiles, List<Long> representativeFileIds, List<Long> deletedFileIds,List<Long> overwriteFileIds, Long requesterMemberNum);
 
     List<FileUpLoadDto> saveFileList(Long bbsId, List<MultipartFile> files, BoardType boardType); // 파일 업로드 리스트 저장 (첨부파일 등록)
     

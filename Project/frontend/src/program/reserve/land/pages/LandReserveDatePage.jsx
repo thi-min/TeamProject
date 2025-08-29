@@ -116,8 +116,13 @@ const LandReserveDatePage = () => {
 
   return (
     <div className="land-date-page">
-      <h2>놀이터 예약 신청</h2>
-      <p>예약하실 날짜를 선택해주세요</p>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon land"></div>
+          <div className="form_title">놀이터 예약 신청</div>
+        </div>
+      </div>
+      <h3>예약하실 날짜를 선택해주세요</h3>
 
       <div className="calendar-wrapper">
         <Calendar

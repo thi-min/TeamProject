@@ -32,52 +32,57 @@ public class KakaoAuthController {
     public ResponseEntity<?> handleKakaoCallback(String code) throws Exception {
         log.info("[KakaoCallback] code={}", code);
 
-        // 1) 토큰 발급
+        // 1) 인가코드 → 카카오 AccessToken
         final String kakaoAccessToken = kakaoApiService.getAccessToken(code);
 
-        // 2) 사용자 정보 조회
+        // 2) 카카오 사용자 정보 조회
         final KakaoUserInfoDto info = kakaoApiService.getUserInfo(kakaoAccessToken);
-        final String rawEmail  = info.getEmail();                                // 카카오가 내려준 이메일
-        final String email     = rawEmail == null ? null : rawEmail.toLowerCase(); // 🔑 비교 안정성 위해 소문자 정규화
-        final String kakaoId   = info.getKakaoId();
+        final String rawEmail = info.getEmail(); // 카카오 이메일
+        final String email = rawEmail == null ? null : rawEmail.toLowerCase(); // 비교 안정성 위해 소문자 정규화
+        final String kakaoId = info.getKakaoId();
 
         log.info("[KakaoCallback] email={}, kakaoId={}", email, kakaoId);
 
-        // 3) 기존 회원 조회: 이메일 우선 → 없으면 kakaoId로도 시도
+        // 3) 기존 회원 조회: 이메일(memberId) 우선 → 없으면 kakaoId 로도 시도
         Optional<MemberEntity> found = Optional.empty();
+
         if (email != null && !email.isBlank()) {
             found = memberRepository.findByMemberId(email);
         }
+
         if (found.isEmpty() && kakaoId != null && !kakaoId.isBlank()) {
-            // 스키마에 kakaoId 컬럼이 없다면, memberId==kakaoId 로 저장한 경우를 대비해 memberId로도 조회
-            // (kakaoId 컬럼이 있다면 findByKakaoId 로 바꾸세요)
+            // (A) 과거 정책: memberId == kakaoId 로 저장된 유저 대응
             Optional<MemberEntity> byMemberId = memberRepository.findByMemberId(kakaoId);
             if (byMemberId.isPresent()) {
                 found = byMemberId;
             } else if (hasKakaoIdColumn()) {
-                // ⚠️ kakaoId 전용 컬럼이 있는 프로젝트라면 아래 메서드를 MemberRepository에 추가하고 사용
-                found = memberRepository.findByKakaoId(kakaoId);
+                // (B) DB 스키마에 kakaoId 전용 컬럼이 있는 경우 (프로젝트에 맞게 Repository 메서드 추가 필요)
+                // found = memberRepository.findByKakaoId(kakaoId);
             }
         }
 
+        // 4) 로그인 처리
         if (found.isPresent()) {
-            // 4) 로그인 처리: JWT 발급 + HttpOnly 쿠키 세팅
             MemberEntity m = found.get();
 
-            final String subject = m.getMemberId();              // 토큰 subject는 "로그인 ID(이메일)"로 통일
-            final String role    = "USER";                       // 필요 시 m.getRole() 등에서 읽어오세요
-            final String at = jwtTokenProvider.createAccessToken(subject, role);
-            final String rt = jwtTokenProvider.createRefreshToken(subject, role);
+            // 토큰 subject는 "로그인 ID(이메일)"로 통일
+            final String subject = m.getMemberId();
+            // 필요 시 DB role 사용: m.getRole() 등
+            final String role = "USER";
 
-            // HttpOnly 쿠키(도메인/secure/sameSite는 환경에 맞게 조정)
-            ResponseCookie atCookie = ResponseCookie.from("accessToken", at)
+            final String accessToken = jwtTokenProvider.createAccessToken(subject, role);
+            final String refreshToken = jwtTokenProvider.createRefreshToken(subject, role);
+
+            // HttpOnly 쿠키 세팅 (도메인/secure/sameSite는 환경에 맞춰 조정)
+            ResponseCookie atCookie = ResponseCookie.from("accessToken", accessToken)
                     .httpOnly(true)
-                    .secure(false)             // HTTPS면 true 권장
+                    .secure(false)              // HTTPS 환경이면 true 권장
                     .path("/")
                     .maxAge(Duration.ofMinutes(30))
-                    .sameSite("Lax")
+                    .sameSite("Lax")            // 프론트/백엔드 오리진이 다르면 None; Secure=true 필요
                     .build();
-            ResponseCookie rtCookie = ResponseCookie.from("refreshToken", rt)
+
+            ResponseCookie rtCookie = ResponseCookie.from("refreshToken", refreshToken)
                     .httpOnly(true)
                     .secure(false)
                     .path("/")
@@ -85,9 +90,14 @@ public class KakaoAuthController {
                     .sameSite("Lax")
                     .build();
 
+            // ⚠️ 프론트 가드(localStorage)와도 호환되게 바디에도 토큰/기본정보 포함
             Map<String, Object> body = new HashMap<>();
             body.put("action", "signin_ok");
-            body.put("redirect", "/member/mypage"); // 프론트에서 이 경로로 navigate
+            body.put("redirect", "/member/mypage");
+            body.put("accessToken", accessToken);
+            body.put("refreshToken", refreshToken);
+            body.put("memberId", subject);
+            body.put("role", role);
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.SET_COOKIE, atCookie.toString())
@@ -95,13 +105,13 @@ public class KakaoAuthController {
                     .body(body);
         }
 
-        // 5) 회원 없음 → /join 으로 보내기 위한 프리필 구성
+        // 5) 회원 없음 → /join 로 보내기 위한 프리필 구성
         Map<String, Object> prefill = new HashMap<>();
-        prefill.put("memberId", email != null ? email : "");          // 현재 정책: ID=이메일 (이전에 ID=카카오ID였다면 맞춰 수정)
-        prefill.put("memberName", info.getName());
+        prefill.put("memberId", email != null ? email : ""); // 정책: ID=이메일
+        prefill.put("memberName", info.getName());           // nickname X, name O
         prefill.put("memberBirth", toIsoBirth(info.getBirthyear(), info.getBirthday())); // YYYY-MM-DD
-        prefill.put("memberSex", normalizeSex(info.getGender()));                       // MAN/WOMAN
-        prefill.put("memberPhone", info.getPhoneNumber());                              // +82 ... → 프론트에서 포맷팅
+        prefill.put("memberSex", normalizeSex(info.getGender())); // MAN/WOMAN
+        prefill.put("memberPhone", info.getPhoneNumber());       // +82 형식 → 프론트에서 포맷
 
         Map<String, Object> res = new HashMap<>();
         res.put("action", "go_join");
@@ -111,7 +121,6 @@ public class KakaoAuthController {
 
         return ResponseEntity.ok(res);
     }
-
     private String toIsoBirth(String birthyear, String birthday) {
         String y = birthyear == null ? "" : birthyear.trim();
         String mmdd = birthday == null ? "" : birthday.trim();

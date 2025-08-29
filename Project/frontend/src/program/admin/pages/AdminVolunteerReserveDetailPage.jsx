@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../../common/api/axios";
 import "../style/ReserveManage.css";
+import AdminReserveService from "../services/AdminReserveService";
 
 const AdminVolunteerReserveDetailPage = () => {
   const { reserveCode } = useParams();
@@ -13,7 +14,7 @@ const AdminVolunteerReserveDetailPage = () => {
     async function fetchDetail() {
       try {
         // 관리자 - 봉사 예약 상세 조회
-        const { data } = await api.get(`/api/admin/reserve/volunteer/${reserveCode}`);
+        const { data } = await AdminReserveService.getVolunteerReservationDetail(reserveCode);
         setDetail(data);
         setNewState(data.reserveState);
       } catch (err) {
@@ -26,25 +27,36 @@ const AdminVolunteerReserveDetailPage = () => {
 
   const handleUpdateState = async () => {
     if (!window.confirm("예약 상태를 변경하시겠습니까?")) return;
-    try {
-      // 관리자 - 예약 상태 변경 (공통 엔드포인트)
-      await api.patch(`/api/admin/reserve/${reserveCode}/state`, { reserveState: newState, });
-      alert("상태가 변경되었습니다.");
-      navigate("/admin/reserve/volunteer");
-    } catch (err) {
-      if (newState === "ING" || newState === "DONE") {
-      alert("취소된 예약은 진행/완료로 변경할 수 없습니다.");
-    } else {
-      alert("상태 변경 중 오류가 발생했습니다.");
-    }
-  }
-};
+    if (
+          detail.reserveState === "CANCEL" &&
+          (newState === "ING" || newState === "DONE")
+        ) {
+          alert("취소된 예약은 대기/승인 으로 변경할 수 없습니다.");
+          return;
+        }
+    
+        try {
+          await AdminReserveService.updateReserveState(reserveCode, newState);
+          alert("상태가 변경되었습니다.");
+          navigate("/admin/reserve/land");
+        } catch (err) {
+          console.error("상태 변경 실패:", err);
+          alert("상태 변경 중 오류가 발생했습니다.");
+        }
+      };
 
   if (!detail) return <p>로딩 중...</p>;
 
   return (
     <div className="admin-reserve-detail">
-      <h2>봉사 예약 상세</h2>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon vol"></div>
+          <div className="form_title">봉사 예약 상세</div>
+        </div>
+      </div>
+      <h3>봉사 예약 정보</h3>
+      <div className="form_wrap">
       <table className="table type2 responsive border">
          <colgroup>
           <col className="w20p" />
@@ -74,7 +86,7 @@ const AdminVolunteerReserveDetailPage = () => {
           </tr>
         </tbody>
       </table>
-
+      </div>
       <div className="form_center_box">
           <div className="temp_btn white md">
             <button type="button" className="btn" onClick={() => navigate(-1)}>

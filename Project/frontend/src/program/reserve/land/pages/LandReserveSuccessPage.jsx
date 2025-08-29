@@ -20,13 +20,14 @@ const LandReserveSuccessPage = () => {
   };
 
   return (
+    
     <div className="box reserve_box">
       <div className="reserve_header">
-        <h2>예약 신청 완료</h2>
+        <h3>예약 신청 완료</h3>
       </div>
 
       <div className="reserve_code">
-        예약번호 <strong>{reserveCode}</strong>
+        예약번호 &nbsp;<span>{reserveCode}</span>
       </div>
 
       <div className="reserve_body">
@@ -40,7 +41,7 @@ const LandReserveSuccessPage = () => {
             예약 결제하기
           </button>
         </span>
-        <span className="temp_btn white md">
+        <span className="temp_btn  md">
           <button type="button" className="btn" onClick={handleGoMyReserves}>
             예약 내역 확인
           </button>
@@ -52,11 +53,12 @@ const LandReserveSuccessPage = () => {
         <div className="modal">
           <div className="modal-content">
             <PaymentInfo />
-            <button onClick={() => setShowModal(false)}>닫기</button>
+            <button type="button" className="btn" onClick={() => setShowModal(false)}>닫기</button>
           </div>
         </div>
       )}
     </div>
+
   );
 };
 

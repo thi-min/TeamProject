@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../../common/api/axios";
 import "../style/ReserveManage.css";
+import AdminReserveService from "../services/AdminReserveService";
 
 const AdminLandReserveDetailPage = () => {
   const { reserveCode } = useParams();
@@ -12,7 +13,7 @@ const AdminLandReserveDetailPage = () => {
   useEffect(() => {
     async function fetchDetail() {
       try {
-        const { data } = await api.get(`/api/admin/reserve/land/${reserveCode}`);
+        const { data } = await AdminReserveService.getLandReservationDetail(reserveCode);
         setDetail(data);
         setNewState(data.reserveState);
       } catch (err) {
@@ -34,9 +35,7 @@ const AdminLandReserveDetailPage = () => {
     }
 
       try {
-        await api.patch(`/api/admin/reserve/${reserveCode}/state`, {
-          reserveState: newState,
-        });
+        await AdminReserveService.updateReserveState(reserveCode, newState);
         alert("상태가 변경되었습니다.");
         navigate("/admin/reserve/land");
       } catch (err) {
@@ -49,7 +48,14 @@ const AdminLandReserveDetailPage = () => {
 
   return (
     <div className="admin-reserve-detail">
-      <h2>놀이터 예약 상세</h2>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon land"></div>
+          <div className="form_title">놀이터 예약 상세</div>
+        </div>
+      </div>
+      <h3>놀이터 예약 정보</h3>
+      <div className="form_wrap">
       <table className="table type2 responsive border">
         <colgroup>
           <col className="w20p" />
@@ -77,8 +83,9 @@ const AdminLandReserveDetailPage = () => {
           </tr>
         </tbody>
       </table>
-
-      <h2>결제 정보</h2>
+      </div>
+      <h3>결제 정보</h3>
+      <div className="form_wrap">
       <table className="table type2 responsive border">
         <colgroup>
           <col className="w20p" />
@@ -90,7 +97,7 @@ const AdminLandReserveDetailPage = () => {
           <tr><th>총 결제금액</th><td><b>{detail.totalPrice}원</b></td></tr>
         </tbody>
       </table>
-
+      </div>
       <div className="form_center_box">
           <div className="temp_btn white md">
             <button type="button" className="btn" onClick={() => navigate(-1)}>

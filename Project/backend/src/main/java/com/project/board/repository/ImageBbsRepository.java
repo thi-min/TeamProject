@@ -26,4 +26,8 @@ public interface ImageBbsRepository extends JpaRepository<ImageBbsEntity, Long> 
     // 대표 이미지 조회 (엔티티 수정 없이, Y/N로 대표 여부 판단)
     @Query(value = "SELECT i.image_path FROM imagebbs i WHERE i.bulletin_num = :bulletinNum AND i.is_representative = 'Y' LIMIT 1", nativeQuery = true)
     String findRepresentativeImagePath(@Param("bulletinNum") Long bulletinNum);
+    
+    ImageBbsEntity findTopByBbsBulletinNumOrderByBulletinNumAsc(Long bulletinNum);
+    
+   
 }
