@@ -24,7 +24,7 @@ export default function GalleryEdit() {
         if (editorRef.current) editorRef.current.innerHTML = data.bbs.bbsContent || "";
 
         const existingFiles = (data.files || []).map(f => ({
-          id: f.fileNum,
+          id: f.fileNum, // 기존 파일은 DB filenum
           file: null,
           name: f.originalName,
           url: f.fileUrl || null,
@@ -34,7 +34,6 @@ export default function GalleryEdit() {
           overwrite: false
         }));
 
-        // 대표 이미지 없으면 첫 번째 살아있는 파일 지정
         if (!existingFiles.some(f => f.isRepresentative) && existingFiles.length > 0) {
           existingFiles[0].isRepresentative = true;
         }
@@ -58,12 +57,11 @@ export default function GalleryEdit() {
     }
 
     setFiles(prev =>
-      prev.map(f => {
-        if (f.id === id) {
-          return { ...f, file: newFile, isNew: true, overwrite: true, name: newFile.name };
-        }
-        return f;
-      })
+      prev.map(f =>
+        f.id === id
+          ? { ...f, file: newFile, isNew: f.isNew || true, overwrite: true, name: newFile.name }
+          : f
+      )
     );
   };
 
@@ -76,10 +74,11 @@ export default function GalleryEdit() {
 
   // 새 파일 추가
   const addFileInput = () => {
+    const tempId = `new_${Date.now()}`;
     setFiles(prev => [
       ...prev,
       {
-        id: Date.now(),
+        id: tempId,
         file: null,
         name: "",
         url: null,
@@ -98,7 +97,6 @@ export default function GalleryEdit() {
         f.id === id ? { ...f, isDeleted: true, isRepresentative: false } : f
       );
 
-      // 대표 이미지 없으면 첫 번째 살아있는 파일로 재설정
       const aliveFiles = updated.filter(f => !f.isDeleted);
       if (!aliveFiles.some(f => f.isRepresentative) && aliveFiles.length > 0) {
         aliveFiles[0].isRepresentative = true;
@@ -115,8 +113,8 @@ export default function GalleryEdit() {
     if (!memberNum) return alert("로그인이 필요합니다.");
 
     const aliveFiles = files.filter(f => !f.isDeleted);
-    const repCount = aliveFiles.filter(f => f.isRepresentative).length;
-    if (repCount === 0) return alert("대표 이미지는 반드시 1장 선택해야 합니다.");
+    const repFile = aliveFiles.find(f => f.isRepresentative);
+    if (!repFile) return alert("대표 이미지는 반드시 1장 선택해야 합니다.");
 
     const formData = new FormData();
 
@@ -132,19 +130,17 @@ export default function GalleryEdit() {
     const deletedFileIds = files.filter(f => f.isDeleted && !f.isNew).map(f => f.id);
     formData.append("deletedFileIds", new Blob([JSON.stringify(deletedFileIds)], { type: "application/json" }));
 
-    // 덮어쓰기 파일
-    const overwriteFileIds = files.filter(f => f.overwrite).map(f => f.id);
+    // 덮어쓰기 파일 (기존 파일만 해당)
+    const overwriteFileIds = files.filter(f => f.overwrite && !f.isNew).map(f => f.id);
     formData.append("overwriteFileIds", new Blob([JSON.stringify(overwriteFileIds)], { type: "application/json" }));
 
     // 새 파일 업로드
-    const filesForUpload = files.filter(f => !f.isDeleted && f.file);
-    filesForUpload.forEach(f => formData.append("files", f.file));
+    const newFiles = files.filter(f => !f.isDeleted && f.isNew && f.file);
+    newFiles.forEach(f => formData.append("files", f.file));
 
-    // 대표 이미지 id 리스트
-    const representativeIds = aliveFiles
-      .filter(f => f.isRepresentative)
-      .map(f => f.id);
-    formData.append("representativeFileIds", new Blob([JSON.stringify(representativeIds)], { type: "application/json" }));
+    // 대표 이미지 전송
+    // 기존 파일이면 그대로 ID, 새 파일이면 임시ID
+    formData.append("isRepresentativeList", repFile.id.toString());
 
     try {
       await api.put(`${baseUrl}/member/${id}`, formData, { headers: { "Content-Type": "multipart/form-data" } });

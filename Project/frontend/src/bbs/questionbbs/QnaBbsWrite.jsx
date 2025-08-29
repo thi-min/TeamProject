@@ -4,44 +4,42 @@ import { useNavigate } from "react-router-dom";
 
 function QnaBbsWrite() {
   const [bbstitle, setBbstitle] = useState("");
-  const [files, setFiles] = useState([
-    { id: Date.now(), file: null, insertOption: "no-insert" },
-  ]);
+  const [files, setFiles] = useState([{ id: Date.now(), file: null, insertOption: "no-insert" }]);
   const editorRef = useRef(null);
   const navigate = useNavigate();
-
   const baseUrl = "http://127.0.0.1:8090/bbs/bbslist/bbsadd";
 
   // 파일 선택
   const handleFileChange = (id, newFile) => {
-    setFiles((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, file: newFile } : f))
+    setFiles(prev =>
+      prev.map(f => (f.id === id ? { ...f, file: newFile } : f))
     );
 
+    // 이미지가 아니면 본문 삽입 옵션 초기화
     if (newFile && !["image/jpeg", "image/jpg"].includes(newFile.type)) {
-      setFiles((prev) =>
-        prev.map((f) => (f.id === id ? { ...f, insertOption: "no-insert" } : f))
+      setFiles(prev =>
+        prev.map(f => (f.id === id ? { ...f, insertOption: "no-insert" } : f))
       );
     }
   };
 
   // 본문 삽입 옵션 변경
   const handleInsertOptionChange = (id, option) => {
-    const fileObj = files.find((f) => f.id === id);
+    const fileObj = files.find(f => f.id === id);
     const file = fileObj?.file;
 
     if (option === "insert") {
-      if (!file) {
-        alert("먼저 파일을 선택해주세요.");
-        return;
-      }
+      if (!file) return alert("먼저 파일을 선택해주세요.");
       if (!["image/jpeg", "image/jpg"].includes(file.type)) {
-        alert("본문 삽입은 jpg/jpeg 이미지 파일만 가능합니다.");
-        return;
+        return alert("본문 삽입은 jpg/jpeg 이미지 파일만 가능합니다.");
       }
 
+      // 이미 삽입된 경우 다시 삽입하지 않음
+      const alreadyInserted = editorRef.current?.querySelector(`img[data-id='${id}']`);
+      if (alreadyInserted) return;
+
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = e => {
         const imgTag = `<img src="${e.target.result}" data-id="${id}" style="max-width:600px;" />`;
 
         if (editorRef.current) {
@@ -62,38 +60,37 @@ function QnaBbsWrite() {
       };
       reader.readAsDataURL(file);
     } else {
+      // no-insert이면 본문에서 제거
       if (editorRef.current) {
         const imgs = editorRef.current.querySelectorAll(`img[data-id='${id}']`);
-        imgs.forEach((img) => img.remove());
+        imgs.forEach(img => img.remove());
       }
     }
 
-    setFiles((prev) =>
-      prev.map((f) => (f.id === id ? { ...f, insertOption: option } : f))
+    setFiles(prev =>
+      prev.map(f => (f.id === id ? { ...f, insertOption: option } : f))
     );
   };
 
-  // 파일 input 추가/삭제
+  // 파일 추가
   const addFileInput = () => {
-    setFiles((prev) => [
-      ...prev,
-      { id: Date.now(), file: null, insertOption: "no-insert" },
-    ]);
+    setFiles(prev => [...prev, { id: Date.now(), file: null, insertOption: "no-insert" }]);
   };
 
-  const removeFileInput = (id) => {
-    setFiles((prev) => prev.filter((f) => f.id !== id));
+  // 파일 삭제
+  const removeFileInput = id => {
+    setFiles(prev => prev.filter(f => f.id !== id));
     if (editorRef.current) {
       const imgs = editorRef.current.querySelectorAll(`img[data-id='${id}']`);
-      imgs.forEach((img) => img.remove());
+      imgs.forEach(img => img.remove());
     }
   };
 
-  // MutationObserver로 이미지 삭제 감지
+  // 본문 삽입 이미지 삭제 감지
   useEffect(() => {
     const observer = new MutationObserver(() => {
-      setFiles((prevFiles) =>
-        prevFiles.map((f) => {
+      setFiles(prevFiles =>
+        prevFiles.map(f => {
           if (f.insertOption === "insert") {
             const imgExists = editorRef.current?.querySelector(`img[data-id='${f.id}']`);
             if (!imgExists) return { ...f, insertOption: "no-insert" };
@@ -111,20 +108,17 @@ function QnaBbsWrite() {
   }, []);
 
   // 제출
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     const memberNum = localStorage.getItem("memberNum");
-    if (!memberNum) {
-      alert("로그인이 필요합니다.");
-      return;
-    }
+    if (!memberNum) return alert("로그인이 필요합니다.");
 
     const formData = new FormData();
     formData.append("memberNum", memberNum);
     formData.append("type", "FAQ");
 
+    // 본문에는 insert 선택된 이미지만 포함
     const contentHTML = editorRef.current?.innerHTML || "";
-
     formData.append(
       "bbsDto",
       new Blob(
@@ -139,10 +133,10 @@ function QnaBbsWrite() {
       )
     );
 
-    files.forEach((f) => {
-      if (f.file) {
+    // 본문 미삽입 파일만 첨부
+    files.forEach(f => {
+      if (f.file && f.insertOption === "no-insert") {
         formData.append("files", f.file);
-        formData.append("insertOptions", f.insertOption);
       }
     });
 
@@ -168,7 +162,7 @@ function QnaBbsWrite() {
             className="bbs-title-input"
             placeholder="제목을 입력해 주세요"
             value={bbstitle}
-            onChange={(e) => setBbstitle(e.target.value)}
+            onChange={e => setBbstitle(e.target.value)}
             required
           />
         </div>
@@ -186,12 +180,9 @@ function QnaBbsWrite() {
         <div className="bbs-row">
           <div className="bbs-label">파일 첨부</div>
           <div className="bbs-file-list">
-            {files.map((f) => (
+            {files.map(f => (
               <div className="bbs-file-row" key={f.id}>
-                <input
-                  type="file"
-                  onChange={(e) => handleFileChange(f.id, e.target.files[0])}
-                />
+                <input type="file" onChange={e => handleFileChange(f.id, e.target.files[0])} />
                 <div className="bbs-file-options">
                   <label>
                     <input
@@ -200,7 +191,7 @@ function QnaBbsWrite() {
                       value="insert"
                       checked={f.insertOption === "insert"}
                       onChange={() => handleInsertOptionChange(f.id, "insert")}
-                    />{" "}
+                    />
                     본문 삽입
                   </label>
                   <label>
@@ -209,19 +200,13 @@ function QnaBbsWrite() {
                       name={`insertOption-${f.id}`}
                       value="no-insert"
                       checked={f.insertOption === "no-insert"}
-                      onChange={() =>
-                        handleInsertOptionChange(f.id, "no-insert")
-                      }
-                    />{" "}
+                      onChange={() => handleInsertOptionChange(f.id, "no-insert")}
+                    />
                     본문 미삽입
                   </label>
                 </div>
                 {files.length > 1 && (
-                  <button
-                    type="button"
-                    className="bbs-file-remove"
-                    onClick={() => removeFileInput(f.id)}
-                  >
+                  <button type="button" className="bbs-file-remove" onClick={() => removeFileInput(f.id)}>
                     ❌
                   </button>
                 )}

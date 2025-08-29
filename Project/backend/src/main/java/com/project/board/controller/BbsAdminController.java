@@ -123,6 +123,53 @@ public class BbsAdminController {
         }
     }
 
+ // ---------------- 관리자 NORMAL 게시판 단건 삭제 ----------------
+    @DeleteMapping("/normal/{id}")
+    public ResponseEntity<Void> deleteNormalBbs(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authorizationHeader) {
+
+        String token = authorizationHeader.replace("Bearer ", "");
+        if (!jwtTokenProvider.validateToken(token)) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String role = jwtTokenProvider.getRoleFromToken(token);
+        String adminId = jwtTokenProvider.getMemberIdFromToken(token);
+
+        if (!"ADMIN".equals(role)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        BbsDto dto = bbsService.getBbs(id);
+        if (dto == null || dto.getBulletinType() != BoardType.NORMAL) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .build(); // NORMAL 게시판이 아닌 경우 삭제 불가
+        }
+
+        bbsService.deleteBbs(id, null, adminId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/normal/{id}/files")
+    public ResponseEntity<List<Map<String, Object>>> getNormalFiles(@PathVariable Long id) {
+        List<FileUpLoadDto> filesList = bbsService.getFilesByBbs(id);
+        List<Map<String, Object>> fileMapList = new ArrayList<>();
+
+        for (FileUpLoadDto f : filesList) {
+            Map<String, Object> fileMap = new HashMap<>();
+            fileMap.put("fileNum", f.getFileNum());
+            fileMap.put("originalName", f.getOriginalName());
+            fileMap.put("savedName", f.getSavedName());
+            fileMap.put("path", f.getPath());
+            fileMap.put("size", f.getSize());
+            fileMap.put("extension", f.getExtension());
+            fileMap.put("fileUrl", "http://127.0.0.1:8090/admin/bbs/files/" + f.getFileNum() + "/download");
+            fileMapList.add(fileMap);
+        }
+
+        return ResponseEntity.ok(fileMapList);
+    }
 
     //답변 작성
     @PostMapping("/qna/{bbsId}/answer")

@@ -6,7 +6,13 @@ import com.project.board.BoardType;
 import com.project.board.dto.BbsDto;
 import com.project.board.dto.FileUpLoadDto;
 import com.project.board.dto.ImageBbsDto;
+import com.project.board.entity.QandAEntity;
+import com.project.board.exception.BbsException;
+import com.project.board.repository.QandARepository;
 import com.project.board.service.BbsService;
+
+import lombok.RequiredArgsConstructor;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.core.io.Resource;
@@ -16,6 +22,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,11 +33,14 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/bbs")
+@RequiredArgsConstructor 
 public class MemberBbsController {
 
 @Autowired  
     private BbsService bbsService;
 
+	private final QandARepository qandARepository;
+	
     private final String BACKEND_URL = "http://127.0.0.1:8090";
 
     // ---------------- 게시글 작성 ----------------
@@ -102,77 +112,142 @@ public class MemberBbsController {
         return ResponseEntity.ok(response);
     }
 
-
-    // ---------------- 게시글 수정 ----------------
+    
+    
+ // ---------------- 게시글 수정 ----------------
     @PutMapping("/member/{id}")
-    public ResponseEntity<Map<String, Object>> updateMemberBbs(
+    @Transactional
+    public ResponseEntity<Map<String, Object>> updateBbsByType(
             @PathVariable Long id,
             @RequestPart("memberNum") Long memberNum,
             @RequestPart("bbsDto") BbsDto dto,
             @RequestPart(value = "files", required = false) List<MultipartFile> files,
-            @RequestPart(value = "deletedFileIds", required = false) String deletedFileIds,
+            @RequestPart(value = "deletedFileIds", required = false) String deletedFileIds, // 이미지 게시판은 String, 일반은 List<Long> 처리
             @RequestPart(value = "overwriteFileIds", required = false) String overwriteFileIds,
-            @RequestPart(value = "isRepresentativeList", required = false) List<String> isRepresentativeList
+            @RequestPart(value = "insertOptions", required = false) List<String> insertOptions,
+            @RequestPart(value = "isRepresentativeList", required = false) String isRepresentativeList,
+            @RequestParam(value = "isAdmin", defaultValue = "false") boolean isAdmin,
+            @RequestPart(value = "adminId", required = false) String adminId
     ) {
-        // 1️⃣ 삭제/덮어쓰기 리스트 파싱
-        List<Long> deleteIds = parseDeleteIds(deletedFileIds);
-        List<Long> overwriteIds = parseDeleteIds(overwriteFileIds);
-        if (overwriteIds != null) deleteIds.addAll(overwriteIds);
+        try {
+            Map<String, Object> response = new HashMap<>();
 
-        // 2️⃣ 새 파일 리스트 정리 (MultipartFile)
-        List<MultipartFile> newFilesList = files != null
-                ? files.stream().filter(f -> f != null && !f.isEmpty()).collect(Collectors.toList())
-                : Collections.emptyList();
+            if (dto.getBulletinType() == BoardType.POTO) {
+                // ==================== 이미지 게시판 처리 ====================
+                List<Long> deleteIds = (deletedFileIds != null && !deletedFileIds.isBlank())
+                        ? parseDeleteIds(deletedFileIds)
+                        : new ArrayList<>();
 
-        // 3️⃣ 대표 이미지 id 리스트 변환 (String -> Long)
-        List<Long> representativeIds = isRepresentativeList != null
-                ? isRepresentativeList.stream().map(Long::valueOf).collect(Collectors.toList())
-                : Collections.emptyList();
+                List<Long> overwriteIds = (overwriteFileIds != null && !overwriteFileIds.isBlank())
+                        ? parseDeleteIds(overwriteFileIds)
+                        : new ArrayList<>();
 
-        // 4️⃣ Service 호출
-        BbsDto updated = bbsService.updatePotoBbs(
-                id,                  // 게시글 번호
-                dto,                 // BbsDto
-                newFilesList,        // 업로드할 새 파일 리스트
-                representativeIds,   // 대표 이미지 파일 id 리스트
-                deleteIds,           // 삭제된 파일 id 리스트
-                overwriteIds,        // 덮어쓰기 파일 id 리스트
-                memberNum            // 요청 회원 번호
-        );
+                if (!overwriteIds.isEmpty()) {
+                    deleteIds.addAll(overwriteIds); // 덮어쓰기 파일은 삭제 처리
+                }
 
-        // 5️⃣ 응답 구성
-        Map<String, Object> response = new HashMap<>();
-        response.put("bbs", updated);
+                List<MultipartFile> newFilesList = (files != null)
+                        ? files.stream().filter(f -> f != null && !f.isEmpty()).collect(Collectors.toList())
+                        : Collections.emptyList();
 
-        // 대표 이미지
-        ImageBbsDto repImg = bbsService.getRepresentativeImage(updated.getBulletinNum());
-        Map<String, Object> repImgMap = null;
-        if (repImg != null) {
-            repImgMap = new HashMap<>();
-            repImgMap.put("bulletinNum", repImg.getBulletinNum());
-            repImgMap.put("thumbnailPath", repImg.getThumbnailPath());
-            repImgMap.put("imagePath", repImg.getImagePath() != null ? BACKEND_URL + repImg.getImagePath() : null);
+                // 대표 이미지 id 처리
+                List<Long> representativeIds = new ArrayList<>();
+                if (isRepresentativeList != null && !isRepresentativeList.isBlank()) {
+                    try {
+                        representativeIds.add(Long.valueOf(isRepresentativeList));
+                    } catch (NumberFormatException e) {
+                        throw new BbsException("대표 이미지 ID가 유효하지 않습니다: " + isRepresentativeList);
+                    }
+                }
+                if (representativeIds.isEmpty()) {
+                    throw new BbsException("대표 이미지는 반드시 1장 선택해야 합니다.");
+                }
+
+                // Service 호출
+                BbsDto updated = bbsService.updatePotoBbs(
+                        id,
+                        dto,
+                        newFilesList,
+                        representativeIds,
+                        deleteIds,
+                        overwriteIds,
+                        memberNum
+                );
+
+                response.put("bbs", updated);
+
+                // 대표 이미지
+                ImageBbsDto repImg = bbsService.getRepresentativeImage(updated.getBulletinNum());
+                Map<String, Object> repImgMap = null;
+                if (repImg != null) {
+                    repImgMap = new HashMap<>();
+                    repImgMap.put("bulletinNum", repImg.getBulletinNum());
+                    repImgMap.put("thumbnailPath", repImg.getThumbnailPath());
+                    repImgMap.put("imagePath", repImg.getImagePath() != null ? BACKEND_URL + repImg.getImagePath() : null);
+                }
+                response.put("representativeImage", repImgMap);
+
+                // 첨부파일 리스트
+                List<FileUpLoadDto> filesList = bbsService.getFilesByBbs(updated.getBulletinNum());
+                List<Map<String, Object>> fileMapList = new ArrayList<>();
+                for (FileUpLoadDto f : filesList) {
+                    Map<String, Object> fileMap = new HashMap<>();
+                    fileMap.put("fileNum", f.getFileNum());
+                    fileMap.put("originalName", f.getOriginalName());
+                    fileMap.put("savedName", f.getSavedName());
+                    fileMap.put("path", f.getPath());
+                    fileMap.put("size", f.getSize());
+                    fileMap.put("extension", f.getExtension());
+                    fileMap.put("fileUrl", BACKEND_URL + "/bbs/files/" + f.getFileNum() + "/download");
+                    fileMapList.add(fileMap);
+                }
+                response.put("files", fileMapList);
+
+            } else {
+                // ==================== 일반 게시판 처리 ====================
+                List<Long> deletedIdsList = deletedFileIds != null
+                        ? parseDeleteIds(deletedFileIds) // String -> List<Long> 또는 List<Long> 그대로 전달
+                        : new ArrayList<>();
+
+                BbsDto updated = bbsService.updateBbs(
+                        id,
+                        dto,
+                        memberNum,
+                        adminId,
+                        files,
+                        deletedIdsList,
+                        isAdmin,
+                        insertOptions
+                );
+
+                response.put("bbs", updated);
+
+                // 첨부파일 리스트
+                List<Map<String, Object>> fileMapList = new ArrayList<>();
+                if (files != null) {
+                    for (MultipartFile f : files) {
+                        Map<String, Object> fileMap = new HashMap<>();
+                        fileMap.put("fileName", f.getOriginalFilename());
+                        fileMap.put("size", f.getSize());
+                        fileMapList.add(fileMap);
+                    }
+                }
+                response.put("files", fileMapList);
+            }
+
+            return ResponseEntity.ok(response);
+
+        } catch (BbsException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "서버 오류: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
         }
-        response.put("representativeImage", repImgMap);
-
-        // 첨부파일 리스트
-        List<FileUpLoadDto> filesList = bbsService.getFilesByBbs(updated.getBulletinNum());
-        List<Map<String, Object>> fileMapList = new ArrayList<>();
-        for (FileUpLoadDto f : filesList) {
-            Map<String, Object> fileMap = new HashMap<>();
-            fileMap.put("fileNum", f.getFileNum());
-            fileMap.put("originalName", f.getOriginalName());
-            fileMap.put("savedName", f.getSavedName());
-            fileMap.put("path", f.getPath());
-            fileMap.put("size", f.getSize());
-            fileMap.put("extension", f.getExtension());
-            fileMap.put("fileUrl", BACKEND_URL + "/bbs/files/" + f.getFileNum() + "/download");
-            fileMapList.add(fileMap);
-        }
-        response.put("files", fileMapList);
-
-        return ResponseEntity.ok(response);
     }
+
 
 
 
@@ -220,12 +295,24 @@ public class MemberBbsController {
             fileMapList.add(fileMap);
         }
 
-        // 4. 결과 맵 구성
+     // 4. FAQ/Answer 처리
+        String answer = null;
+        if (dto.getBulletinType() == BoardType.FAQ) {
+            Optional<QandAEntity> qaEntity = qandARepository.findByBbsBulletinNum(id);
+            if (qaEntity.isPresent()) {
+                answer = qaEntity.get().getAnswer();
+            }
+        }
+        
+        // 5. 결과 맵 구성
         Map<String, Object> result = new HashMap<>();
         result.put("bbs", dto);
         result.put("representativeImage", repImgMap);
         result.put("files", fileMapList);
-
+        
+        if (dto.getBulletinType() == BoardType.FAQ) {  
+            result.put("answer", answer);  
+        }
         return ResponseEntity.ok(result);
     }
 
@@ -302,7 +389,8 @@ public class MemberBbsController {
 
     // ---------------- 첨부파일 다운로드 ----------------
     @GetMapping("/files/{fileId}/download")
-    public ResponseEntity<Resource> downloadFile(@PathVariable Long fileId) {
+    public ResponseEntity<Resource> downloadFile(@PathVariable Long fileId,
+                                                 @RequestParam(required = false) String boardType) {
         FileUpLoadDto fileDto = bbsService.getFileById(fileId);
         Path path = Paths.get(fileDto.getPath(), fileDto.getSavedName());
         Resource resource = new FileSystemResource(path);
@@ -311,14 +399,20 @@ public class MemberBbsController {
             return ResponseEntity.notFound().build();
         }
 
-        String ext = fileDto.getExtension();
-        MediaType mediaType = "jpg".equalsIgnoreCase(ext) || "jpeg".equalsIgnoreCase(ext)
-                ? MediaType.IMAGE_JPEG
-                : MediaType.APPLICATION_OCTET_STREAM;
+        // 이미지 게시판(boardType=image)에서만 jpg, jpeg 허용
+        if ("image".equals(boardType)) {
+            String ext = fileDto.getExtension().toLowerCase();
+            if (!ext.equals("jpg") && !ext.equals("jpeg")) {
+                return ResponseEntity.badRequest().build();
+            }
+        }
 
         return ResponseEntity.ok()
-                .contentType(mediaType)
-                .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileDto.getOriginalName() + "\"")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + fileDto.getOriginalName() + "\"")
                 .body(resource);
     }
+
+
 }

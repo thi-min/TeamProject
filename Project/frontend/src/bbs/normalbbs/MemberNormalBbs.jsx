@@ -110,7 +110,7 @@ function MemberNormalBbs() {
                 <td>{post.bulletinNum}</td>
                 <td>{post.bbsTitle}</td>
                 <td>관리자</td>
-                <td>{new Date(post.createdAt).toLocaleDateString()}</td>
+                <td>{post.registDate ? new Date(post.registDate).toLocaleDateString() : ""}</td>
               </tr>
             ))
           ) : (

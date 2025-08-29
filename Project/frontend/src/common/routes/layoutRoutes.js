@@ -82,7 +82,7 @@ const layoutRoutes = [
   <Route key="normal" path="/admin/bbs/normal" element={<Normal />} />,
   <Route key="normal-bbs-view" path="/admin/bbs/normal/:id" element={<NormalBbsView />} />,
   <Route key="normal-bbs-write" path="/admin/bbs/normal/write" element={<NormalBbsWrite />} />,
-  <Route key="normal-bbs-edit" path="/bbs/normal/edit" element={<NormalBbsEdit />} />,
+  <Route key="normal-bbs-edit" path="admin/bbs/normal/edit/:id" element={<NormalBbsEdit />} />,
   <Route key="Membernormal" path="/bbs/normal" element={<MemberNormalBbs />} />,
   <Route key="Membernormal-view" path="/bbs/normal/view/:id" element={<MemberNormalBbsView />} />,
   <Route key="Membernormal-dummy" path="/bbs/member/normal/dummy" element={<MemberNormalBbsDummy/>} />,

@@ -31,7 +31,8 @@ function MemberNormalBbsView() {
 
       <div className="bbs-content">
         <p>{post.bbs?.bbsContent}</p>
-        <p>작성일: {post.bbs?.createdAt ? new Date(post.bbs.createdAt).toLocaleDateString() : ""}</p>
+       <p>작성일: {post.bbs?.registDate ? new Date(post.bbs.registDate).toLocaleDateString() : ""}</p>
+
       </div>
 
       {/* 첨부파일 */}

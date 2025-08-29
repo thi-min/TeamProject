@@ -303,9 +303,9 @@ public class BbsServiceImpl implements BbsService {
                 .orElseThrow(() -> new BbsException("게시글 없음: " + id));
 
         // 권한 체크
-        if (isAdmin && (bbs.getAdminId() == null || !bbs.getAdminId().getAdminId().equals(adminId))) {
-            throw new BbsException("관리자 권한이 없습니다.");
-        }
+//        if (isAdmin && (bbs.getAdminId() == null || !bbs.getAdminId().getAdminId().equals(adminId))) {
+//            throw new BbsException("관리자 권한이 없습니다.");
+//        }
         if (!isAdmin && (bbs.getMemberNum() == null || !bbs.getMemberNum().getMemberNum().equals(userId))) {
             throw new BbsException("본인이 작성한 글만 수정 가능합니다.");
         }
@@ -443,33 +443,7 @@ public class BbsServiceImpl implements BbsService {
         return result.map(this::convertToDto);
     }
 
-    @Override
-    public ImageBbsDto getRepresentativeImage(Long bulletinNum) {
-        // DB에서 모든 이미지 조회
-        List<ImageBbsEntity> images = imageBbsRepository.findByBbsBulletinNum(bulletinNum);
-        if (images.isEmpty()) return null;
-
-        // 서비스 레벨에서 대표 이미지 판단 (프론트에서 전달한 isRepresentative 기준)
-        ImageBbsEntity representativeImage = images.stream()
-                .filter(img -> img.getImagePath().contains("Y")) // 프론트에서 "Y"로 전달한 이미지
-                .findFirst()
-                .orElse(images.get(0)); // 없으면 첫 번째 이미지 fallback
-
-        return ImageBbsDto.builder()
-                .bulletinNum(bulletinNum)
-                .thumbnailPath(representativeImage.getThumbnailPath())
-                .imagePath(representativeImage.getImagePath() != null
-                        ? "/uploads/" + getFileNameFromPath(representativeImage.getImagePath())
-                        : null)
-                .build();
-    }
-
-    // helper
-    private String getFileNameFromPath(String path) {
-        if (path == null) return null;
-        return Paths.get(path).getFileName().toString();
-    }
-
+   
 
 
     private BbsDto convertToDto(BbsEntity e) {
@@ -671,7 +645,13 @@ public class BbsServiceImpl implements BbsService {
 
     @Override
     @Transactional
-    public BbsDto updatePotoBbs(Long bulletinNum, BbsDto dto, List<MultipartFile> newFiles, List<Long> representativeFileIds, List<Long> deletedFileIds,List<Long> overwriteFileIds, Long requesterMemberNum) {
+    public BbsDto updatePotoBbs(Long bulletinNum,
+                                BbsDto dto,
+                                List<MultipartFile> newFiles,
+                                List<Long> representativeFileIds,
+                                List<Long> deletedFileIds,
+                                List<Long> overwriteFileIds,
+                                Long requesterMemberNum) {
 
         // 1️⃣ 게시글 조회
         BbsEntity bbs = bbsRepository.findById(bulletinNum)
@@ -690,7 +670,7 @@ public class BbsServiceImpl implements BbsService {
         if (deletedFileIds != null && !deletedFileIds.isEmpty()) {
             for (Long fileId : deletedFileIds) {
                 fileUploadRepository.findById(fileId).ifPresent(fileEntity -> {
-                    // 대표 이미지 삭제
+                    // 대표 이미지 삭제 가능성 반영
                     imageBbsRepository.findByBbsBulletinNum(bbs.getBulletinNum())
                             .stream()
                             .filter(img -> img.getImagePath() != null && img.getImagePath().endsWith(fileEntity.getSavedName()))
@@ -706,38 +686,43 @@ public class BbsServiceImpl implements BbsService {
             }
         }
 
-        // 4️⃣ 기존 파일 + 새 파일 통합 리스트 생성
+        // 4️⃣ 기존 파일 조회 + 삭제/덮어쓰기 반영
         List<FileUpLoadEntity> existingFiles = fileUploadRepository.findByBbsBulletinNum(bbs.getBulletinNum());
         List<FileUpLoadEntity> combinedFiles = new ArrayList<>(existingFiles);
 
+        // 덮어쓰기 처리
+        if (overwriteFileIds != null) {
+            for (Long overwriteId : overwriteFileIds) {
+                fileUploadRepository.findById(overwriteId).ifPresent(oldFile -> {
+                    try {
+                        Files.deleteIfExists(Paths.get(uploadDir, oldFile.getSavedName()));
+                    } catch (IOException e) {
+                        throw new BbsException("파일 삭제 실패: " + oldFile.getOriginalName());
+                    }
+                    fileUploadRepository.delete(oldFile);
+                    combinedFiles.remove(oldFile);
+                });
+            }
+        }
+
+        // 5️⃣ 새 파일 저장
+        List<FileUpLoadEntity> newFileEntities = new ArrayList<>();
         if (newFiles != null) {
-            for (int i = 0; i < newFiles.size(); i++) {
-                MultipartFile file = newFiles.get(i);
+            for (MultipartFile file : newFiles) {
                 if (file == null || file.isEmpty()) continue;
 
-                // 덮어쓰기 처리
-                Long overwriteId = (overwriteFileIds != null && overwriteFileIds.size() > i) ? overwriteFileIds.get(i) : null;
-                if (overwriteId != null) {
-                    fileUploadRepository.findById(overwriteId).ifPresent(oldFile -> {
-                        try {
-                            Files.deleteIfExists(Paths.get(uploadDir, oldFile.getSavedName()));
-                        } catch (IOException e) {
-                            throw new BbsException("파일 삭제 실패: " + oldFile.getOriginalName());
-                        }
-                        fileUploadRepository.delete(oldFile);
-                        combinedFiles.remove(oldFile);
-                    });
-                }
-
-                // 새 파일 저장
                 String ext = getExtension(file.getOriginalFilename());
                 if (ext == null || !List.of("jpg", "jpeg").contains(ext.toLowerCase()) || file.getSize() > 5 * 1024 * 1024) {
                     throw new BbsException("첨부파일은 jpg/jpeg만 가능: " + file.getOriginalFilename());
                 }
+
                 String savedName = UUID.randomUUID() + "." + ext;
                 Path target = Paths.get(uploadDir, savedName);
-                try { file.transferTo(target); }
-                catch (IOException e) { throw new BbsException("파일 저장 실패: " + file.getOriginalFilename(), e); }
+                try {
+                    file.transferTo(target);
+                } catch (IOException e) {
+                    throw new BbsException("파일 저장 실패: " + file.getOriginalFilename(), e);
+                }
 
                 FileUpLoadEntity newFileEntity = FileUpLoadEntity.builder()
                         .bbs(bbs)
@@ -749,24 +734,32 @@ public class BbsServiceImpl implements BbsService {
                         .build();
                 fileUploadRepository.save(newFileEntity);
                 combinedFiles.add(newFileEntity);
+                newFileEntities.add(newFileEntity); // 새 파일 따로 저장
             }
         }
 
-        // 5️⃣ 대표 이미지 처리 (id 기준)
+        // 6️⃣ 대표 이미지 처리
         if (representativeFileIds == null || representativeFileIds.isEmpty()) {
             throw new BbsException("대표 이미지는 반드시 1장 선택해야 합니다.");
         }
 
-        // 기존 대표 이미지 삭제
-        imageBbsRepository.findByBbsBulletinNum(bbs.getBulletinNum()).forEach(imageBbsRepository::delete);
-
-        // 대표 이미지 등록 (여러장 선택 불가, 첫 번째만)
         Long repId = representativeFileIds.get(0);
+
+        // 기존 파일에서 filenum 찾기 + 새 파일에서도 검색
         FileUpLoadEntity repFile = combinedFiles.stream()
                 .filter(f -> f.getFilenum().equals(repId))
                 .findFirst()
-                .orElseThrow(() -> new BbsException("대표 이미지 파일이 존재하지 않습니다."));
+                .orElseGet(() -> newFileEntities.stream()
+                        .filter(f -> f.getSavedName().hashCode() == repId.intValue()) // 프론트 임시 ID와 매칭
+                        .findFirst()
+                        .orElseThrow(() -> new BbsException("대표 이미지 파일이 존재하지 않습니다."))
+                );
 
+        // 기존 대표 이미지 삭제
+        imageBbsRepository.findByBbsBulletinNum(bbs.getBulletinNum())
+                .forEach(imageBbsRepository::delete);
+
+        // 새 대표 이미지 등록
         ImageBbsEntity repImg = ImageBbsEntity.builder()
                 .bbs(bbs)
                 .thumbnailPath("/uploads/thumb/" + repFile.getSavedName())
@@ -778,6 +771,29 @@ public class BbsServiceImpl implements BbsService {
         return dto;
     }
 
+
+    // ---------------- 대표 이미지 조회 (서비스 레벨에서 보정) ----------------
+    @Override
+    public ImageBbsDto getRepresentativeImage(Long bulletinNum) {
+        List<ImageBbsEntity> images = imageBbsRepository.findByBbsBulletinNum(bulletinNum);
+        if (images.isEmpty()) return null;
+
+        // 항상 DB에 존재하는 대표 이미지 한 건 반환
+        ImageBbsEntity representativeImage = images.get(0); // 단일 insert 보장으로 첫 번째가 대표 이미지
+
+        return ImageBbsDto.builder()
+                .bulletinNum(bulletinNum)
+                .thumbnailPath(representativeImage.getThumbnailPath())
+                .imagePath(representativeImage.getImagePath() != null
+                        ? "/uploads/" + getFileNameFromPath(representativeImage.getImagePath())
+                        : null)
+                .build();
+    }
+
+    private String getFileNameFromPath(String path) {
+        if (path == null) return null;
+        return Paths.get(path).getFileName().toString();
+    }
 
 
 

@@ -8,15 +8,16 @@ export default function ImgDetail() {
   const navigate = useNavigate();
   const [post, setPost] = useState(null);
   const [files, setFiles] = useState([]);
-  const [repImage, setRepImage] = useState(null); // 대표 이미지
+  const [repImage, setRepImage] = useState(null);
   const backendUrl = "http://127.0.0.1:8090";
 
-  // 게시글 조회
+  // 게시글 상세 조회
   const fetchPost = async () => {
     try {
       const res = await api.get(`${backendUrl}/bbs/${id}`);
-      // 백엔드 반환 데이터 구조 확인 후 맞춤
-      setPost(res.data.bbs || res.data); 
+      const bbs = res.data.bbs || res.data;
+
+      setPost(bbs);
       setFiles(res.data.files || []);
       setRepImage(res.data.representativeImage || null);
     } catch (error) {
@@ -40,10 +41,10 @@ export default function ImgDetail() {
 
     try {
       await api.delete(`${backendUrl}/bbs/${id}?memberNum=${memberNum}`);
-      alert("게시글이 삭제되었습니다.");
-      navigate("/imgbbs"); // 목록 페이지 이동
+      alert("게시글 삭제 성공");
+      navigate("/bbs/image");
     } catch (error) {
-      console.error("삭제 오류:", error);
+      console.error("삭제 실패:", error);
       alert("게시글 삭제 실패");
     }
   };
@@ -60,11 +61,24 @@ export default function ImgDetail() {
       {/* 대표 이미지 */}
       {repImage && repImage.imagePath && (
         <div className="bbs-rep-image">
-          <img
-            src={`${backendUrl}${repImage.imagePath}`} // 절대 경로 사용
-            alt="대표 이미지"
-            style={{ maxWidth: "500px", marginBottom: "20px" }}
-          />
+          {repImage.fileNum ? (
+            <a
+              href={`${backendUrl}/bbs/files/${repImage.fileNum}/download`}
+              download={repImage.originalName || "대표이미지"}
+            >
+              <img
+                src={repImage.imagePath.startsWith("http") ? repImage.imagePath : `${backendUrl}${repImage.imagePath}`}
+                alt={post.bbsTitle}
+                style={{ maxWidth: "500px", marginBottom: "20px" }}
+              />
+            </a>
+          ) : (
+            <img
+              src={repImage.imagePath.startsWith("http") ? repImage.imagePath : `${backendUrl}${repImage.imagePath}`}
+              alt={post.bbsTitle}
+              style={{ maxWidth: "500px", marginBottom: "20px" }}
+            />
+          )}
         </div>
       )}
 
@@ -73,8 +87,8 @@ export default function ImgDetail() {
 
       {/* 작성일 및 조회수 */}
       <div className="bbs-detail-meta">
-        <span>{post.regdate?.substring(0, 10)}</span>
-        <span>조회 {post.readcount}</span>
+        <span>{post.registDate ? post.registDate.substring(0, 10) : ""}</span>
+        <span>조회 {post.readCount ?? 0}</span>
       </div>
 
       {/* 내용 */}
@@ -86,24 +100,29 @@ export default function ImgDetail() {
       {/* 첨부파일 */}
       <div className="bbs-detail-files">
         {files.length > 0 ? (
-          files.map((f) => (
-            <div key={f.fileNum} style={{ marginBottom: "10px" }}>
-              {f.fileUrl.match(/\.(jpeg|jpg|gif|png)$/i) ? (
-                <img
-                  src={`${backendUrl}${f.fileUrl}`}
-                  alt={f.originalName}
-                  style={{ maxWidth: "300px" }}
-                />
-              ) : (
-                <a
-                  href={`${backendUrl}${f.fileUrl}`}
-                  download={f.originalName}
-                >
-                  {f.originalName}
-                </a>
-              )}
-            </div>
-          ))
+          files.map((f) => {
+            const ext = f.extension?.toLowerCase();
+            const isDownloadable = ext === "jpg" || ext === "jpeg"; // 백엔드 허용
+            return (
+              <div key={f.fileNum} style={{ marginBottom: "10px" }}>
+                {isDownloadable ? (
+                  <a href={`${backendUrl}/bbs/files/${f.fileNum}/download`} download={f.originalName}>
+                    {ext.match(/\.(jpeg|jpg)$/i) ? (
+                      <img
+                        src={f.fileUrl.startsWith("http") ? f.fileUrl : `${backendUrl}${f.fileUrl}`}
+                        alt={f.originalName}
+                        style={{ maxWidth: "300px" }}
+                      />
+                    ) : (
+                      f.originalName
+                    )}
+                  </a>
+                ) : (
+                  <span>{f.originalName} (다운로드 불가)</span>
+                )}
+              </div>
+            );
+          })
         ) : (
           <div>첨부파일이 없습니다.</div>
         )}
@@ -111,13 +130,9 @@ export default function ImgDetail() {
 
       {/* 버튼 영역 */}
       <div style={{ marginTop: "20px" }}>
-        <button onClick={() => navigate("/imgbbs")}>목록으로</button>
-        <button onClick={handleEdit} style={{ marginLeft: "10px" }}>
-          수정
-        </button>
-        <button onClick={handleDelete} style={{ marginLeft: "10px" }}>
-          삭제
-        </button>
+        <button onClick={() => navigate("/bbs/image")}>목록으로</button>
+        <button onClick={handleEdit} style={{ marginLeft: "10px" }}>수정</button>
+        <button onClick={handleDelete} style={{ marginLeft: "10px" }}>삭제</button>
       </div>
     </div>
   );

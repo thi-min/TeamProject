@@ -7,10 +7,10 @@ import "./normalbbs.css";
 function NormalBbsWrite() {
   const [title, setTitle] = useState("");
   const [files, setFiles] = useState([{ id: Date.now(), file: null, insertOption: "no-insert" }]);
-  const editorRef = useRef(null); // 본문 내용 ref
+  const editorRef = useRef(null);
   const navigate = useNavigate();
 
-  // 로그인 확인 (accessToken 기준)
+  // 로그인 확인
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     if (!token) {
@@ -25,9 +25,10 @@ function NormalBbsWrite() {
       prev.map(f => (f.id === id ? { ...f, file: newFile } : f))
     );
 
+    // 본문 삽입은 jpg/jpeg만
     if (newFile && !["image/jpeg", "image/jpg"].includes(newFile.type)) {
       setFiles(prev =>
-        prev.map(f => (f.id === id ? { ...f, insertOption: "no-insert" } : f))
+        prev.map(f => (f.id === id && f.insertOption === "insert" ? { ...f, insertOption: "no-insert" } : f))
       );
     }
   };
@@ -45,6 +46,9 @@ function NormalBbsWrite() {
         alert("본문 삽입은 jpg/jpeg 이미지 파일만 가능합니다.");
         return;
       }
+
+      const alreadyInserted = editorRef.current?.querySelector(`img[data-id='${id}']`);
+      if (alreadyInserted) return;
 
       const reader = new FileReader();
       reader.onload = (e) => {
@@ -79,7 +83,7 @@ function NormalBbsWrite() {
     );
   };
 
-  // 파일 input 추가/삭제
+  // 파일 추가/삭제
   const addFileInput = () => {
     setFiles(prev => [...prev, { id: Date.now(), file: null, insertOption: "no-insert" }]);
   };
@@ -92,7 +96,7 @@ function NormalBbsWrite() {
     }
   };
 
-  // MutationObserver로 이미지 삭제 감지
+  // 본문 이미지 삭제 감지
   useEffect(() => {
     const observer = new MutationObserver(() => {
       setFiles(prevFiles =>
@@ -113,10 +117,9 @@ function NormalBbsWrite() {
     return () => observer.disconnect();
   }, []);
 
-  // 저장
+  // 제출
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const token = localStorage.getItem("accessToken");
     if (!token) {
       alert("관리자 로그인 후 이용해주세요.");
@@ -134,22 +137,21 @@ function NormalBbsWrite() {
       new Blob([JSON.stringify({ bbsTitle: title, bbsContent: contentHTML })], { type: "application/json" })
     );
 
-    files.forEach((f, index) => {
+    files.forEach((f) => {
       if (f.file) {
         formData.append("files", f.file);
-        formData.append(`insertOptions[${index}]`, f.insertOption);
       }
     });
 
     try {
       await api.post("/admin/bbs/bbslist/bbsadd", formData, {
-        headers: { 
+        headers: {
           "Content-Type": "multipart/form-data",
-          "Authorization": `Bearer ${token}`
+          "Authorization": `Bearer ${token}`,
         },
       });
       alert("공지사항 등록 성공!");
-      navigate("/admin/bbs/normal"); // 글 저장 후 목록 이동
+      navigate("/admin/bbs/normal");
     } catch (error) {
       console.error("등록 오류:", error);
       if (error.response?.status === 401) {
@@ -166,7 +168,6 @@ function NormalBbsWrite() {
   return (
     <div className="bbs-write-container">
       <form className="bbs-write-form" onSubmit={handleSubmit}>
-        {/* 제목 */}
         <input
           type="text"
           className="bbs-title-input"
@@ -176,7 +177,6 @@ function NormalBbsWrite() {
           required
         />
 
-        {/* 내용 */}
         <div
           ref={editorRef}
           contentEditable
@@ -184,15 +184,14 @@ function NormalBbsWrite() {
           style={{ minHeight: "200px", border: "1px solid #ccc", padding: "10px" }}
         />
 
-        {/* 파일 첨부 */}
         <div className="bbs-file-section">
           <div className="bbs-file-label">파일 첨부</div>
           <div className="bbs-file-list">
             {files.map((f) => (
               <div className="bbs-file-row" key={f.id}>
+                {/* accept 제거: 모든 파일 선택 가능 */}
                 <input
                   type="file"
-                  accept=".jpg,.jpeg"
                   onChange={(e) => handleFileChange(f.id, e.target.files[0])}
                 />
                 <div className="bbs-file-options">
@@ -216,11 +215,7 @@ function NormalBbsWrite() {
                   </label>
                 </div>
                 {files.length > 1 && (
-                  <button
-                    type="button"
-                    className="bbs-file-remove"
-                    onClick={() => removeFileInput(f.id)}
-                  >
+                  <button type="button" className="bbs-file-remove" onClick={() => removeFileInput(f.id)}>
                     ❌
                   </button>
                 )}
@@ -232,13 +227,8 @@ function NormalBbsWrite() {
           </div>
         </div>
 
-        {/* 버튼 */}
         <div className="bbs-btn-area">
-          <button
-            type="button"
-            className="bbs-cancel-btn"
-            onClick={() => navigate("/admin/bbs/normal")}
-          >
+          <button type="button" className="bbs-cancel-btn" onClick={() => navigate("/admin/bbs/normal")}>
             취소
           </button>
           <button type="submit" className="bbs-save-btn">저장</button>
