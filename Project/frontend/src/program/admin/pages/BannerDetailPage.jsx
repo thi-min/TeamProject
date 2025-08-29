@@ -79,6 +79,7 @@ const AdminBannerDetailPage = () => {
 
       {!isEditing ? (
         // ---------------------- 상세보기 모드 ----------------------
+        <div className="form_wrap">
         <table className="table type2 responsive border">
           <tbody>
             <tr><th>ID</th><td>{banner.bannerId}</td></tr>
@@ -100,8 +101,10 @@ const AdminBannerDetailPage = () => {
             <tr><th>노출 여부</th><td>{banner.visible ? "활성" : "비활성"}</td></tr>
           </tbody>
         </table>
+        </div>
       ) : (
         // ---------------------- 수정 모드 ----------------------
+        <div className="form_wrap">
         <form className="banner-edit-form">
           <table className="table type2 responsive border">
             <tbody>
@@ -190,6 +193,7 @@ const AdminBannerDetailPage = () => {
             </tbody>
           </table>
         </form>
+        </div>
       )}
 
       {/* 버튼 영역 */}

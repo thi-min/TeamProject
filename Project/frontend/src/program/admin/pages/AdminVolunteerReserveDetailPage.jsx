@@ -56,6 +56,7 @@ const AdminVolunteerReserveDetailPage = () => {
         </div>
       </div>
       <h3>봉사 예약 정보</h3>
+      <div className="form_wrap">
       <table className="table type2 responsive border">
          <colgroup>
           <col className="w20p" />
@@ -85,7 +86,7 @@ const AdminVolunteerReserveDetailPage = () => {
           </tr>
         </tbody>
       </table>
-
+      </div>
       <div className="form_center_box">
           <div className="temp_btn white md">
             <button type="button" className="btn" onClick={() => navigate(-1)}>
