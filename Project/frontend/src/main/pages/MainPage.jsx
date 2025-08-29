@@ -258,7 +258,8 @@ export default function MainPage() {
                   </div>
                 </div>
               </div>
-              <div className="desc_box"></div>
+              <div className="sub_slide_box">
+              </div>
             </div>
           </div>
         </section>
