@@ -7,15 +7,13 @@
 //
 // ⚠ React.StrictMode로 콜백이 2번 실행되는 경우를 막기 위해
 //   같은 code에 대해 1회만 실행하도록 세션키를 사용한다.
-// ⚠ 일반 가입과 카카오 가입을 구분하기 위해 kakao_flow 플래그를 세션에 관리한다.
 
 import React, { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import api, { saveTokens } from "../../../common/api/axios";
+import api, { saveTokens } from "../../../common/api/axios"; // 공용 axios 인스턴스(+토큰 저장 헬퍼)
 import routes from "../../../common/routes/router";
 
 const KAKAO_PREFILL_KEY = "kakao_prefill_v1";
-const KAKAO_FLOW_FLAG = "kakao_flow";
 
 export default function KakaoCallbackPage() {
   const navigate = useNavigate();
@@ -52,7 +50,7 @@ export default function KakaoCallbackPage() {
           code
         )}`;
 
-        // 공용 api 인스턴스 사용(헤더/쿠키 일관성)
+        // 반드시 공용 api 인스턴스 사용(헤더/쿠키 일관성)
         const res = await api.get(url);
         const data = res?.data;
         console.log("[KakaoCallback] response:", data);
@@ -78,12 +76,6 @@ export default function KakaoCallbackPage() {
               window.dispatchEvent(new Event("auth:login"));
             } catch {}
           }
-
-          // ✅ 카카오 플로우 흔적 제거(일반 가입에 영향 방지)
-          try {
-            sessionStorage.removeItem(KAKAO_FLOW_FLAG);
-            sessionStorage.removeItem(KAKAO_PREFILL_KEY);
-          } catch {}
 
           // ✅ 사용자 알림 후 이동
           alert("카카오 계정으로 로그인 되었습니다.");
@@ -111,13 +103,12 @@ export default function KakaoCallbackPage() {
               data?.phoneNumber ?? pf.memberPhone ?? pf.phoneNumber ?? null,
           };
 
-          // 새로고침 대비 백업 + 카카오 플로우 플래그 세팅
+          // 새로고침 대비 백업
           try {
             sessionStorage.setItem(
               KAKAO_PREFILL_KEY,
               JSON.stringify(joinState)
             );
-            sessionStorage.setItem(KAKAO_FLOW_FLAG, "1");
           } catch {}
 
           // ✅ 사용자 알림 후 이동
