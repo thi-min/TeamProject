@@ -39,8 +39,15 @@ const LandReserveDetailPage = () => {
 
   return (
     <div className="mypage-reserve-wrapper">
-      <h2>놀이터 예약 정보</h2>
-      <table className="table type2 responsive">
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon land"></div>
+          <div className="form_title">예약 내역 조회</div>
+        </div>
+      </div>
+      <h3>놀이터 예약 정보</h3>
+      <div className="form_wrap">
+      <table className="table type2 responsive border">
         <colgroup>
           <col className="w20p" />
           <col />
@@ -59,9 +66,11 @@ const LandReserveDetailPage = () => {
           <tr><th>비고</th><td>{detail.note ? detail.note : "-"}</td></tr>
         </tbody>
       </table>
+      </div>
 
-      <h2>결제 정보</h2>
-      <table className="table type2 responsive">
+      <h3>결제 정보</h3>
+      <div className="form_wrap">
+      <table className="table type2 responsive border">
         <colgroup>
           <col className="w20p" />
           <col />
@@ -72,7 +81,7 @@ const LandReserveDetailPage = () => {
           <tr><th>총 결제금액</th><td><b>{detail.totalPrice}원</b></td></tr>
         </tbody>
       </table>
-
+      </div>
       <div className="form_center_box">
           <div className="temp_btn white md">
             <button type="button" className="btn" onClick={() => navigate(-1)}>이전</button>

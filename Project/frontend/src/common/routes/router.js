@@ -30,7 +30,6 @@ const routes = {
   land: {
     root: { path: "/land", label: "동물 놀이터" },
     info: { path: "/land/info", label: "놀이터 소개" },
-    gallery: { path: "/land/gallery", label: "놀이터 둘러보기" },
   },
 
   // ==============================
@@ -182,6 +181,7 @@ const routes = {
 
   volunteer: {
     list: { path: "/volunteer/list", label: "봉사 목록" },
+    info: { path: "/volunteer/info", label: "봉사 소개" },
     detail: (id) => `/volunteer/${id}`,
   },
 

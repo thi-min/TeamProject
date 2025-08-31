@@ -25,7 +25,6 @@ const menuRoutes = [
     access: "ALL",
     children: [
       { title: "놀이터 소개", path: "/land/info", access: "ALL" },
-      { title: "놀이터 둘러보기", path: "/land/gallery", access: "ALL" },
       { title: "예약하기", path: "/reserve/land/date", access: "USER" },
     ],
   },
@@ -33,7 +32,7 @@ const menuRoutes = [
     title: "봉사활동",
     access: "ALL",
     children: [
-      { title: "봉사 프로그램 소개", path: "/volunteer/info", access: "ALL" },
+      { title: "봉사 활동 안내", path: "/volunteer/info", access: "ALL" },
       { title: "봉사 신청하기", path: "/reserve/volunteer/date", access: "USER" },
     ],
   },

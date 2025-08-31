@@ -1,0 +1,90 @@
+.land-info-page {
+  padding: 3rem 1rem;
+  font-family: 'Noto Sans KR', sans-serif;
+}
+
+.land-info-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.land-info-title {
+  text-align: center;
+  font-size: 2.5rem;
+  font-weight: 800;
+  color: #1a202c; /* gray-900 */
+  margin-bottom: 1.5rem;
+}
+
+.land-info-description {
+  text-align: center;
+  font-size: 1.125rem;
+  color: #4a5568; /* gray-600 */
+  margin-bottom: 3rem;
+  line-height: 1.6;
+}
+
+.land-info-sections {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+@media (min-width: 768px) {
+  .land-info-sections {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.land-info-card {
+  background: #fff;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  text-align: center;
+  transition: transform 0.3s ease-in-out;
+}
+
+.land-info-card h3 {
+  margin-top: 0;
+  font-size: 20px;  
+  font-weight: 700;
+  color: #2d3748; 
+}
+
+.land-info-card p {
+  font-size: 16px; 
+  color: #4a5568;
+  line-height: 24px; 
+}
+
+.land-info-img {
+  width: 200px;   /* 원하는 가로 크기 */
+  height: 200px;  /* 원하는 세로 크기 */
+  object-fit: contain; /* 비율 유지하면서 여백 처리 */
+  margin-bottom: 1rem; /* 제목/본문과 간격 */
+}
+
+.pay-info-section {
+  margin-top: 60px;
+  background: #fff;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  text-align: center;
+  transition: transform 0.3s ease-in-out;
+}
+
+.pay-info-section h3 {
+  margin-top: 0;
+  font-size: 20px;  
+  font-weight: 700;
+  color: #2d3748; 
+}
+
+.pay-info-section p {
+  font-size: 16px; 
+  color: #4a5568;
+  line-height: 24px; 
+  text-align: left;
+}

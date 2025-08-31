@@ -18,13 +18,15 @@ import BannerListPage from "../../program/admin/pages/BannerListPage";
 import BannerCreatePage from "../../program/admin/pages/BannerCreatePage";
 import BannerDetailPage from "../../program/admin/pages/BannerDetailPage";
 
-// ✅ Land 예약 플로우 페이지
+// ✅ Land 관련 페이지
+import LandInfoPage from "../../program/land/pages/LandInfoPage";
 import LandReserveDatePage from "../../program/reserve/land/pages/LandReserveDatePage";
 import LandReserveFormPage from "../../program/reserve/land/pages/LandReserveFormPage";
 import LandReserveConfirmPage from "../../program/reserve/land/pages/LandReserveConfirmPage";
 import LandReserveSuccessPage from "../../program/reserve/land/pages/LandReserveSuccessPage";
 
-// ✅ Volunteer 예약 플로우
+// ✅ Volunteer 관련 페이지
+import VolunteerInfoPage from "../../program/volunteer/pages/VolunteerInfoPage";
 import VolunteerReserveDatePage from "../../program/reserve/volunteer/pages/VolunteerReserveDatePage";
 import VolunteerReserveFormPage from "../../program/reserve/volunteer/pages/VolunteerReserveFormPage";
 import VolunteerReserveConfirmPage from "../../program/reserve/volunteer/pages/VolunteerReserveConfirmPage";
@@ -143,13 +145,15 @@ const layoutRoutes = [
   //메인페이지
   <Route key="main" path={routes.main.path} element={<Main />} />, //메인
 
-   // 🔹 Land 예약: 날짜 → 폼 → 확인 → 완료
+   // 🔹 Land 관련 페이지
+  <Route key ="land-info" path={routes.land.info.path} element={<LandInfoPage />} />,
   <Route key="reserve-land-date" path={routes.reserve.land.date.path} element={<RequireMember><LandReserveDatePage /></RequireMember>} />,
   <Route key="reserve-land-form" path={routes.reserve.land.form.path} element={<RequireMember><LandReserveFormPage /></RequireMember>} />,
   <Route key="reserve-land-confirm" path={routes.reserve.land.confirm.path} element={<RequireMember><LandReserveConfirmPage /></RequireMember>} />,
   <Route key="reserve-land-success" path={routes.reserve.land.success.path} element={<RequireMember><LandReserveSuccessPage /></RequireMember>} />,
 
-  // 🔹 Volunteer 예약: 날짜 → 폼 → 확인 → 완료
+  // 🔹 Volunteer 관련 페이지
+  <Route key ="volunteer-info" path={routes.volunteer.info.path} element={<VolunteerInfoPage />} />,
   <Route key="reserve-volunteer-date" path={routes.reserve.volunteer.date.path} element={<RequireMember><VolunteerReserveDatePage /></RequireMember>} />,
   <Route key="reserve-volunteer-form" path={routes.reserve.volunteer.form.path} element={<RequireMember><VolunteerReserveFormPage /></RequireMember>} />,
   <Route key="reserve-volunteer-confirm" path={routes.reserve.volunteer.confirm.path} element={<RequireMember><VolunteerReserveConfirmPage /></RequireMember>} />,
