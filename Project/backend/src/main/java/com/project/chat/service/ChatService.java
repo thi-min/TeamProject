@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ import com.project.chat.entity.ChatRoomEntity;
 import com.project.chat.repository.ChatRepository;
 import com.project.chat.repository.ChatRoomRepository;
 import com.project.member.entity.MemberEntity;
+import com.project.admin.entity.AdminEntity;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,22 +35,41 @@ public class ChatService {
      */
     @Transactional
     public ChatRoomEntity findOrCreateChatRoom(MemberEntity member) {
-        return chatRoomRepository.findByMember(member)
-                .orElseGet(() -> {
-                    ChatRoomEntity newChatRoom = new ChatRoomEntity();
-                    newChatRoom.setMember(member);
-                    newChatRoom.setLastMessage("채팅방이 생성되었습니다.");
-                    newChatRoom.setLastMessageTime(LocalDateTime.now());
-                    return chatRoomRepository.save(newChatRoom);
-                });
-    }
+        Optional<ChatRoomEntity> existingChatRoom = chatRoomRepository.findByMember(member);
+        if (existingChatRoom.isPresent()) {
+            return existingChatRoom.get();
+        }
 
+        try {
+            ChatRoomEntity newChatRoom = new ChatRoomEntity();
+            newChatRoom.setMember(member);
+            newChatRoom.setLastMessage(""); 
+            newChatRoom.setLastMessageTime(LocalDateTime.now());
+            
+            ChatRoomEntity savedChatRoom = chatRoomRepository.save(newChatRoom);
+
+            ChatEntity initialMessage = new ChatEntity();
+            initialMessage.setChatRoom(savedChatRoom);
+            initialMessage.setSenderNum(member.getMemberNum());
+            initialMessage.setSenderRole("MEMBER");
+            initialMessage.setMessage("채팅방이 생성되었습니다.");
+            initialMessage.setTimestamp(LocalDateTime.now());
+            chatRepository.save(initialMessage);
+
+            return savedChatRoom;
+        } catch (DataIntegrityViolationException e) {
+            return chatRoomRepository.findByMember(member)
+                .orElseThrow(() -> new IllegalStateException("채팅방 생성 실패 후 재조회 실패"));
+        }
+    }
+    
     /**
      * 새로운 채팅 메시지를 저장하고, 채팅방의 마지막 메시지 정보를 업데이트합니다.
      * @param chatDto 클라이언트로부터 받은 메시지 정보
+     * @param sender 메시지를 보낸 회원 또는 관리자 (Object 타입으로 통합)
      */
     @Transactional
-    public void saveMessage(ChatDto chatDto) {
+    public void saveMessage(ChatDto chatDto, Object sender) {
         Optional<ChatRoomEntity> optionalChatRoom = chatRoomRepository.findById(chatDto.getChatRoomNum());
         if (optionalChatRoom.isEmpty()) {
             throw new IllegalArgumentException("Chat room not found with ID: " + chatDto.getChatRoomNum());
@@ -58,16 +79,30 @@ public class ChatService {
 
         ChatEntity chatMessage = new ChatEntity();
         chatMessage.setChatRoom(chatRoom);
-        chatMessage.setSenderNum(chatDto.getSenderNum());
-        chatMessage.setSenderRole(chatDto.getSenderRole());
+        
+        // sender 객체의 실제 타입에 따라 senderNum과 senderRole 설정
+        if (sender instanceof MemberEntity) {
+            MemberEntity member = (MemberEntity) sender;
+            chatMessage.setSenderNum(member.getMemberNum());
+            chatMessage.setSenderRole("MEMBER");
+        } else if (sender instanceof AdminEntity) {
+            AdminEntity admin = (AdminEntity) sender;
+            chatMessage.setSenderNum(admin.getAdminNum());
+            chatMessage.setSenderRole("ADMIN");
+        } else {
+            throw new IllegalArgumentException("Unsupported sender type.");
+        }
+        
         chatMessage.setMessage(chatDto.getMessage());
+        chatMessage.setTimestamp(LocalDateTime.now());
         chatRepository.save(chatMessage);
         
         chatRoom.setLastMessage(chatDto.getMessage());
         chatRoom.setLastMessageTime(LocalDateTime.now());
         chatRoomRepository.save(chatRoom);
     }
-
+	
+	 // (관리자용) 메시지 저장 메서드는 saveMessage로 통합되므로 삭제합니다.
     /**
      * [관리자용] 모든 채팅방 목록을 페이지네이션하여 조회합니다.
      * @param pageable 페이징 및 정렬 정보
@@ -126,7 +161,7 @@ public class ChatService {
             ))
             .toList();
     }
-    
+     
     @Transactional
     public void deleteChatRoom(Long chatRoomNum) {
         ChatRoomEntity chatRoom = chatRoomRepository.findById(chatRoomNum)
