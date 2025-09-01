@@ -61,4 +61,12 @@ public class BannerController {
     	if (bannerIds == null || bannerIds.isEmpty()) return;
         bannerService.deleteBulk(bannerIds);
     }
+    
+    
+    //25.09.01 안형주 추가
+    //활성상태 베너 조회
+    @GetMapping("/active")
+    public List<BannerResponseDto> getActiveBanners() {
+        return bannerService.getActiveBanners();
+    }
 }

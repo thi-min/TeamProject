@@ -22,4 +22,8 @@ public interface BannerRepository extends JpaRepository<BannerEntity, Long> {
     
     // 관리자용 전체배너 조회
     Page<BannerEntity> findAll(Pageable pageable);
+    
+    //25.09.01 안형주 추가
+    //활성상태 베너 조회
+    List<BannerEntity> findByVisibleTrue();
 }

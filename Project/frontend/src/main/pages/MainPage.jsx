@@ -1,5 +1,6 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import api from "../../common/api/axios";
 //swiper
 import { Swiper, SwiperSlide } from "swiper/react";
 import {
@@ -56,11 +57,20 @@ export default function MainPage() {
     }
   };
 
-  // 슬라이드 데이터 (필요 시 확장 가능)
-  const slides = [
-    { src: visualImg01, alt: "비주얼 이미지 1" },
-    { src: visualImg02, alt: "비주얼 이미지 2" },
-  ];
+  //이미지 데이터
+  const [banners, setBanners] = useState([]);
+
+  useEffect(() => {
+    api
+      .get("http://localhost:8090/api/banner/active")
+      .then((res) => setBanners(res.data))
+      .catch((err) => console.error(err));
+  }, []);
+  // // 슬라이드 데이터 (필요 시 확장 가능)
+  // const slides = [
+  //   { src: visualImg01, alt: "비주얼 이미지 1" },
+  //   { src: visualImg02, alt: "비주얼 이미지 2" },
+  // ];
 
   const slideMarkup = (
     <Swiper
@@ -79,10 +89,19 @@ export default function MainPage() {
       }}
       className="main_swiper"
     >
-      {slides.map((s, idx) => (
-        <SwiperSlide key={idx}>
+      {banners.map((banner) => (
+        <SwiperSlide key={banner.bannerId}>
           <div className="visual_img_box">
-            <img src={s.src} alt={s.alt} />
+            <img
+              src={`/DATA/banner/${banner.imageUrl}`}
+              alt={banner.altText || "배너 이미지"}
+              style={{ width: "100%", height: "auto" }}
+            />
+            {banner.linkUrl && (
+              <a href={banner.linkUrl} className="banner_link">
+                {banner.subTitle || banner.title}
+              </a>
+            )}
           </div>
         </SwiperSlide>
       ))}
@@ -144,6 +163,7 @@ export default function MainPage() {
       ))}
     </Swiper>
   );
+
   return (
     <div className="main_page">
       <div className="rowgroup1">

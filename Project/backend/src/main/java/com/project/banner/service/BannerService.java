@@ -21,4 +21,8 @@ public interface BannerService {
     void delete(Long id);
     //배너 복수 삭제
     void deleteBulk(List<Long> ids);
+    
+    //25.09.01 안형주 추가
+    //활성상태 베너 조회
+    List<BannerResponseDto> getActiveBanners();
 }

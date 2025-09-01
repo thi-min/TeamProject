@@ -80,145 +80,198 @@ const AdminBannerDetailPage = () => {
       {!isEditing ? (
         // ---------------------- 상세보기 모드 ----------------------
         <div className="form_wrap">
-        <table className="table type2 responsive border">
-          <tbody>
-            <tr><th>ID</th><td>{banner.bannerId}</td></tr>
-            <tr><th>제목</th><td>{banner.title}</td></tr>
-            <tr><th>부제목</th><td>{banner.subTitle || "-"}</td></tr>
-            <tr><th>노출 기간</th><td>{banner.startDate} ~ {banner.endDate}</td></tr>
-            <tr>
-              <th>이미지</th>
-              <td>
-                <img
-                  src={`http://localhost:8090/banner-uploads/${banner.imageUrl}`}
-                  alt={banner.altText || "배너 이미지"}
-                  style={{ maxWidth: "300px", borderRadius: "8px" }}
-                />
-              </td>
-            </tr>
-            <tr><th>이미지 설명</th><td>{banner.altText || "-"}</td></tr>
-            <tr><th>링크 URL</th><td>{banner.linkUrl || "-"}</td></tr>
-            <tr><th>노출 여부</th><td>{banner.visible ? "활성" : "비활성"}</td></tr>
-          </tbody>
-        </table>
-        </div>
-      ) : (
-        // ---------------------- 수정 모드 ----------------------
-        <div className="form_wrap">
-        <form className="banner-edit-form">
           <table className="table type2 responsive border">
             <tbody>
               <tr>
+                <th>ID</th>
+                <td>{banner.bannerId}</td>
+              </tr>
+              <tr>
                 <th>제목</th>
-                <td>
-                  <input
-                    type="text"
-                    value={formData.title || ""}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  />
-                </td>
+                <td>{banner.title}</td>
               </tr>
               <tr>
                 <th>부제목</th>
-                <td>
-                  <input
-                    type="text"
-                    value={formData.subTitle || ""}
-                    onChange={(e) => setFormData({ ...formData, subTitle: e.target.value })}
-                  />
-                </td>
+                <td>{banner.subTitle || "-"}</td>
               </tr>
               <tr>
                 <th>노출 기간</th>
                 <td>
-                  <input
-                    type="date"
-                    value={formData.startDate || ""}
-                    onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                  />
-                  <span> ~ </span>
-                  <input
-                    type="date"
-                    value={formData.endDate || ""}
-                    onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                  />
+                  {banner.startDate} ~ {banner.endDate}
                 </td>
               </tr>
               <tr>
                 <th>이미지</th>
                 <td>
-
-                    {/* 새 이미지 업로드 */}
-                    <input
-                    type="file"
-                    onChange={(e) => setFile(e.target.files[0])}
-                    />
-                    <p style={{ fontSize: "12px", color: "#666" }}>
-                    새 이미지를 선택하지 않으면 기존 이미지가 유지됩니다.
-                    </p>
+                  <img
+                    src={`/DATA/banner/${banner.imageUrl}`}
+                    alt={banner.altText || "배너 이미지"}
+                    style={{ maxWidth: "300px", borderRadius: "8px" }}
+                  />
                 </td>
               </tr>
               <tr>
                 <th>이미지 설명</th>
-                <td>
-                  <input
-                    type="text"
-                    value={formData.altText || ""}
-                    onChange={(e) => setFormData({ ...formData, altText: e.target.value })}
-                  />
-                </td>
+                <td>{banner.altText || "-"}</td>
               </tr>
               <tr>
                 <th>링크 URL</th>
-                <td>
-                  <input
-                    type="text"
-                    value={formData.linkUrl || ""}
-                    onChange={(e) => setFormData({ ...formData, linkUrl: e.target.value })}
-                  />
-                </td>
+                <td>{banner.linkUrl || "-"}</td>
               </tr>
               <tr>
                 <th>노출 여부</th>
-                <td>
-                  <select
-                    value={formData.visible}
-                    onChange={(e) => setFormData({ ...formData, visible: e.target.value === "true" })}
-                  >
-                    <option value="true">활성</option>
-                    <option value="false">비활성</option>
-                  </select>
-                </td>
+                <td>{banner.visible ? "활성" : "비활성"}</td>
               </tr>
             </tbody>
           </table>
-        </form>
+        </div>
+      ) : (
+        // ---------------------- 수정 모드 ----------------------
+        <div className="form_wrap">
+          <form className="banner-edit-form">
+            <table className="table type2 responsive border">
+              <tbody>
+                <tr>
+                  <th>제목</th>
+                  <td>
+                    <input
+                      type="text"
+                      value={formData.title || ""}
+                      onChange={(e) =>
+                        setFormData({ ...formData, title: e.target.value })
+                      }
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <th>부제목</th>
+                  <td>
+                    <input
+                      type="text"
+                      value={formData.subTitle || ""}
+                      onChange={(e) =>
+                        setFormData({ ...formData, subTitle: e.target.value })
+                      }
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <th>노출 기간</th>
+                  <td>
+                    <input
+                      type="date"
+                      value={formData.startDate || ""}
+                      onChange={(e) =>
+                        setFormData({ ...formData, startDate: e.target.value })
+                      }
+                    />
+                    <span> ~ </span>
+                    <input
+                      type="date"
+                      value={formData.endDate || ""}
+                      onChange={(e) =>
+                        setFormData({ ...formData, endDate: e.target.value })
+                      }
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <th>이미지</th>
+                  <td>
+                    {/* 새 이미지 업로드 */}
+                    <input
+                      type="file"
+                      onChange={(e) => setFile(e.target.files[0])}
+                    />
+                    <p style={{ fontSize: "12px", color: "#666" }}>
+                      새 이미지를 선택하지 않으면 기존 이미지가 유지됩니다.
+                    </p>
+                  </td>
+                </tr>
+                <tr>
+                  <th>이미지 설명</th>
+                  <td>
+                    <input
+                      type="text"
+                      value={formData.altText || ""}
+                      onChange={(e) =>
+                        setFormData({ ...formData, altText: e.target.value })
+                      }
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <th>링크 URL</th>
+                  <td>
+                    <input
+                      type="text"
+                      value={formData.linkUrl || ""}
+                      onChange={(e) =>
+                        setFormData({ ...formData, linkUrl: e.target.value })
+                      }
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <th>노출 여부</th>
+                  <td>
+                    <select
+                      value={formData.visible}
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          visible: e.target.value === "true",
+                        })
+                      }
+                    >
+                      <option value="true">활성</option>
+                      <option value="false">비활성</option>
+                    </select>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </form>
         </div>
       )}
 
       {/* 버튼 영역 */}
       <div className="form_center_box">
         <div className="temp_btn white md">
-          <button type="button" className="btn" onClick={() => navigate(-1)}>목록보기</button>
+          <button type="button" className="btn" onClick={() => navigate(-1)}>
+            목록보기
+          </button>
         </div>
 
         <div className="right_btn_box">
           {!isEditing ? (
             <>
               <div className="temp_btn md">
-                <button type="button" className="btn" onClick={handleEdit}>수정</button>
+                <button type="button" className="btn" onClick={handleEdit}>
+                  수정
+                </button>
               </div>
               <div className="temp_btn danger md">
-                <button type="button" className="btn" onClick={handleDelete}>삭제</button>
+                <button type="button" className="btn" onClick={handleDelete}>
+                  삭제
+                </button>
               </div>
             </>
           ) : (
             <>
               <div className="temp_btn md">
-                <button type="button" className="btn" onClick={handleUpdate}>저장</button>
+                <button type="button" className="btn" onClick={handleUpdate}>
+                  저장
+                </button>
               </div>
               <div className="temp_btn white md">
-                <button type="button" className="btn" onClick={() => setIsEditing(false)}>취소</button>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => setIsEditing(false)}
+                >
+                  취소
+                </button>
               </div>
             </>
           )}

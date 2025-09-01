@@ -4258,3 +4258,5 @@ span.temp_form{display:inline-block;width:auto;}
 
 .table.border{overflow:hidden;border-radius:12px;margin:0;}
 .update_box{margin-top:50px;}
+
+.all_day{display:flex;gap:20px;}

@@ -25,7 +25,7 @@ public class BannerEntity {
     private String title;
 
     // 배너 부제목
-    @Column(name = "sub_title", nullable = true)
+    @Column(name = "sub_title")
     private String subTitle;
 
     // 이미지 경로
@@ -33,19 +33,19 @@ public class BannerEntity {
     private String imageUrl;
 
     // 이미지 대체 텍스트
-    @Column(name = "alt_text", nullable = true)
+    @Column(name = "alt_text")
     private String altText;
 
     // 링크
-    @Column(name = "link_url", nullable = true)
+    @Column(name = "link_url")
     private String linkUrl;
 
     // 배너 노출 시작일
-    @Column(name = "start_date", nullable = false)
+    @Column(name = "start_date")
     private LocalDate startDate;
 
     // 배너 노출 종료일
-    @Column(name = "end_date", nullable = false)
+    @Column(name = "end_date")
     private LocalDate endDate;
 
     // 배너 노출 여부
