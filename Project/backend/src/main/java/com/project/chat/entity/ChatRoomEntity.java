@@ -29,7 +29,7 @@ public class ChatRoomEntity {
 	private Long chatRoomNum;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_num", nullable = false)
+    @JoinColumn(name = "member_num", unique = true, nullable = false)
     private MemberEntity member;
 
     @Column(nullable = false)

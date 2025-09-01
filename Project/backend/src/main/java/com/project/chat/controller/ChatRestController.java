@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -43,6 +44,9 @@ public class ChatRestController {
         return ResponseEntity.ok(chatRoomsPage);
     }
 
+    /**
+     * 특정 채팅방의 모든 대화 기록을 조회합니다.
+     */
     @GetMapping("/detail/{chatRoomNum}")
     public ResponseEntity<List<ChatDto>> getChatHistory(@PathVariable Long chatRoomNum, Principal principal) {
         List<ChatDto> chatHistory = chatService.getChatHistory(chatRoomNum);
@@ -55,26 +59,41 @@ public class ChatRestController {
      */
     @PostMapping("/detail")
     public ResponseEntity<ChatRoomEntity> findOrCreateChatRoomForMember(Principal principal) {
-        // Principal 객체에서 회원 ID(이메일)를 가져옵니다.
         String memberId = principal.getName();
         
-        // MemberService를 통해 회원 ID로 MemberEntity를 조회합니다.
-        // Optional을 사용해 회원이 없을 경우를 안전하게 처리합니다.
         Optional<MemberEntity> optionalMember = memberService.findByMemberId(memberId);
         
         if (optionalMember.isEmpty()) {
-            // 해당 ID의 회원을 찾지 못하면 404 에러를 반환합니다.
-            // 이는 보통 JWT 토큰의 ID가 DB에 존재하지 않을 때 발생합니다.
             return ResponseEntity.notFound().build();
         }
         
         MemberEntity member = optionalMember.get();
         
-        // 조회된 MemberEntity 객체를 서비스 계층으로 전달하여 채팅방을 찾거나 새로 생성합니다.
         ChatRoomEntity chatRoom = chatService.findOrCreateChatRoom(member);
         
         return ResponseEntity.ok(chatRoom);
     }
+
+    /**
+     * [관리자용] 특정 채팅방에 메시지를 전송합니다.
+     */
+    @PostMapping("/admin/send")
+    public ResponseEntity<Void> sendAdminMessage(@RequestBody ChatDto chatDto, Principal principal) {
+        String adminId = principal.getName();
+        
+        Optional<MemberEntity> optionalAdmin = memberService.findByMemberId(adminId);
+        
+        if (optionalAdmin.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        
+        MemberEntity adminMember = optionalAdmin.get();
+        
+        chatService.saveMessage(chatDto, adminMember);
+        
+        return ResponseEntity.ok().build();
+    }
+    
     
     /**
      * [관리자용] 특정 채팅방을 제거합니다.

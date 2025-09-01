@@ -179,14 +179,8 @@ const AdoptApplicationForm = () => {
         return (
             <div className="adopt-list-page">
                  <div className="adopt-list-container">
-                    <h2 className="adopt-list-title">{isAdmin ? "입양 신청서 관리" : "나의 입양 신청서"}</h2>
-                    {isAdmin && (
-                        <div className="button-container">
-                            <button onClick={() => navigate('/admin/adopt/regist')} className="btn-create-adopt">
-                                입양 신청서 작성
-                            </button>
-                        </div>
-                    )}
+                    <h3 className="adopt-list-title">{isAdmin ? "입양 신청서 관리" : "나의 입양 신청서"}</h3>
+                    
                     
                     <table className="table type2 responsive border">
                         <thead>
@@ -213,7 +207,13 @@ const AdoptApplicationForm = () => {
                             ))}
                         </tbody>
                     </table>
-                    
+                    {isAdmin && (
+                        <div className="button-container">
+                            <button onClick={() => navigate('/admin/adopt/regist')} className="btn-create-adopt search-bar button">
+                                입양 신청서 작성
+                            </button>
+                        </div>
+                    )}
                     {isAdmin && (
                         <div className="pagination">
                             {[...Array(totalPages).keys()].map(page => (
@@ -227,13 +227,14 @@ const AdoptApplicationForm = () => {
                             ))}
                         </div>
                     )}
+                    
                 </div>
             </div>
         );
     } else if (isCreateView || isUpdateView) {
         return (
             <div className="adopt-form-page">
-                <h2>{isCreateView ? "입양 신청서 작성" : "입양 신청서 수정"}</h2>
+                <h3>{isCreateView ? "입양 신청서 작성" : "입양 신청서 수정"}</h3>
                 <form onSubmit={handleSubmit}>
                     <input
                         type="text"
@@ -323,7 +324,7 @@ const AdoptApplicationForm = () => {
         if (!adoptDetail) return <div>{message || "로딩 중..."}</div>;
         return (
             <div className="adopt-detail-page">
-                <h2>입양 신청서 상세 조회</h2>
+                <h3>입양 신청서 상세 조회</h3>
                 <div><strong>입양자명:</strong> {adoptDetail.memberName}</div>
                 <div><strong>입양 동물명:</strong> {adoptDetail.animalName}</div>
                 <div><strong>상담 날짜:</strong> {adoptDetail.consultDt ? new Date(adoptDetail.consultDt).toLocaleDateString() : 'N/A'}</div>

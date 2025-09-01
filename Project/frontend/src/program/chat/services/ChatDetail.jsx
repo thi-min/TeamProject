@@ -1,5 +1,3 @@
-// Project/frontend/src/program/chat/ChatDetail.jsx
-
 import React, { useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { api } from "../../../common/api/axios.js";
@@ -17,10 +15,11 @@ const decodeJwt = (token) => {
     }
 };
 
-// 메시지 입력 컴포넌트 (내부 정의)
-const ChatInput = ({ chatRoomNum, onAddMessage, userRole }) => {
+// 낙관적 업데이트 로직이 제거된 ChatInput 컴포넌트
+const ChatInput = ({ chatRoomNum }) => {
     const [message, setMessage] = useState("");
-
+    const [isSending, setIsSending] = useState(false);
+    
     const handleMessageChange = event => {
         setMessage(event.target.value);
     };
@@ -29,24 +28,24 @@ const ChatInput = ({ chatRoomNum, onAddMessage, userRole }) => {
         event.preventDefault();
         const trimmedMessage = message.trim();
         
-        if (trimmedMessage && chatRoomNum) {
-            const chatDto = {
-                chatRoomNum: chatRoomNum,
-                message: trimmedMessage,
-                senderRole: userRole // 동적으로 사용자 역할을 할당
-            };
-            
-            try {
-                await ChatService.sendMessage(chatDto);
-                onAddMessage({
-                    ...chatDto,
-                    timestamp: new Date().toISOString()
-                });
-                setMessage("");
-            } catch (error) {
-                console.error("메시지 전송 실패:", error);
-                alert("메시지 전송에 실패했습니다. 다시 시도해주세요.");
-            }
+        if (!trimmedMessage || isSending) {
+            return;
+        }
+
+        setIsSending(true);
+
+        const chatDto = {
+            chatRoomNum: chatRoomNum,
+            message: trimmedMessage
+        };
+
+        try {
+            await ChatService.sendMessage(chatDto);
+            setMessage("");
+        } catch (error) {
+            console.error("메시지 전송 실패:", error);
+        } finally {
+            setIsSending(false);
         }
     };
 
@@ -58,14 +57,14 @@ const ChatInput = ({ chatRoomNum, onAddMessage, userRole }) => {
                 placeholder="메시지를 입력하세요..."
                 value={message}
                 onChange={handleMessageChange}
+                disabled={isSending}
             />
-            <button type="submit" className="chat-send-btn">
-                전송
+            <button type="submit" className="chat-send-btn" disabled={isSending || !message.trim()}>
+                {isSending ? "전송 중..." : "전송"}
             </button>
         </form>
     );
 };
-
 
 const ChatDetail = () => {
     const { id } = useParams();
@@ -75,21 +74,18 @@ const ChatDetail = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const chatMessagesRef = useRef(null);
-    const [userRole, setUserRole] = useState("MEMBER"); // 기본값 설정
+    const [userRole, setUserRole] = useState(null);
 
     const authAxios = api.create({
         baseURL: 'http://localhost:8090/',
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
     });
 
-    // 역할을 표시 이름으로 매핑하는 객체
     const roleDisplayNames = {
-        'USER': '회원',
-        
-        'MEMBER': '관리자' 
+        'ADMIN': '관리자',
+        'MEMBER': '회원' 
     };
 
-    // 시간을 보기 좋게 포맷팅하는 함수 추가
     const formatTime = (isoString) => {
         if (!isoString) return "";
         const date = new Date(isoString);
@@ -111,22 +107,32 @@ const ChatDetail = () => {
         }
     };
 
-    const handleAddMessage = (message) => {
-        setMessages(prevMessages => [...prevMessages, message]);
+    // WebSocket 메시지를 받아 상태에 추가하는 함수
+    const handleAddMessage = (newMessage) => {
+        setMessages(prevMessages => [...prevMessages, newMessage]);
     };
     
-    // 컴포넌트 마운트 시 대화 기록 조회 및 웹소켓 연결
     useEffect(() => {
         fetchChatHistory();
 
         const token = localStorage.getItem("accessToken");
         if (token) {
-            // 토큰에서 사용자 역할 추출
             const decodedToken = decodeJwt(token);
             if (decodedToken && decodedToken.auth) {
                 const role = decodedToken.auth;
                 setUserRole(role);
+            } else {
+                setUserRole("MEMBER");
             }
+        } else {
+            setUserRole("MEMBER");
+        }
+    }, [chatRoomNum]);
+
+    useEffect(() => {
+        if (chatRoomNum) {
+            const token = localStorage.getItem("accessToken");
+            if (!token) return;
 
             ChatService.connect(
                 token,
@@ -140,20 +146,18 @@ const ChatDetail = () => {
                     console.error("WebSocket 연결 실패:", err);
                 }
             );
-        }
 
-        return () => {
-            ChatService.disconnect();
-        };
+            return () => {
+                ChatService.disconnect();
+            };
+        }
     }, [chatRoomNum]);
 
-    // 메시지가 추가될 때마다 스크롤을 맨 아래로 이동
     useEffect(() => {
         if (chatMessagesRef.current) {
             chatMessagesRef.current.scrollTop = chatMessagesRef.current.scrollHeight;
         }
     }, [messages]);
-
 
     if (loading) return <div>로딩 중...</div>;
     if (error) return <div>{error}</div>;
@@ -164,9 +168,8 @@ const ChatDetail = () => {
             <div className="message-list" ref={chatMessagesRef}>
                 {messages.length > 0 ? (
                     messages.map((msg, index) => (
-                        <div key={index} className="message-item">
+                        <div key={index} className={`message-item ${msg.senderRole === userRole ? "my-message" : "other-message"}`}>
                             <div className="message-content-wrapper">
-                                {/* roleDisplayNames 객체를 사용하여 역할 이름을 변환 */}
                                 <strong>{roleDisplayNames[msg.senderRole] || msg.senderRole}</strong>: {msg.message}
                                 <span className="message-timestamp">{formatTime(msg.timestamp)}</span>
                             </div>
@@ -176,11 +179,9 @@ const ChatDetail = () => {
                     <div>대화 기록이 없습니다.</div>
                 )}
             </div>
-            
             <div className="chat-input-container">
-                <ChatInput chatRoomNum={chatRoomNum} onAddMessage={handleAddMessage} userRole={userRole} />
+                <ChatInput chatRoomNum={chatRoomNum} />
             </div>
-
             <button onClick={() => navigate(-1)}>이전으로</button>
         </div>
     );
