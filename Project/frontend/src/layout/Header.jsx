@@ -17,7 +17,7 @@ const Header = () => {
   const [isAlarmOpen, setIsAlarmOpen] = useState(false);
 
   const handleAlarmToggle = () => {
-    setIsAlarmOpen(prev => !prev);
+    setIsAlarmOpen((prev) => !prev);
   };
 
   return (
@@ -29,7 +29,10 @@ const Header = () => {
           <button className="alarm-button" onClick={handleAlarmToggle}>
             🔔
           </button>
-        <AlarmBanner isOpen={isAlarmOpen} onClose={() => setIsAlarmOpen(false)} />
+          <AlarmBanner
+            isOpen={isAlarmOpen}
+            onClose={() => setIsAlarmOpen(false)}
+          />
           {/* 날짜 */}
           <div className="today_box">
             <span className="today">2025년 7월 9일</span>
