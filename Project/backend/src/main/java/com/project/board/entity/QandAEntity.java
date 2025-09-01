@@ -22,10 +22,10 @@ public class QandAEntity {
     @JoinColumn(name = "bulletin_num")
     private BbsEntity bbs;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
+    @Column(nullable = false, columnDefinition = "TEXT") //질문
     private String question;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT") // 답변
     private String answer;
     
    
