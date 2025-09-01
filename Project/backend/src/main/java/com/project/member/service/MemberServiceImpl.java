@@ -84,22 +84,22 @@ public class MemberServiceImpl implements MemberService {
 	    if (isKakaoSignup && memberRepository.findFirstByKakaoId(kakaoId).isPresent()) {
 	        throw new IllegalArgumentException("이미 카카오 계정으로 가입된 사용자입니다.");
 	    }
-
-	    // ─────────────────────────────────────────────────────────────
-	    // 2) 비밀번호 처리
-	    //    - 일반 가입: 평소대로 암호화
-	    //    - 카카오 가입: 비밀번호 없이 가입 → DB에 null 저장
-	    // ─────────────────────────────────────────────────────────────
-	    final String encodedPw;
-	    if (isKakaoSignup) {
-	        encodedPw = null; // 소셜 계정은 비번 없이 가입
-	    } else {
-	        if (dto.getMemberPw() == null || dto.getMemberPw().isBlank()) {
-	            throw new IllegalArgumentException("비밀번호를 입력해주세요.");
-	        }
-	        // 기존 로직 유지: 비밀번호 암호화
-	        encodedPw = passwordEncoder.encode(dto.getMemberPw());
-	    }
+	 // ─────────────────────────────────────────────────────────────
+	 // 2) 비밀번호 처리
+	//	     - 일반 가입: 평소대로 암호화
+	//	     - 카카오 가입: 화면 입력 없이 가입 → DB NOT NULL 만족 위해 난수 해시 저장
+		 // ─────────────────────────────────────────────────────────────
+		 final String encodedPw;
+		 if (isKakaoSignup) {
+		     // member_pw NOT NULL 제약 회피 + 실제로는 사용할 수 없는 랜덤 비번
+		     String randomRaw = "kakao:" + java.util.UUID.randomUUID() + ":" + System.nanoTime();
+		     encodedPw = passwordEncoder.encode(randomRaw);
+		 } else {
+		     if (dto.getMemberPw() == null || dto.getMemberPw().isBlank()) {
+		         throw new IllegalArgumentException("비밀번호를 입력해주세요.");
+		     }
+		     encodedPw = passwordEncoder.encode(dto.getMemberPw());
+		 }
 
 	    // ─────────────────────────────────────────────────────────────
 	    // 3) 휴대폰번호 암호화 (기존 로직 + 숫자만 보정)
@@ -562,6 +562,11 @@ public class MemberServiceImpl implements MemberService {
         MemberEntity m = memberRepository.findByMemberNum(memberNum)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "존재하지 않는 회원입니다."));
 
+        // ✅ 카카오 회원은 비밀번호 변경 불가
+        if (m.getKakaoId() != null && !m.getKakaoId().isBlank()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "카카오회원은 비밀번호 변경을 사용하실 수 없습니다.");
+        }
+        
         if (dto.getNewPassword() == null || !dto.getNewPassword().equals(dto.getNewPasswordCheck())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "새 비밀번호와 확인이 일치하지 않습니다.");
         }
