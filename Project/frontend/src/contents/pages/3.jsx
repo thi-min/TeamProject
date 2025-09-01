@@ -19,7 +19,7 @@ export default function Content3() {
   }, []);
 
   return (
-    <div className="map_content_box">
+    <div className="cts3_wrap map_content_box">
       <h3>오시는길</h3>
       <div className="map_box">
         <div className="con_map_wrap">
@@ -31,8 +31,30 @@ export default function Content3() {
           </div>
         </div>
       </div>
+      <div className="to_info_box">
+        <div className="info_item">
+          <h4 className="h4_icon">
+            <i className="h4_icon type1"></i>주소
+          </h4>
+          <div className="box">
+            <ul className="bu">
+              <li>대전광역시 유성구 가정로 218</li>
+            </ul>
+          </div>
+        </div>
+        <div className="info_item">
+          <h4 className="h4_icon">
+            <i className="h4_icon type2"></i>전화번호
+          </h4>
+          <div className="box">
+            <ul className="bu">
+              <li>042-111-2222</li>
+            </ul>
+          </div>
+        </div>
+      </div>
       <h4 className="h4_icon">
-        <i className="h4_icon type1"></i>버스로 오시는길
+        <i className="h4_icon type4"></i>버스로 오시는길
       </h4>
       <div className="box">
         <ul className="bu">
@@ -44,7 +66,7 @@ export default function Content3() {
         </ul>
       </div>
       <h4 className="h4_icon">
-        <i className="h4_icon type2"></i>지하철로 오시는길
+        <i className="h4_icon type5"></i>지하철로 오시는길
       </h4>
       <div className="box">
         <ul className="bu">
@@ -55,7 +77,7 @@ export default function Content3() {
         </ul>
       </div>
       <h4 className="h4_icon">
-        <i className="h4_icon type2"></i>자가용으로 오시는길
+        <i className="h4_icon type6"></i>자가용으로 오시는길
       </h4>
       <div className="box">
         <ul className="bu">

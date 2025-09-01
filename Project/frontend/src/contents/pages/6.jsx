@@ -1,3 +1,4 @@
+// 📁 src/contents/1.jsx
 import React from "react";
 
 export default function Content1() {
