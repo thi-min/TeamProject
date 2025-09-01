@@ -25,7 +25,7 @@ public class BannerServiceImpl implements BannerService {
 
     private final BannerRepository bannerRepository;
     
-    private final String UPLOAD_PATH = "C:/banner-uploads";
+    private final String UPLOAD_PATH = "C:\\Users\\JA311\\git\\TeamProject\\Project\\frontend\\src\\DATA\\banner";
     
     //배너 생성
     @Override

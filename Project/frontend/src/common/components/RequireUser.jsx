@@ -37,7 +37,10 @@ function hasValidLocalToken() {
 function isMemberRoot(pathname) {
   if (!pathname) return false;
 
-  return pathname === "/member" || pathname.startsWith("/member/");
+  return (
+    pathname.startsWith("/member") ||
+    pathname.startsWith("/reserve") 
+  );
 
 }
 
