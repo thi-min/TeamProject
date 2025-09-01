@@ -15,7 +15,6 @@ function QnaBbsWrite() {
       prev.map(f => (f.id === id ? { ...f, file: newFile } : f))
     );
 
-    // 이미지가 아니면 본문 삽입 옵션 초기화
     if (newFile && !["image/jpeg", "image/jpg"].includes(newFile.type)) {
       setFiles(prev =>
         prev.map(f => (f.id === id ? { ...f, insertOption: "no-insert" } : f))
@@ -34,7 +33,6 @@ function QnaBbsWrite() {
         return alert("본문 삽입은 jpg/jpeg 이미지 파일만 가능합니다.");
       }
 
-      // 이미 삽입된 경우 다시 삽입하지 않음
       const alreadyInserted = editorRef.current?.querySelector(`img[data-id='${id}']`);
       if (alreadyInserted) return;
 
@@ -60,7 +58,6 @@ function QnaBbsWrite() {
       };
       reader.readAsDataURL(file);
     } else {
-      // no-insert이면 본문에서 제거
       if (editorRef.current) {
         const imgs = editorRef.current.querySelectorAll(`img[data-id='${id}']`);
         imgs.forEach(img => img.remove());
@@ -117,7 +114,7 @@ function QnaBbsWrite() {
     formData.append("memberNum", memberNum);
     formData.append("type", "FAQ");
 
-    // 본문에는 insert 선택된 이미지만 포함
+    // 본문 HTML (insert 선택된 이미지 포함)
     const contentHTML = editorRef.current?.innerHTML || "";
     formData.append(
       "bbsDto",
@@ -133,9 +130,9 @@ function QnaBbsWrite() {
       )
     );
 
-    // 본문 미삽입 파일만 첨부
+    // 모든 파일 첨부 (insert 여부 상관없이)
     files.forEach(f => {
-      if (f.file && f.insertOption === "no-insert") {
+      if (f.file) {
         formData.append("files", f.file);
       }
     });

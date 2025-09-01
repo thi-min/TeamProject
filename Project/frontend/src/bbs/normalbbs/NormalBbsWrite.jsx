@@ -10,6 +10,18 @@ function NormalBbsWrite() {
   const editorRef = useRef(null);
   const navigate = useNavigate();
 
+  const allowedExtensions = ["jpg", "jpeg", "png", "pdf", "ppt", "pptx", "doc", "docx"];
+  const allowedMimeTypes = [
+    "image/jpeg",
+    "image/png",
+    "application/pdf",
+    "application/vnd.ms-powerpoint",
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+    "application/msword",
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  ];
+  const imageMimeTypes = ["image/jpeg", "image/jpg", "image/png"];
+
   // 로그인 확인
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -19,31 +31,75 @@ function NormalBbsWrite() {
     }
   }, [navigate]);
 
+  // contentEditable placeholder 처리
+  useEffect(() => {
+    const editor = editorRef.current;
+    const placeholder = "내용을 입력해주세요";
+
+    const handleFocus = () => {
+      if (editor.innerHTML === placeholder) {
+        editor.innerHTML = "";
+        editor.classList.remove("placeholder");
+      }
+    };
+    const handleBlur = () => {
+      if (editor.innerHTML.trim() === "") {
+        editor.innerHTML = placeholder;
+        editor.classList.add("placeholder");
+      }
+    };
+
+    if (editor.innerHTML.trim() === "") {
+      editor.innerHTML = placeholder;
+      editor.classList.add("placeholder");
+    }
+
+    editor.addEventListener("focus", handleFocus);
+    editor.addEventListener("blur", handleBlur);
+
+    return () => {
+      editor.removeEventListener("focus", handleFocus);
+      editor.removeEventListener("blur", handleBlur);
+    };
+  }, []);
+
   // 파일 변경
   const handleFileChange = (id, newFile) => {
-    setFiles(prev =>
-      prev.map(f => (f.id === id ? { ...f, file: newFile } : f))
+    if (newFile) {
+      const ext = newFile.name.split(".").pop().toLowerCase();
+      if (!allowedExtensions.includes(ext) || !allowedMimeTypes.includes(newFile.type)) {
+        alert("첨부 불가한 파일입니다.");
+        return;
+      }
+    }
+
+    setFiles((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, file: newFile } : f))
     );
 
-    // 본문 삽입은 jpg/jpeg만
-    if (newFile && !["image/jpeg", "image/jpg"].includes(newFile.type)) {
-      setFiles(prev =>
-        prev.map(f => (f.id === id && f.insertOption === "insert" ? { ...f, insertOption: "no-insert" } : f))
+    // 본문 삽입은 imageMimeTypes만 허용
+    if (newFile && !imageMimeTypes.includes(newFile.type)) {
+      setFiles((prev) =>
+        prev.map((f) =>
+          f.id === id && f.insertOption === "insert"
+            ? { ...f, insertOption: "no-insert" }
+            : f
+        )
       );
     }
   };
 
   // 본문 삽입 옵션 변경
   const handleInsertOptionChange = (id, option) => {
-    const file = files.find(f => f.id === id)?.file;
+    const file = files.find((f) => f.id === id)?.file;
 
     if (option === "insert") {
       if (!file) {
         alert("먼저 파일을 선택해주세요.");
         return;
       }
-      if (!["image/jpeg", "image/jpg"].includes(file.type)) {
-        alert("본문 삽입은 jpg/jpeg 이미지 파일만 가능합니다.");
+      if (!imageMimeTypes.includes(file.type)) {
+        alert("본문 삽입은 jpg, jpeg, png 이미지 파일만 가능합니다.");
         return;
       }
 
@@ -53,19 +109,14 @@ function NormalBbsWrite() {
       const reader = new FileReader();
       reader.onload = (e) => {
         const imgTag = `<img src="${e.target.result}" data-id="${id}" style="max-width:600px;" />`;
-
         if (editorRef.current) {
-          editorRef.current.focus();
-          const sel = window.getSelection();
-          if (!sel.rangeCount) return;
-          const range = sel.getRangeAt(0);
-
+          const range = document.createRange();
+          range.selectNodeContents(editorRef.current);
+          range.collapse(false);
           const el = document.createElement("span");
           el.innerHTML = imgTag;
           range.insertNode(el);
-
-          range.setStartAfter(el);
-          range.setEndAfter(el);
+          const sel = window.getSelection();
           sel.removeAllRanges();
           sel.addRange(range);
         }
@@ -78,44 +129,26 @@ function NormalBbsWrite() {
       }
     }
 
-    setFiles(prev =>
-      prev.map(f => (f.id === id ? { ...f, insertOption: option } : f))
+    setFiles((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, insertOption: option } : f))
     );
   };
 
   // 파일 추가/삭제
   const addFileInput = () => {
-    setFiles(prev => [...prev, { id: Date.now(), file: null, insertOption: "no-insert" }]);
+    setFiles((prev) => [
+      ...prev,
+      { id: Date.now(), file: null, insertOption: "no-insert" }
+    ]);
   };
 
   const removeFileInput = (id) => {
-    setFiles(prev => prev.filter(f => f.id !== id));
+    setFiles((prev) => prev.filter((f) => f.id !== id));
     if (editorRef.current) {
       const imgs = editorRef.current.querySelectorAll(`img[data-id='${id}']`);
       imgs.forEach((img) => img.remove());
     }
   };
-
-  // 본문 이미지 삭제 감지
-  useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setFiles(prevFiles =>
-        prevFiles.map(f => {
-          if (f.insertOption === "insert") {
-            const imgExists = editorRef.current?.querySelector(`img[data-id='${f.id}']`);
-            if (!imgExists) return { ...f, insertOption: "no-insert" };
-          }
-          return f;
-        })
-      );
-    });
-
-    if (editorRef.current) {
-      observer.observe(editorRef.current, { childList: true, subtree: true });
-    }
-
-    return () => observer.disconnect();
-  }, []);
 
   // 제출
   const handleSubmit = async (e) => {
@@ -130,25 +163,31 @@ function NormalBbsWrite() {
     const formData = new FormData();
     formData.append("type", "NORMAL");
 
-    const contentHTML = editorRef.current?.innerHTML || "";
+    // editorRef에 있는 최종 HTML 저장, placeholder 제거
+    const editorHTML =
+      editorRef.current?.innerHTML === "내용을 입력해주세요"
+        ? ""
+        : editorRef.current?.innerHTML || "";
 
     formData.append(
       "bbsDto",
-      new Blob([JSON.stringify({ bbsTitle: title, bbsContent: contentHTML })], { type: "application/json" })
+      new Blob(
+        [JSON.stringify({ bbsTitle: title, bbsContent: editorHTML })],
+        { type: "application/json" }
+      )
     );
 
+    // 모든 파일 첨부 (본문 삽입 여부와 무관)
     files.forEach((f) => {
-      if (f.file) {
-        formData.append("files", f.file);
-      }
+      if (f.file) formData.append("files", f.file);
     });
 
     try {
       await api.post("/admin/bbs/bbslist/bbsadd", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
-          "Authorization": `Bearer ${token}`,
-        },
+          Authorization: `Bearer ${token}`
+        }
       });
       alert("공지사항 등록 성공!");
       navigate("/admin/bbs/normal");
@@ -180,7 +219,7 @@ function NormalBbsWrite() {
         <div
           ref={editorRef}
           contentEditable
-          className="bbs-content-input"
+          className="bbs-content-input placeholder"
           style={{ minHeight: "200px", border: "1px solid #ccc", padding: "10px" }}
         />
 
@@ -189,7 +228,6 @@ function NormalBbsWrite() {
           <div className="bbs-file-list">
             {files.map((f) => (
               <div className="bbs-file-row" key={f.id}>
-                {/* accept 제거: 모든 파일 선택 가능 */}
                 <input
                   type="file"
                   onChange={(e) => handleFileChange(f.id, e.target.files[0])}
@@ -202,7 +240,8 @@ function NormalBbsWrite() {
                       value="insert"
                       checked={f.insertOption === "insert"}
                       onChange={() => handleInsertOptionChange(f.id, "insert")}
-                    /> 본문 삽입
+                    />{" "}
+                    본문 삽입
                   </label>
                   <label>
                     <input
@@ -211,27 +250,42 @@ function NormalBbsWrite() {
                       value="no-insert"
                       checked={f.insertOption === "no-insert"}
                       onChange={() => handleInsertOptionChange(f.id, "no-insert")}
-                    /> 본문 미삽입
+                    />{" "}
+                    본문 미삽입
                   </label>
                 </div>
                 {files.length > 1 && (
-                  <button type="button" className="bbs-file-remove" onClick={() => removeFileInput(f.id)}>
+                  <button
+                    type="button"
+                    className="bbs-file-remove"
+                    onClick={() => removeFileInput(f.id)}
+                  >
                     ❌
                   </button>
                 )}
               </div>
             ))}
-            <button type="button" className="bbs-file-add" onClick={addFileInput}>
+            <button
+              type="button"
+              className="bbs-file-add"
+              onClick={addFileInput}
+            >
               ➕ 파일 추가
             </button>
           </div>
         </div>
 
         <div className="bbs-btn-area">
-          <button type="button" className="bbs-cancel-btn" onClick={() => navigate("/admin/bbs/normal")}>
+          <button
+            type="button"
+            className="bbs-cancel-btn"
+            onClick={() => navigate("/admin/bbs/normal")}
+          >
             취소
           </button>
-          <button type="submit" className="bbs-save-btn">저장</button>
+          <button type="submit" className="bbs-save-btn">
+            저장
+          </button>
         </div>
       </form>
     </div>

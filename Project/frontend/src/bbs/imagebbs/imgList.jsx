@@ -24,6 +24,7 @@ export default function ImgBoard() {
 
       // 검색 키워드와 타입에 따라 파라미터 설정
       if (searchType !== "all" && keyword.trim() !== "") {
+        params.searchType = searchType;
         if (searchType === "title") params.bbstitle = keyword.trim();
         if (searchType === "content") params.bbscontent = keyword.trim();
         // 작성자 검색 관련 조건 삭제

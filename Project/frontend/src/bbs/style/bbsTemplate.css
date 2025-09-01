@@ -1,0 +1,344 @@
+/* ================================
+   1. 게시판 글쓰기 폼 스타일
+================================= */
+.bbs-write-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 24px;
+  background: #fff;
+  border-radius: 8px;
+  box-sizing: border-box;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+}
+
+.bbs-write-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.bbs-row {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+
+.bbs-label {
+  flex: 0 0 100px;
+  font-weight: bold;
+  padding-top: 8px;
+}
+
+.bbs-title-input,
+.bbs-content-input {
+  flex: 1;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.bbs-title-input {
+  border-bottom: 1px solid #000;
+  border-radius: 6px 6px 0 0;
+}
+
+.bbs-content-input {
+  min-height: 150px;
+  resize: vertical;
+  border-radius: 0 0 6px 6px;
+  border-top: none;
+}
+
+.bbs-file-section {
+  display: flex;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  margin-top: 10px;
+  overflow: hidden;
+}
+
+.bbs-file-label {
+  flex: 0 0 100px;
+  border-right: 1px solid #ccc;
+  padding: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  background: #f9f9f9;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.bbs-file-list {
+  flex: 1;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  box-sizing: border-box;
+}
+
+.bbs-file-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bbs-file-row input[type="file"] {
+  flex: 1;
+}
+
+.bbs-file-options {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+  color: #555;
+}
+
+.bbs-file-add {
+  border: 1px dashed #aaa;
+  background: #fafafa;
+  border-radius: 4px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  align-self: flex-start;
+  margin-top: 5px;
+}
+
+.bbs-file-remove {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  color: #c00;
+}
+
+.bbs-btn-area {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 12px;
+}
+
+.bbs-cancel-btn,
+.bbs-save-btn {
+  padding: 8px 16px;
+  border-radius: 4px;
+  border: 1px solid #007bff;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s ease;
+}
+
+.bbs-cancel-btn {
+  background: #eee;
+  color: #333;
+}
+
+.bbs-cancel-btn:hover {
+  background: #ddd;
+}
+
+.bbs-save-btn {
+  background: #007bff;
+  color: #fff;
+}
+
+.bbs-save-btn:hover {
+  background: #0056b3;
+}
+
+/* ================================
+   2. 게시판 테이블 스타일
+================================= */
+.table,
+.bbs-table {
+  width: 100%;
+  margin: 10px 0;
+  box-sizing: border-box;
+  border-collapse: collapse;
+  font-family: 'Arial', sans-serif;
+  font-size: 14px;
+}
+
+.bbs-table th,
+.bbs-table td {
+  border-bottom: 1px solid #ddd;
+  padding: 12px;
+  text-align: center;
+}
+
+.bbs-table th {
+  background-color: #f9f9f9;
+  font-weight: bold;
+}
+
+.bbs-table td.title-cell {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 400px;
+}
+
+.responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ================================
+   3. 페이징 스타일
+================================= */
+.pagination {
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+  gap: 6px;
+}
+
+.pagination button,
+.pagination span {
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  background-color: white;
+  cursor: pointer;
+  font-size: 14px;
+  border-radius: 4px;
+  user-select: none;
+}
+
+.pagination button:hover:not(.active) {
+  background-color: #f0f0f0;
+}
+
+.pagination .active {
+  background-color: #5c5c5c;
+  color: white;
+  cursor: default;
+}
+
+/* ================================
+   4. 기타 박스 스타일
+================================= */
+.box {
+  display: block;
+  position: relative;
+  margin-top: 21px;
+  padding: 38px 34px 34px 43px;
+  border: 1px solid #c6c6c6;
+  border-radius: 12px;
+  background-color: #fff;
+  word-break: keep-all;
+  box-sizing: border-box;
+}
+
+.text_box {
+  display: block;
+  position: relative;
+  margin: 13px 0;
+  padding: 21px 26px;
+  border: 1px solid #c6c6c6;
+  border-radius: 8px;
+  background-color: #fff;
+  font-size: 17px;
+  color: #1d1d1d;
+  line-height: 26px;
+  letter-spacing: 0;
+  font-weight: 400;
+  font-family: 'PretendardGOV', sans-serif;
+  box-sizing: border-box;
+}
+
+.temp_form_box.lg .temp_select {
+  height: 56px;
+  border-radius: 8px;
+  font-size: 19px;
+  line-height: 54px;
+}
+
+/* 체크박스 컬럼 */
+.bbs-table th.checkbox-column,
+.bbs-table td.checkbox-column {
+  width: 5%;
+  text-align: center;
+}
+
+/* 체크박스 스타일 */
+.bbs-table input[type="checkbox"] {
+  transform: scale(1.2);
+  cursor: pointer;
+}
+
+/* 다중 삭제 버튼 스타일 */
+.bulk-delete-btn {
+  margin-bottom: 10px;
+  background-color: #f56262;
+  color: #fff;
+  border: none;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.bulk-delete-btn:hover {
+  background-color: #d9534f;
+}
+
+/* ================================
+  5. 글쓰기 버튼 영역
+================================= */
+/* 상단 글쓰기 버튼 */
+.top-bar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 15px;
+}
+
+.write-btn {
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.write-btn:hover {
+  background-color: #0056b3;
+}
+/* ================================
+  6. 게시판 단건 조회 제목 영역 {이미지(detail-container) qna, 공지사힝(bbs-container)}
+================================= */
+.detail-container h2 {
+    width: auto;
+    height: auto;
+    font-size: 1em;
+    line-height: normal;
+    color: black;
+}
+
+.bbs-container h2 {
+    width: auto;
+    height: auto;
+    font-size: 1em;
+    line-height: normal;
+    color: black;
+}
+
+
+/* 페이지네이션 마크업 */
+.pagination_box{display:flex;position:relative;margin-top:50px;gap:30px;justify-content:center}
+.pagination_box .page_btn{position:relative;width:40px;height:40px;border:1px solid #333;border-radius:6px;font-size:0;line-height:0"";color:transparent;}
+.pagination_box .page_btn:before{display:block;position:absolute;top:calc(50% - 12px);left:calc(50% - 12px);width:24px;height:24px;content:'';background-image:url("../../common/images/array.svg");}
+.pagination_box .page_btn.prev:before{transform:rotate(90deg);}
+.pagination_box .page_btn.next:before{transform:rotate(270deg);}
+.pagination_box .page_btn_box{display:block;position:relative;box-sizing:border-box;}
+.pagination_box .page_btn_box .page{display:inline-block;margin:0 2px;position:relative;width:40px;height:40px;background-color:transparent;vertical-align:top;box-sizing:border-box;text-align:center;border:none;font-size:18px;line-height:20px;color:#333;}
+.pagination_box .page_btn_box .page{transition-property:background-color,color;transition-duration:0.3s;transition-timing-function:ease-in-out;border-radius:8px;}
+.pagination_box .page_btn_box .page:hover{background-color:#246beb;color:#fff;}
+.pagination_box .page_btn_box .page.active{background-color:#246beb;color:#fff;}

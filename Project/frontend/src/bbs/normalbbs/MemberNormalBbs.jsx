@@ -26,6 +26,7 @@ function MemberNormalBbs() {
 
       // 검색 조건 반영
       if (searchKeyword.trim() !== "" && searchType !== "all") {
+        params.searchType = searchType;
         if (searchType === "title") params.bbstitle = searchKeyword.trim();
         else if (searchType === "writer") params.memberName = searchKeyword.trim();
         else if (searchType === "content") params.bbscontent = searchKeyword.trim();
@@ -71,7 +72,7 @@ function MemberNormalBbs() {
             <option value="all">전체</option>
             <option value="title">제목</option>
             <option value="content">내용</option>
-            <option value="writer">작성자</option>
+            
           </select>
         </div>
         <input

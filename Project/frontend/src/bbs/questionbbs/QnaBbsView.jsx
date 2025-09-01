@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
+
 function QnaBbsView() {
   const { id } = useParams();
   const [post, setPost] = useState(null);   // 게시글 + 답변 포함

@@ -6,9 +6,6 @@ function MemberNormalBbsView() {
   const { id } = useParams(); // 게시글 번호
   const [post, setPost] = useState(null);
 
-  // --- 백엔드 URL 상수 ---
-  const BASE_URL = "http://127.0.0.1:8090";
-
   useEffect(() => {
     fetchPost();
   }, [id]);
@@ -30,9 +27,17 @@ function MemberNormalBbsView() {
       <h2>{post.bbs?.bbsTitle}</h2>
 
       <div className="bbs-content">
-        <p>{post.bbs?.bbsContent}</p>
-       <p>작성일: {post.bbs?.registDate ? new Date(post.bbs.registDate).toLocaleDateString() : ""}</p>
+        {/* HTML 렌더링 적용 */}
+        <div
+          dangerouslySetInnerHTML={{ __html: post.bbs?.bbsContent }}
+        ></div>
 
+        <p>
+          작성일:{" "}
+          {post.bbs?.registDate
+            ? new Date(post.bbs.registDate).toLocaleDateString()
+            : ""}
+        </p>
       </div>
 
       {/* 첨부파일 */}

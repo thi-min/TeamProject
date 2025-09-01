@@ -4,9 +4,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import api from "../../common/api/axios";
 
 function NormalBbsView() {
-  const { id } = useParams(); 
+  const { id } = useParams();
   const [post, setPost] = useState(null);
   const [files, setFiles] = useState([]); // 첨부파일 상태
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const token = localStorage.getItem("accessToken");
@@ -18,8 +19,15 @@ function NormalBbsView() {
       navigate("/admin/login");
       return;
     }
-    fetchPost();
-    fetchFiles(); // 첨부파일 별도 호출
+
+    const fetchData = async () => {
+      setLoading(true);
+      await fetchPost();
+      await fetchFiles();
+      setLoading(false);
+    };
+
+    fetchData();
   }, [id, token, navigate]);
 
   // ---------------- 게시글 조회 ----------------
@@ -51,12 +59,9 @@ function NormalBbsView() {
       const res = await api.get(`${apiBase}/${id}/files`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      // fileUrl 세팅
-      const filesWithUrl = res.data.map(f => ({
-        ...f,
-        fileUrl: `http://127.0.0.1:8090/admin/bbs/files/${f.fileNum}/download`
-      }));
-      setFiles(filesWithUrl);
+
+      // 모든 첨부파일 표시 (jpg/jpeg/png 포함)
+      setFiles(res.data);
     } catch (error) {
       console.error("첨부파일 조회 오류:", error);
     }
@@ -71,7 +76,7 @@ function NormalBbsView() {
         headers: { Authorization: `Bearer ${token}` },
       });
       alert("삭제되었습니다.");
-      navigate("/admin/bbs/normal"); 
+      navigate("/admin/bbs/normal");
     } catch (error) {
       console.error("삭제 오류:", error);
       if (error.response?.status === 401) {
@@ -85,7 +90,18 @@ function NormalBbsView() {
     }
   };
 
-  if (!post) return <div>로딩 중...</div>;
+  // ---------------- 파일 다운로드 ----------------
+  const handleDownload = (fileUrl, originalName) => {
+    const link = document.createElement("a");
+    link.href = fileUrl;
+    link.setAttribute("download", originalName || "file");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  if (loading) return <div>로딩 중...</div>;
+  if (!post) return <div>게시글이 존재하지 않습니다.</div>;
 
   return (
     <div className="bbs-container">
@@ -94,29 +110,26 @@ function NormalBbsView() {
         <span>{post.registDate ? post.registDate.substring(0, 10) : ""}</span>
         <span>조회 {post.readCount ?? 0}</span>
       </div>
+
+      {/* 본문 (jpg/jpeg/png 삽입 허용됨) */}
       <div
         className="bbs-content"
         dangerouslySetInnerHTML={{ __html: post.bbsContent }}
       />
 
-      {/* 첨부파일 */}
+      {/* 첨부파일 (본문 삽입 여부 상관없이 모든 파일 표시) */}
       {files.length > 0 && (
         <div className="bbs-files">
           <h4>첨부파일</h4>
           <ul>
             {files.map((file) => (
               <li key={file.fileNum} style={{ marginBottom: "10px" }}>
-                {file.extension?.match(/(jpeg|jpg|gif|png)/i) ? (
-                  <img
-                    src={file.fileUrl}
-                    alt={file.originalName}
-                    style={{ maxWidth: "200px" }}
-                  />
-                ) : (
-                  <a href={file.fileUrl} download>
-                    {file.originalName}
-                  </a>
-                )}
+                <a
+                  href="#!"
+                  onClick={() => handleDownload(file.fileUrl, file.originalName)}
+                >
+                  {file.originalName}
+                </a>
               </li>
             ))}
           </ul>

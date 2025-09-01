@@ -57,7 +57,7 @@ export default function ImgDetail() {
   if (!post) return <div>로딩 중...</div>;
 
   return (
-    <div className="bbs-detail-container">
+    <div className="bbs-container">
       {/* 대표 이미지 */}
       {repImage && repImage.imagePath && (
         <div className="bbs-rep-image">

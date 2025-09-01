@@ -20,6 +20,7 @@ function QnaBbs() {
       const params = { type: "FAQ", page: pageNumber, size: 10 };
 
       if (searchType !== "all" && searchKeyword.trim() !== "") {
+         params.searchType = searchType;
         if (searchType === "title") params.bbstitle = searchKeyword.trim();
         if (searchType === "content") params.bbscontent = searchKeyword.trim();
       }
