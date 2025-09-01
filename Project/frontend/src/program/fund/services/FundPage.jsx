@@ -140,18 +140,18 @@ const FundApplicationForm = () => {
   };
 
 return (
-    <div className="application-form-page">
+    <div className="uiux_cts-form-page">
       <div className="application-form-container">
-        <h3 className="application-form-title">후원금 신청서</h3>
+        <h3>후원금 신청서</h3>
         <form onSubmit={handleSubmit}>
           <div className="form-input-group">
             <div className="form-input-item">
-              <label htmlFor="applicantName" className="form-label required">신청자명</label>
+              <h5>신청자명</h5>
               <input type="text" id="applicantName" name="applicantName" value={formData.applicantName} onChange={handleChange} className="form-input" />
             </div>
             
             <div className="form-input-item">
-              <label htmlFor="contact" className="form-label required">연락처</label>
+              <h5>연락처</h5>
               <div className="form-contact-input">
                 <input
                   type="text"
@@ -180,12 +180,12 @@ return (
             </div>
             
             <div className="form-input-item">
-              <label htmlFor="birthDate" className="form-label required">생년월일</label>
+              <h5>생년월일</h5>
               <input type="date" id="birthDate" name="birthDate" value={formData.birthDate} onChange={handleChange} className="form-input form-input-date" />
             </div>
             
             <div className="form-input-item">
-              <label htmlFor="confirmationRequired" className="form-label required">후원확인서 필 여부</label>
+              <h5>후원확인서 필 여부</h5>
               <select id="confirmationRequired" name="confirmationRequired" value={formData.confirmationRequired} onChange={handleChange} className="form-select">
                 <option value="">선택</option>
                 <option value="필요">필요</option>
@@ -194,7 +194,7 @@ return (
             </div>
             
             <div className="form-input-item">
-              <label htmlFor="fundAmount" className="form-label required">후원 금액</label>
+              <h5>후원 금액</h5>
               <div className="form-amount-input">
                 <input type="number" id="fundAmount" name="fundAmount" value={formData.fundAmount} onChange={handleChange} className="form-input" />
                 <span className="form-unit">원</span>
@@ -202,7 +202,7 @@ return (
             </div>
             
             <div className="form-input-item">
-              <label htmlFor="notes" className="form-label">비고</label>
+              <h5>비고</h5>
               <textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} className="form-textarea" rows="3" placeholder="비고 입력"></textarea>
             </div>
           </div>
@@ -247,33 +247,32 @@ const FundApplicationDetails = () => {
         
         <div className="details-info-group">
           <div className="details-info-item">
-            <div className="details-label">신청자명</div>
+            <h5>신청자명</h5>
             <div className="details-text">{responseData.fundSponsor}</div>
           </div>
           
           <div className="details-info-item">
-            <div className="details-label">연락처</div>
+            <h5>연락처</h5>
             <div className="details-text">{responseData.fundPhone}</div>
           </div>
           
           <div className="details-info-item">
-            <div className="details-label">생년월일</div>
+            <h5>생년월일</h5>
             <div className="details-text">{responseData.fundBirth}</div>
           </div>
           
           <div className="details-info-item">
-            <div className="details-label">후원확인서 필 여부</div>
-            {/* ⭐️ 변환된 값 출력 */}
+            <h5>후원확인서 필 여부</h5>
             <div className="details-text">{confirmationText}</div>
           </div>
           
           <div className="details-info-item">
-            <div className="details-label">후원 금액</div>
+            <h5>후원 금액</h5>
             <div className="details-text">{responseData.fundMoney.toLocaleString()} 원</div>
           </div>
           
           <div className="details-info-item-textarea">
-            <div className="details-label">비고</div>
+            <h5>비고</h5>
             <div className="details-text-notes">{responseData.fundNote || '없음'}</div>
           </div>
         </div>
@@ -362,16 +361,16 @@ const GoodsApplicationForm = () => {
   return (
     <div className="application-form-page">
       <div className="application-form-container">
-        <h3 className="application-form-title">후원 물품 신청서</h3>
+        <h3>후원 물품 신청서</h3>
         <form onSubmit={handleSubmit}>
           <div className="form-input-group">
             <div className="form-input-item">
-              <label htmlFor="applicantName" className="form-label required">신청자명</label>
+              <h5>신청자명</h5>
               <input type="text" id="applicantName" name="applicantName" value={formData.applicantName} onChange={handleChange} className="form-input" />
             </div>
             
             <div className="form-input-item">
-              <label htmlFor="contact" className="form-label required">연락처</label>
+              <h5>연락처</h5>
               <div className="form-contact-input">
                 <input
                   type="text"
@@ -399,12 +398,12 @@ const GoodsApplicationForm = () => {
               </div>
             </div>
             <div className="form-input-item">
-              <label htmlFor="birthDate" className="form-label required">생년월일</label>
+              <h5>생년월일</h5>
               <input type="date" id="birthDate" name="birthDate" value={formData.birthDate} onChange={handleChange} className="form-input form-input-date" />
             </div>
             
             <div className="form-input-item">
-              <label htmlFor="confirmationRequired" className="form-label required">후원확인서 필 여부</label>
+              <h5>후원확인서 필 여부</h5>
               <select id="confirmationRequired" name="confirmationRequired" value={formData.confirmationRequired} onChange={handleChange} className="form-select">
                 <option value="">선택</option>
                 <option value="필요">필요</option>
@@ -413,12 +412,12 @@ const GoodsApplicationForm = () => {
             </div>
             
             <div className="form-input-item">
-              <label htmlFor="goods" className="form-label required">후원물품</label>
+              <h5>후원물품</h5>
               <input type="text" id="goods" name="goods" value={formData.goods} onChange={handleChange} className="form-input" placeholder="후원물품 기부 시 작성" />
             </div>
             
             <div className="form-input-item">
-              <label htmlFor="notes" className="form-label">비고</label>
+              <h5>비고</h5>
               <textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} className="form-textarea" rows="3" placeholder="비고 입력"></textarea>
             </div>
           </div>
@@ -468,11 +467,11 @@ const GoodsApplicationDetails = () => {
   return (
     <div className="application-details-page">
       <div className="application-details-container">
-        <h3 className="application-details-title">후원 물품 신청 내역</h3>
+        <h3>후원 물품 신청 내역</h3>
         
         <div className="details-info-group">
           <div className="details-info-item">
-            <div className="details-label">신청자명</div>
+            <h5>신청자명</h5>
             <div className="details-text">{responseData.fundSponsor}</div>
           </div>
           
