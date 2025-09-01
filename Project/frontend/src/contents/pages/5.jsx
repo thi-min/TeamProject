@@ -1,19 +1,20 @@
 import React from "react";
-import "../style/VolunteerInfoStyle.css";
+import "../styles/contents2.css";
 
 const VolunteerInfoPage = () => {
   return (
+    <div className="cts5_wrap">
+    <h3>봉사 활동 안내</h3>
+        <div class="box">
+            <span class="box_title">봉사 개요</span>
+            <span class="box_desc">보호자와 반려견을 위한 다양한 봉사 프로그램에 참여해 보세요.
+            <br />
+            주말에만 운영되는 봉사활동을 통해 반려동물과 교감하며 뜻깊은 시간을 보내실 수 있습니다.</span>
+        </div>
     <div className="volunteer-info-page">
       <div className="volunteer-info-container">
-        <h1 className="volunteer-info-title">봉사활동 안내</h1>
-        <p className="volunteer-info-description">
-          보호자와 반려견을 위한 다양한 봉사 프로그램에 참여해 보세요.
-          <br />
-          주말에만 운영되는 봉사활동을 통해 반려동물과 교감하며 뜻깊은 시간을 보내실 수 있습니다.
-        </p>
-
+        <h3>봉사 프로그램</h3>
         <div className="volunteer-program-section">
-          <h3>봉사 프로그램</h3>
           <div className="volunteer-program-cards">
             <div className="volunteer-program-card">
               <h4>유기견 보호소 청소</h4>
@@ -31,8 +32,8 @@ const VolunteerInfoPage = () => {
         </div>
 
         {/* 이용 안내 표 */}
+        <h3>이용 안내</h3>
         <div className="volunteer-guide-section">
-          <h3>이용 안내</h3>
           <table className="table type2 responsive border">
             <thead>
               <tr>
@@ -64,6 +65,7 @@ const VolunteerInfoPage = () => {
           <p>※ 미성년자와 동반하는 보호자는 참가자 수에 적용되지 않습니다.</p>
           <p>※ 봉사활동 참여 시 편한 복장과 운동화를 착용해 주세요.</p>
         </div>
+      </div>
       </div>
     </div>
   );

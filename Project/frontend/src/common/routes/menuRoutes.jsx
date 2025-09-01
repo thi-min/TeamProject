@@ -24,7 +24,7 @@ const menuRoutes = [
     title: "동물 놀이터",
     access: "ALL",
     children: [
-      { title: "놀이터 소개", path: "/land/info", access: "ALL" },
+      { title: "놀이터 소개", path: "/contents/4", access: "ALL" },
       { title: "예약하기", path: "/reserve/land/date", access: "ALL" },
     ],
   },
@@ -32,7 +32,7 @@ const menuRoutes = [
     title: "봉사활동",
     access: "ALL",
     children: [
-      { title: "봉사 활동 안내", path: "/volunteer/info", access: "ALL" },
+      { title: "봉사 활동 안내", path: "/contents/5", access: "ALL" },
       {
         title: "봉사 신청하기",
         path: "/reserve/volunteer/date",

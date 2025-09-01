@@ -5,6 +5,11 @@ import NavLinks from "../common/routes/NavLinks";
 import { LogoutLink } from "../program/login/pages/LogoutLink";
 import AlarmBanner from "../program/alarm/services/AlarmBanner";
 
+//공용css
+import "../contents/styles/contents1.css";
+import "../contents/styles/contents2.css";
+import "../bbs/style/bbsTemplate.css";
+
 const Header = () => {
   const { isLogin, userId, role } = useAuth();
   console.log("isLogin:", isLogin, "userId:", userId, "role:", role);

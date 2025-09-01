@@ -1,0 +1,330 @@
+/* 25.09.01 김강민 */
+/* 놀이터 소개*/
+
+
+.land-info-description {
+  text-align: center;
+  font-size: 18px;
+  color: #4a5568; 
+  margin-bottom: 48px;
+  line-height: 1.6;
+}
+
+.land-info-sections {
+  margin-top: 60px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+@media (min-width: 768px) {
+  .land-info-sections {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.land-info-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  text-align: center;
+  transition: transform 0.3s ease-in-out;
+}
+
+.land-info-card h3 {
+  margin-top: 0;
+  font-size: 20px;  
+  font-weight: 700;
+  color: #2d3748; 
+}
+
+.land-info-card p {
+  font-size: 16px; 
+  color: #4a5568;
+  line-height: 24px; 
+}
+
+.land-info-img {
+  width: 200px;   /* 원하는 가로 크기 */
+  height: 200px;  /* 원하는 세로 크기 */
+  object-fit: contain; /* 비율 유지하면서 여백 처리 */
+  margin-bottom: 16px; /* 제목/본문과 간격 */
+}
+
+.pay-info-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  text-align: center;
+  transition: transform 0.3s ease-in-out;
+}
+
+.pay-info-section h3 {
+  margin-top: 0;
+  font-size: 20px;  
+  font-weight: 700;
+  color: #2d3748; 
+}
+
+.pay-info-section p {
+  font-size: 16px; 
+  color: #4a5568;
+  line-height: 24px; 
+  text-align: left;
+}
+/* 봉사 활동 안내 */
+
+.volunteer-info-description {
+  text-align: center;
+  font-size: 18px; /* 18px */
+  color: #4a5568; /* gray-600 */
+  margin-bottom: 48px;
+  line-height: 1.6;
+}
+
+.volunteer-program-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  text-align: center;
+  transition: transform 0.3s ease-in-out;
+}
+
+.volunteer-program-section h3 {
+  margin-top: 0;
+  text-align: center;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 32px;
+}
+
+.volunteer-program-cards {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .volunteer-program-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.volunteer-program-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  text-align: center;
+  transition: transform 0.3s ease-in-out;
+}
+
+.volunteer-program-card h4 {
+  margin-top: 0;
+  font-size: 20px;  
+  font-weight: 700;
+  color: #2d3748; 
+}
+
+.volunteer-program-card p {
+  font-size: 16px; 
+  color: #4a5568;
+  line-height: 24px; 
+}
+
+
+.volunteer-guide-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+  text-align: center;
+  transition: transform 0.3s ease-in-out;
+}
+
+.volunteer-guide-section h3 {
+  margin-top: 0;
+  font-size: 20px;  
+  font-weight: 700;
+  color: #2d3748; 
+}
+
+.volunteer-guide-section p {
+  font-size: 16px; 
+  color: #4a5568;
+  line-height: 24px; 
+  text-align: left;
+}
+/* 인사말 + 센터소개 */
+.ct-container {
+  width: 1280px;   /* 팀에서 통일한 레이아웃 */
+  margin: 0 auto;
+  padding: 24px 20px;
+  font-family: "Noto Sans KR", sans-serif;
+}
+
+/* 헤더/타이틀 */
+
+
+
+/* 섹션 */
+.ct-section {
+  margin: 32px 0;
+}
+
+.ct-timeline {
+    text-align: center;
+}
+.ct-p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #374151;
+  margin-bottom: 12px;
+}
+
+/* 좌우 분할 (인사말 페이지) */
+
+.ct-split-col {
+  background-image: url("../images/greeting-bg.png");
+  border-radius: 20px;
+  min-width: 0;
+  padding: 50px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+.ct-image {
+  width: 100%;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* 카드 (인사말/시설소개 공통) */
+.ct-cards,
+.ct-grid {
+  display: grid;
+  gap: 20px;
+}
+.ct-cards {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.ct-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+.ct-card {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+}
+.ct-card-title {
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+.ct-card-body .ct-p {
+  margin-bottom: 0;
+}
+
+/* 미디어 카드 (시설 소개) */
+.ct-card-media .ct-media {
+  aspect-ratio: 16/10;
+  overflow: hidden;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #e5e7eb;
+}
+.ct-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* 인사말 강조 문구 */
+.ct-quote {
+  position: relative;
+  border-left: 4px solid #2563eb;
+  padding: 12px 14px;
+  margin: 16px 0;
+  color: #1f2937;
+}
+.ct-quote-mark {
+  position: absolute;
+  left: -10px;
+  top: -8px;
+  font-size: 28px;
+  color: #93c5fd;
+}
+.ct-sign {
+  margin-top: 12px;
+  text-align: right;
+}
+.ct-sign-name {
+  margin-top: 70px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* 정보 테이블 (시설 소개) */
+.ct-info-table {
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  overflow: hidden;
+}
+.ct-row {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  border-top: 1px solid #e5e7eb;
+}
+.ct-row:first-child {
+  border-top: 0;
+}
+.ct-cell {
+  padding: 14px 16px;
+  background: #fff;
+}
+.ct-th {
+  background: #f3f4f6;
+  font-weight: 700;
+}
+
+/* 리스트 */
+.ct-list {
+  margin: 0;
+  padding-left: 18px;
+  color: #4b5563;
+  line-height: 1.6;
+}
+
+/* 안내 섹션 */
+.ct-note .ct-list {
+  color: #374151;
+  font-size: 15px;
+}
+
+/* 반응형 */
+@media (max-width: 1080px) {
+  .ct-split {
+    grid-template-columns: 1fr;
+  }
+  .ct-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ct-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 640px) {
+  .ct-cards,
+  .ct-grid {
+    grid-template-columns: 1fr;
+  }
+  .ct-title {
+    font-size: 28px;
+  }
+}
+
+.full_img_box{display:block;position:relative;box-sizing:border-box;width:100%;text-align:center;}
+.full_img_box img{border-radius:24px;overflow:hidden;box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
