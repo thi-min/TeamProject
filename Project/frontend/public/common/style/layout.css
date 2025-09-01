@@ -15,7 +15,7 @@ body{font-size:16px;line-height:28px;letter-spacing:0;font-weight:400;font-famil
 .header_inner .logo{display:block;position:relative;box-sizing:border-box;}
 .header_inner .logo a{display:flex;align-items:center;gap:16px;}
 .header_inner .logo .logo_image{width:100px;height:100px;font-size:0;line-height:0;}
-.header_inner .logo .logo_text{padding-top:6px;font-size:40px;line-height:46px;font-weight:600;}
+.header_inner .logo .logo_text{padding-top:6px;font-size:40px;line-height:46px;font-weight:600;font-family:'cafe24';}
 .header_inner .nav_box{position:relative;display:flex;gap:50px;vertical-align:top;box-sizing:border-box;}
 .header_inner .nav_box .depth_area{display:flex;position:relative;box-sizing:border-box;}
 .header_inner .nav_box .depth_area .depth_list{height:100%;display:flex;align-items:center;gap:10px;box-sizing:border-box;}
@@ -45,7 +45,7 @@ body{font-size:16px;line-height:28px;letter-spacing:0;font-weight:400;font-famil
 
 #container{position:relative;border-top:1px solid #333;}
 #container:before{background-color:#fafafa;display:block;position:absolute;top:-160px;width:100%;height:calc(100% + 160px);content:'';z-index:-1;}
-#container .wrap{max-width:1280px;min-height:600px;margin:0 auto;padding-top:20px;padding-bottom:100px}
+#container .wrap{max-width:1280px;min-height:600px;margin:0 auto;margin-top:70px;padding-bottom:100px}
 
 /* footer */
 /* --------------- footer 시작 --------------- */

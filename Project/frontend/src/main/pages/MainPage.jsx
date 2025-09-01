@@ -21,6 +21,8 @@ import { useGSAP } from "@gsap/react";
 
 //메인 맵지도
 import RoughMap from "./RoughMap";
+//게시판 데이터
+import NormalBbs from "./NormalItem";
 
 import "../style/main.css";
 
@@ -300,57 +302,7 @@ export default function MainPage() {
         <section>
           <div className="row_wrap">
             <div className="item_area">
-              <div className="bbs_box">
-                <div className="bbs_title_box">
-                  <span>공지사항</span>
-                  <Link to="" className="bbs_move_btn">
-                    더보기
-                  </Link>
-                </div>
-                <div className="bbs_text_list">
-                  <div className="bbs_text_item">
-                    <Link to="">
-                      <span className="link_title">
-                        동해물과백두산이 마르고 닳도록 하느님이 보우하사
-                        우리나라만세상에 소리쳐 너에게 닿기를
-                      </span>
-                      <span className="link_day">2025-06-25</span>
-                    </Link>
-                  </div>
-                  <div className="bbs_text_item">
-                    <Link to="">
-                      <span className="link_title">
-                        동해물과백두산이 마르고 닳도록 하느님이 보우하사
-                      </span>
-                      <span className="link_day">2025-06-25</span>
-                    </Link>
-                  </div>
-                  <div className="bbs_text_item">
-                    <Link to="">
-                      <span className="link_title">
-                        하느님이 보우하사 우리나라만세
-                      </span>
-                      <span className="link_day">2025-06-25</span>
-                    </Link>
-                  </div>
-                  <div className="bbs_text_item">
-                    <Link to="">
-                      <span className="link_title">
-                        하느님이 보우하사 우리나라만세
-                      </span>
-                      <span className="link_day">2025-06-25</span>
-                    </Link>
-                  </div>
-                  <div className="bbs_text_item">
-                    <Link to="">
-                      <span className="link_title">
-                        동해물과백두산이 터진다면 어떤가요
-                      </span>
-                      <span className="link_day">2025-06-25</span>
-                    </Link>
-                  </div>
-                </div>
-              </div>
+              <NormalBbs />
               <div className="map_wrap">
                 <div className="bbs_title_box">
                   <span>오시는길</span>

@@ -63,6 +63,8 @@ public interface BbsService {
     // FAQ 게시글 리스트 조회
     Map<String, Object> getBbsList(BoardType type, int page, int size, String bbstitle, String memberName, String bbscontent);
 
+	List<BbsSimpleResponseDto> getLatestNormalPosts();
+
 
 }
 

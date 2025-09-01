@@ -6,6 +6,7 @@ import com.project.board.BoardType;
 import com.project.board.dto.BbsDto;
 import com.project.board.dto.FileUpLoadDto;
 import com.project.board.dto.ImageBbsDto;
+import com.project.board.dto.BbsSimpleResponseDto;
 import com.project.board.entity.QandAEntity;
 import com.project.board.exception.BbsException;
 import com.project.board.repository.QandARepository;
@@ -415,4 +416,9 @@ public class MemberBbsController {
     }
 
 
+    //게시판 공지사항 조회 최신5개 안형주 추가 09.01
+    @GetMapping("/latest")
+    public List<BbsSimpleResponseDto> getLatestNormalPosts() {
+        return bbsService.getLatestNormalPosts();
+    }
 }

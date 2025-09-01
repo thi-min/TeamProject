@@ -40,6 +40,9 @@ public interface BbsRepository extends JpaRepository<BbsEntity, Long> {
 
     Page<BbsEntity> findByBulletinTypeAndBbscontentContaining(BoardType type, String bbscontent, Pageable pageable);
 
+    //25.09.01 안형주 추가
+    List<BbsEntity> findTop5ByBulletinTypeOrderByRegistdateDesc(BoardType boardType);
+    
     // ---------------- JPQL for Admin QnA / FAQ ----------------
     @Query("""
         SELECT new com.project.board.dto.BbsDto(

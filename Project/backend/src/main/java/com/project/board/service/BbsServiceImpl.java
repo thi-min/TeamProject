@@ -26,6 +26,7 @@ import com.project.admin.entity.AdminEntity;
 import com.project.admin.repository.AdminRepository;
 import com.project.board.BoardType;
 import com.project.board.dto.BbsDto;
+import com.project.board.dto.BbsSimpleResponseDto;
 import com.project.board.dto.FileUpLoadDto;
 import com.project.board.dto.ImageBbsDto;
 import com.project.board.dto.QandADto;
@@ -979,5 +980,17 @@ public class BbsServiceImpl implements BbsService {
 //    }
 
 
-
+    //공지사항 최신글 5개 가져오기 안형주 추가
+    @Override
+    public List<BbsSimpleResponseDto> getLatestNormalPosts() {
+        return bbsRepository.findTop5ByBulletinTypeOrderByRegistdateDesc(BoardType.NORMAL)
+                .stream()
+                .map(b -> BbsSimpleResponseDto.builder()
+                        .bulletinNum(b.getBulletinNum())
+                        .bbstitle(b.getBbstitle())
+                        .registdate(b.getRegistdate().toLocalDate())
+                        .build())
+                .toList();
+    }
+    
 }
