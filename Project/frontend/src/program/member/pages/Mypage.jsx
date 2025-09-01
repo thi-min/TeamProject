@@ -136,10 +136,7 @@ export default function Mypage() {
           <li className="link_item type3">
             <Link to="/member/mypage/reserves">예약 내역 조회</Link>
           </li>
-          <li className="link_item type6">
-            <Link to="">예약 시간대 관리</Link>
-          </li>
-          <li className="link_item type5">
+          <li className="link_item type4">
             <MemberDeleteButton
               memberNum={myInfo?.memberNum}
               className="form_flex"

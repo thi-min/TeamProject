@@ -18,7 +18,7 @@ const ChatService = {
     }
 
     // SockJS를 사용하여 WebSocket 연결
-    const socket = new SockJS(`http://localhost:8090/ws`);
+    const socket = new SockJS(`http://192.168.0.115:8090/ws`);
     stompClient = Stomp.over(socket);
 
     // 디버그 메시지 비활성화 (필요하다면)
