@@ -1,0 +1,8 @@
+/* 25.09.01  안형주 */
+.h4_icon{position:relative;padding-left:40px;}
+.h4_icon i{display:inline-block;position:absolute;top:0;left:0;width:30px;height:30px;border-radius:100%;box-sizing:border-box;background-color:#fff;}
+.h4_icon i:before{display:block;position:absolute;top:0;left:0;width:100%;height:100%;background-repeat:no-repeat;background-size:contain;content:'';}
+.h4_icon i.type1:before{background-image:url(../images/map_icon.png);}
+.h4_icon i.type2:before{background-image:url(../images/train_icon.png);}
+.h4_icon i.type3:before{background-image:url(../images/map_icon.png);}
+.h4_icon i.type4:before{background-image:url(../images/map_icon.png);}

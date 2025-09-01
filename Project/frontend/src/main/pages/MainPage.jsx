@@ -23,8 +23,6 @@ import { useGSAP } from "@gsap/react";
 import RoughMap from "./RoughMap";
 
 import "../style/main.css";
-import visualImg01 from "../images/visual_img01.jpg";
-import visualImg02 from "../images/visual_img02.jpg";
 
 //이미지 import
 import animal1 from "../images/animal1.jpeg";
@@ -114,6 +112,7 @@ export default function MainPage() {
   // 외부 버튼 핸들러
   const handlePrev2 = () => swiperRef.current?.slidePrev();
   const handleNext2 = () => swiperRef.current?.slideNext();
+
   const handleTogglePlay2 = () => {
     if (!swiperRef.current) return;
     if (isPlaying2) {
@@ -363,7 +362,12 @@ export default function MainPage() {
               </div>
             </div>
           </div>
-          <div className="img_bbs_box">
+          <div className="img_bbs_box old_img_wrap">
+            <div class="deco_img_box">
+              <i class="deco_img img1"></i>
+              <i class="deco_img img2"></i>
+              <i class="deco_img img3"></i>
+            </div>
             <div className="item_area animal_bbs_box">
               <div className="animal_title">아이들 사진</div>
               <div className="animal_inner">

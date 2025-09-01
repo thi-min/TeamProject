@@ -5,6 +5,11 @@ import NavLinks from "../common/routes/NavLinks";
 import { LogoutLink } from "../program/login/pages/LogoutLink";
 import AlarmBanner from "../program/alarm/services/AlarmBanner";
 
+//공용css
+import "../contents/styles/contents1.css";
+import "../contents/styles/contents2.css";
+import "../bbs/style/bbsTemplate.css";
+
 const Header = () => {
   const { isLogin, userId, role } = useAuth();
   console.log("isLogin:", isLogin, "userId:", userId, "role:", role);
@@ -12,7 +17,7 @@ const Header = () => {
   const [isAlarmOpen, setIsAlarmOpen] = useState(false);
 
   const handleAlarmToggle = () => {
-    setIsAlarmOpen(prev => !prev);
+    setIsAlarmOpen((prev) => !prev);
   };
 
   return (
@@ -24,7 +29,10 @@ const Header = () => {
           <button className="alarm-button" onClick={handleAlarmToggle}>
             🔔
           </button>
-        <AlarmBanner isOpen={isAlarmOpen} onClose={() => setIsAlarmOpen(false)} />
+          <AlarmBanner
+            isOpen={isAlarmOpen}
+            onClose={() => setIsAlarmOpen(false)}
+          />
           {/* 날짜 */}
           <div className="today_box">
             <span className="today">2025년 7월 9일</span>

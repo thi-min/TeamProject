@@ -29,3 +29,8 @@
     src:url('/common/font/HakgyoansimRikodeoR.woff2') format('woff2'),
     url('/common/font/HakgyoansimRikodeoR.woff') format('woff');
 }
+@font-face {
+    font-family:'Cafe24';
+    src:url('/common/font/Cafe24Ssurround.woff2'),
+    url('/common/font/Cafe24Ssurround.woff'),
+}
