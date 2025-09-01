@@ -65,30 +65,32 @@ import KakaoCallbackPage from "../../program/login/pages/KakaoCallbackPage"; //�
 // 게시판 관련
 import AdminBbs from "../../bbs/adminbbs";
 
+//공지사항 게시판
 import Normal from "../../bbs/normalbbs/Normal";
 import NormalBbsView from "../../bbs/normalbbs/NormalBbsview";
 import NormalBbsWrite from "../../bbs/normalbbs/NormalBbsWrite";
 import NormalBbsEdit from "../../bbs/normalbbs/NormalBbsEdit";
 import MemberNormalBbs from "../../bbs/normalbbs/MemberNormalBbs";
 import MemberNormalBbsView from "../../bbs/normalbbs/MemberNormalBbsView";
-import MemberNormalBbsDummy from "../../bbs/normalbbs/MemberNormalBbsdummy";
-import AdminNormalBbsdummy from "../../bbs/normalbbs/AdminNormalBbsdummy";
 
+
+//QNA 게시판
 import QnaBbs from "../../bbs/questionbbs/QnaBbs";
 import QnaBbsWrite from "../../bbs/questionbbs/QnaBbsWrite";
 import QnaBbsView from "../../bbs/questionbbs/QnaBbsView";
 import QnaBbsEdit from "../../bbs/questionbbs/QnaBbsEdit";
 import AdminQnaBbs from "../../bbs/questionbbs/AdminQnaBbs";
 import AdminQnaBbsView from "../../bbs/questionbbs/AdminQnaBbsView";
-import AdminQnaBbsDummy from "../../bbs/questionbbs/AdminQnaBbsDummy";
 
+
+//이미지게시판
 import ImgList from "../../bbs/imagebbs/imgList";
 import ImgDetail from "../../bbs/imagebbs/imgdetail";
 import ImgEdit from "../../bbs/imagebbs/imgedit";
 import ImgWrite from "../../bbs/imagebbs/imgwrite";
 import AdminImgBoard from "../../bbs/imagebbs/AdminImgBoard";
 import AdminImgDetail from "../../bbs/imagebbs/AdminImgDetail";
-import ImgBoardDummy from "../../bbs/imagebbs/ImgBoardDummy";
+
 
 import {
   FundApplicationDetails,
@@ -363,16 +365,7 @@ const layoutRoutes = [
     path="/bbs/normal/view/:id"
     element={<MemberNormalBbsView />}
   />,
-  <Route
-    key="Membernormal-dummy"
-    path="/bbs/member/normal/dummy"
-    element={<MemberNormalBbsDummy />}
-  />,
-  <Route
-    key="Adminnormal-dummy"
-    path="/bbs/Admin/normal/dummy"
-    element={<AdminNormalBbsdummy />}
-  />,
+  
 
   // QnA 게시판
   <Route key="qna-bbs" path="/bbs/qna" element={<QnaBbs />} />,
@@ -401,11 +394,6 @@ const layoutRoutes = [
       </RequireAdmin>
     }
   />,
-  <Route
-    key="qna-bbs-admin-dummy"
-    path="/bbs/admin/qna/dummy"
-    element={<AdminQnaBbsDummy />}
-  />,
 
   // 이미지 게시판
   <Route key="img-list" path="/bbs/image" element={<ImgList />} />,
@@ -421,11 +409,6 @@ const layoutRoutes = [
     key="img-Admin-ImgDetail"
     path="/admin/bbs/image/Detail/:id"
     element={<AdminImgDetail />}
-  />,
-  <Route
-    key="img-Admin-ImgDummy"
-    path="/bbs/admin/image/Dummy"
-    element={<ImgBoardDummy />}
   />,
 
   //사용자
