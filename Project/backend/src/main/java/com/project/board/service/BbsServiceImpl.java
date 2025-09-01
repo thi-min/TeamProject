@@ -58,7 +58,7 @@ public class BbsServiceImpl implements BbsService {
     private final AdminRepository adminRepository;
     
     private final String uploadDir = "C:/photo"; // 공통 업로드 경로
-    
+
     // ---------------- 게시글 저장 ----------------
     private BbsDto saveOnlyBbs(BbsDto dto, Long requesterMemberNum, String requesterAdminId) {
         MemberEntity member = null;
@@ -119,22 +119,26 @@ public class BbsServiceImpl implements BbsService {
         if (type == BoardType.POTO) {
             return createPotoBbs(savedDto, requesterMemberNum, files, isRepresentativeList);
         } else {
+            // 1️⃣ 첨부파일 저장 + 본문 삽입 처리
             BbsDto result = createBbsWithFiles(savedDto, requesterMemberNum, requesterAdminId, files, insertOptions);
 
-            // 본문 삽입 이미지 처리
+            // 2️⃣ 본문 삽입용 처리 (jpg/jpeg/png, insert 옵션)
             if (files != null && insertOptions != null) {
                 StringBuilder contentBuilder = new StringBuilder(
                         result.getBbsContent() == null ? "" : result.getBbsContent()
                 );
 
+                // DB에 저장된 모든 파일 조회
                 List<FileUpLoadDto> savedFiles = getFilesByBbs(result.getBulletinNum());
-                int size = Math.min(savedFiles.size(), insertOptions.size());
 
-                for (int i = 0; i < size; i++) {
-                    String option = insertOptions.get(i);
-                    if ("insert".equals(option)) {
-                        FileUpLoadDto fileDto = savedFiles.get(i);
-                        String fileUrl = "http://127.0.0.1:8090/bbs/files/" + fileDto.getFileNum() + "/download";
+                for (int i = 0; i < savedFiles.size(); i++) {
+                    FileUpLoadDto fileDto = savedFiles.get(i);
+                    String ext = fileDto.getExtension().toLowerCase();
+                    String option = (insertOptions.size() > i) ? insertOptions.get(i) : "no-insert";
+                    String fileUrl = "http://127.0.0.1:8090/bbs/files/" + fileDto.getFileNum() + "/download";
+
+                    // insert 옵션이면서 허용 이미지일 때만 본문에 삽입
+                    if ("insert".equals(option) && List.of("jpg","jpeg","png").contains(ext)) {
                         contentBuilder.append("<br><img src='")
                                       .append(fileUrl)
                                       .append("' style='max-width:600px;'/>");
@@ -149,6 +153,7 @@ public class BbsServiceImpl implements BbsService {
             return result;
         }
     }
+
 
 
 
@@ -214,23 +219,23 @@ public class BbsServiceImpl implements BbsService {
                 throw new BbsException("이미지 저장 실패: " + file.getOriginalFilename(), e);
             }
 
-            // ✅ 모든 파일을 FileUploadEntity에 저장 (대표 포함)
+            // ✅ FileUpLoadEntity는 절대경로 유지
             FileUpLoadEntity fileEntity = FileUpLoadEntity.builder()
                     .bbs(savedEntity)
                     .originalName(file.getOriginalFilename())
                     .savedName(savedName)
-                    .path("/uploads/" + savedName)
+                    .path(uploadDir) // 절대경로
                     .size(file.getSize())
                     .extension(ext)
                     .build();
             fileUploadRepository.save(fileEntity);
 
-            // ✅ 대표 이미지라면 추가로 ImageBbsEntity에 저장
-            if ("Y".equalsIgnoreCase(isRepresentativeList.get(i))) {
+            // ✅ 대표 이미지는 프론트 접근용 URL만 저장
+            if ("Y".equalsIgnoreCase(isRepresentativeList.get(i)) && representativeImage == null) {
                 ImageBbsEntity repImg = ImageBbsEntity.builder()
                         .bbs(savedEntity)
-                        .thumbnailPath("/uploads/thumb/" + savedName)
-                        .imagePath("/uploads/" + savedName)
+                        .thumbnailPath("/uploads/thumb/" + savedName) // 프론트 URL
+                        .imagePath("/uploads/" + savedName)           // 프론트 URL
                         .build();
                 representativeImage = imageBbsRepository.save(repImg);
             }
@@ -244,7 +249,6 @@ public class BbsServiceImpl implements BbsService {
         dto.setBulletinNum(savedEntity.getBulletinNum());
         return dto;
     }
-
 
 
 
@@ -275,10 +279,11 @@ public class BbsServiceImpl implements BbsService {
         return savedBbs;
     }
 
-    // ---------------- 본문 삽입 처리 ----------------
+ // ---------------- 본문 삽입 처리 ----------------
     private String insertFilesToContent(String originalContent, List<FileUpLoadDto> files, List<String> insertOptions) {
         StringBuilder content = new StringBuilder(originalContent == null ? "" : originalContent);
-        List<String> imageExt = List.of("jpg", "jpeg");
+        // 본문 삽입 허용 확장자: jpg, jpeg, png
+        List<String> imageExt = List.of("jpg", "jpeg", "png");
 
         for (int i = 0; i < files.size(); i++) {
             FileUpLoadDto file = files.get(i);
@@ -286,51 +291,81 @@ public class BbsServiceImpl implements BbsService {
             String ext = file.getExtension().toLowerCase();
             String url = "/uploads/" + file.getSavedName();
 
+            // "insert" 옵션이면서 허용 이미지 확장자일 때만 본문에 삽입
             if ("insert".equals(option) && imageExt.contains(ext)) {
-                content.append("\n<img src=\"").append(url).append("\" alt=\"").append(file.getOriginalName()).append("\" />");
-            } else if (!imageExt.contains(ext)) { // 문서류는 항상 링크
-                content.append("\n<a href=\"").append(url).append("\" download>").append(file.getOriginalName()).append("</a>");
+                content.append("\n<img src=\"")
+                       .append(url)
+                       .append("\" alt=\"")
+                       .append(file.getOriginalName())
+                       .append("\" style='max-width:600px;' />");
             }
+
+            // 그 외 파일(pdf, doc, ppt 등)은 본문에 추가하지 않음
         }
 
         return content.toString();
     }
 
+
+
     // ---------------- 게시글 수정 ----------------
     @Override
-    @Transactional
-    public BbsDto updateBbs(Long id, BbsDto dto, Long userId, String adminId, List<MultipartFile> newFiles, List<Long> deleteFileIds, boolean isAdmin, List<String> insertOptions) {
+    @Transactional(noRollbackFor = BbsException.class) // BbsException 발생 시 rollback 방지
+    public BbsDto updateBbs(Long id,
+                            BbsDto dto,
+                            Long userId,
+                            String adminId,
+                            List<MultipartFile> newFiles,
+                            List<Long> deleteFileIds,
+                            boolean isAdmin,
+                            List<String> insertOptions) {
+
         BbsEntity bbs = bbsRepository.findById(id)
                 .orElseThrow(() -> new BbsException("게시글 없음: " + id));
 
-        // 권한 체크
-//        if (isAdmin && (bbs.getAdminId() == null || !bbs.getAdminId().getAdminId().equals(adminId))) {
-//            throw new BbsException("관리자 권한이 없습니다.");
-//        }
+        // ---------------- 권한 체크 ----------------
         if (!isAdmin && (bbs.getMemberNum() == null || !bbs.getMemberNum().getMemberNum().equals(userId))) {
             throw new BbsException("본인이 작성한 글만 수정 가능합니다.");
         }
 
-        // 게시글 업데이트
-        bbs.setBbstitle(dto.getBbsTitle());
-        bbs.setBbscontent(dto.getBbsContent());
-        bbs.setRevisiondate(dto.getRevisionDate());
+        try {
+            // ---------------- 게시글 업데이트 ----------------
+            bbs.setBbstitle(dto.getBbsTitle());
+            bbs.setBbscontent(dto.getBbsContent());
+            bbs.setRevisiondate(dto.getRevisionDate());
 
-        // 삭제 파일 처리
-        if (deleteFileIds != null) {
-            for (Long fileId : deleteFileIds) deleteFileById(fileId);
+            // ---------------- 삭제 파일 처리 ----------------
+            if (deleteFileIds != null) {
+                for (Long fileId : deleteFileIds) {
+                    try {
+                        deleteFileById(fileId);
+                    } catch (Exception e) {
+                        // 개별 파일 삭제 실패는 무시, 로그만 남김
+                        System.err.println("파일 삭제 실패: " + fileId + ", " + e.getMessage());
+                    }
+                }
+            }
+
+            // ---------------- 새 파일 업로드 ----------------
+            if (newFiles != null && !newFiles.isEmpty()) {
+                Long memberNumParam = isAdmin ? null : userId;
+                String adminIdParam = isAdmin ? adminId : null;
+
+                try {
+                    this.createBbsWithFiles(convertToDto(bbs), memberNumParam, adminIdParam, newFiles, insertOptions);
+                } catch (Exception e) {
+                    // 파일 업로드 실패도 rollback 없이 로그 처리
+                    System.err.println("파일 업로드 실패: " + e.getMessage());
+                }
+            }
+
+            // ---------------- DB 저장 ----------------
+            return convertToDto(bbsRepository.save(bbs));
+
+        } catch (Exception e) {
+            // 예상치 못한 예외는 여전히 rollback
+            throw new RuntimeException("게시글 수정 실패", e);
         }
-
-        // 새 파일 업로드 (본문 삽입 옵션 반영)
-        if (newFiles != null && !newFiles.isEmpty()) {
-        	Long memberNumParam = isAdmin ? null : userId;       // userId는 Long 타입
-        	String adminIdParam = isAdmin ? adminId : null;     // adminId는 String 타입
-
-        	this.createBbsWithFiles(convertToDto(bbs), memberNumParam, adminIdParam, newFiles, insertOptions);
-
-        }
-
-        return convertToDto(bbsRepository.save(bbs));
     }
 
 
@@ -810,17 +845,15 @@ public class BbsServiceImpl implements BbsService {
 
         switch (boardType) {
             case POTO:
-
                 allowedExtensions = List.of("jpg", "jpeg");
-
                 allowedMimeTypes = List.of("image/jpeg");
-
-                break; 
+                break;
             case FAQ:
             case NORMAL:
-                allowedExtensions = List.of("jpg", "jpeg", "pdf", "ppt", "pptx", "doc", "docx");
+                allowedExtensions = List.of("jpg", "jpeg", "png", "pdf", "ppt", "pptx", "doc", "docx"); // PNG 추가
                 allowedMimeTypes = List.of(
                     "image/jpeg",
+                    "image/png", // PNG 추가
                     "application/pdf",
                     "application/vnd.ms-powerpoint", // ppt
                     "application/vnd.openxmlformats-officedocument.presentationml.presentation", // pptx
@@ -834,6 +867,7 @@ public class BbsServiceImpl implements BbsService {
 
         long maxSize = 5 * 1024 * 1024; // 5MB
         String uploadDir = "C:/photo"; // 실제 경로로 변경 필요
+
         List<FileUpLoadEntity> entities = files.stream()
             .filter(file -> {
                 if (file == null || file.isEmpty()) return false;
@@ -881,6 +915,7 @@ public class BbsServiceImpl implements BbsService {
                 .build())
             .collect(Collectors.toList());
     }
+
 
     private String getExtension(String filename) {
         if (filename == null || filename.isBlank()) return null;
