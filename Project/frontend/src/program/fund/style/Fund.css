@@ -1,0 +1,458 @@
+/* 공통 스타일 */
+.mpva-site-wrap {
+  min-height: 100vh;
+  font-family: 'Noto Sans KR', sans-serif;
+  padding: 3rem 0; /* 상하 패딩 추가 */
+}
+
+/* 템플릿: 컨테이너와 제목 스타일 */
+.mpva-site-body {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* 템플릿: 제목 (h1) 스타일 */
+.mpva-body-title {
+  text-align: center;
+  font-size: 2.5rem; /* 40px */
+  font-weight: 800;
+  margin-bottom: 3rem; /* 48px */
+  color: #1a202c; /* gray-900 */
+}
+
+/* 템플릿: 제목 (h2) 스타일 */
+.mpva-body-title-sub {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 700;
+  margin-bottom: 1.5rem; /* 24px */
+  color: #1a202c; /* gray-900 */
+  text-align: center;
+}
+
+/* 템플릿: 버튼 스타일 */
+.mpva-btn-primary {
+  padding: 0.75rem 1.5rem; /* py-3 px-6 -> py-2 px-6 */
+  border-radius: 0.5rem; /* rounded-lg */
+  color: #ffffff;
+  font-weight: 700;
+  background-color: #3b82f6; /* blue-500 */
+  transition: background-color 0.3s ease-in-out;
+  border: none;
+  cursor: pointer;
+}
+
+.mpva-btn-primary:hover {
+  background-color: #2563eb; /* blue-600 */
+}
+
+.mpva-btn-secondary {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 700;
+  color: #4a5568; /* gray-700 */
+  border: 1px solid #e2e8f0; /* gray-300 */
+  background-color: #ffffff;
+  transition: background-color 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+.mpva-btn-secondary:hover {
+  background-color: #f7fafc; /* gray-100 */
+}
+
+
+/* ----- FundMainPage 스타일 ----- */
+.fund-main-page {
+  min-height: 100vh;
+  font-family: 'Noto Sans KR', sans-serif;
+  padding: 3rem;
+  background-color: #f7fafc; /* gray-100 */
+}
+
+.fund-main-container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.fund-main-title {
+  text-align: center;
+  font-size: 2.25rem; /* 36px */
+  font-weight: 800;
+  margin-bottom: 3rem; /* 48px */
+  color: #1a202c; /* gray-900 */
+}
+
+.fund-section-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem; /* 32px */
+}
+
+@media (min-width: 768px) {
+  .fund-section-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .fund-section-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* 후원 섹션 카드 스타일 */
+.fund-section-card {
+  background-color: #ffffff;
+  padding: 1.5rem; /* 24px */
+  border-radius: 0.75rem; /* 12px */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+  border: 1px solid #e2e8f0; /* gray-200 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition-property: transform;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.fund-section-card:hover {
+  transform: scale(1.05);
+}
+
+.fund-section-icon {
+  font-size: 3rem; /* 48px */
+  margin-bottom: 1rem; /* 16px */
+  color: #3b82f6; /* blue-500 */
+}
+
+.fund-section-title {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 700;
+  margin-bottom: 0.5rem; /* 8px */
+  color: #2d3748; /* gray-800 */
+}
+
+.fund-section-description {
+  color: #4a5568; /* gray-600 */
+  margin-bottom: 1.5rem; /* 24px */
+  flex-grow: 1;
+}
+
+.fund-donate-button {
+  margin-top: auto;
+  width: 100%;
+  padding: 0.75rem 1.5rem; /* py-3 px-6 */
+  border-radius: 0.5rem; /* rounded-lg */
+  color: #ffffff;
+  font-weight: 700;
+  transition-property: color, background-color;
+  transition-duration: 0.3s;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  background-color: #3b82f6; /* blue-500 */
+  border: none;
+  cursor: pointer;
+}
+
+.fund-donate-button:hover {
+  background-color: #2563eb; /* blue-600 */
+}
+
+
+/* ----- 신청서 페이지 스타일 ----- */
+.application-form-page {
+  min-height: 100vh;
+  background-color: #f7fafc; /* gray-100 */
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.application-form-container {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 0.75rem; /* 12px */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+  width: 100%;
+  max-width: 672px; /* max-w-2xl */
+}
+
+.application-form-title {
+  font-size: 1.5rem; /* 24px */
+  font-weight: 700;
+  margin-bottom: 1.5rem; /* 24px */
+  text-align: center;
+}
+
+.form-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* space-y-4 */
+}
+
+.form-input-item,
+.form-input-item-textarea {
+  display: flex;
+  align-items: center;
+}
+
+.form-input-item-textarea {
+  align-items: flex-start;
+}
+
+.form-label {
+  width: 25%;
+  font-weight: 600;
+  color: #4a5568; /* gray-700 */
+  white-space: nowrap;
+}
+
+.form-label.required::after {
+  content: '*';
+  color: #ef4444; /* red-500 */
+  margin-left: 0.25rem;
+}
+
+.form-input {
+  width: 75%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 0.375rem; /* 6px */
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3b82f6; /* blue-500 */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5); /* ring-2 focus:ring-blue-500 */
+}
+
+.form-contact-input {
+  width: 75%;
+  display: flex;
+  gap: 0.5rem;
+}
+.form-contact-input .form-input {
+  width: 33.333%;
+  text-align: center;
+}
+.form-contact-input span {
+  font-weight: bold;
+  align-self: center;
+}
+
+
+.form-select {
+  width: 75%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.form-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.form-amount-input {
+  width: 75%;
+  display: flex;
+  align-items: center;
+}
+.form-amount-input .form-input {
+  width: 100%;
+}
+.form-unit {
+  margin-left: 0.5rem;
+  font-weight: 600;
+}
+
+.form-textarea {
+  width: 75%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  resize: vertical;
+}
+.form-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+
+.form-amount-select-input {
+  width: 75%;
+  display: flex;
+  gap: 0.5rem;
+}
+.form-amount-select-input .form-select {
+  width: 50%;
+}
+.form-amount-select-input .form-input {
+  width: 50%;
+}
+
+.form-notice-box {
+  background-color: #e5e7eb; /* gray-200 */
+  padding: 1rem;
+  border-radius: 0.375rem;
+  margin-top: 1.5rem; /* 24px */
+}
+
+.form-notice-title {
+  font-weight: 700;
+  font-size: 1.125rem; /* 18px */
+  margin-bottom: 0.5rem;
+}
+
+.form-notice-list {
+  list-style-type: disc;
+  list-style-position: inside;
+  font-size: 0.875rem; /* 14px */
+  color: #4a5568; /* gray-700 */
+}
+
+.form-checkbox-container {
+  display: flex;
+  align-items: center;
+  margin-top: 1rem;
+}
+.form-checkbox {
+  margin-right: 0.5rem;
+}
+
+
+.form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 2rem; /* 32px */
+}
+
+.form-buttons.right-aligned {
+  justify-content: flex-end;
+}
+
+.form-button-primary {
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.375rem;
+  color: #ffffff;
+  font-weight: 700;
+  background-color: #3b82f6;
+  transition: background-color 0.3s;
+  border: none;
+  cursor: pointer;
+}
+.form-button-primary:hover {
+  background-color: #2563eb;
+}
+
+.form-button-secondary {
+  padding: 0.5rem 1.5rem;
+  border-radius: 0.375rem;
+  font-weight: 700;
+  color: #4a5568;
+  border: 1px solid #d1d5db;
+  background-color: #ffffff;
+  transition: background-color 0.3s;
+  cursor: pointer;
+}
+.form-button-secondary:hover {
+  background-color: #f3f4f6;
+}
+
+.form-message {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: #000000;
+  color: #ffffff;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  z-index: 50;
+}
+
+
+/* ----- 신청 내역 페이지 스타일 ----- */
+.application-details-page {
+  min-height: 100vh;
+  background-color: #f7fafc;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.application-details-container {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  width: 100%;
+  max-width: 672px;
+}
+
+.application-details-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.details-info-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.details-info-item,
+.details-info-item-textarea {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #e2e8f0; /* gray-200 */
+  padding-bottom: 0.5rem;
+}
+
+.details-info-item-textarea {
+  align-items: flex-start;
+}
+
+.details-label {
+  width: 25%;
+  font-weight: 600;
+  color: #4a5568; /* gray-700 */
+  white-space: nowrap;
+}
+
+.details-text {
+  width: 75%;
+  color: #1a202c; /* gray-900 */
+}
+
+.details-text-notes {
+  width: 75%;
+  color: #1a202c;
+  white-space: pre-wrap;
+}
+
+.details-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 2rem;
+}
+
+.details-buttons.right-aligned {
+  justify-content: flex-end;
+}
+
+.application-details-error {
+  text-align: center;
+  color: #ef4444; /* red-500 */
+  padding: 2rem;
+}

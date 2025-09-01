@@ -29,7 +29,7 @@ export default function AdminPasswordUpdatePage() {
       return;
     }
     if (newPassword !== newPasswordCheck) {
-      setFeedback({ type: "error", text: "새 비밀번호가 일치하지 않습니다." });
+      setFeedback({ type  : "error", text: "새 비밀번호가 일치하지 않습니다." });
       return;
     }
     try {

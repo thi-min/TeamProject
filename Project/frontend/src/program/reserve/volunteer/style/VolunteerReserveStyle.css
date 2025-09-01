@@ -193,7 +193,6 @@ body {
   width: 100%;
   margin: 0 auto;
   padding: 20px;
-  font-family: "Noto Sans KR", sans-serif;
 }
 
 .form-title {
@@ -220,6 +219,7 @@ body {
 }
 
 .form-section {
+  width: 100%;
   border: 1px solid #ccc;
   border-radius: 10px;
   background-color: #fafafa;

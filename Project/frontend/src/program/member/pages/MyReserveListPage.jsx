@@ -43,7 +43,13 @@ function MyReserveListPage() {
   return (
     <div className="mypage-reserve-wrapper">
       <div className="reserve-header">
-        <h2>마이페이지 - 예약내역 조회</h2>
+        <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon reserve"></div>
+          <div className="form_title">예약 내역 조회</div>
+        </div>
+      </div>
+        <h3>예약 내역</h3>
       </div>
       <div className="reserve-tabs">
         <div className={`temp_btn md ${selectedType === "LAND" ? "" : "white"}`}>

@@ -161,7 +161,6 @@ body {
   width: 100%;
   margin: 0 auto;
   padding: 20px;
-  font-family: "Noto Sans KR", sans-serif;
 }
 
 /* 제목 정렬 */
@@ -191,6 +190,7 @@ body {
 
 /* 폼 섹션 구분 박스 */
 .form-section {
+  width: 100%;
   border: 1px solid #ccc;
   border-radius: 10px;
   background-color: #fafafa; 
@@ -202,6 +202,7 @@ body {
 
 /* 각 라벨과 입력창을 테이블 형식처럼 정렬 */
 .form-container {
+  width: 100%;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -307,7 +308,6 @@ textarea {
 /*---------------놀이터예약확인페이지----------------*/
 .land-confirm-page {
   width: 100%;
-  max-width: 1600px;
   margin: 0 auto;
   padding: 30px;
   box-sizing: border-box;

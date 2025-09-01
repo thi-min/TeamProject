@@ -26,4 +26,5 @@ public class ImageBbsEntity {
 
     @Column(name = "image_path", nullable = false, length = 255)
     private String imagePath; // 이미지 경로
+    
 }

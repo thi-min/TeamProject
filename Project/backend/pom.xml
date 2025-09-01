@@ -70,7 +70,11 @@
 			<artifactId>spring-security-test</artifactId>
 			<scope>test</scope>
 		</dependency>
-		
+		<!-- websocket사용 -->
+		<dependency>
+		    <groupId>org.springframework.boot</groupId>
+		    <artifactId>spring-boot-starter-websocket</artifactId>
+		</dependency>
 		<!-- phone사용
 	    유효성 검사 (Validation) 어노테이션 사용을 위한 의존성.
 	    예: @NotBlank, @NotNull, @Pattern 등의 입력값 검증 어노테이션을 DTO에서 사용 가능하게 해줌.
@@ -105,11 +109,6 @@
 		    <version>0.11.5</version>
 		    <scope>runtime</scope>
 		</dependency>
-<!--	<dependency>
-			<groupId>com.springboot</groupId>
-			<artifactId>advanced_jpa</artifactId>
-			<version>0.0.1-SNAPSHOT</version>
-		</dependency> -->
 	</dependencies>
 
 	<build>
@@ -130,12 +129,7 @@
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 				<configuration>
-					<excludes>
-						<exclude>
-							<groupId>org.projectlombok</groupId>
-							<artifactId>lombok</artifactId>
-						</exclude>
-					</excludes>
+					<!-- Lombok exclude is not needed here. It's handled by the 'optional' tag. -->
 				</configuration>
 			</plugin>
 		</plugins>

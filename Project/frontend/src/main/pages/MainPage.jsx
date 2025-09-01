@@ -18,9 +18,20 @@ import "swiper/css/effect-fade";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 
+//메인 맵지도
+import RoughMap from "./RoughMap";
+
 import "../style/main.css";
 import visualImg01 from "../images/visual_img01.jpg";
 import visualImg02 from "../images/visual_img02.jpg";
+
+//이미지 import
+import animal1 from "../images/animal1.jpeg";
+import animal2 from "../images/animal2.jpeg";
+import animal3 from "../images/animal3.jpeg";
+import animal4 from "../images/animal4.jpeg";
+import animal5 from "../images/animal5.jpeg";
+import animal6 from "../images/animal6.jpeg";
 
 export default function MainPage() {
   // Swiper 인스턴스 레퍼런스
@@ -78,6 +89,61 @@ export default function MainPage() {
     </Swiper>
   );
 
+  // 재생/정지 상태
+  const [isPlaying2, setIsPlaying2] = useState(true);
+
+  // 외부 버튼 핸들러
+  const handlePrev2 = () => swiperRef.current?.slidePrev();
+  const handleNext2 = () => swiperRef.current?.slideNext();
+  const handleTogglePlay2 = () => {
+    if (!swiperRef.current) return;
+    if (isPlaying2) {
+      // 재생 중이면 정지
+      swiperRef.current.autoplay?.stop();
+      setIsPlaying2(false);
+    } else {
+      // 정지 상태면 재생
+      swiperRef.current.autoplay?.start();
+      setIsPlaying2(true);
+    }
+  };
+
+  const animalimages = [
+    { src: animal1, alt: "동물 이미지1" },
+    { src: animal2, alt: "동물 이미지2" },
+    { src: animal3, alt: "동물 이미지3" },
+    { src: animal4, alt: "동물 이미지4" },
+    { src: animal5, alt: "동물 이미지5" },
+    { src: animal6, alt: "동물 이미지6" },
+  ];
+
+  const animalSlideList = (
+    <Swiper
+      modules={[Navigation, Autoplay, A11y]}
+      loop
+      speed={400}
+      // autoplay={{
+      //   delay: 3000,
+      //   disableOnInteraction: false,
+      // }}
+      onBeforeInit={(swiper) => {
+        swiperRef.current = swiper;
+      }}
+      slidesPerView={5}
+      spaceBetween={40}
+      className="main_swiper"
+    >
+      {animalimages.map((s, idx) => (
+        <SwiperSlide key={idx}>
+          <div className="animal_item">
+            <Link>
+              <img src={s.src} alt={s.alt} />
+            </Link>
+          </div>
+        </SwiperSlide>
+      ))}
+    </Swiper>
+  );
   return (
     <div className="main_page">
       <div className="rowgroup1">
@@ -142,88 +208,162 @@ export default function MainPage() {
           </div>
         </section>
       </div>
-      <div className="rowgroup2">
+      <div className="rowgroup2 row_index">
         <section>
-          <h2>빠른메뉴 영역</h2>
-          <div className="quick_menu_wrap waypoint">
-            <div className="quick_menu_title">
-              <span>Quick Menu</span>
-            </div>
-            <div className="quick_menu_list">
-              <div className="quick_menu_item quick1">
-                <Link to="" className="quick_item_link">
-                  <div className="item_box">
-                    <i className="menu_icon"></i>
-                    <div className="item_text">
-                      <span className="title">놀이터 예약</span>
-                      <span className="desc">
-                        반려견과 함께 <br />
-                        놀아볼까요?
-                      </span>
-                    </div>
-                  </div>
-                </Link>
+          <div className="row_wrap">
+            <div className="quick_menu_wrap waypoint">
+              <div className="quick_menu_title">
+                <span>Quick Menu</span>
               </div>
-              <div className="quick_menu_item quick2">
-                <Link to="" className="quick_item_link">
-                  <div className="item_box">
-                    <i className="menu_icon"></i>
-                    <div className="item_text">
-                      <span className="title">봉사 예약</span>
-                      <span className="desc">
-                        유기견들과 함께하는 <br />
-                        봉사활동
-                      </span>
+              <div className="quick_menu_list">
+                <div className="quick_menu_item quick1">
+                  <Link to="" className="quick_item_link">
+                    <div className="item_box">
+                      <i className="menu_icon"></i>
+                      <div className="item_text">
+                        <span className="title">놀이터 예약</span>
+                        <span className="desc">
+                          반려견과 함께 <br />
+                          놀아볼까요?
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              </div>
-              <div className="quick_menu_item quick3">
-                <Link to="" className="quick_item_link">
-                  <div className="item_box">
-                    <i className="menu_icon"></i>
-                    <div className="item_text">
-                      <span className="title">센터 아이들</span>
-                      <span className="desc">
-                        보호중인 귀여운 <br />
-                        아이들 보고가세요~
-                      </span>
+                  </Link>
+                </div>
+                <div className="quick_menu_item quick2">
+                  <Link to="" className="quick_item_link">
+                    <div className="item_box">
+                      <i className="menu_icon"></i>
+                      <div className="item_text">
+                        <span className="title">봉사 예약</span>
+                        <span className="desc">
+                          유기견들과 함께하는 <br />
+                          봉사활동
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </Link>
-              </div>
-              <div className="quick_menu_item quick4">
-                <Link to="" className="quick_item_link">
-                  <div className="item_box">
-                    <i className="menu_icon"></i>
-                    <div className="item_text">
-                      <span className="title">후원하기</span>
-                      <span className="desc">
-                        당신의 작은 관심이 <br />
-                        아이들에게 큰 도움이 됩니다.
-                      </span>
+                  </Link>
+                </div>
+                <div className="quick_menu_item quick3">
+                  <Link to="" className="quick_item_link">
+                    <div className="item_box">
+                      <i className="menu_icon"></i>
+                      <div className="item_text">
+                        <span className="title">센터 아이들</span>
+                        <span className="desc">
+                          보호중인 귀여운 <br />
+                          아이들 보고가세요~
+                        </span>
+                      </div>
                     </div>
-                  </div>
-                </Link>
+                  </Link>
+                </div>
+                <div className="quick_menu_item quick4">
+                  <Link to="" className="quick_item_link">
+                    <div className="item_box">
+                      <i className="menu_icon"></i>
+                      <div className="item_text">
+                        <span className="title">후원하기</span>
+                        <span className="desc">
+                          당신의 작은 관심이 <br />
+                          아이들에게 큰 도움이 됩니다.
+                        </span>
+                      </div>
+                    </div>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
         </section>
       </div>
-      <div className="rowgroup3">
+      <div className="rowgroup3 row_index">
         <section>
-          <div className="bbs_list_box">
-            <div className="bbs_list_item">
-              <div className="bbs_title_box">
-                <span>공지사항</span>
+          <div className="row_wrap">
+            <div className="item_area">
+              <div className="bbs_box">
+                <div className="bbs_title_box">
+                  <span>공지사항</span>
+                  <Link to="" className="bbs_move_btn">
+                    더보기
+                  </Link>
+                </div>
+                <div className="bbs_text_list">
+                  <div className="bbs_text_item">
+                    <Link to="">
+                      <span className="link_title">
+                        동해물과백두산이 마르고 닳도록 하느님이 보우하사
+                        우리나라만세상에 소리쳐 너에게 닿기를
+                      </span>
+                      <span className="link_day">2025-06-25</span>
+                    </Link>
+                  </div>
+                  <div className="bbs_text_item">
+                    <Link to="">
+                      <span className="link_title">
+                        동해물과백두산이 마르고 닳도록 하느님이 보우하사
+                      </span>
+                      <span className="link_day">2025-06-25</span>
+                    </Link>
+                  </div>
+                  <div className="bbs_text_item">
+                    <Link to="">
+                      <span className="link_title">
+                        하느님이 보우하사 우리나라만세
+                      </span>
+                      <span className="link_day">2025-06-25</span>
+                    </Link>
+                  </div>
+                  <div className="bbs_text_item">
+                    <Link to="">
+                      <span className="link_title">
+                        하느님이 보우하사 우리나라만세
+                      </span>
+                      <span className="link_day">2025-06-25</span>
+                    </Link>
+                  </div>
+                  <div className="bbs_text_item">
+                    <Link to="">
+                      <span className="link_title">
+                        동해물과백두산이 터진다면 어떤가요
+                      </span>
+                      <span className="link_day">2025-06-25</span>
+                    </Link>
+                  </div>
+                </div>
               </div>
-              <div className="bbs_desc">
-                <Link to="">
-                  <span className="link_title">
-                    <em className="title">공지/소식 게시글 제목</em>
-                  </span>
-                  <span className="link_day">2025-06-25</span>
-                </Link>
+              <div className="map_wrap">
+                <div className="bbs_title_box">
+                  <span>오시는길</span>
+                  <a className="bbs_move_btn" href="/" data-discover="true">
+                    더보기
+                  </a>
+                </div>
+                <RoughMap />
+              </div>
+            </div>
+          </div>
+          <div className="img_bbs_box">
+            <div className="item_area animal_bbs_box">
+              <div className="animal_title">아이들 사진</div>
+              <div className="animal_inner">
+                <div className="animal_list">{animalSlideList}</div>
+                <div className="animal_btn_box">
+                  <button
+                    type="button"
+                    className="ani_btn prev"
+                    onClick={handlePrev2}
+                  >
+                    이전
+                  </button>
+                  <button
+                    type="button"
+                    className="ani_btn next"
+                    onClick={handleNext2}
+                  >
+                    다음
+                  </button>
+                </div>
               </div>
             </div>
           </div>

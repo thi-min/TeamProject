@@ -1,0 +1,121 @@
+.map-container {
+  display: flex;
+  width: 100%;
+  height: 80vh;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.map-wrapper {
+  flex: 2; /* 지도가 더 넓게 차지 */
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
+.list-wrapper {
+  flex: 1; /* 목록이 상대적으로 좁게 */
+  padding: 1rem;
+  overflow-y: auto; /* 목록이 길어지면 스크롤바 */
+  background-color: #f8f9fa;
+  border-left: 1px solid #ddd;
+}
+
+.list-header {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.list-button {
+  padding: 0.5rem 1rem;
+  margin-right: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+  cursor: pointer;
+}
+
+.search-box {
+  display: flex;
+  flex: 1;
+}
+
+.search-box input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.search-box button {
+  padding: 0.5rem;
+  border: 1px solid #007bff;
+  background-color: #007bff;
+  color: white;
+  border-radius: 4px;
+  margin-left: 0.5rem;
+  cursor: pointer;
+}
+
+.place-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.place-list li {
+  padding: 1rem;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.place-list li:hover {
+  background-color: #e9ecef;
+}
+@media (max-width: 768px) {
+  .map-container {
+    flex-direction: column; /* 가로 배열 -> 세로 배열로 변경 */
+    height: auto; /* 높이를 자동 조정 */
+  }
+  .map-wrapper {
+    height: 50vh; /* 모바일에서 지도가 보이는 최소 높이 설정 */
+  }
+  .list-wrapper {
+    flex: none; /* flex 속성 제거 */
+    width: 100%;
+  }
+}
+:root {
+  --primary-color: #007bff;
+  --border-color: #ddd;
+  --bg-color-light: #f8f9fa;
+  --box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.map-container {
+  box-shadow: var(--box-shadow);
+}
+
+.list-wrapper {
+  background-color: var(--bg-color-light);
+  border-left: 1px solid var(--border-color);
+}
+
+
+.direction-button {
+  padding: 5px 10px;
+  margin-top: 5px;
+  border: 1px solid #4a86f7;
+  background-color: #4a86f7;
+  color: #fff;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.direction-button:hover {
+  background-color: #3b6ed3;
+}

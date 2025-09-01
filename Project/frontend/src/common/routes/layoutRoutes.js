@@ -1,4 +1,5 @@
 // 📁 src/router/layoutRoutes.js
+import React from "react";
 import { Route } from "react-router-dom";
 import routes from "./router";
 import { LogoutLink } from "../../program/login/pages/LogoutLink"; //로그아웃
@@ -17,13 +18,15 @@ import BannerListPage from "../../program/admin/pages/BannerListPage";
 import BannerCreatePage from "../../program/admin/pages/BannerCreatePage";
 import BannerDetailPage from "../../program/admin/pages/BannerDetailPage";
 
-// ✅ Land 예약 플로우 페이지
+// ✅ Land 관련 페이지
+import LandInfoPage from "../../program/land/pages/LandInfoPage";
 import LandReserveDatePage from "../../program/reserve/land/pages/LandReserveDatePage";
 import LandReserveFormPage from "../../program/reserve/land/pages/LandReserveFormPage";
 import LandReserveConfirmPage from "../../program/reserve/land/pages/LandReserveConfirmPage";
 import LandReserveSuccessPage from "../../program/reserve/land/pages/LandReserveSuccessPage";
 
-// ✅ Volunteer 예약 플로우
+// ✅ Volunteer 관련 페이지
+import VolunteerInfoPage from "../../program/volunteer/pages/VolunteerInfoPage";
 import VolunteerReserveDatePage from "../../program/reserve/volunteer/pages/VolunteerReserveDatePage";
 import VolunteerReserveFormPage from "../../program/reserve/volunteer/pages/VolunteerReserveFormPage";
 import VolunteerReserveConfirmPage from "../../program/reserve/volunteer/pages/VolunteerReserveConfirmPage";
@@ -57,19 +60,100 @@ import MemberDetail from "../../program/admin/pages/MemberDetailPage"; //관리�
 //카카오
 import KakaoCallbackPage from "../../program/login/pages/KakaoCallbackPage"; //카카오 로그인 콜백
 
+
+// 📌 layoutRoutes 정의
+
+// 게시판 관련
+import AdminBbs from "../../bbs/adminbbs";
+
+import Normal from "../../bbs/normalbbs/Normal";
+import NormalBbsView from "../../bbs/normalbbs/NormalBbsview";
+import NormalBbsWrite from "../../bbs/normalbbs/NormalBbsWrite";
+import NormalBbsEdit from "../../bbs/normalbbs/NormalBbsEdit";
+import MemberNormalBbs from "../../bbs/normalbbs/MemberNormalBbs";
+import MemberNormalBbsView from "../../bbs/normalbbs/MemberNormalBbsView";
+import MemberNormalBbsDummy from "../../bbs/normalbbs/MemberNormalBbsdummy";
+import AdminNormalBbsdummy from "../../bbs/normalbbs/AdminNormalBbsdummy";
+
+import QnaBbs from "../../bbs/questionbbs/QnaBbs";
+import QnaBbsWrite from "../../bbs/questionbbs/QnaBbsWrite";
+import QnaBbsView from "../../bbs/questionbbs/QnaBbsView";
+import QnaBbsEdit from "../../bbs/questionbbs/QnaBbsEdit";
+import AdminQnaBbs from "../../bbs/questionbbs/AdminQnaBbs";
+import AdminQnaBbsView from "../../bbs/questionbbs/AdminQnaBbsView";
+import AdminQnaBbsDummy from "../../bbs/questionbbs/AdminQnaBbsDummy";
+
+
+import ImgList from "../../bbs/imagebbs/imgList";
+import ImgDetail from "../../bbs/imagebbs/imgdetail";
+import ImgEdit from "../../bbs/imagebbs/imgedit";
+import ImgWrite from "../../bbs/imagebbs/imgwrite";
+import AdminImgBoard from "../../bbs/imagebbs/AdminImgBoard";
+import AdminImgDetail from "../../bbs/imagebbs/AdminImgDetail";
+import ImgBoardDummy from "../../bbs/imagebbs/ImgBoardDummy";
+
+import {
+  FundApplicationDetails,
+  FundApplicationForm,
+  FundMainPage,
+  GoodsApplicationDetails,
+  GoodsApplicationForm,
+  RegularApplicationDetails,
+  RegularApplicationForm,
+  MemberFundList,
+  MemberFundDetail,
+  AdminFundList,
+  AdminFundDetail,
+} from "../../program/fund/services/FundPage";
+
+
+// ==============================
+// 입양 신청서 관련 페이지
+// ==============================
+import AdoptApplicationForm from "../../program/adopt/services/AdoptApplicationForm";
+
+
+// ==============================
+// 동물 정보 페이지 (Animal)
+// ==============================
+import AnimalForm from "../../program/animal/services/AnimalForm";
+
+
+// import Normal from "../../bbs/normalbbs/Normal";
+// import NormalBbsView from "../../bbs/normalbbs/NormalBbsview";
+// import NormalBbsWrite from "../../bbs/normalbbs/NormalBbsWrite";
+// import NormalBbsEdit from "../../bbs/normalbbs/NormalBbsEdit";
+// import MemberNormalBbs from "../../bbs/normalbbs/MemberNormalBbs";
+// import MemberNormalBbsView from "../../bbs/normalbbs/MemberNormalBbsView";
+// import MemberNormalBbsDummy from "../../bbs/normalbbs/MemberNormalBbsdummy";
+// import AdminNormalBbsdummy from "../../bbs/normalbbs/AdminNormalBbsdummy";
+
+// ==============================
+// 지도 관련 페이지
+// ==============================
+import MapForm from '../../program/mapdata/services/MapForm.jsx';
+
+import ChatList from "../../program/chat/services/ChatList.jsx";
+import ChatDetail from "../../program/chat/services/ChatDetail.jsx";
+
+
+
+
 // 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
 
   //메인페이지
   <Route key="main" path={routes.main.path} element={<Main />} />, //메인
 
-   // 🔹 Land 예약: 날짜 → 폼 → 확인 → 완료
+   // 🔹 Land 관련 페이지
+  <Route key ="land-info" path={routes.land.info.path} element={<LandInfoPage />} />,
   <Route key="reserve-land-date" path={routes.reserve.land.date.path} element={<RequireMember><LandReserveDatePage /></RequireMember>} />,
   <Route key="reserve-land-form" path={routes.reserve.land.form.path} element={<RequireMember><LandReserveFormPage /></RequireMember>} />,
   <Route key="reserve-land-confirm" path={routes.reserve.land.confirm.path} element={<RequireMember><LandReserveConfirmPage /></RequireMember>} />,
   <Route key="reserve-land-success" path={routes.reserve.land.success.path} element={<RequireMember><LandReserveSuccessPage /></RequireMember>} />,
 
-  // 🔹 Volunteer 예약: 날짜 → 폼 → 확인 → 완료
+  // 🔹 Volunteer 관련 페이지
+  <Route key ="volunteer-info" path={routes.volunteer.info.path} element={<VolunteerInfoPage />} />,
   <Route key="reserve-volunteer-date" path={routes.reserve.volunteer.date.path} element={<RequireMember><VolunteerReserveDatePage /></RequireMember>} />,
   <Route key="reserve-volunteer-form" path={routes.reserve.volunteer.form.path} element={<RequireMember><VolunteerReserveFormPage /></RequireMember>} />,
   <Route key="reserve-volunteer-confirm" path={routes.reserve.volunteer.confirm.path} element={<RequireMember><VolunteerReserveConfirmPage /></RequireMember>} />,
@@ -87,6 +171,37 @@ const layoutRoutes = [
   <Route key="admin-banner-manage" path={routes.admin.bannerManage.path} element={<RequireAdmin><BannerListPage /></RequireAdmin >} />,
   <Route key="admin-banner-create" path={routes.admin.bannerCreate.path} element={<RequireAdmin><BannerCreatePage /></RequireAdmin >} />,
   <Route key="admin-banner-detail" path={routes.admin.bannerDetail.path} element={<RequireAdmin><BannerDetailPage /></RequireAdmin >} />,
+  <Route key="adminbbstab" path="/admin/bbs" element={<AdminBbs />} />,
+
+  // 일반 게시판
+  <Route key="normal" path="/admin/bbs/normal" element={<Normal />} />,
+  <Route key="normal-bbs-view" path="/admin/bbs/normal/:id" element={<NormalBbsView />} />,
+  <Route key="normal-bbs-write" path="/admin/bbs/normal/write" element={<NormalBbsWrite />} />,
+  <Route key="normal-bbs-edit" path="admin/bbs/normal/edit/:id" element={<NormalBbsEdit />} />,
+  <Route key="Membernormal" path="/bbs/normal" element={<MemberNormalBbs />} />,
+  <Route key="Membernormal-view" path="/bbs/normal/view/:id" element={<MemberNormalBbsView />} />,
+  <Route key="Membernormal-dummy" path="/bbs/member/normal/dummy" element={<MemberNormalBbsDummy/>} />,
+  <Route key="Adminnormal-dummy" path="/bbs/Admin/normal/dummy" element={<AdminNormalBbsdummy/>} />,
+
+  // QnA 게시판
+  <Route key="qna-bbs" path="/bbs/qna" element={<QnaBbs />} />,
+  <Route key="qna-bbs-write" path="/bbs/qna/write" element={<QnaBbsWrite />} />,
+  <Route key="qna-bbs-view" path="/bbs/qna/:id" element={<QnaBbsView />} />,
+  <Route key="qna-bbs-edit" path="/bbs/qna/edit/:id" element={<QnaBbsEdit />} />,
+  <Route key="qna-bbs-admin" path="/admin/bbs/qna" element={ <RequireAdmin><AdminQnaBbs /></RequireAdmin>} />,
+  <Route key="qna-bbs-admin-view" path="/admin/qna/view/:id" element={ <RequireAdmin><AdminQnaBbsView /></RequireAdmin>} />,
+  <Route key="qna-bbs-admin-dummy" path="/bbs/admin/qna/dummy" element={<AdminQnaBbsDummy />} />,
+
+
+  // 이미지 게시판
+  <Route key="img-list" path="/bbs/image" element={<ImgList />} />,
+  <Route key="img-detail" path="/bbs/image/:id" element={<ImgDetail />} />,
+  <Route key="img-edit" path="/bbs/image/edit/:id" element={<ImgEdit />} />,
+  <Route key="img-write" path="/bbs/image/write" element={<ImgWrite />} />,
+  <Route key="img-Admin-ImgBoard" path="/admin/bbs/image" element={<AdminImgBoard />} />,
+  <Route key="img-Admin-ImgDetail" path="/admin/bbs/image/Detail/:id" element={<AdminImgDetail />} />,
+  <Route key="img-Admin-ImgDummy" path="/bbs/admin/image/Dummy" element={<ImgBoardDummy />} />,
+
 
   //사용자
   <Route key="login" path={routes.member.login.path} element={<LoginPage />} />, //로그인
@@ -183,6 +298,49 @@ const layoutRoutes = [
       </RequireAdmin>
     }
   />, //관리자 회원상세보기
+
+  
+
+  // ------------------------------
+  // 후원(Fund) 관련 Route
+  // ------------------------------
+  <Route key="fundMainPage" path={routes.fund.root.path} element={<FundMainPage />} />,
+  <Route key="fundForm" path={routes.fund.fundForm.path} element={<FundApplicationForm />} />,
+  <Route key="goodsForm" path={routes.fund.goodsForm.path} element={<GoodsApplicationForm />} />,
+  <Route key="regularForm" path={routes.fund.regularForm.path} element={<RegularApplicationForm />} />,
+  <Route key="fundDetails" path={routes.fund.fundDetails.path} element={<FundApplicationDetails />} />,
+  <Route key="goodsDetails" path={routes.fund.goodsDetails.path} element={<GoodsApplicationDetails />} />,
+  <Route key="regularDetails" path={routes.fund.regularDetails.path} element={<RegularApplicationDetails />} />,
+  <Route key="memberFundList" path={routes.member.fund.list.path} element={<MemberFundList />} />,
+  <Route key="memberFundDetail" path={routes.member.fund.detail(`:id`)} element={<MemberFundDetail/>} />,
+  <Route key="adminFundList" path={routes.admin.fund.list.path} element={<AdminFundList/>}/>,
+  <Route key="adminFundDetail" path={routes.admin.fund.detail(`:id`)} element={<AdminFundDetail/>}/>,
+
+  // ------------------------------
+  // 입양 신청서 Route
+  // ------------------------------
+  <Route key="memberAdoptList" path={routes.member.adopt.list.path} element={<RequireMember><AdoptApplicationForm /></RequireMember>} />,
+  <Route key="memberAdoptDetail" path={routes.member.adopt.detail(':id')} element={<RequireMember><AdoptApplicationForm /></RequireMember>} />,
+  <Route key="adminAdoptList" path={routes.admin.adopt.list.path} element={<RequireAdmin><AdoptApplicationForm /></RequireAdmin>} />,
+  <Route key="adminAdoptDetail" path={routes.admin.adopt.detail(':id')} element={<RequireAdmin><AdoptApplicationForm /></RequireAdmin>} />,
+  <Route key="adminAdoptRegist" path={routes.admin.adopt.regist.path} element={<RequireAdmin><AdoptApplicationForm /></RequireAdmin>} />,
+  <Route key="adminAdoptUpdate" path={routes.admin.adopt.update(':id')} element={<RequireAdmin><AdoptApplicationForm /></RequireAdmin>} />,
+
+  // ------------------------------
+  // 동물 정보 Route (관리자)
+  // ------------------------------
+  <Route key="adminAnimalList" path={routes.admin.animal.list.path} element={<RequireAdmin><AnimalForm /></RequireAdmin>} />,
+  <Route key="adminAnimalDetail" path={routes.admin.animal.detail(':id')} element={<RequireAdmin><AnimalForm /></RequireAdmin>} />,
+  <Route key="adminAnimalRegist" path={routes.admin.animal.regist.path} element={<RequireAdmin><AnimalForm /></RequireAdmin>} />,
+  <Route key="adminAnimalUpdate" path={routes.admin.animal.update(':id')} element={<RequireAdmin><AnimalForm /></RequireAdmin>} />,
+
+  // ------------------------------
+  // 지도 관련 Route
+  // ------------------------------
+  <Route key="map" path={routes.map.root.path} element={<MapForm />} />,
+// 1:1 채팅 라우터
+  <Route key="chatList" path={routes.admin.chat.path} element={<RequireAdmin><ChatList /></RequireAdmin>} />,
+  <Route key="chatDetail" path={routes.admin.chatDetail(":id")} element={<RequireAdmin><ChatDetail /></RequireAdmin>} />,
 ];
 
 export default layoutRoutes;

@@ -1,0 +1,160 @@
+
+/* 공통 컨테이너 스타일 */
+.application-form-page {
+    padding: 2rem;
+    background-color: #f7f7f7;
+    min-height: 80vh;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: #333;
+}
+
+.application-form-container {
+    max-width: 800px;
+    margin: 2rem auto;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    padding: 2.5rem;
+    border-top: 5px solid #0d47a1;
+}
+
+.application-form-title {
+    /* font-size: 2rem;
+    font-weight: bold;
+    color: #0d47a1;
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #0d47a1; */
+    margin-top:44px;
+    margin-bottom:22px;
+    font-size:23px;
+    line-height:36px;
+}
+
+/* 폼 입력 그룹 및 아이템 */
+.form-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.form-input-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* 좌측 정렬로 변경 */
+}
+
+/* 신청 상세 내용과 같은 열에 맞춰 정렬 */
+.form-input-item-textarea,
+.form-input-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* 모든 폼 아이템을 좌측 정렬 */
+    width: 100%; /* 너비를 100%로 설정 */
+}
+
+.form-label {
+    /* font-size: 1rem;
+    color: #555;
+    margin-bottom: 0.5rem;
+    font-weight: 500; */
+
+    display:block;
+    margin-top:29px;
+    margin-bottom:16px;
+    font-size:20px;
+    color:#1d1d1d;
+    line-height:30px;
+    letter-spacing:0;
+    font-weight:600;
+    font-family:'PretendardGOV';
+    word-break:keep-all;
+}
+
+.form-label.required::after {
+    content: '*';
+    color: #e53935;
+    margin-left: 4px;
+}
+
+.form-input,
+.form-select,
+.form-textarea {
+    /* width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box; */
+    height:40px;
+    padding:0 16px;
+    border-radius:6px;
+    font-size:15px;
+    line-height:38px;
+}
+
+.form-input:focus,
+.form-select:focus,
+.form-textarea:focus {
+    outline: none;
+    border-color: #0d47a1;
+    box-shadow: 0 0 0 3px rgba(13, 71, 161, 0.2);
+}
+
+.form-textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* 폼 버튼 */
+.form-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+}
+
+.form-button-primary,
+.form-button-secondary {
+    padding: 0.8rem 2rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.form-button-primary {
+    background-color: #0d47a1;
+    color: white;
+}
+
+.form-button-primary:hover {
+    background-color: #0a3d8b;
+    transform: translateY(-2px);
+}
+
+.form-button-secondary {
+    background-color: #f0f0f0;
+    color: #555;
+    border: 1px solid #ccc;
+}
+
+.form-button-secondary:hover {
+    background-color: #e0e0e0;
+    transform: translateY(-2px);
+}
+
+/* 메시지 박스 */
+.form-message {
+    text-align: center;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    border-radius: 8px;
+    background-color: #fff3e0;
+    color: #e65100;
+    font-weight: bold;
+}

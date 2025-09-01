@@ -1,21 +1,13 @@
 package com.project.reserve.service;
 
-import com.project.reserve.dto.AdminReservationListDto;
-import com.project.reserve.dto.AdminReservationSearchDto;
-import com.project.reserve.dto.FullReserveRequestDto;
-import com.project.reserve.dto.ReserveCompleteResponseDto;
-import com.project.reserve.dto.ReserveRequestDto;
-import com.project.reserve.dto.ReserveResponseDto;
-import com.project.reserve.entity.Reserve;
-import com.project.reserve.entity.ReserveState;
-import com.project.reserve.exception.DuplicateReservationException;
-import com.project.reserve.repository.ReserveRepository;
-import com.project.volunteer.dto.VolunteerDetailDto;
-import com.project.volunteer.dto.VolunteerRequestDto;
-import com.project.volunteer.entity.Volunteer;
-import com.project.volunteer.repository.VolunteerRepository;
-import com.project.volunteer.service.VolunteerService;
-import com.project.member.repository.MemberRepository;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.project.common.entity.TimeSlot;
 import com.project.common.entity.TimeType;
 import com.project.common.repository.TimeSlotRepository;
@@ -27,18 +19,24 @@ import com.project.land.entity.LandType;
 import com.project.land.repository.LandRepository;
 import com.project.land.service.LandService;
 import com.project.member.entity.MemberEntity;
+import com.project.member.repository.MemberRepository;
+import com.project.reserve.dto.AdminReservationListDto;
+import com.project.reserve.dto.AdminReservationSearchDto;
+import com.project.reserve.dto.FullReserveRequestDto;
+import com.project.reserve.dto.ReserveCompleteResponseDto;
+import com.project.reserve.dto.ReserveResponseDto;
+import com.project.reserve.entity.Reserve;
+import com.project.reserve.entity.ReserveState;
+import com.project.reserve.exception.DuplicateReservationException;
+import com.project.reserve.repository.ReserveRepository;
+import com.project.volunteer.dto.VolunteerDetailDto;
+import com.project.volunteer.dto.VolunteerRequestDto;
+import com.project.volunteer.entity.Volunteer;
+import com.project.volunteer.repository.VolunteerRepository;
+import com.project.volunteer.service.VolunteerService;
 
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -54,6 +52,7 @@ public class ReserveServiceImpl implements ReserveService {
     private final VolunteerRepository volunteerRepository;
 
 
+    
     
     // 예약생성 (사용자가 예약요청하면 예약상태 기본값으로 설정, DB에 저장)
     @Override
@@ -386,7 +385,7 @@ public class ReserveServiceImpl implements ReserveService {
         reserve.setReserveState(newState);
         reserve.setUpdateTime(LocalDateTime.now());
     }
-    
+
     //마이페이지에서 예약유형 별 탭 기능
     @Override
     @Transactional(readOnly = true)

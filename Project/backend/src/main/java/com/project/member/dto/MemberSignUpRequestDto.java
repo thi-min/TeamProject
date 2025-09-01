@@ -60,4 +60,7 @@ public class MemberSignUpRequestDto {
     private boolean smsAgree; //문자 수신여부(동의/비동의)
     
     private String kakaoId; //카카오아이디
+    private String via;           // "kakao" | ""
+    private Boolean snsYn;        // true | false
+    private String snsType;       // "KAKAO" | null
 }
