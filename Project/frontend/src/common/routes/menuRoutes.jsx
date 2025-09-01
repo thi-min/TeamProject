@@ -6,9 +6,9 @@ const menuRoutes = [
     title: "센터소개",
     access: "ALL",
     children: [
-      { title: "인사말", path: "/about/greeting", access: "ALL" },
-      { title: "시설 소개", path: "/about/facility", access: "ALL" },
-      { title: "오시는 길", path: "/about/location", access: "ALL" },
+      { title: "인사말", path: "/contents/1", access: "ALL" },
+      { title: "시설 소개", path: "/contents/2", access: "ALL" },
+      { title: "오시는 길", path: "/contents/3", access: "ALL" },
     ],
   },
   {
@@ -33,7 +33,11 @@ const menuRoutes = [
     access: "ALL",
     children: [
       { title: "봉사 활동 안내", path: "/volunteer/info", access: "ALL" },
-      { title: "봉사 신청하기", path: "/reserve/volunteer/date", access: "ALL" },
+      {
+        title: "봉사 신청하기",
+        path: "/reserve/volunteer/date",
+        access: "ALL",
+      },
     ],
   },
   {

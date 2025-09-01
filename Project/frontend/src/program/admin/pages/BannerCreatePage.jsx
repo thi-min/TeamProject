@@ -35,10 +35,10 @@ const BannerCreatePage = () => {
       alert("제목은 필수입니다.");
       return;
     }
-    if (!formData.startDate || !formData.endDate) {
-      alert("노출 기간을 입력해주세요.");
-      return;
-    }
+    // if (!formData.startDate || !formData.endDate) {
+    //   alert("노출 기간을 입력해주세요.");
+    //   return;
+    // }
     if (!file) {
       alert("이미지 파일은 필수입니다.");
       return;
@@ -119,7 +119,6 @@ const BannerCreatePage = () => {
                   className="input-date"
                   value={formData.startDate}
                   onChange={handleChange}
-                  required
                 />
                 <span> ~ </span>
                 <input
@@ -128,7 +127,6 @@ const BannerCreatePage = () => {
                   className="input-date"
                   value={formData.endDate}
                   onChange={handleChange}
-                  required
                 />
               </td>
             </tr>
