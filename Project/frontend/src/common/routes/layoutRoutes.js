@@ -131,6 +131,22 @@ import MapForm from "../../program/mapdata/services/MapForm.jsx";
 import ChatList from "../../program/chat/services/ChatList.jsx";
 import ChatDetail from "../../program/chat/services/ChatDetail.jsx";
 
+// ✅ contents 폴더 안의 모든 jsx 파일 자동 import
+const req = require.context("../../contents/pages", false, /\.jsx$/);
+
+const contentRoutes = req.keys().map((file) => {
+  const Component = req(file).default;
+  const name = file.replace("./", "").replace(".jsx", ""); // ex) 1.jsx → "1"
+
+  return (
+    <Route
+      key={`content-${name}`}
+      path={`/contents/${name}`}
+      element={<Component />}
+    />
+  );
+});
+
 // 📌 routes 객체 기반으로 Route 구성
 const layoutRoutes = [
   //메인페이지
@@ -712,6 +728,7 @@ const layoutRoutes = [
       </RequireAdmin>
     }
   />,
+  ...contentRoutes,
 ];
 
 export default layoutRoutes;
