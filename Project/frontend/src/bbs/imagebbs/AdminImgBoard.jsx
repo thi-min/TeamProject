@@ -2,9 +2,11 @@
 import React, { useEffect, useState } from "react";
 import api from "../../common/api/axios";
 import { useNavigate } from "react-router-dom";
-import "./Gallery.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function AdminImgBoard() {
   const [posts, setPosts] = useState([]);
@@ -136,7 +138,10 @@ export default function AdminImgBoard() {
 
       {/* 검색창 */}
       <div className="search-bar">
-        <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+        <select
+          value={searchType}
+          onChange={(e) => setSearchType(e.target.value)}
+        >
           <option value="all">전체</option>
           <option value="title">제목</option>
           <option value="content">내용</option>
@@ -158,7 +163,9 @@ export default function AdminImgBoard() {
             const repImage = repImages[post.bulletinNum?.toString()];
             return (
               <div
-                className={`img-board-item ${selectedPosts.includes(post.bulletinNum) ? "selected" : ""}`}
+                className={`img-board-item ${
+                  selectedPosts.includes(post.bulletinNum) ? "selected" : ""
+                }`}
                 key={post.bulletinNum}
               >
                 {/* 개별 체크박스 */}
@@ -172,7 +179,9 @@ export default function AdminImgBoard() {
                 {/* 게시글 이미지 + 클릭 이동 */}
                 <div
                   className="img-thumb"
-                  onClick={() => navigate(`/admin/bbs/image/Detail/${post.bulletinNum}`)}
+                  onClick={() =>
+                    navigate(`/admin/bbs/image/Detail/${post.bulletinNum}`)
+                  }
                 >
                   {repImage ? (
                     <img src={repImage} alt={post.bbstitle} />
@@ -199,7 +208,10 @@ export default function AdminImgBoard() {
 
       {/* 페이지네이션 */}
       <div className="pagination">
-        <button disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)}>
+        <button
+          disabled={currentPage === 0}
+          onClick={() => handlePageChange(currentPage - 1)}
+        >
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
         {Array.from({ length: Math.max(totalPages, 1) }, (_, idx) => (

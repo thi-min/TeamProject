@@ -2,10 +2,9 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 
-
 function QnaBbsView() {
   const { id } = useParams();
-  const [post, setPost] = useState(null);   // 게시글 + 답변 포함
+  const [post, setPost] = useState(null); // 게시글 + 답변 포함
   const [files, setFiles] = useState([]);
   const navigate = useNavigate();
   const baseUrl = "http://127.0.0.1:8090/bbs";
@@ -73,7 +72,8 @@ function QnaBbsView() {
       <div className="bbs-content">
         <div dangerouslySetInnerHTML={{ __html: bbs.bbsContent }} />
         <p>
-          작성일: {bbs.registDate ? new Date(bbs.registDate).toLocaleDateString() : ""}
+          작성일:{" "}
+          {bbs.registDate ? new Date(bbs.registDate).toLocaleDateString() : ""}
         </p>
       </div>
 

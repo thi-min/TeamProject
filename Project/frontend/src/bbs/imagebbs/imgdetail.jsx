@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../common/api/axios";
-import "./Gallery.css";
 
 export default function ImgDetail() {
   const { id } = useParams();
@@ -61,24 +60,33 @@ export default function ImgDetail() {
       {/* 대표 이미지 */}
       {repImage && repImage.imagePath && (
         <div className="bbs-rep-image">
-          {repImage.fileNum ? (
-            <a
-              href={`${backendUrl}/bbs/files/${repImage.fileNum}/download`}
-              download={repImage.originalName || "대표이미지"}
-            >
+          {(() => {
+            // ✅ /DATA 로 시작하면 그대로 사용 (프론트 정적 경로)
+            const src =
+              repImage.imagePath.startsWith("/DATA") ||
+              repImage.imagePath.startsWith("http")
+                ? repImage.imagePath
+                : `${backendUrl}${repImage.imagePath}`;
+
+            return repImage.fileNum ? (
+              <a
+                href={`${backendUrl}/bbs/files/${repImage.fileNum}/download`}
+                download={repImage.originalName || "대표이미지"}
+              >
+                <img
+                  src={src}
+                  alt={post.bbsTitle}
+                  style={{ maxWidth: "500px", marginBottom: "20px" }}
+                />
+              </a>
+            ) : (
               <img
-                src={repImage.imagePath.startsWith("http") ? repImage.imagePath : `${backendUrl}${repImage.imagePath}`}
+                src={src}
                 alt={post.bbsTitle}
                 style={{ maxWidth: "500px", marginBottom: "20px" }}
               />
-            </a>
-          ) : (
-            <img
-              src={repImage.imagePath.startsWith("http") ? repImage.imagePath : `${backendUrl}${repImage.imagePath}`}
-              alt={post.bbsTitle}
-              style={{ maxWidth: "500px", marginBottom: "20px" }}
-            />
-          )}
+            );
+          })()}
         </div>
       )}
 
@@ -106,10 +114,17 @@ export default function ImgDetail() {
             return (
               <div key={f.fileNum} style={{ marginBottom: "10px" }}>
                 {isDownloadable ? (
-                  <a href={`${backendUrl}/bbs/files/${f.fileNum}/download`} download={f.originalName}>
+                  <a
+                    href={`${backendUrl}/bbs/files/${f.fileNum}/download`}
+                    download={f.originalName}
+                  >
                     {ext.match(/\.(jpeg|jpg)$/i) ? (
                       <img
-                        src={f.fileUrl.startsWith("http") ? f.fileUrl : `${backendUrl}${f.fileUrl}`}
+                        src={
+                          f.fileUrl.startsWith("http")
+                            ? f.fileUrl
+                            : `${backendUrl}${f.fileUrl}`
+                        }
                         alt={f.originalName}
                         style={{ maxWidth: "300px" }}
                       />
@@ -131,8 +146,12 @@ export default function ImgDetail() {
       {/* 버튼 영역 */}
       <div style={{ marginTop: "20px" }}>
         <button onClick={() => navigate("/bbs/image")}>목록으로</button>
-        <button onClick={handleEdit} style={{ marginLeft: "10px" }}>수정</button>
-        <button onClick={handleDelete} style={{ marginLeft: "10px" }}>삭제</button>
+        <button onClick={handleEdit} style={{ marginLeft: "10px" }}>
+          수정
+        </button>
+        <button onClick={handleDelete} style={{ marginLeft: "10px" }}>
+          삭제
+        </button>
       </div>
     </div>
   );

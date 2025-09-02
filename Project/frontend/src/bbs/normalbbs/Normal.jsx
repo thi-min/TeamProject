@@ -3,8 +3,11 @@ import React, { useEffect, useState } from "react";
 import api from "../../common/api/axios";
 import { useNavigate } from "react-router-dom";
 import "./normalbbs.css";
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 function NoticeBbs() {
   const [posts, setPosts] = useState([]);
@@ -28,12 +31,16 @@ function NoticeBbs() {
 
       if (searchKeyword.trim() !== "" && searchType !== "all") {
         if (searchType === "title") params.bbstitle = searchKeyword.trim();
-        else if (searchType === "writer") params.memberName = searchKeyword.trim();
-        else if (searchType === "content") params.bbscontent = searchKeyword.trim();
+        else if (searchType === "writer")
+          params.memberName = searchKeyword.trim();
+        else if (searchType === "content")
+          params.bbscontent = searchKeyword.trim();
       }
 
       // 🔹 공지사항 전용 API 호출
-      const response = await api.get(`${BASE_URL}/admin/bbs/notices`, { params });
+      const response = await api.get(`${BASE_URL}/admin/bbs/notices`, {
+        params,
+      });
 
       const data = response.data;
       setPosts(data.list || []);
@@ -71,7 +78,10 @@ function NoticeBbs() {
       {/* 🔍 검색창 */}
       <div className="search-bar">
         <div className="temp_form_box lg">
-          <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+          <select
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
             <option value="all">전체</option>
             <option value="title">제목</option>
             <option value="content">내용</option>
@@ -122,7 +132,9 @@ function NoticeBbs() {
                 {/* 제목 클릭 시 상세 페이지로 이동 */}
                 <td
                   style={{ cursor: "pointer", color: "#007bff" }}
-                  onClick={() => navigate(`/admin/bbs/normal/${post.bulletinNum}`)}
+                  onClick={() =>
+                    navigate(`/admin/bbs/normal/${post.bulletinNum}`)
+                  }
                 >
                   {post.bbsTitle}
                 </td>
@@ -132,7 +144,10 @@ function NoticeBbs() {
             ))
           ) : (
             <tr>
-              <td colSpan={4} style={{ textAlign: "center", padding: "90px 0" }}>
+              <td
+                colSpan={4}
+                style={{ textAlign: "center", padding: "90px 0" }}
+              >
                 등록된 공지가 없습니다.
               </td>
             </tr>
@@ -142,7 +157,10 @@ function NoticeBbs() {
 
       {/* 📌 페이지네이션 */}
       <div className="pagination">
-        <button disabled={page === 0} onClick={() => handlePageChange(page - 1)}>
+        <button
+          disabled={page === 0}
+          onClick={() => handlePageChange(page - 1)}
+        >
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
 
@@ -156,7 +174,10 @@ function NoticeBbs() {
           </button>
         ))}
 
-        <button disabled={page === Math.max(totalPages, 1) - 1} onClick={() => handlePageChange(page + 1)}>
+        <button
+          disabled={page === Math.max(totalPages, 1) - 1}
+          onClick={() => handlePageChange(page + 1)}
+        >
           <FontAwesomeIcon icon={faChevronRight} />
         </button>
       </div>

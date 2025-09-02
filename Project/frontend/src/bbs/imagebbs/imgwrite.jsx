@@ -1,21 +1,27 @@
 import React, { useState, useRef } from "react";
 import api from "../../common/api/axios";
 import { useNavigate } from "react-router-dom";
-import "./Gallery.css";
 
 export default function ImgWrite() {
   const [title, setTitle] = useState("");
-  const [files, setFiles] = useState([{ id: Date.now(), file: null, isRepresentative: false }]);
+  const [files, setFiles] = useState([
+    { id: Date.now(), file: null, isRepresentative: false },
+  ]);
   const editorRef = useRef(null);
   const navigate = useNavigate();
   const baseUrl = "http://127.0.0.1:8090/bbs/bbslist/bbsadd";
 
   const handleFileChange = (id, newFile) => {
-    if (newFile && !["image/jpeg", "image/jpg"].includes(newFile.type.toLowerCase())) {
+    if (
+      newFile &&
+      !["image/jpeg", "image/jpg"].includes(newFile.type.toLowerCase())
+    ) {
       alert("jpg/jpeg 파일만 첨부 가능합니다.");
       return;
     }
-    setFiles((prev) => prev.map((f) => (f.id === id ? { ...f, file: newFile } : f)));
+    setFiles((prev) =>
+      prev.map((f) => (f.id === id ? { ...f, file: newFile } : f))
+    );
   };
 
   const handleRepresentativeChange = (id, value) => {
@@ -27,12 +33,20 @@ export default function ImgWrite() {
       }
     }
     setFiles((prev) =>
-      prev.map((f) => ({ ...f, isRepresentative: f.id === id ? value : f.isRepresentative }))
+      prev.map((f) => ({
+        ...f,
+        isRepresentative: f.id === id ? value : f.isRepresentative,
+      }))
     );
   };
 
-  const addFileInput = () => setFiles((prev) => [...prev, { id: Date.now(), file: null, isRepresentative: false }]);
-  const removeFileInput = (id) => setFiles((prev) => prev.filter((f) => f.id !== id));
+  const addFileInput = () =>
+    setFiles((prev) => [
+      ...prev,
+      { id: Date.now(), file: null, isRepresentative: false },
+    ]);
+  const removeFileInput = (id) =>
+    setFiles((prev) => prev.filter((f) => f.id !== id));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -47,9 +61,16 @@ export default function ImgWrite() {
     formData.append("type", "POTO");
 
     const contentHTML = editorRef.current?.innerHTML || "";
-    const bbsDtoPayload = { bbsTitle: title, bbsContent: contentHTML, bulletinType: "POTO" };
+    const bbsDtoPayload = {
+      bbsTitle: title,
+      bbsContent: contentHTML,
+      bulletinType: "POTO",
+    };
 
-    formData.append("bbsDto", new Blob([JSON.stringify(bbsDtoPayload)], { type: "application/json" }));
+    formData.append(
+      "bbsDto",
+      new Blob([JSON.stringify(bbsDtoPayload)], { type: "application/json" })
+    );
 
     files.forEach((f) => {
       if (f.file) {
@@ -59,7 +80,9 @@ export default function ImgWrite() {
     });
 
     try {
-      await api.post(baseUrl, formData, { headers: { "Content-Type": "multipart/form-data" } });
+      await api.post(baseUrl, formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
       alert("게시글이 등록되었습니다.");
       navigate("/bbs/image");
     } catch (error) {
@@ -89,7 +112,12 @@ export default function ImgWrite() {
             ref={editorRef}
             contentEditable
             className="bbs-content-input"
-            style={{ minHeight: "200px", border: "1px solid #ccc", padding: "10px", whiteSpace: "pre-wrap" }}
+            style={{
+              minHeight: "200px",
+              border: "1px solid #ccc",
+              padding: "10px",
+              whiteSpace: "pre-wrap",
+            }}
           />
         </div>
 
@@ -124,20 +152,32 @@ export default function ImgWrite() {
                   </label>
                 </div>
                 {files.length > 1 && (
-                  <button type="button" className="bbs-file-remove" onClick={() => removeFileInput(f.id)}>
+                  <button
+                    type="button"
+                    className="bbs-file-remove"
+                    onClick={() => removeFileInput(f.id)}
+                  >
                     ❌
                   </button>
                 )}
               </div>
             ))}
-            <button type="button" className="bbs-file-add" onClick={addFileInput}>
+            <button
+              type="button"
+              className="bbs-file-add"
+              onClick={addFileInput}
+            >
               ➕ 파일 추가
             </button>
           </div>
         </div>
 
         <div className="bbs-btn-area">
-          <button type="button" className="bbs-cancel-btn" onClick={() => navigate("/bbs/image")}>
+          <button
+            type="button"
+            className="bbs-cancel-btn"
+            onClick={() => navigate("/bbs/image")}
+          >
             취소
           </button>
           <button type="submit" className="bbs-save-btn">

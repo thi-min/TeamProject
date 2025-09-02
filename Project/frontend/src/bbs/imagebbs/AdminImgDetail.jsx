@@ -2,7 +2,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../common/api/axios";
-import "./Gallery.css";
 
 export default function AdminImgDetail() {
   const { id } = useParams();
@@ -75,8 +74,6 @@ export default function AdminImgDetail() {
 
       {/* 제목 */}
       <h2>{post.bbsTitle}</h2>
-
-      
 
       {/* 작성일 및 조회수 */}
       <div className="bbs-detail-meta">

@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import api from "../../common/api/axios";
 import { useNavigate } from "react-router-dom";
-import "./Gallery.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 export default function ImgBoard() {
   const [posts, setPosts] = useState([]);
@@ -15,34 +17,43 @@ export default function ImgBoard() {
 
   const navigate = useNavigate();
   const baseUrl = "http://127.0.0.1:8090/bbs/bbslist";
-  const backendUrl = "http://127.0.0.1:8090";
+  const backendUrl = "http://127.0.0.1:8090"; // ⚠️ /DATA 경로에는 붙이지 않음
+
+  // /DATA 또는 http(s)로 시작하면 그대로, 그 외만 backendUrl prefix
+  const resolveSrc = (raw) => {
+    if (!raw) return null;
+    const s = String(raw);
+    if (s.startsWith("/DATA") || s.startsWith("http")) return s;
+    return `${backendUrl}${s}`;
+  };
 
   // 게시글 + 대표 이미지 조회
   const fetchPosts = async (page = 0, keyword = "") => {
     try {
       const params = { type: "POTO", page, size: 12 };
 
-      // 검색 키워드와 타입에 따라 파라미터 설정
+      // 검색 파라미터
       if (searchType !== "all" && keyword.trim() !== "") {
         params.searchType = searchType;
         if (searchType === "title") params.bbstitle = keyword.trim();
         if (searchType === "content") params.bbscontent = keyword.trim();
-        // 작성자 검색 관련 조건 삭제
       }
 
       const res = await api.get(baseUrl, { params });
 
-      const pageData = res.data.bbsList;
+      const pageData = res.data.bbsList || {};
       setPosts(pageData.content || []);
       setTotalPages(pageData.totalPages || 0);
       setCurrentPage(pageData.number || 0);
 
-      // 대표 이미지 Map 처리
+      // 대표 이미지 맵 구성
       const repMap = {};
       const repImagesFromBack = res.data.representativeImages || {};
       for (const [key, value] of Object.entries(repImagesFromBack)) {
-        if (value && value.imagePath) {
-          repMap[key] = { ...value, imagePath: `${backendUrl}${value.imagePath}` };
+        if (value) {
+          // thumbnailPath 우선, 없으면 imagePath 사용
+          const raw = value.thumbnailPath || value.imagePath || null;
+          repMap[key] = raw ? { ...value, imagePath: resolveSrc(raw) } : null;
         } else {
           repMap[key] = null;
         }
@@ -56,6 +67,7 @@ export default function ImgBoard() {
 
   useEffect(() => {
     fetchPosts(currentPage, searchKeyword);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage]);
 
   const handleSearch = () => {
@@ -67,16 +79,33 @@ export default function ImgBoard() {
     if (page >= 0 && page < totalPages) setCurrentPage(page);
   };
 
+  const formatDate = (iso) => {
+    if (!iso) return "";
+    // registDate가 ISO 문자열이면 앞 10자리, 객체면 적절히 변환
+    try {
+      const s = String(iso);
+      return s.length >= 10 ? s.slice(0, 10) : s;
+    } catch {
+      return "";
+    }
+  };
+
   return (
     <div className="img-board-container">
       <div className="top-bar">
-        <button className="write-btn" onClick={() => navigate("/bbs/image/write")}>
+        <button
+          className="write-btn"
+          onClick={() => navigate("/bbs/image/write")}
+        >
           글쓰기
         </button>
       </div>
 
       <div className="search-bar">
-        <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+        <select
+          value={searchType}
+          onChange={(e) => setSearchType(e.target.value)}
+        >
           <option value="all">전체</option>
           <option value="title">제목</option>
           <option value="content">내용</option>
@@ -93,7 +122,10 @@ export default function ImgBoard() {
       {posts.length > 0 ? (
         <div className="img-board-grid">
           {posts.map((post) => {
-            const repImage = repImages[post.bulletinNum.toString()];
+            // key는 bulletinNum 문자열 키로 저장되어 있음
+            const repImage = repImages[String(post.bulletinNum)];
+            const thumbSrc = repImage?.imagePath || null;
+
             return (
               <div
                 className="img-board-item"
@@ -101,17 +133,18 @@ export default function ImgBoard() {
                 onClick={() => navigate(`/bbs/image/${post.bulletinNum}`)}
               >
                 <div className="img-thumb">
-                  {repImage && repImage.imagePath ? (
-                    <img src={repImage.imagePath} alt={post.bbstitle} />
+                  {thumbSrc ? (
+                    <img src={thumbSrc} alt={post.bbsTitle} />
                   ) : (
                     <div className="no-image">🖼️</div>
                   )}
                 </div>
                 <div className="img-info">
-                  <div className="title">{post.bbstitle}</div>
+                  {/* ✅ 백엔드 DTO 필드명과 일치 */}
+                  <div className="title">{post.bbsTitle}</div>
                   <div className="meta">
-                    <span>{post.regdate?.substring(0, 10)}</span>
-                    <span>조회 {post.readcount}</span>
+                    <span>{formatDate(post.registDate)}</span>
+                    <span>조회 {post.viewers ?? 0}</span>
                   </div>
                 </div>
               </div>
@@ -123,7 +156,10 @@ export default function ImgBoard() {
       )}
 
       <div className="pagination">
-        <button disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)}>
+        <button
+          disabled={currentPage === 0}
+          onClick={() => handlePageChange(currentPage - 1)}
+        >
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
         {Array.from({ length: Math.max(totalPages, 1) }, (_, idx) => (

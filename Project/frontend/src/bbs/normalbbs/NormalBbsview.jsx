@@ -126,7 +126,9 @@ function NormalBbsView() {
               <li key={file.fileNum} style={{ marginBottom: "10px" }}>
                 <a
                   href="#!"
-                  onClick={() => handleDownload(file.fileUrl, file.originalName)}
+                  onClick={() =>
+                    handleDownload(file.fileUrl, file.originalName)
+                  }
                 >
                   {file.originalName}
                 </a>

@@ -3,7 +3,10 @@ import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import "./qnabbs.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 function QnaBbs() {
   const [posts, setPosts] = useState([]);
@@ -20,7 +23,7 @@ function QnaBbs() {
       const params = { type: "FAQ", page: pageNumber, size: 10 };
 
       if (searchType !== "all" && searchKeyword.trim() !== "") {
-         params.searchType = searchType;
+        params.searchType = searchType;
         if (searchType === "title") params.bbstitle = searchKeyword.trim();
         if (searchType === "content") params.bbscontent = searchKeyword.trim();
       }
@@ -68,7 +71,10 @@ function QnaBbs() {
       {/* 검색창 */}
       <div className="search-bar">
         <div className="temp_form_box lg">
-          <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+          <select
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
             <option value="all">전체</option>
             <option value="title">제목</option>
             <option value="content">내용</option>
@@ -93,48 +99,58 @@ function QnaBbs() {
       </div>
 
       {/* 게시판 테이블 */}
-      <table className="bbs-table">
-        <div className="table responsive">
-          <colgroup>
-            <col style={{ width: "10%" }} />
-            <col style={{ width: "70%" }} />
-            <col style={{ width: "10%" }} />
-            <col style={{ width: "10%" }} />
-          </colgroup>
-          <thead>
-            <tr>
-              <th>번호</th>
-              <th>제목</th>
-              <th>작성자</th>
-              <th>작성일</th>
-            </tr>
-          </thead>
-          <tbody>
-            {posts.length > 0 ? (
-              posts.map((post) => (
-                <tr key={post.bulletinNum}>
-                  <td>{post.bulletinNum}</td>
-                  <td>
-                    <Link to={`/bbs/qna/${post.bulletinNum}`}>{post.bbsTitle}</Link>
-                  </td>
-                  <td>{post.memberName || "익명"}</td>
-                  <td>{post.registDate ? new Date(post.registDate).toLocaleDateString() : ""}</td>
-                </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan={4} style={{ textAlign: "center", padding: "90px 0" }}>
-                  등록된 질문이 없습니다.
+      <table className="table bbs-table">
+        <colgroup>
+          <col style={{ width: "10%" }} />
+          <col style={{ width: "70%" }} />
+          <col style={{ width: "10%" }} />
+          <col style={{ width: "10%" }} />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>번호</th>
+            <th>제목</th>
+            <th>작성자</th>
+            <th>작성일</th>
+          </tr>
+        </thead>
+        <tbody>
+          {posts.length > 0 ? (
+            posts.map((post) => (
+              <tr key={post.bulletinNum}>
+                <td>{post.bulletinNum}</td>
+                <td>
+                  <Link to={`/bbs/qna/${post.bulletinNum}`}>
+                    {post.bbsTitle}
+                  </Link>
+                </td>
+                <td>{post.memberName || "익명"}</td>
+                <td>
+                  {post.registDate
+                    ? new Date(post.registDate).toLocaleDateString()
+                    : ""}
                 </td>
               </tr>
-            )}
-          </tbody>
-        </div>
+            ))
+          ) : (
+            <tr>
+              <td
+                colSpan={4}
+                style={{ textAlign: "center", padding: "90px 0" }}
+              >
+                등록된 질문이 없습니다.
+              </td>
+            </tr>
+          )}
+        </tbody>
       </table>
 
       {/* 페이지네이션 */}
       <div className="pagination">
-        <button disabled={page === 0} onClick={() => handlePageChange(page - 1)}>
+        <button
+          disabled={page === 0}
+          onClick={() => handlePageChange(page - 1)}
+        >
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
 

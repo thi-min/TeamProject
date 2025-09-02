@@ -1,4 +1,4 @@
-@import "../style/bbsTemplate.css";
+/* @import "../style/bbsTemplate.css";
 
 .notice-container {
   max-width: 1600px;
@@ -35,7 +35,7 @@
 
 .search-bar {
   display: flex;
-  justify-content: center; /* 🔹 가운데 정렬 */
+  justify-content: center; 
   gap: 8px;
   margin-bottom: 15px;
 }
@@ -45,4 +45,4 @@
 .search-bar button {
   padding: 6px;
   font-size: 14px;
-}
+} */
