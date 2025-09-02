@@ -1582,9 +1582,9 @@ const AdminFundDetail = () => {
         </table>
       </div>
       <div className="form_center_box">
-        <div className="temp_btn md">
-          <button type="button" className="btn" onClick={handleUpdate}>
-            수정
+        <div className="temp_btn white md">
+          <button type="button" className="btn" onClick={() => navigate(-1)}>
+            목록보기
           </button>
         </div>
         <div className="temp_btn md">
@@ -1592,11 +1592,7 @@ const AdminFundDetail = () => {
             삭제
           </button>
         </div>
-        <div className="temp_btn white md">
-          <button type="button" className="btn" onClick={() => navigate(-1)}>
-            목록보기
-          </button>
-        </div>
+        
       </div>
     </div>
   );

@@ -93,6 +93,7 @@
     align-items: flex-end;
     margin-bottom: 5px;
     max-width: 100%;
+    align-items:center;
 }
 
 .chat-line.my-line {
@@ -104,22 +105,21 @@
 }
 
 .chat-message-bubble {
+    max-width:260px;
     padding: 12px 18px;
-    max-width: 75%;
-    word-wrap: break-word;
     font-size: 15px;
     line-height: 1.5;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
     border-radius: 20px;
     transition: all 0.2s ease;
 }
+.chat-message-bubble span{width:100%;word-break:break-all;}
 
 .my-bubble {
     background-color: #007bff;
     color: white;
     border-top-right-radius: 20px;
     border-bottom-right-radius: 5px; /* 비대칭 효과 */
-    margin-left: auto;
 }
 
 .other-bubble {
@@ -127,12 +127,12 @@
     color: #343a40;
     border-top-left-radius: 20px;
     border-bottom-left-radius: 5px; /* 비대칭 효과 */
-    margin-right: auto;
 }
 
 /* -------------------- 타임스탬프 -------------------- */
 .message-timestamp {
     font-size: 11px;
+    line-height:13px;
     color: #888;
     margin: 0 8px;
     white-space: nowrap;
@@ -140,6 +140,7 @@
 
 .chat-line.my-line .message-timestamp {
     order: -1;
+
 }
 
 /* -------------------- 인풋 필드 -------------------- */
@@ -175,7 +176,7 @@
     color: white;
     border: none;
     border-radius: 25px;
-    padding: 12px 22px;
+    padding: 25px 22px;
     cursor: pointer;
     font-size: 15px;
     font-weight: bold;
