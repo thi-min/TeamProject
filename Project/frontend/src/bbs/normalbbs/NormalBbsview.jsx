@@ -105,6 +105,12 @@ function NormalBbsView() {
 
   return (
     <div className="bbs-container">
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon bbs"></div>
+          <div className="form_title">게시판 관리</div>
+        </div>
+      </div>
       <table className="table type2 responsive border line_td">
         <colgroup>
           <col style={{ width: "20%" }} />
