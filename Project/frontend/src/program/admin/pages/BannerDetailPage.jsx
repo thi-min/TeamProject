@@ -134,55 +134,69 @@ const AdminBannerDetailPage = () => {
                 <tr>
                   <th>제목</th>
                   <td>
-                    <input
-                      type="text"
-                      value={formData.title || ""}
-                      onChange={(e) =>
-                        setFormData({ ...formData, title: e.target.value })
-                      }
-                    />
+                    <div class="temp_form md w30p">
+                      <input
+                        type="text"
+                        class="temp_input"
+                        value={formData.title || ""}
+                        onChange={(e) =>
+                          setFormData({ ...formData, title: e.target.value })
+                        }
+                      />
+                    </div>
                   </td>
                 </tr>
                 <tr>
                   <th>부제목</th>
                   <td>
-                    <input
-                      type="text"
-                      value={formData.subTitle || ""}
-                      onChange={(e) =>
-                        setFormData({ ...formData, subTitle: e.target.value })
-                      }
-                    />
+                    <div class="temp_form md w30p">
+                      <input
+                        type="text"
+                        class="temp_input"
+                        value={formData.subTitle || ""}
+                        onChange={(e) =>
+                          setFormData({ ...formData, subTitle: e.target.value })
+                        }
+                      />
+                    </div>
                   </td>
                 </tr>
                 <tr>
                   <th>노출 기간</th>
-                  <td>
+                  <td className="all_day">
+                    <div class="temp_form md w30p">
                     <input
                       type="date"
+                      class="temp_input"
                       value={formData.startDate || ""}
                       onChange={(e) =>
                         setFormData({ ...formData, startDate: e.target.value })
                       }
                     />
+                    </div>
                     <span> ~ </span>
+                    <div class="temp_form md w30p">
                     <input
                       type="date"
+                      class="temp_input"
                       value={formData.endDate || ""}
                       onChange={(e) =>
                         setFormData({ ...formData, endDate: e.target.value })
                       }
                     />
+                    </div>
                   </td>
                 </tr>
                 <tr>
                   <th>이미지</th>
                   <td>
-                    {/* 새 이미지 업로드 */}
+                    <div class="temp_form md w30p">
                     <input
                       type="file"
+                      class="temp_input"
                       onChange={(e) => setFile(e.target.files[0])}
                     />
+                    </div>
                     <p style={{ fontSize: "12px", color: "#666" }}>
                       새 이미지를 선택하지 않으면 기존 이미지가 유지됩니다.
                     </p>
@@ -191,42 +205,51 @@ const AdminBannerDetailPage = () => {
                 <tr>
                   <th>이미지 설명</th>
                   <td>
+                    <div class="temp_form md w30p">
                     <input
                       type="text"
+                      class="temp_input"
                       value={formData.altText || ""}
                       onChange={(e) =>
                         setFormData({ ...formData, altText: e.target.value })
                       }
                     />
+                    </div>
                   </td>
                 </tr>
                 <tr>
                   <th>링크 URL</th>
                   <td>
+                    <div class="temp_form md w30p">
                     <input
                       type="text"
+                      class="temp_input"
                       value={formData.linkUrl || ""}
                       onChange={(e) =>
                         setFormData({ ...formData, linkUrl: e.target.value })
                       }
                     />
+                    </div>
                   </td>
                 </tr>
                 <tr>
                   <th>노출 여부</th>
                   <td>
-                    <select
-                      value={formData.visible}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          visible: e.target.value === "true",
-                        })
-                      }
-                    >
-                      <option value="true">활성</option>
-                      <option value="false">비활성</option>
-                    </select>
+                    <div class="temp_form_box md">
+                      <select
+                        value={formData.visible}
+                        class="temp_select"
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            visible: e.target.value === "true",
+                          })
+                        }
+                      >
+                        <option value="true">활성</option>
+                        <option value="false">비활성</option>
+                      </select>
+                    </div>
                   </td>
                 </tr>
               </tbody>
