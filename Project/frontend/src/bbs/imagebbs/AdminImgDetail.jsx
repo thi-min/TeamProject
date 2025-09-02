@@ -51,89 +51,103 @@ export default function AdminImgDetail() {
   if (!post) return <div>로딩중...</div>;
 
   return (
-    <div className="bbs-container">
-      {/* ✅ 대표 이미지 따로 표시 */}
-      {repImage && repImage.imagePath && (
-        <div className="bbs-rep-image">
-          <a
-            href={`${backendUrl}/bbs/files/${repImage.fileNum}/download`}
-            download={repImage.originalName || "대표이미지"}
-          >
-            <img
-              src={
-                repImage.imagePath.startsWith("http")
-                  ? repImage.imagePath
-                  : `${backendUrl}${repImage.imagePath}`
-              }
-              alt={post.bbsTitle}
-              style={{ maxWidth: "500px", marginBottom: "20px" }}
-            />
-          </a>
+  <div className="bbs-container">
+    <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon bbs"></div>
+          <div className="form_title">게시판 관리</div>
         </div>
-      )}
-
-      {/* 제목 */}
-      <h2>{post.bbsTitle}</h2>
-
-      {/* 작성일 및 조회수 */}
-      <div className="bbs-detail-meta">
-        <span>{post.registDate ? post.registDate.substring(0, 10) : ""}</span>
-        <span>조회 {post.readCount ?? 0}</span>
       </div>
+    <table className="table type2 responsive border line_td" >
+      <colgroup>
+        <col style={{ width: "20%" }} />
+        <col />
+      </colgroup>
+      <tbody>
+        {/* 제목 */}
+        <tr>
+          <th scope="row">제목</th>
+          <td>{post.bbsTitle}</td>
+        </tr>
 
-      {/* 내용 */}
-      <div
-        className="bbs-detail-content"
-        dangerouslySetInnerHTML={{ __html: post.bbsContent }}
-      />
+        {/* 작성일 / 조회수 */}
+        <tr>
+          <th scope="row">작성일 / 조회수</th>
+          <td>
+            {post.registDate ? post.registDate.substring(0, 10) : ""} &nbsp;|&nbsp;
+            조회 {post.readCount ?? 0}
+          </td>
+        </tr>
 
-      {/* 첨부파일 (대표이미지 포함 전체 파일 다운로드 가능) */}
-      <div className="bbs-detail-files">
+        {/* 내용 */}
+        <tr>
+          <th scope="row">내용</th>
+          <td>
+            <div
+              className="bbs-detail-content"
+              dangerouslySetInnerHTML={{ __html: post.bbsContent }}
+            />
+          </td>
+        </tr>
+
+        {/* 첨부파일 */}
         {files.length > 0 ? (
-          files.map((f) => {
+          files.map((f, idx) => {
             const ext = f.extension?.toLowerCase();
             const isImage = ["jpg", "jpeg", "png"].includes(ext);
 
             return (
-              <div key={f.fileNum} style={{ marginBottom: "10px" }}>
-                {isImage ? (
-                  <a
-                    href={`${backendUrl}/admin/bbs/files/${f.fileNum}/download`}
-                    download={f.originalName}
-                  >
-                    <img
-                      src={
-                        f.fileUrl.startsWith("http")
-                          ? f.fileUrl
-                          : `${backendUrl}${f.fileUrl}`
-                      }
-                      alt={f.originalName}
-                      style={{ maxWidth: "300px" }}
-                    />
-                  </a>
-                ) : (
-                  <a
-                    href={`${backendUrl}/admin/bbs/files/${f.fileNum}/download`}
-                    download={f.originalName}
-                  >
-                    {f.originalName}
-                  </a>
+              <tr key={f.fileNum}>
+                {/* 첫 번째 파일만 th 출력, rowspan으로 합치기 */}
+                {idx === 0 && (
+                  <th scope="row" rowSpan={files.length}>
+                    첨부파일
+                  </th>
                 )}
-              </div>
+                <td>
+                  <a
+                    href={`${backendUrl}/admin/bbs/files/${f.fileNum}/download`}
+                    download={f.originalName}
+                  >
+                    {isImage ? (
+                      <img
+                        src={
+                          f.fileUrl.startsWith("http")
+                            ? f.fileUrl
+                            : `${backendUrl}${f.fileUrl}`
+                        }
+                        alt={f.originalName}
+                        style={{ maxWidth: "300px" }}
+                      />
+                    ) : (
+                      f.originalName
+                    )}
+                  </a>
+                </td>
+              </tr>
             );
           })
         ) : (
-          <div>첨부파일이 없습니다.</div>
+          <tr>
+            <th scope="row">첨부파일</th>
+            <td>첨부파일이 없습니다.</td>
+          </tr>
         )}
-      </div>
+      </tbody>
+    </table>
 
-      {/* 버튼 */}
-      <div className="detail-actions" style={{ marginTop: "20px" }}>
-        <button onClick={() => navigate("/admin/bbs/image")}>목록으로</button>
-        <button onClick={handleDelete} style={{ marginLeft: "10px" }}>
-          삭제
-        </button>
+    {/* 버튼 영역 (테이블 밖) */}
+    <div className="form_center_box">
+      <div className="temp_btn white md">
+      <button className="btn" onClick={() => navigate("/admin/bbs/image")}>목록으로</button>
       </div>
+      <div className="temp_btn md">
+      <button className="btn" onClick={handleDelete}>
+        삭제
+      </button>
+      </div>
+    </div>
     </div>
   );
 }
+

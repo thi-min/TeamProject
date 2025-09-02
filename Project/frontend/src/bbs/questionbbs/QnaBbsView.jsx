@@ -67,46 +67,78 @@ function QnaBbsView() {
 
   return (
     <div className="bbs-container">
-      <h2>{bbs.bbsTitle}</h2>
-
-      <div className="bbs-content">
-        <div dangerouslySetInnerHTML={{ __html: bbs.bbsContent }} />
-        <p>
-          작성일:{" "}
-          {bbs.registDate ? new Date(bbs.registDate).toLocaleDateString() : ""}
-        </p>
-      </div>
-
-      {/* 첨부파일 */}
-      {files.length > 0 && (
-        <div className="bbs-files">
-          <h4>첨부파일</h4>
-          <ul>
-            {files.map((file) => (
-              <li key={file.fileNum}>
-                <a
-                  href={`${baseUrl}/files/${file.fileNum}/download`}
-                  download={file.originalName}
-                >
-                  {file.originalName}
-                </a>
-              </li>
-            ))}
-          </ul>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon bbs"></div>
+          <div className="form_title">Q&A 게시판</div>
         </div>
-      )}
 
-      {/* 관리자 답변 표시 */}
-      {post.answer && (
-        <div className="answer-section">
-          <h4>관리자 답변</h4>
-          <p>{post.answer}</p>
+
+        <div className="bbs-table">
+          <table className="table type2 responsive border line_td" >
+            <colgroup>
+              <col className="w20p" />
+              <col />
+            </colgroup>
+            <tbody>
+              <tr>
+                <th scope="row">제목</th>
+                <td>
+                  {bbs.bbsTitle}
+                </td>
+              </tr>
+              <tr>
+                <th>작성일</th>
+                <td>{bbs.registDate ? new Date(bbs.registDate).toLocaleDateString() : ""}</td>
+              </tr>
+              <tr>
+                <th>질문</th>
+                <td>
+                  <div dangerouslySetInnerHTML={{ __html: bbs.bbsContent }} />
+                </td>
+              </tr>
+              {files.length > 0 && (
+                <tr>
+                  <th>첨부파일</th>
+                  <td>
+                    {files.map((file) => (
+                      <div key={file.fileNum}>
+                        <a
+                          href={`${baseUrl}/files/${file.fileNum}/download`}
+                          download={file.originalName}
+                        >
+                          {file.originalName}
+                        </a>
+                      </div>
+                    ))}
+                  </td>
+                </tr>
+              )}
+
+              {/* 관리자 답변 */}
+              {post.answer && (
+                <tr>
+                  <th>관리자 답변</th>
+                  <td>{post.answer}</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
-      )}
 
-      <div className="bbs-btn-area">
-        <button onClick={handleEdit}>수정</button>
-        <button onClick={handleDelete}>삭제</button>
+        <div className="form_center_box ">
+          <div className="temp_btn white md">
+            <button className="btn" onClick={() => navigate("/bbs/qna")}>목록보기</button>
+          </div>
+          <div className="right_btn_box">
+            <div className="temp_btn white md">
+              <button className="btn" onClick={handleEdit}>수정</button>
+            </div>
+            <div className="temp_btn md">
+              <button className="btn" onClick={handleDelete}>삭제</button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -107,32 +107,40 @@ function AdminQnaBbs() {
 
   return (
     <div className="bbs-container">
-      <h2>📌 Q&A 게시판 (관리자)</h2>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon bbs"></div>
+          <div className="form_title">게시판 관리</div>
+        </div>
+      </div>
+      <h3>Q&A 게시판</h3>
 
       {/* 검색창 */}
-      <div className="search-bar">
-        <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
-          <option value="all">전체</option>
-          <option value="title">제목</option>
-          <option value="writer">작성자</option>
-          <option value="content">내용</option>
-        </select>
-        <input
-          type="text"
-          value={searchKeyword}
-          onChange={(e) => setSearchKeyword(e.target.value)}
-          placeholder="검색어를 입력하세요"
-        />
-        <button onClick={handleSearch}>조회</button>
-      </div>
-
-      {/* 다중 삭제 버튼 */}
-      <div style={{ margin: "10px 0" }}>
-        <button onClick={handleDeleteSelected}>선택 삭제</button>
+      <div className="search_bar_box">
+        <div className="temp_form_box md">
+          <select className="temp_select" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+            <option value="all">전체</option>
+            <option value="title">제목</option>
+            <option value="writer">작성자</option>
+            <option value="content">내용</option>
+          </select>
+        </div>
+        <div className="temp_form md w30p">
+          <input
+            type="text"
+            className="temp_input"
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            placeholder="검색어를 입력하세요"
+          />
+        </div>
+        <div className="temp_btn md">
+        <button className="btn" onClick={handleSearch}>조회</button>
+        </div>
       </div>
 
       {/* 게시글 테이블 */}
-      <table className="bbs-table">
+      <table className="table responsive border">
         <thead>
           <tr>
             <th style={{ width: "3%" }}>선택</th>
@@ -143,7 +151,7 @@ function AdminQnaBbs() {
             <th style={{ width: "7%" }}>답변</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="text_center">
           {posts?.length > 0 ? (
             posts.map((post) => (
               <React.Fragment key={post.bulletinNum}>
@@ -221,6 +229,12 @@ function AdminQnaBbs() {
         >
           <FontAwesomeIcon icon={faChevronRight} />
         </button>
+      </div>
+      {/* 다중 삭제 버튼 */}
+      <div className="form_center_box solo">
+        <div className="temp_btn md">
+          <button className="btn" onClick={handleDeleteSelected}>삭제</button>
+        </div>
       </div>
     </div>
   );

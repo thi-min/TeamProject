@@ -92,40 +92,38 @@ export default function ImgBoard() {
 
   return (
     <div className="img-board-container">
-      <div className="top-bar">
-        <button
-          className="write-btn"
-          onClick={() => navigate("/bbs/image/write")}
-        >
-          글쓰기
-        </button>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon bbs"></div>
+          <div className="form_title">입양 후기 게시판</div>
+        </div>
       </div>
-
-      <div className="search-bar">
-        <select
-          value={searchType}
-          onChange={(e) => setSearchType(e.target.value)}
-        >
+      <div className="search_bar_box">
+        <div className="temp_form_box md">
+        <select className="temp_select" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
           <option value="all">전체</option>
           <option value="title">제목</option>
           <option value="content">내용</option>
         </select>
+        </div>
+        <div className="temp_form md w30p">
         <input
           type="text"
+          className="temp_input"
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
           placeholder="검색어를 입력하세요"
         />
-        <button onClick={handleSearch}>조회</button>
+        </div>
+        <div className="temp_btn md">
+        <button className="btn" onClick={handleSearch}>조회</button>
+        </div>
       </div>
 
       {posts.length > 0 ? (
         <div className="img-board-grid">
           {posts.map((post) => {
-            // key는 bulletinNum 문자열 키로 저장되어 있음
-            const repImage = repImages[String(post.bulletinNum)];
-            const thumbSrc = repImage?.imagePath || null;
-
+            const repImage = repImages[post.bulletinNum.toString()];
             return (
               <div
                 className="img-board-item"
@@ -133,18 +131,17 @@ export default function ImgBoard() {
                 onClick={() => navigate(`/bbs/image/${post.bulletinNum}`)}
               >
                 <div className="img-thumb">
-                  {thumbSrc ? (
-                    <img src={thumbSrc} alt={post.bbsTitle} />
+                  {repImage && repImage.imagePath ? (
+                    <img src={repImage.imagePath} alt={post.bbstitle} />
                   ) : (
                     <div className="no-image">🖼️</div>
                   )}
                 </div>
                 <div className="img-info">
-                  {/* ✅ 백엔드 DTO 필드명과 일치 */}
-                  <div className="title">{post.bbsTitle}</div>
+                  <div className="title">{post.bbstitle}</div>
                   <div className="meta">
-                    <span>{formatDate(post.registDate)}</span>
-                    <span>조회 {post.viewers ?? 0}</span>
+                    <span>{post.regdate?.substring(0, 10)}</span>
+                    <span>조회 {post.readcount}</span>
                   </div>
                 </div>
               </div>
@@ -156,10 +153,7 @@ export default function ImgBoard() {
       )}
 
       <div className="pagination">
-        <button
-          disabled={currentPage === 0}
-          onClick={() => handlePageChange(currentPage - 1)}
-        >
+        <button disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)}>
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
         {Array.from({ length: Math.max(totalPages, 1) }, (_, idx) => (
@@ -177,6 +171,13 @@ export default function ImgBoard() {
         >
           <FontAwesomeIcon icon={faChevronRight} />
         </button>
+      </div>
+      <div className="form_center_box solo">
+        <div className="temp_btn md">
+          <button className="btn" onClick={() => navigate("/bbs/image/write")}>
+            글쓰기
+          </button>
+        </div>
       </div>
     </div>
   );

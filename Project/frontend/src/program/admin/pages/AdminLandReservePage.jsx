@@ -86,33 +86,45 @@ useEffect(() => {
       <h3>놀이터 예약 목록</h3>
 
       {/* 검색 영역 */}
-      <div className="search-bar">
+      <div className="reserve-search-bar">
+        <div class="temp_form md w15p">
+          <input
+            type="date"
+            class="temp_input"
+            value={filters.startDate}
+            onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
+          />
+        </div>
+        <div class="temp_form md w15p">
         <input
           type="date"
-          value={filters.startDate}
-          onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
-        />
-        <input
-          type="date"
+          class="temp_input"
           value={filters.endDate}
           onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
         />
+        </div>
+        <div class="temp_form md w10p">
         <input
           type="text"
+          class="temp_input"
           placeholder="회원 이름"
           value={filters.memberName}
           onChange={(e) => setFilters({ ...filters, memberName: e.target.value })}
         />
+        </div>
+        <div class="temp_form_box md">
         <select
+          class="temp_select"
           value={filters.reserveState}
           onChange={(e) => setFilters({ ...filters, reserveState: e.target.value })}
         >
-          <option value="">상태 전체</option>
+          <option value="">상태</option>
           <option value="ING">대기중</option>
           <option value="REJ">거절</option>
           <option value="DONE">승인</option>
           <option value="CANCEL">취소</option>
         </select>
+        </div>
         <button onClick={handleSearch}>검색</button>
         <button onClick={handleReset} className="reset-btn">초기화</button>
       </div>

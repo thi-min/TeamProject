@@ -4262,3 +4262,6 @@ span.temp_form{display:inline-block;width:auto;}
 .all_day{display:flex;gap:20px;align-items:center;}
 .phone_form{display:flex;gap:20px;align-items:center;}
 .phone_form .temp_form input[type="text"]{text-align:center;}
+
+.line_td.table.type2 tbody tr td{text-align:left;}
+.img_td > div > span{display:block;margin-bottom:20px;}

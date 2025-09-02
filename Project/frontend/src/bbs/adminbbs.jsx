@@ -1,17 +1,24 @@
 // src/admin/pages/AdminBbs.jsx
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import "../program/admin/style/admin.css";
 
 export default function AdminBbs() {
+  const navigate = useNavigate();
   return (
     <div className="admin_page">
-      <div className="title_box">
-        <div className="title">게시판 관리</div>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon bbs"></div>
+          <div className="form_title">게시판 관리</div>
+        </div>
       </div>
+       {/* 안내 메시지 */}
+        <div className="bbs_content">
+          게시판을 선택해주세요.
+        </div>
       <div className="admin_area">
-        {/* 탭 메뉴 */}
-        <ul className="admin_menu">
+        <ul className="my_menu">
           <li className="link_item type1">
             <Link to="/admin/bbs/image">이미지 게시판</Link>
           </li>
@@ -23,14 +30,13 @@ export default function AdminBbs() {
           </li>
         </ul>
 
-        {/* 안내 메시지 */}
-        <div className="bbs_content">
-          게시판을 선택해주세요.
-        </div>
-
         {/* 뒤로가기 */}
-        <div className="back_link">
-          <Link to="/admin">← 관리자 메인으로</Link>
+        <div className ="adminbbs-btn">
+          <div className="temp_btn white md">
+            <button type="button" className="btn" onClick={() => navigate(-1)}>
+            뒤로
+            </button>
+          </div>
         </div>
       </div>
     </div>

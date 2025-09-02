@@ -105,50 +105,92 @@ function NormalBbsView() {
 
   return (
     <div className="bbs-container">
-      <h2>{post.bbsTitle}</h2>
-      <div className="bbs-detail-meta">
-        <span>{post.registDate ? post.registDate.substring(0, 10) : ""}</span>
-        <span>조회 {post.readCount ?? 0}</span>
-      </div>
-
-      {/* 본문 (jpg/jpeg/png 삽입 허용됨) */}
-      <div
-        className="bbs-content"
-        dangerouslySetInnerHTML={{ __html: post.bbsContent }}
-      />
-
-      {/* 첨부파일 (본문 삽입 여부 상관없이 모든 파일 표시) */}
-      {files.length > 0 && (
-        <div className="bbs-files">
-          <h4>첨부파일</h4>
-          <ul>
-            {files.map((file) => (
-              <li key={file.fileNum} style={{ marginBottom: "10px" }}>
-                <a
-                  href="#!"
-                  onClick={() =>
-                    handleDownload(file.fileUrl, file.originalName)
-                  }
-                >
-                  {file.originalName}
-                </a>
-              </li>
-            ))}
-          </ul>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon bbs"></div>
+          <div className="form_title">게시판 관리</div>
         </div>
-      )}
+      </div>
+      <table className="table type2 responsive border line_td">
+        <colgroup>
+          <col style={{ width: "20%" }} />
+          <col />
+        </colgroup>
+        <tbody>
+          {/* 제목 */}
+          <tr>
+            <th scope="row">제목</th>
+            <td>{post.bbsTitle}</td>
+          </tr>
 
-      {/* 삭제 / 수정 버튼 */}
-      <div style={{ marginTop: "20px" }}>
-        <button onClick={handleDelete}>삭제</button>
+          {/* 작성일 / 조회수 */}
+          <tr>
+            <th scope="row">작성일 / 조회수</th>
+            <td>
+              {post.registDate ? post.registDate.substring(0, 10) : ""} &nbsp; | &nbsp; 조회{" "}
+              {post.readCount ?? 0}
+            </td>
+          </tr>
+
+          {/* 본문 */}
+          <tr>
+            <th scope="row">내용</th>
+            <td>
+              <div
+                className="bbs-content"
+                dangerouslySetInnerHTML={{ __html: post.bbsContent }}
+              />
+            </td>
+          </tr>
+
+          {/* 첨부파일 */}
+          {files.length > 0 ? (
+            files.map((file, idx) => (
+              <tr key={file.fileNum}>
+                {/* 첫 번째 파일만 th 표시 + rowspan */}
+                {idx === 0 && (
+                  <th scope="row" rowSpan={files.length}>
+                    첨부파일
+                  </th>
+                )}
+                <td>
+                  <a
+                    href="#!"
+                    onClick={() => handleDownload(file.fileUrl, file.originalName)}
+                  >
+                    {file.originalName}
+                  </a>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <th scope="row">첨부파일</th>
+              <td>첨부파일이 없습니다.</td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+
+      {/* 버튼 영역은 테이블 밖에 두는 게 자연스러움 */}
+      <div className="form_center_box ">
+        <div className="temp_btn white md">
+            <button className="btn" onClick={() => navigate("/admin/bbs/normal")}>목록보기</button>
+          </div>
+          <div className="right_btn_box">
+          <div className="temp_btn white md">
+            <button className="btn" onClick={handleDelete}>삭제</button>
+          </div>
+          <div className="temp_btn md">
         <button
+          className="btn"
           onClick={() => navigate(`/admin/bbs/normal/edit/${id}`)}
-          style={{ marginLeft: "10px" }}
-        >
-          수정
-        </button>
+        >수정</button>
+        </div>
+        </div>
       </div>
     </div>
+
   );
 }
 

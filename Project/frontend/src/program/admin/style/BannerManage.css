@@ -22,29 +22,6 @@
   color: #999;              /* 글자 색도 흐리게 */
 }
 
-/* 등록 파트 */
-.table input,
-.table select {
-  width: 300px;
-  padding: 8px 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-}
-.table .isvisible {
-  width: 120px;   /* 날짜 입력창 줄임 */
-}
-
-.table .input-date {
-  width: 150px;   /* select 박스 줄임 */
-}
-
-.table input:focus,
-.table select:focus {
-  border-color: #1976d2;
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(25,118,210,0.2);
-}
 /* 하단 버튼 */
 .banner-button {
   display: flex;
