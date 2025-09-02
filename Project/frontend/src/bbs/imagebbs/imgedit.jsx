@@ -2,6 +2,20 @@ import React, { useState, useRef, useEffect } from "react";
 import api from "../../common/api/axios";
 import { useNavigate, useParams } from "react-router-dom";
 
+//swiper
+import { Swiper, SwiperSlide } from "swiper/react";
+import {
+  Navigation,
+  Pagination,
+  Autoplay,
+  A11y,
+  EffectFade,
+} from "swiper/modules";
+import "swiper/css";
+import "swiper/css/pagination";
+import "swiper/css/navigation";
+import "swiper/css/effect-fade";
+
 export default function GalleryEdit() {
   const { id } = useParams();
   const navigate = useNavigate();

@@ -50,6 +50,7 @@ export default function ImgWrite() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    console.log("handleSubmit 실행됨"); // 테스트
     const memberNum = localStorage.getItem("memberNum");
     if (!memberNum) return alert("로그인이 필요합니다.");
 
@@ -84,7 +85,8 @@ export default function ImgWrite() {
         headers: { "Content-Type": "multipart/form-data" },
       });
       alert("게시글이 등록되었습니다.");
-      navigate("/bbs/image");
+      console.log("리스트로 이동 시도");
+      navigate("/bbs/imagebbs");
     } catch (error) {
       console.error("등록 오류:", error);
       alert("등록 실패: " + (error.response?.data?.message || "서버 오류"));
@@ -180,7 +182,11 @@ export default function ImgWrite() {
           >
             취소
           </button>
-          <button type="submit" className="bbs-save-btn">
+          <button
+            type="submit"
+            className="bbs-save-btn"
+            onClick={(e) => console.log("등록 버튼 클릭됨")}
+          >
             등록
           </button>
         </div>

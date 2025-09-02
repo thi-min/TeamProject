@@ -1,6 +1,13 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../common/api/axios";
+
+// Swiper import
+import { Swiper, SwiperSlide } from "swiper/react";
+import { Navigation, Pagination, Autoplay } from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 
 export default function ImgDetail() {
   const { id } = useParams();
@@ -9,6 +16,12 @@ export default function ImgDetail() {
   const [files, setFiles] = useState([]);
   const [repImage, setRepImage] = useState(null);
   const backendUrl = "http://127.0.0.1:8090";
+
+  // Swiper 인스턴스 레퍼런스
+  const swiperRef = useRef(null);
+
+  // 재생/정지 상태
+  const [isPlaying, setIsPlaying] = useState(true);
 
   // 게시글 상세 조회
   const fetchPost = async () => {
@@ -53,16 +66,72 @@ export default function ImgDetail() {
     navigate(`/bbs/image/edit/${id}`);
   };
 
+  // 외부 버튼 핸들러
+  const handlePrev = () => swiperRef.current?.slidePrev();
+  const handleNext = () => swiperRef.current?.slideNext();
+  const handleTogglePlay = () => {
+    if (!swiperRef.current) return;
+    if (isPlaying) {
+      swiperRef.current.autoplay?.stop();
+      setIsPlaying(false);
+    } else {
+      swiperRef.current.autoplay?.start();
+      setIsPlaying(true);
+    }
+  };
+
+  // ✅ return 밖으로 뺀 슬라이드 JSX
+  const slideMarkup = (
+    <div className="img_slide_box">
+      {files.length > 0 ? (
+        <Swiper
+          modules={[Navigation, Pagination, Autoplay]}
+          navigation
+          pagination={{ clickable: true }}
+          spaceBetween={10}
+          slidesPerView={1}
+          loop
+          autoplay={{ delay: 3000, disableOnInteraction: false }}
+          onBeforeInit={(swiper) => {
+            swiperRef.current = swiper; // ref 연결
+          }}
+        >
+          {files.map((f) => {
+            const imgUrl = f.fileUrl?.startsWith("http")
+              ? f.fileUrl
+              : `${backendUrl}${f.fileUrl}`;
+
+            return (
+              <SwiperSlide key={f.fileNum}>
+                <div className="slide_item">
+                  {f.extension?.toLowerCase().match(/(jpeg|jpg|png|gif)$/) ? (
+                    <img src={imgUrl} alt={f.originalName} />
+                  ) : (
+                    <a
+                      href={`${backendUrl}/bbs/files/${f.fileNum}/download`}
+                      download={f.originalName}
+                    >
+                      {f.originalName}
+                    </a>
+                  )}
+                </div>
+              </SwiperSlide>
+            );
+          })}
+        </Swiper>
+      ) : (
+        <div className="no-image">첨부파일이 없습니다.</div>
+      )}
+    </div>
+  );
+
   if (!post) return <div>로딩 중...</div>;
 
   return (
     <div className="form_item type2 bbs_form">
-      <div className="img_bbs_wrap">
-        <div className="img_slide_box">
-          <div className="slide_list">
-            <div className="slide_item">슬라이드 아이템</div>
-          </div>
-        </div>
+      <div className="img_dtl_wrap">
+        {/* ✅ 여기서는 slideMarkup만 호출 */}
+        {slideMarkup}
         <div className="text_box">
           <div className="text_item">
             <span className="t1">제목</span>
@@ -81,6 +150,22 @@ export default function ImgDetail() {
               {post.registDate ? post.registDate.substring(0, 10) : ""}
             </span>
           </div>
+        </div>
+      </div>
+      <div className="img_slide_controls">
+        <div className="btn_box_wrap">
+          <button className="slide_btn" onClick={handlePrev}>
+            이전
+          </button>
+          <button
+            className={`all ${isPlaying ? "pause" : "play"}`}
+            onClick={handleTogglePlay}
+          >
+            {isPlaying ? "정지" : "재생"}
+          </button>
+          <button className="slide_btn next" onClick={handleNext}>
+            다음
+          </button>
         </div>
       </div>
       <div className="form_center_box ">
@@ -103,37 +188,5 @@ export default function ImgDetail() {
         </div>
       </div>
     </div>
-    // {files.length > 0 ? (
-    //   files.map((f, idx) => (
-    //     <tr key={f.fileNum}>
-    //       {idx === 0 && <th rowSpan={files.length}>첨부파일</th>}
-    //       <td>
-    //         <a
-    //           href={`${backendUrl}/bbs/files/${f.fileNum}/download`}
-    //           download={f.originalName}
-    //         >
-    //           {f.extension?.toLowerCase().match(/(jpeg|jpg|png|gif)$/) ? (
-    //             <img
-    //               src={
-    //                 f.fileUrl.startsWith("http")
-    //                   ? f.fileUrl
-    //                   : `${backendUrl}${f.fileUrl}`
-    //               }
-    //               alt={f.originalName}
-    //               style={{ maxWidth: "300px" }}
-    //             />
-    //           ) : (
-    //             f.originalName
-    //           )}
-    //         </a>
-    //       </td>
-    //     </tr>
-    //   ))
-    // ) : (
-    //   <tr>
-    //     <th scope="row">첨부파일</th>
-    //     <td>첨부파일이 없습니다.</td>
-    //   </tr>
-    // )}
   );
 }
