@@ -32,7 +32,7 @@
 /* -------------------- 헤더 스타일 -------------------- */
 .chat-header {
     padding: 12px 20px;
-    background: linear-gradient(135deg, #4b6cb7, #182848); /* 딥블루 그라데이션 */
+    background: #246beb;
     color: white;
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
@@ -166,12 +166,12 @@
 }
 
 .chat-input-field:focus {
-    border-color: #007bff;
+    border-color: #246beb;
     box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
 }
 
 .chat-send-btn {
-    background-color: #007bff;
+    background-color: #246beb;
     color: white;
     border: none;
     border-radius: 25px;
@@ -184,7 +184,7 @@
 }
 
 .chat-send-btn:hover {
-    background-color: #0056b3;
+    background-color: #246beb;
     box-shadow: 0 6px 12px rgba(0, 123, 255, 0.3);
 }
 

@@ -1,7 +1,7 @@
 // import axios from 'axios';
 import { api } from "../../../common/api/axios.js";
-import { useState , useEffect} from 'react';
-import { useLocation, useNavigate,useParams } from 'react-router-dom';
+import { useState, useEffect, useRef } from 'react';
+import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import '../style/Fund.css'; // 경로 수정
 
 // 후원 섹션 컴포넌트
@@ -9,9 +9,9 @@ const FundSection = ({ title, description, icon, onDonateClick }) => {
   return (
     <div className="fund-section-card">
       <div className="fund-section-icon">{icon}</div>
-      <h3 className="fund-section-title">{title}</h3>
+      <div className="form_title">{title}</div>
       <p className="fund-section-description">{description}</p>
-      <button 
+      <button
         className="fund-donate-button"
         onClick={onDonateClick}
       >
@@ -46,24 +46,24 @@ const FundMainPage = () => {
     },
   ];
 
-return (
+  return (
     <div className="fund-main-page">
-        <div className="fund-main-container">
-            <h1 className="fund-main-title">후원 정보</h1>
-                <div className="fund-section-grid">
-                    {fundSections.map((section, index) => (
-                    <FundSection
-                    key={index}
-                    title={section.title}
-                    description={section.description}
-                    icon={section.icon}
-                    onDonateClick={() => navigate(section.path)}
-                    />
-                ))}
-            </div>
+      <div className="fund-main-container">
+        <h1 className="fund-main-title">후원 정보</h1>
+        <div className="fund-section-grid">
+          {fundSections.map((section, index) => (
+            <FundSection
+              key={index}
+              title={section.title}
+              description={section.description}
+              icon={section.icon}
+              onDonateClick={() => navigate(section.path)}
+            />
+          ))}
         </div>
+      </div>
     </div>
-    );
+  );
 };
 
 // 후원금 신청서 컴포넌트
@@ -98,29 +98,26 @@ const FundApplicationForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // 1. 로컬 스토리지에서 memberNum 가져오기
     const memberNum = localStorage.getItem("memberNum");
     const memberId = memberNum ? Number(memberNum) : null;
 
     if (!formData.applicantName || !formData.contact.part2 || !formData.contact.part3 || !formData.birthDate || !formData.confirmationRequired || !formData.fundAmount) {
-      // 2. 로그인 상태가 아닐 때만 유효성 검사 추가
-      if (!memberId && (!formData.applicantName || !formData.contact.part2 || !formData.contact.part3 || !formData.birthDate)) {
-        setMessage('비회원 후원은 신청자 정보를 모두 입력해야 합니다.');
-        setTimeout(() => setMessage(null), 3000); 
-        return;
-      }
+      setMessage('모든 필수 항목을 입력해야 합니다.');
+      setTimeout(() => setMessage(null), 3000);
+      return;
     }
-    
+
     try {
       const fundCheckStatus = formData.confirmationRequired === '필요' ? 'Y' : 'N';
-      
+
       const requestData = {
         memberId: memberId, // 동적으로 설정된 memberId 사용
         fundSponsor: formData.applicantName,
         fundPhone: `${formData.contact.part1}-${formData.contact.part2}-${formData.contact.part3}`,
         fundBirth: formData.birthDate,
-        fundType: 'REGULAR', 
+        fundType: 'REGULAR',
         fundMoney: formData.fundAmount,
         fundNote: formData.notes,
         fundCheck: fundCheckStatus
@@ -139,86 +136,139 @@ const FundApplicationForm = () => {
     }
   };
 
-return (
-    <div className="uiux_cts-form-page">
-      <div className="application-form-container">
+  return (
+    <div>
+      <div>
         <h3>후원금 신청서</h3>
+
         <form onSubmit={handleSubmit}>
-          <div className="form-input-group">
-            <div className="form-input-item">
-              <h5>신청자명</h5>
-              <input type="text" id="applicantName" name="applicantName" value={formData.applicantName} onChange={handleChange} className="form-input" />
+
+          <div className="form_wrap">
+            <table className="table type2 responsive border">
+              <colgroup>
+                <col className="w30p" />
+                <col />
+              </colgroup>
+              <tbody>
+
+                <tr>
+                  <th scope="row">신청자명</th>
+                  <td>
+                    <div className="temp_form md w40p">
+                      <input type="text" id="applicantName" name="applicantName" value={formData.applicantName} onChange={handleChange} className="temp_input" />
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <th scope="row">연락처</th>
+                  <td className="phone_form">
+                    <div className="temp_form md w15p">
+                      <input
+                        type="text"
+                        value={formData.contact.part1}
+                        onChange={(e) => {
+                          const onlyNumbers = e.target.value.replace(/\D/g, ''); // 숫자만 남김
+                          setFormData(p => ({ ...p, contact: { ...p.contact, part1: onlyNumbers } }));
+                        }}
+                        className="temp_input"
+                        maxLength="3" // 최대 입력 길이 제한
+                      />
+                    </div>
+                    <span>-</span>
+                    <div className="temp_form md w15p">
+                      <input
+                        type="text"
+                        value={formData.contact.part2}
+                        onChange={(e) => {
+                          const onlyNumbers = e.target.value.replace(/\D/g, ''); // 숫자만 남김
+                          setFormData(p => ({ ...p, contact: { ...p.contact, part2: onlyNumbers } }));
+                        }}
+                        className="temp_input"
+                        maxLength="4" // 최대 입력 길이 제한
+                      />
+                    </div>
+                    <span>-</span>
+                    <div className="temp_form md w15p">
+                      <input
+                        type="text"
+                        value={formData.contact.part3}
+                        onChange={(e) => {
+                          const onlyNumbers = e.target.value.replace(/\D/g, ''); // 숫자만 남김
+                          setFormData(p => ({ ...p, contact: { ...p.contact, part3: onlyNumbers } }));
+                        }}
+                        className="temp_input"
+                        maxLength="4" // 최대 입력 길이 제한
+                      />
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <th scope="row">생년월일</th>
+                  <td>
+                    <div className="temp_form md w40p">
+                      <input className="temp_input" type="date" id="birthDate" value={formData.birthDate} name="birthDate" onChange={handleChange} />
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+
+                  <th scope="row">후원확인서 필 여부</th>
+                  <div className="temp_form_box">
+                    <td>
+                      <div className="temp_form md w40p">
+                        <select id="confirmationRequired" name="confirmationRequired" value={formData.confirmationRequired} onChange={handleChange} className="temp_select">
+                          <option value="">선택</option>
+                          <option value="필요">필요</option>
+                          <option value="불필요">불필요</option>
+                        </select>
+                      </div>
+                    </td>
+                  </div>
+                </tr>
+                <tr>
+
+                  <th scope="row">후원 금액</th>
+                  <td>
+                    <div className="temp_form md w40p">
+                      <input type="text" id="fundAmount" name="fundAmount" value={formData.fundAmount} onChange={handleChange} className="temp_input" />
+                    </div>
+                  </td>
+                </tr>
+
+
+                <tr>
+                  <th scope="row">비고</th>
+                  <td>
+                    <div className="form-input-item">
+                      <textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} className="form-textarea w40p" rows="3" placeholder="비고 입력"></textarea>
+                    </div>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div >
+
+          <div className="form_center_box">
+            <div className="form_btn_box">
+              <div><button type="button" onClick={() => navigate('/funds')} className="form-button-secondary">이전</button></div>
             </div>
-            
-            <div className="form-input-item">
-              <h5>연락처</h5>
-              <div className="form-contact-input">
-                <input
-                  type="text"
-                  value={formData.contact.part1}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part1: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="3" // 최대 입력 길이 제한
-                />
-                <span>-</span>
-                <input
-                  type="text"
-                  value={formData.contact.part2}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part2: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="4" // 최대 입력 길이 제한
-                />
-                <span>-</span>
-                <input
-                  type="text"
-                  value={formData.contact.part3}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part3: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="4" // 최대 입력 길이 제한
-                />
-              </div>
-            </div>
-            
-            <div className="form-input-item">
-              <h5>생년월일</h5>
-              <input type="date" id="birthDate" name="birthDate" value={formData.birthDate} onChange={handleChange} className="form-input form-input-date" />
-            </div>
-            
-            <div className="form-input-item">
-              <h5>후원확인서 필 여부</h5>
-              <select id="confirmationRequired" name="confirmationRequired" value={formData.confirmationRequired} onChange={handleChange} className="form-select">
-                <option value="">선택</option>
-                <option value="필요">필요</option>
-                <option value="불필요">불필요</option>
-              </select>
-            </div>
-            
-            <div className="form-input-item">
-              <h5>후원 금액</h5>
-              <div className="form-amount-input">
-                <input type="number" id="fundAmount" name="fundAmount" value={formData.fundAmount} onChange={handleChange} className="form-input" />
-                <span className="form-unit">원</span>
-              </div>
-            </div>
-            
-            <div className="form-input-item">
-              <h5>비고</h5>
-              <textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} className="form-textarea" rows="3" placeholder="비고 입력"></textarea>
+            <div className="form_btn_box">
+              <div><button type="submit" className="form-button-primary">다음</button></div>
             </div>
           </div>
 
-          <div className="form-buttons">
-            <button onClick={() => navigate('/funds')} className="form-button-secondary">이전</button>
-            <button type="submit" className="form-button-primary">다음</button>
-          </div>
         </form>
       </div>
+
       {message && (
         <div className="form-message">
           {message}
         </div>
       )}
-    </div>
+    </div >
   );
 };
 
@@ -227,7 +277,7 @@ const FundApplicationDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const responseData = location.state?.formData;
-  
+
   if (!responseData) {
     return (
       <div className="application-details-error">
@@ -241,45 +291,75 @@ const FundApplicationDetails = () => {
   const confirmationText = responseData.fundCheck === 'Y' ? '필요' : '불필요';
 
   return (
-    <div className="application-details-page">
-      <div className="application-details-container">
-        <h3 className="application-details-title">후원금 신청 내역</h3>
-        
-        <div className="details-info-group">
-          <div className="details-info-item">
-            <h5>신청자명</h5>
-            <div className="details-text">{responseData.fundSponsor}</div>
-          </div>
-          
-          <div className="details-info-item">
-            <h5>연락처</h5>
-            <div className="details-text">{responseData.fundPhone}</div>
-          </div>
-          
-          <div className="details-info-item">
-            <h5>생년월일</h5>
-            <div className="details-text">{responseData.fundBirth}</div>
-          </div>
-          
-          <div className="details-info-item">
-            <h5>후원확인서 필 여부</h5>
-            <div className="details-text">{confirmationText}</div>
-          </div>
-          
-          <div className="details-info-item">
-            <h5>후원 금액</h5>
-            <div className="details-text">{responseData.fundMoney.toLocaleString()} 원</div>
-          </div>
-          
-          <div className="details-info-item-textarea">
-            <h5>비고</h5>
-            <div className="details-text-notes">{responseData.fundNote || '없음'}</div>
-          </div>
+    <div>
+      <div>
+        <h3>후원금 신청 내역</h3>
+        <div className="form_wrap">
+          <table className="table type2 responsive border">
+            <colgroup>
+              <col className="w30p" />
+              <col />
+            </colgroup>
+            <tbody>
+
+              <tr>
+                <th scope="row">신청자명</th>
+                <td>
+                  <div className="form_desc">{responseData.fundSponsor}
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">연락처</th>
+                <td>
+                  <div className="form_desc">{responseData.fundPhone}
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">생년월일</th>
+                <td>
+                  <div className="form_desc">{responseData.fundBirth}
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">후원확인서 필 여부</th>
+                <td>
+                  <div className="form_desc">{confirmationText}
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">후원 금액</th>
+                <td>
+                  <div className="form_desc">{responseData.fundMoney.toLocaleString()} 원
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">비고</th>
+                <td>
+                  <div className="form_desc">{responseData.fundNote || '없음'}
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
         </div>
-        
-        <div className="details-buttons">
-          <button onClick={() => navigate('/funds/donation')} className="form-button-secondary">이전</button>
-          <button onClick={() => navigate('/funds')} className="form-button-primary">메인으로 이동</button>
+        <div className="form_center_box">
+          <div className="form_btn_box">
+            <div><button onClick={() => navigate('/funds/donation')} className="form-button-secondary">이전</button></div>
+          </div>
+          <div className="form_btn_box">
+            <div><button onClick={() => navigate('/funds')} className="form-button-primary">메인으로 이동</button></div>
+          </div>
         </div>
       </div>
     </div>
@@ -294,7 +374,7 @@ const GoodsApplicationForm = () => {
     applicantName: '',
     contact: { part1: '010', part2: '', part3: '' },
     birthDate: '',
-    confirmationRequired: '', 
+    confirmationRequired: '',
     goods: '',
     notes: ''
   });
@@ -318,33 +398,30 @@ const GoodsApplicationForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-// 1. 로컬 스토리지에서 memberNum 가져오기
+    // 1. 로컬 스토리지에서 memberNum 가져오기
     const memberNum = localStorage.getItem("memberNum");
     const memberId = memberNum ? Number(memberNum) : null;
-    
-    if (!formData.applicantName || !formData.contact.part2 || !formData.contact.part3 || !formData.birthDate || !formData.confirmationRequired || !formData.goods) {
-      // 2. 로그인 상태가 아닐 때만 유효성 검사 추가
-      if (!memberId && (!formData.applicantName || !formData.contact.part2 || !formData.contact.part3 || !formData.birthDate)) {
-        setMessage('비회원 후원은 신청자 정보를 모두 입력해야 합니다.');
-        setTimeout(() => setMessage(null), 3000); 
-        return;
-      }
+
+    if (!formData.applicantName || !formData.contact.part1 || !formData.contact.part2 || !formData.contact.part3 || !formData.birthDate || !formData.confirmationRequired) {
+      setMessage('모든 필수 항목을 입력해야 합니다.');
+      setTimeout(() => setMessage(null), 3000);
+      return;
     }
-    
+
     try {
       const fundCheckStatus = formData.confirmationRequired === '필요' ? 'Y' : 'N';
-      
+
       const requestData = {
         memberId: memberId, // 동적으로 설정된 memberId 사용
         fundSponsor: formData.applicantName,
         fundPhone: `${formData.contact.part1}-${formData.contact.part2}-${formData.contact.part3}`,
         fundBirth: formData.birthDate,
-        fundType: 'ITEM', 
+        fundType: 'ITEM',
         fundItem: formData.goods,
         fundNote: formData.notes,
         fundCheck: fundCheckStatus
       };
-      
+
       const response = await api.post('/funds/request', requestData);
 
       if (response.status === 200 || response.status === 201) {
@@ -357,93 +434,139 @@ const GoodsApplicationForm = () => {
       setTimeout(() => setMessage(null), 3000);
     }
   };
-  
+
   return (
-    <div className="application-form-page">
-      <div className="application-form-container">
-        <h3>후원 물품 신청서</h3>
+    <div>
+      <div>
+        <h3>후원물품 신청서</h3>
+
         <form onSubmit={handleSubmit}>
-          <div className="form-input-group">
-            <div className="form-input-item">
-              <h5>신청자명</h5>
-              <input type="text" id="applicantName" name="applicantName" value={formData.applicantName} onChange={handleChange} className="form-input" />
+
+          <div className="form_wrap">
+            <table className="table type2 responsive border">
+              <colgroup>
+                <col className="w30p" />
+                <col />
+              </colgroup>
+              <tbody>
+                <tr>
+                  <th scope="row">신청자명</th>
+                  <td>
+                    <div className="temp_form md w40p">
+                      <input type="text" id="applicantName" name="applicantName" value={formData.applicantName} onChange={handleChange} className="temp_input" />
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <th scope="row">연락처</th>
+                  <td className="phone_form">
+                    <div className="temp_form md w15p">
+                      <input
+                        type="text"
+                        value={formData.contact.part1}
+                        onChange={(e) => {
+                          const onlyNumbers = e.target.value.replace(/\D/g, ''); // 숫자만 남김
+                          setFormData(p => ({ ...p, contact: { ...p.contact, part1: onlyNumbers } }));
+                        }}
+                        className="temp_input"
+                        maxLength="3" // 최대 입력 길이 제한
+                      />
+                    </div>
+                    <span>-</span>
+                    <div className="temp_form md w15p">
+                      <input
+                        type="text"
+                        value={formData.contact.part2}
+                        onChange={(e) => {
+                          const onlyNumbers = e.target.value.replace(/\D/g, ''); // 숫자만 남김
+                          setFormData(p => ({ ...p, contact: { ...p.contact, part2: onlyNumbers } }));
+                        }}
+                        className="temp_input"
+                        maxLength="4" // 최대 입력 길이 제한
+                      />
+                    </div>
+                    <span>-</span>
+                    <div className="temp_form md w15p">
+                      <input
+                        type="text"
+                        value={formData.contact.part3}
+                        onChange={(e) => {
+                          const onlyNumbers = e.target.value.replace(/\D/g, ''); // 숫자만 남김
+                          setFormData(p => ({ ...p, contact: { ...p.contact, part3: onlyNumbers } }));
+                        }}
+                        className="temp_input"
+                        maxLength="4" // 최대 입력 길이 제한
+                      />
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <th scope="row">생년월일</th>
+                  <td>
+                    <div className="temp_form md w40p">
+                      <input className="temp_input" type="date" id="birthDate" value={formData.birthDate} name="birthDate" onChange={handleChange} />
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+
+
+                  <th scope="row">후원확인서 필 여부</th>
+                  <div className="temp_form_box">
+                    <td>
+                      <div className="temp_form md w40p">
+                        <select id="confirmationRequired" name="confirmationRequired" value={formData.confirmationRequired} onChange={handleChange} className="temp_select">
+                          <option value="">선택</option>
+                          <option value="필요">필요</option>
+                          <option value="불필요">불필요</option>
+                        </select>
+                      </div>
+                    </td>
+                  </div>
+                </tr>
+
+                <tr>
+                  <th scope="row">후원물품</th>
+                  <td>
+                    <div className="form-input-item">
+                      <textarea id="goods" name="goods" value={formData.goods} onChange={handleChange} className="form-textarea w40p" rows="3" placeholder="후원물품 기부 시 작성"></textarea>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <th scope="row">비고</th>
+                  <td>
+                    <div className="form-input-item">
+                      <textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} className="form-textarea w40p" rows="3" placeholder="비고 입력"></textarea>
+                    </div>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div >
+
+          <div className="form_center_box">
+            <div className="form_btn_box">
+              <div><button type="button" onClick={() => navigate('/funds')} className="form-button-secondary">이전</button></div>
             </div>
-            
-            <div className="form-input-item">
-              <h5>연락처</h5>
-              <div className="form-contact-input">
-                <input
-                  type="text"
-                  value={formData.contact.part1}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part1: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="3" // 최대 입력 길이 제한
-                />
-                <span>-</span>
-                <input
-                  type="text"
-                  value={formData.contact.part2}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part2: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="4" // 최대 입력 길이 제한
-                />
-                <span>-</span>
-                <input
-                  type="text"
-                  value={formData.contact.part3}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part3: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="4" // 최대 입력 길이 제한
-                />
-              </div>
-            </div>
-            <div className="form-input-item">
-              <h5>생년월일</h5>
-              <input type="date" id="birthDate" name="birthDate" value={formData.birthDate} onChange={handleChange} className="form-input form-input-date" />
-            </div>
-            
-            <div className="form-input-item">
-              <h5>후원확인서 필 여부</h5>
-              <select id="confirmationRequired" name="confirmationRequired" value={formData.confirmationRequired} onChange={handleChange} className="form-select">
-                <option value="">선택</option>
-                <option value="필요">필요</option>
-                <option value="불필요">불필요</option>
-              </select>
-            </div>
-            
-            <div className="form-input-item">
-              <h5>후원물품</h5>
-              <input type="text" id="goods" name="goods" value={formData.goods} onChange={handleChange} className="form-input" placeholder="후원물품 기부 시 작성" />
-            </div>
-            
-            <div className="form-input-item">
-              <h5>비고</h5>
-              <textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} className="form-textarea" rows="3" placeholder="비고 입력"></textarea>
+            <div className="form_btn_box">
+              <div><button type="submit" className="form-button-primary">다음</button></div>
             </div>
           </div>
 
-          <div className="form-buttons">
-            <button
-              onClick={() => navigate('/funds')}
-              className="form-button-secondary"
-            >
-              이전
-            </button>
-            <button
-              type="submit"
-              className="form-button-primary"
-            >
-              다음
-            </button>
-          </div>
         </form>
       </div>
+
       {message && (
         <div className="form-message">
           {message}
         </div>
       )}
-    </div>
+    </div >
   );
 };
 
@@ -452,7 +575,7 @@ const GoodsApplicationDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const responseData = location.state?.formData;
-  
+
   if (!responseData) {
     return (
       <div className="application-details-error">
@@ -461,67 +584,86 @@ const GoodsApplicationDetails = () => {
       </div>
     );
   }
-  
+
   const confirmationText = responseData.fundCheck === 'Y' ? '필요' : '불필요';
 
   return (
-    <div className="application-details-page">
-      <div className="application-details-container">
-        <h3>후원 물품 신청 내역</h3>
-        
-        <div className="details-info-group">
-          <div className="details-info-item">
-            <h5>신청자명</h5>
-            <div className="details-text">{responseData.fundSponsor}</div>
-          </div>
-          
-          <div className="details-info-item">
-            <div className="details-label">연락처</div>
-            <div className="details-text">{responseData.fundPhone}</div>
-          </div>
-          
-          <div className="details-info-item">
-            <div className="details-label">생년월일</div>
-            <div className="details-text">{responseData.fundBirth}</div>
-          </div>
-          
-          <div className="details-info-item">
-            <div className="details-label">후원확인서 필 여부</div>
-            <div className="details-text">{confirmationText}</div>
-          </div>
-          
-          <div className="details-info-item">
-            <div className="details-label">후원 물품</div>
-            <div className="details-text">{responseData.fundItem}</div>
-          </div>
-          
-          <div className="details-info-item-textarea">
-            <div className="details-label">비고</div>
-            <div className="details-text-notes">{responseData.fundNote || '없음'}</div>
-          </div>
-        </div>
-        
-        <div className="details-buttons">
-          <button
-            onClick={() => navigate('/funds/goods')}
-            className="form-button-secondary"
-          >
-            이전
-          </button>
-          <button
-            onClick={() => navigate('/funds')}
-            className="form-button-primary"
-          >
-            메인으로 이동
-          </button>
-        </div>
-        </div>
+    <div>
+      <div>
+        <h3>후원금 신청 내역</h3>
+        <div className="form_wrap">
+          <table className="table type2 responsive border">
+            <colgroup>
+              <col className="w30p" />
+              <col />
+            </colgroup>
+            <tbody>
 
+              <tr>
+                <th scope="row">신청자명</th>
+                <td>
+                  <div className="form_desc">{responseData.fundSponsor}
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">연락처</th>
+                <td>
+                  <div className="form_desc">{responseData.fundPhone}
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">생년월일</th>
+                <td>
+                  <div className="form_desc">{responseData.fundBirth}
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">후원확인서 필 여부</th>
+                <td>
+                  <div className="form_desc">{confirmationText}
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">후원 물품</th>
+                <td>
+                  <div className="form_desc">{responseData.fundItem}
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">비고</th>
+                <td>
+                  <div className="form_desc">{responseData.fundNote || '없음'}
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
         </div>
-      );
-    };
-    
-  
+        <div className="form_center_box">
+          <div className="form_btn_box">
+            <div><button onClick={() => navigate('/funds/donation')} className="form-button-secondary">이전</button></div>
+          </div>
+          <div className="form_btn_box">
+            <div><button onClick={() => navigate('/funds')} className="form-button-primary">메인으로 이동</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+
 
 
 // 정기후원 신청서 컴포넌트
@@ -555,12 +697,12 @@ const RegularApplicationForm = () => {
           part3: parts[2] || ''
         }
       }));
-    } else if (name === 'fundAmountSelect') { 
+    } else if (name === 'fundAmountSelect') {
       if (value === '직접 입력') {
-        setIsAmountInputDisabled(false); 
+        setIsAmountInputDisabled(false);
         setFormData(prev => ({ ...prev, fundAmount: '' }));
       } else {
-        setIsAmountInputDisabled(true); 
+        setIsAmountInputDisabled(true);
         setFormData(prev => ({ ...prev, fundAmount: value }));
       }
     } else {
@@ -571,25 +713,25 @@ const RegularApplicationForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-   // 1. 로컬 스토리지에서 memberNum 가져오기
+    // 1. 로컬 스토리지에서 memberNum 가져오기
     const memberNum = localStorage.getItem("memberNum");
     const memberId = memberNum ? Number(memberNum) : null;
-    
-      // 2. 필수 입력 체크
-  if (
-    !formData.applicantName || !formData.contact.part2 || !formData.contact.part3 ||
-    !formData.birthDate || !formData.confirmationRequired || !formData.fundAmount ||
-    !formData.bankName || !formData.accountNumber || !formData.accountHolder || !formData.withdrawalDay
-  ) {
-    if (!memberId && (!formData.applicantName || !formData.contact.part2 || !formData.contact.part3 || !formData.birthDate)) {
-      setMessage('비회원 후원은 신청자 정보를 모두 입력해야 합니다.');
-      setTimeout(() => setMessage(null), 3000); 
-      return;
+
+    // 2. 필수 입력 체크
+    if (
+      !formData.applicantName || !formData.contact.part1 || !formData.contact.part2 || !formData.contact.part3 ||
+      !formData.birthDate || !formData.confirmationRequired || !formData.fundAmount ||
+      !formData.bankName || !formData.accountNumber || !formData.accountHolder || !formData.withdrawalDay
+    ) {
+      if (!memberId && (!formData.applicantName || !formData.contact.part2 || !formData.contact.part3 || !formData.birthDate)) {
+        setMessage('비회원 후원은 신청자 정보를 모두 입력해야 합니다.');
+        setTimeout(() => setMessage(null), 3000);
+        return;
+      }
     }
-  }
     try {
       const fundCheckStatus = formData.confirmationRequired === '필요' ? 'Y' : 'N';
-    // 🔹 출금일 처리: "말일"은 99, 숫자일 경우 parseInt
+      // 🔹 출금일 처리: "말일"은 99, 숫자일 경우 parseInt
       let withdrawalDayValue;
       if (formData.withdrawalDay === "말일") {
         withdrawalDayValue = 99;
@@ -597,7 +739,7 @@ const RegularApplicationForm = () => {
         // "10일" -> 10
         withdrawalDayValue = parseInt(formData.withdrawalDay.replace("일", ""), 10);
       }
-      
+
       const requestData = {
         memberId: memberId,
         fundSponsor: formData.applicantName,
@@ -612,7 +754,7 @@ const RegularApplicationForm = () => {
         fundNote: formData.notes,
         fundCheck: fundCheckStatus
       };
-      
+
       const response = await api.post('/funds/request', requestData);
 
       if (response.status === 200 || response.status === 201) {
@@ -627,148 +769,210 @@ const RegularApplicationForm = () => {
   };
 
   return (
-    <div className="application-form-page">
-      <div className="application-form-container">
-        <h3 className="application-form-title">정기후원 신청서</h3>
+    <div>
+      <div>
+        <h3>정기후원 신청서</h3>
+
         <form onSubmit={handleSubmit}>
-        <div className="form-input-group">
-          <div className="form-input-item">
-            <label htmlFor="applicantName" className="form-label required">신청자명</label>
-            <input type="text" id="applicantName" name="applicantName" value={formData.applicantName} onChange={handleChange} className="form-input" />
-          </div>
-          
-          <div className="form-input-item">
-            <label htmlFor="contact" className="form-label required">연락처</label>
-            <div className="form-contact-input">
-              <input
-                  type="text"
-                  value={formData.contact.part1}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part1: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="3" // 최대 입력 길이 제한
-                />
-                <span>-</span>
-                <input
-                  type="text"
-                  value={formData.contact.part2}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part2: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="4" // 최대 입력 길이 제한
-                />
-                <span>-</span>
-                <input
-                  type="text"
-                  value={formData.contact.part3}
-                  onChange={(e) => setFormData(p => ({ ...p, contact: { ...p.contact, part3: e.target.value } }))}
-                  className="form-input text-center"
-                  maxLength="4" // 최대 입력 길이 제한
-                />
-                </div>
-          </div>
-          
-          <div className="form-input-item">
-            <label htmlFor="birthDate" className="form-label required">생년월일</label>
-            <input type="date" id="birthDate" name="birthDate" value={formData.birthDate} onChange={handleChange} className="form-input form-input-date" />
-          </div>
-          
-          <div className="form-input-item">
-            <label htmlFor="confirmationRequired" className="form-label required">후원확인서 필 여부</label>
-            <select id="confirmationRequired" name="confirmationRequired" value={formData.confirmationRequired} onChange={handleChange} className="form-select">
-              <option value="">선택</option>
-              <option value="필요">필요</option>
-              <option value="불필요">불필요</option>
-            </select>
-          </div>
-          
-          <div className="form-input-item">
-            <label htmlFor="fundAmount" className="form-label required">후원 금액</label>
-            <div className="form-amount-select-input">
-              <select name="fundAmountSelect" onChange={handleChange} className="form-select w-1/2">
-                <option value="">후원 금액 선택</option>
-                <option value="10000">10,000원</option>
-                <option value="20000">20,000원</option>
-                <option value="30000">30,000원</option>
-                <option value="직접 입력">직접 입력</option>
-              </select>
-              <input type="number" name="fundAmount" value={formData.fundAmount} onChange={handleChange} disabled={isAmountInputDisabled} className="form-input w-1/2" />
+
+          <div className="form_wrap">
+            <table className="table type2 responsive border">
+              <colgroup>
+                <col className="w30p" />
+                <col />
+              </colgroup>
+              <tbody>
+
+                <tr>
+                  <th scope="row">신청자명</th>
+                  <td>
+                    <div className="temp_form md w40p">
+                      <input type="text" id="applicantName" name="applicantName" value={formData.applicantName} onChange={handleChange} className="temp_input" />
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <th scope="row">연락처</th>
+                  <td className="phone_form">
+                    <div className="temp_form md w15p">
+                      <input
+                        type="text"
+                        value={formData.contact.part1}
+                        onChange={(e) => {
+                          const onlyNumbers = e.target.value.replace(/\D/g, ''); // 숫자만 남김
+                          setFormData(p => ({ ...p, contact: { ...p.contact, part1: onlyNumbers } }));
+                        }}
+                        className="temp_input"
+                        maxLength="3" // 최대 입력 길이 제한
+                      />
+                    </div>
+                    <span>-</span>
+                    <div className="temp_form md w15p">
+                      <input
+                        type="text"
+                        value={formData.contact.part2}
+                        onChange={(e) => {
+                          const onlyNumbers = e.target.value.replace(/\D/g, ''); // 숫자만 남김
+                          setFormData(p => ({ ...p, contact: { ...p.contact, part2: onlyNumbers } }));
+                        }}
+                        className="temp_input"
+                        maxLength="4" // 최대 입력 길이 제한
+                      />
+                    </div>
+                    <span>-</span>
+                    <div className="temp_form md w15p">
+                      <input
+                        type="text"
+                        value={formData.contact.part3}
+                        onChange={(e) => {
+                          const onlyNumbers = e.target.value.replace(/\D/g, ''); // 숫자만 남김
+                          setFormData(p => ({ ...p, contact: { ...p.contact, part3: onlyNumbers } }));
+                        }}
+                        className="temp_input"
+                        maxLength="4" // 최대 입력 길이 제한
+                      />
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <th scope="row">생년월일</th>
+                  <td>
+                    <div className="temp_form md w40p">
+                      <input className="temp_input" type="date" id="birthDate" value={formData.birthDate} name="birthDate" onChange={handleChange} />
+                    </div>
+                  </td>
+                </tr>
+                <tr>
+
+                  <th scope="row">후원확인서 필 여부</th>
+                  <div className="temp_form_box">
+                    <td>
+                      <div className="temp_form md w40p">
+                        <select id="confirmationRequired" name="confirmationRequired" value={formData.confirmationRequired} onChange={handleChange} className="temp_select">
+                          <option value="">선택</option>
+                          <option value="필요">필요</option>
+                          <option value="불필요">불필요</option>
+                        </select>
+                      </div>
+                    </td>
+                  </div>
+                </tr>
+                <tr>
+
+                  <th scope="row">후원 금액</th>
+
+                  <td>
+                    <div className="all_day">
+                      <select name="fundAmountSelect" onChange={handleChange} className="form-select w30p">
+                        <option value="">후원 금액 선택</option>
+                        <option value="10000">10,000원</option>
+                        <option value="20000">20,000원</option>
+                        <option value="30000">30,000원</option>
+                        <option value="직접 입력">직접 입력</option>
+                      </select>
+                      <div className="temp_form md w30p">
+                        <input type="text" id="fundAmount" name="fundAmount" value={formData.fundAmount} onChange={handleChange} disabled={isAmountInputDisabled} className="temp_input" />
+                      </div>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <th scope="row">은행 선택</th>
+                  <td>
+                    <select id="bankName" name="bankName" value={formData.bankName} onChange={handleChange} className="form-select">
+                      <option value="">은행 선택</option>
+                      <option value="국민은행">국민은행</option>
+                      <option value="신한은행">신한은행</option>
+                      <option value="우리은행">우리은행</option>
+                      <option value="하나은행">하나은행</option>
+                      <option value="기업은행">기업은행</option>
+                    </select>
+
+                  </td>
+                </tr>
+
+                <tr>
+                  <th scope="row">계좌번호</th>
+                  <td>
+                    <div className="temp_form md w40p">
+                      <input type="text" id="accountNumber" name="accountNumber" value={formData.accountNumber} onChange={handleChange} className="temp_input" />
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <th scope="row">예금주명</th>
+                  <td>
+                    <div className="temp_form md w40p">
+                      <input type="text" id="accountHolder" name="accountHolder" value={formData.accountHolder} onChange={handleChange} className="temp_input" />
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <th scope="row">출금일</th>
+                  <td>
+                    <select id="withdrawalDay" name="withdrawalDay" value={formData.withdrawalDay} onChange={handleChange} className="form-select">
+                      <option value="">출금일 선택</option>
+                      <option value="5일">5일</option>
+                      <option value="10일">10일</option>
+                      <option value="15일">15일</option>
+                      <option value="20일">20일</option>
+                      <option value="25일">25일</option>
+                      <option value="말일">말일</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr></tr>
+
+
+                <tr>
+                  <th scope="row">비고</th>
+                  <td>
+                    <div className="form-input-item">
+                      <textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} className="form-textarea w40p" rows="3" placeholder="비고 입력"></textarea>
+                    </div>
+                  </td>
+                </tr>
+
+                <tr>
+                  <th scope="row">정기후원 안내사항</th>
+                  <td>
+                    <ul className="form-notice-list">
+                      <li>가입 첫 달은 5, 10, 15, 20, 25일, 말일 중 가장 가까운 날에 출금됩니다.</li>
+                      <li>정기 출금 실패 시 10, 15, 20, 25일, 말일에 재출금됩니다.</li>
+                    </ul>
+                  </td>
+                </tr>
+
+              </tbody>
+            </table>
+          </div >
+
+
+
+          <div className="form_center_box">
+            <div className="form_btn_box">
+              <div><button type="button" onClick={() => navigate('/funds')} className="form-button-secondary">이전</button></div>
+            </div>
+            <div className="form_btn_box">
+              <div><button type="submit" className="form-button-primary">다음</button></div>
             </div>
           </div>
 
-          <div className="form-input-item">
-            <label htmlFor="bankName" className="form-label required">은행 선택</label>
-            <select id="bankName" name="bankName" value={formData.bankName} onChange={handleChange} className="form-select">
-              <option value="">은행 선택</option>
-              <option value="국민은행">국민은행</option>
-              <option value="신한은행">신한은행</option>
-              <option value="우리은행">우리은행</option>
-              <option value="하나은행">하나은행</option>
-              <option value="기업은행">기업은행</option>
-            </select>
-          </div>
-
-          <div className="form-input-item">
-            <label htmlFor="accountNumber" className="form-label required">계좌번호</label>
-            <input type="text" id="accountNumber" name="accountNumber" value={formData.accountNumber} onChange={handleChange} className="form-input" />
-          </div>
-
-          <div className="form-input-item">
-            <label htmlFor="accountHolder" className="form-label required">예금주명</label>
-            <input type="text" id="accountHolder" name="accountHolder" value={formData.accountHolder} onChange={handleChange} className="form-input" />
-          </div>
-
-          <div className="form-input-item">
-            <label htmlFor="withdrawalDay" className="form-label required">출금일</label>
-            <select id="withdrawalDay" name="withdrawalDay" value={formData.withdrawalDay} onChange={handleChange} className="form-select">
-              <option value="">출금일 선택</option>
-              <option value="5일">5일</option>
-              <option value="10일">10일</option>
-              <option value="15일">15일</option>
-              <option value="20일">20일</option>
-              <option value="25일">25일</option>
-              <option value="말일">말일</option>
-            </select>
-          </div>
-          
-          <div className="form-input-item">
-            <label htmlFor="notes" className="form-label">비고</label>
-            <textarea id="notes" name="notes" value={formData.notes} onChange={handleChange} className="form-textarea" rows="3" placeholder="비고 입력"></textarea>
-          </div>
-        </div>
-
-        <div className="form-notice-box">
-          <h3 className="form-notice-title">정기후원 안내사항</h3>
-          <ul className="form-notice-list">
-            <li>가입 첫 달은 5, 10, 15, 20, 25일, 말일 중 가장 가까운 날에 출금됩니다.</li>
-            <li>정기 출금 실패 시 10, 15, 20, 25일, 말일에 재출금됩니다.</li>
-          </ul>
-        </div>
-        <div className="form-checkbox-container">
-          <input type="checkbox" id="confirmation" className="form-checkbox" />
-          <label htmlFor="confirmation">위 내용을 확인하셨습니까?</label>
-        </div>
-
-        <div className="form-buttons right-aligned">
-          <button
-            onClick={() => navigate('/funds')}
-            className="form-button-secondary"
-          >
-            이전
-          </button>
-          <button
-            type="submit"
-            className="form-button-primary"
-          >
-            결제하기
-          </button>
-        </div>
         </form>
       </div>
+
       {message && (
         <div className="form-message">
           {message}
         </div>
       )}
-    </div>
+    </div >
+
   );
 };
 
@@ -777,7 +981,7 @@ const RegularApplicationDetails = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const responseData = location.state?.formData;
-  
+
   if (!responseData) {
     return (
       <div className="application-details-error">
@@ -790,369 +994,614 @@ const RegularApplicationDetails = () => {
   const confirmationText = responseData.fundCheck === 'Y' ? '필요' : '불필요';
 
   return (
-    <div className="application-details-page">
-      <div className="application-details-container">
-        <h3 className="application-details-title">정기후원 신청 내역</h3>
+    <div>
+      <div>
+        <h3>후원금 신청 내역</h3>
+        <div className="form_wrap">
+          <table className="table type2 responsive border">
+            <colgroup>
+              <col className="w30p" />
+              <col />
+            </colgroup>
+            <tbody>
 
-        <div className="details-info-group">
-          <div className="details-info-item">
-            <div className="details-label">신청자명</div>
-            <div className="details-text">{responseData.fundSponsor}</div>
-          </div>
-          
-          <div className="details-info-item">
-            <div className="details-label">연락처</div>
-            <div className="details-text">{responseData.fundPhone}</div>
-          </div>
-          
-          <div className="details-info-item">
-            <div className="details-label">생년월일</div>
-            <div className="details-text">{responseData.fundBirth}</div>
-          </div>
-          
-          <div className="details-info-item">
-            <div className="details-label">후원확인서 필 여부</div>
-            <div className="details-text">{confirmationText}</div>
-          </div>
+              <tr>
+                <th scope="row">신청자명</th>
+                <td>
+                  <div className="form_desc">{responseData.fundSponsor}
+                  </div>
+                </td>
+              </tr>
 
-          <div className="details-info-item">
-            <div className="details-label">후원 금액</div>
-            <div className="details-text">{responseData.fundMoney.toLocaleString()} 원</div>
-          </div>
-          
-          <div className="details-info-item">
-            <div className="details-label">은행</div>
-            <div className="details-text">{responseData.fundBank}</div>
-          </div>
+              <tr>
+                <th scope="row">연락처</th>
+                <td>
+                  <div className="form_desc">{responseData.fundPhone}
+                  </div>
+                </td>
+              </tr>
 
-          <div className="details-info-item">
-            <div className="details-label">계좌번호</div>
-            <div className="details-text">{responseData.fundAccountNum}</div>
-          </div>
+              <tr>
+                <th scope="row">생년월일</th>
+                <td>
+                  <div className="form_desc">{responseData.fundBirth}
+                  </div>
+                </td>
+              </tr>
 
-          <div className="details-info-item">
-            <div className="details-label">예금주명</div>
-            <div className="details-text">{responseData.fundDepositor}</div>
-          </div>
+              <tr>
+                <th scope="row">후원확인서 필 여부</th>
+                <td>
+                  <div className="form_desc">{confirmationText}
+                  </div>
+                </td>
+              </tr>
 
-          <div className="details-info-item">
-            <div className="details-label">출금일</div>
-            <div className="details-text">{responseData.fundDrawlDate}</div>
+              <tr>
+                <th scope="row">후원 금액</th>
+                <td>
+                  <div className="form_desc">{responseData.fundMoney.toLocaleString()} 원
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">은행</th>
+                <td>
+                  <div className="form_desc">{responseData.fundBank}
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">계좌번호</th>
+                <td>
+                  <div className="form_desc">{responseData.fundAccountNum}
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">예금주명</th>
+                <td>
+                  <div className="form_desc">{responseData.fundDepositor}
+                  </div>
+                </td>
+              </tr>
+
+              <tr>
+                <th scope="row">출금일</th>
+                <td>
+                  <div className="form_desc">{responseData.fundDrawlDate}
+                  </div>
+                </td>
+              </tr>
+
+
+              <tr>
+                <th scope="row">비고</th>
+                <td>
+                  <div className="form_desc">{responseData.fundNote || '없음'}
+                  </div>
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
+        </div>
+        <div className="form_center_box">
+          <div className="form_btn_box">
+            <div><button onClick={() => navigate('/funds/donation')} className="form-button-secondary">이전</button></div>
           </div>
-          
-          <div className="details-info-item-textarea">
-            <div className="details-label">비고</div>
-            <div className="details-text-notes">{responseData.fundNote || '없음'}</div>
+          <div className="form_btn_box">
+            <div><button onClick={() => navigate('/funds')} className="form-button-primary">메인으로 이동</button></div>
           </div>
         </div>
-        
-        <div className="details-buttons right-aligned">
-          <button
-            onClick={() => navigate('/funds')}
-            className="form-button-primary"
-          >
-            메인으로 이동
+      </div>
+    </div>
+  );
+};
+
+
+const MemberFundList = () => {
+  const navigate = useNavigate();
+  const [funds, setFunds] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState(0); // 현재 페이지 (0부터 시작)
+  const [totalPages, setTotalPages] = useState(0); // 총 페이지 수
+
+  const isFetching = useRef(false);
+
+  const fetchFunds = async (page) => {
+    if (isFetching.current) return;
+
+    setLoading(true);
+    setError(null);
+    isFetching.current = true;
+
+    try {
+      const res = await api.get(`/funds/list?page=${page}&size=10`);
+      setFunds(res.data.content);
+      setTotalPages(res.data.totalPages);
+      setCurrentPage(res.data.pageable.pageNumber);
+    } catch (err) {
+      console.error("후원 목록 불러오기 오류:", err);
+      if (err.response && err.response.status === 401) {
+        setError("로그인이 필요합니다. 로그인 후 다시 시도해주세요.");
+      } else {
+        setError("후원 목록을 불러오는 데 실패했습니다.");
+      }
+    } finally {
+      setLoading(false);
+      isFetching.current = false;
+    }
+  };
+
+  useEffect(() => {
+    fetchFunds(currentPage);
+  }, [currentPage]); // currentPage가 변경될 때마다 데이터 재조회
+
+  const handleRowClick = (fundId) => {
+    navigate(`/member/funds/${fundId}`);
+  };
+
+  // 기존 handlePageChange 함수를 남겨두어 재사용성을 높였습니다.
+  const handlePageChange = (page) => {
+    if (page >= 0 && page < totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="fund-list-container">
+        <p>후원 목록을 불러오는 중입니다...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="fund-list-container">
+        <p className="error-message">{error}</p>
+        <button onClick={() => navigate('/login')} className="form-button-primary mt-4">
+          로그인 페이지로 이동
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <h3>후원 목록</h3>
+      <div>
+        <table className="table type2 responsive border">
+          <thead>
+            <tr>
+              <th>후원자명</th>
+              <th>후원금/물품</th>
+              <th>후원일</th>
+            </tr>
+          </thead>
+          <tbody className="text_center">
+            {funds.length > 0 ? (
+              funds.map((fund) => (
+                <tr
+                  key={fund.fundId}
+                  onClick={() => handleRowClick(fund.fundId)}
+                  style={{ cursor: "pointer" }}
+                >
+                  <td>{fund.fundSponsor}</td>
+                  <td>{fund.fundMoney ? `${fund.fundMoney.toLocaleString()} 원` : fund.fundItem}</td>
+                  <td>{new Date(fund.fundTime).toLocaleString()}</td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan="3">후원 목록이 없습니다.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+
+        {/* 수정된 페이지네이션 UI */}
+        {totalPages > 1 && (
+          <div className="pagination_box">
+            <button
+              className="page_btn prev"
+              disabled={currentPage === 0}
+              onClick={() => handlePageChange(currentPage - 1)}
+            >
+              이전
+            </button>
+            <div className="page_btn_box">
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i}
+                  className={`page ${currentPage === i ? "active" : ""}`}
+                  onClick={() => handlePageChange(i)}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+            <button
+              className="page_btn next"
+              disabled={currentPage === totalPages - 1}
+              onClick={() => handlePageChange(currentPage + 1)}
+            >
+              다음
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+
+
+
+const MemberFundDetail = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [fundDetail, setFundDetail] = useState(null);
+  const [message, setMessage] = useState(null);
+
+  const authAxios = api.create({
+    baseURL: 'http://192.168.0.115:8090/',
+    headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+  });
+
+  const fetchFundDetail = async () => {
+    try {
+      const res = await authAxios.get(`/funds/${id}`);
+      setFundDetail(res.data);
+    } catch (err) {
+      console.error(err);
+      setMessage("상세 정보 불러오기 실패");
+    }
+  };
+
+  useEffect(() => {
+    fetchFundDetail();
+  }, [id]);
+
+  if (!fundDetail) return <div>{message || "로딩 중..."}</div>;
+
+  return (
+    <div>
+      <h3>후원 상세 정보</h3>
+      <div className="form_wrap">
+        <table className="table type2 responsive border">
+          <colgroup>
+            <col className="w20p" />
+            <col />
+          </colgroup>
+          <tbody>
+            <tr>
+              <th>후원금/물품</th>
+              <td>{fundDetail.fundMoney ? `${fundDetail.fundMoney.toLocaleString()} 원` : fundDetail.fundItem}</td>
+            </tr>
+            <tr>
+              <th>신청자</th>
+              <td>{fundDetail.fundSponsor}</td>
+            </tr>
+            <tr>
+              <th>연락처</th>
+              <td>{fundDetail.fundPhone}</td>
+            </tr>
+            <tr>
+              <th>생년월일</th>
+              <td>{fundDetail.fundBirth}</td>
+            </tr>
+            <tr>
+              <th>후원일</th>
+              <td>{fundDetail.fundTime}</td>
+            </tr>
+            <tr>
+              <th>입금정보</th>
+              <td>{fundDetail.fundBank} / {fundDetail.fundAccountNum} ({fundDetail.fundDepositor})</td>
+            </tr>
+            <tr>
+              <th>인출예정일</th>
+              <td>{fundDetail.fundDrawlDate}</td>
+            </tr>
+            <tr>
+              <th>확인여부</th>
+              <td>{fundDetail.fundCheck}</td>
+            </tr>
+            <tr>
+              <th>비고</th>
+              <td>{fundDetail.fundNote}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div className="form_center_box">
+        <div className="temp_btn white md">
+          <button type="button" className="btn" onClick={() => navigate(-1)}>
+            목록보기
           </button>
         </div>
       </div>
     </div>
   );
 };
-const MemberFundList = () => {
-    const navigate = useNavigate();
-    const [funds, setFunds] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchFunds = async () => {
-            try {
-                const res = await api.get('/funds/list'); 
-                setFunds(res.data.content); 
-            } catch (err) {
-                console.error("후원 목록 불러오기 오류:", err);
-                if (err.response && err.response.status === 401) {
-                    setError("로그인이 필요합니다. 로그인 후 다시 시도해주세요.");
-                } else {
-                    setError("후원 목록을 불러오는 데 실패했습니다.");
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchFunds();
-    }, []);
 
-    // ⭐️ Add this function to handle navigation
-    const handleRowClick = (fundId) => {
-        navigate(`/member/funds/${fundId}`);
-    };
 
-    if (loading) {
-        return (
-            <div className="fund-list-container">
-                <p>후원 목록을 불러오는 중입니다...</p>
-            </div>
-        );
+const AdminFundList = () => {
+  const navigate = useNavigate();
+  const [funds, setFunds] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // 페이지네이션을 위한 상태 추가
+  const [currentPage, setCurrentPage] = useState(0); // 현재 페이지 (0부터 시작)
+  const [totalPages, setTotalPages] = useState(0); // 총 페이지 수
+
+  // 중복 API 호출을 막기 위한 useRef
+  const isFetching = useRef(false);
+
+  // 페이지네이션을 포함한 API 호출 함수
+  const fetchAdminFunds = async (page) => {
+    // 이미 API 호출 중이면 함수 종료
+    if (isFetching.current) return;
+
+    setLoading(true);
+    setError(null);
+    isFetching.current = true;
+
+    try {
+      // API 호출 시 page와 size를 쿼리 파라미터로 전달
+      const res = await api.get(`/funds/list?page=${page}&size=10`);
+      setFunds(res.data.content);
+      setTotalPages(res.data.totalPages);
+      setCurrentPage(res.data.pageable.pageNumber);
+    } catch (err) {
+      console.error("관리자 후원 목록 불러오기 오류:", err);
+      if (err.response && err.response.status === 403) {
+        setError("접근 권한이 없습니다. 관리자 계정으로 로그인해주세요.");
+      } else if (err.response && err.response.status === 401) {
+        setError("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
+        setTimeout(() => navigate('/login'), 3000);
+      } else {
+        setError("후원 목록을 불러오는 데 실패했습니다.");
+      }
+    } finally {
+      setLoading(false);
+      isFetching.current = false;
     }
-    if (error) {
-      return (
-        <div className="fund-list-container">
-          <p className="error-message">
-            {error}
-          </p>
+  };
+
+  useEffect(() => {
+    fetchAdminFunds(currentPage); // 컴포넌트 마운트 시 첫 페이지 데이터 불러오기
+  }, [currentPage]); // currentPage가 변경될 때마다 데이터 재조회
+
+  // 행 클릭 시 상세 페이지로 이동하는 함수
+  const handleRowClick = (fundId) => {
+    navigate(`/admin/funds/detail/${fundId}`);
+  };
+
+  // 페이지 번호 클릭 핸들러
+  const handlePageChange = (page) => {
+    if (page >= 0 && page < totalPages) {
+      setCurrentPage(page);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="fund-list-container">
+        <p>후원 목록을 불러오는 중입니다...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="fund-list-container">
+        <p className="error-message">{error}</p>
+        {error.includes("로그인") && (
           <button onClick={() => navigate('/login')} className="form-button-primary mt-4">
             로그인 페이지로 이동
           </button>
-        </div>
-      );
-    }
-
-    return (
-        <div className="fund-list-page">
-            <div className="fund-list-container">
-                <h2 className="fund-list-title">나의 후원 내역</h2>
-                <table className="fund-table">
-                    <thead>
-                        <tr>
-                            <th>후원금/물품</th>
-                            <th>신청자</th>
-                            <th>후원일</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {funds.length > 0 ? (
-                            funds.map((fund) => (
-                                // ⭐️ Add onClick handler to the table row
-                                <tr 
-                                    key={fund.fundId} 
-                                    onClick={() => handleRowClick(fund.fundId)}
-                                    style={{ cursor: 'pointer' }} // Add a pointer cursor to indicate it's clickable
-                                >
-                                    <td>{fund.fundMoney ? `${fund.fundMoney.toLocaleString()} 원` : fund.fundItem}</td>
-                                    <td>{fund.fundSponsor}</td>
-                                    <td>{fund.fundTime}</td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr><td colSpan="3">아직 후원하신 내역이 없습니다.</td></tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        )}
+      </div>
     );
-};
+  }
 
+  return (
+    <div>
+      <h3>후원 정보 관리</h3>
+      <div className="form_wrap">
+        <table className="table type2 responsive border">
+          <thead>
+            <tr>
+              <th>신청자</th>
+              <th>후원금/물품</th>
+              <th>후원일</th>
+            </tr>
+          </thead>
+          <tbody className="text_center">
+            {funds.length > 0 ? (
+              funds.map((fund) => (
+                <tr
+                  key={fund.fundId}
+                  onClick={() => handleRowClick(fund.fundId)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <td>{fund.fundSponsor}</td>
+                  <td>{fund.fundMoney ? `${fund.fundMoney.toLocaleString()} 원` : fund.fundItem}</td>
+                  <td>{new Date(fund.fundTime).toLocaleString()}</td>
+                </tr>
+              ))
+            ) : (
+              <tr><td colSpan="3">등록된 후원 내역이 없습니다.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
 
-const MemberFundDetail = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const [fundDetail, setFundDetail] = useState(null);
-    const [message, setMessage] = useState(null);
-
-    const authAxios = api.create({
-        baseURL: 'http://localhost:8090/',
-        headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
-    });
-
-    const fetchFundDetail = async () => {
-        try {
-            const res = await authAxios.get(`/funds/${id}`);
-            setFundDetail(res.data);
-        } catch (err) {
-            console.error(err);
-            setMessage("상세 정보 불러오기 실패");
-        }
-    };
-
-    useEffect(() => {
-        fetchFundDetail();
-    }, [id]);
-
-    if (!fundDetail) return <div>{message || "로딩 중..."}</div>;
-
-    return (
-    <div className="fund-detail-page">
-        <h2>후원 상세</h2>
-        {/* ⭐️ Corrected property names */}
-        <div><strong>후원금/물품:</strong> {fundDetail.fundMoney ? `${fundDetail.fundMoney.toLocaleString()} 원` : fundDetail.fundItem}</div>
-        <div><strong>신청자:</strong> {fundDetail.fundSponsor}</div>
-        <div><strong>연락처:</strong> {fundDetail.fundPhone}</div>
-        <div><strong>생년월일:</strong> {fundDetail.fundBirth}</div>
-        <div><strong>후원일:</strong> {fundDetail.fundTime}</div>
-        <div><strong>입금정보:</strong> {fundDetail.fundBank} / {fundDetail.fundAccountNum} ({fundDetail.fundDepositor})</div>
-        <div><strong>인출예정일:</strong> {fundDetail.fundDrawlDate}</div>
-        <div><strong>확인여부:</strong> {fundDetail.fundCheck}</div>
-        <div><strong>비고:</strong> {fundDetail.fundNote}</div>
-        <button onClick={() => navigate(-1)}>목록으로 돌아가기</button>
+      {/* 수정된 페이지네이션 UI 추가 */}
+      {totalPages > 1 && (
+        <div className="pagination_box">
+          <button
+            className="page_btn prev"
+            disabled={currentPage === 0}
+            onClick={() => handlePageChange(currentPage - 1)}
+          >
+            이전
+          </button>
+          <div className="page_btn_box">
+            {Array.from({ length: totalPages }, (_, i) => (
+              <button
+                key={i}
+                className={`page ${currentPage === i ? "active" : ""}`}
+                onClick={() => handlePageChange(i)}
+              >
+                {i + 1}
+              </button>
+            ))}
+          </div>
+          <button
+            className="page_btn next"
+            disabled={currentPage === totalPages - 1}
+            onClick={() => handlePageChange(currentPage + 1)}
+          >
+            다음
+          </button>
+        </div>
+      )}
     </div>
-);
+
+  );
 };
-const AdminFundList = () => {
-    const navigate = useNavigate();
-    const [funds, setFunds] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
-    useEffect(() => {
-        const fetchAdminFunds = async () => {
-            try {
-                // Admin API endpoint is the same, but the backend handles role validation
-                const res = await api.get('/funds/list'); 
-                setFunds(res.data.content);
-            } catch (err) {
-                console.error("관리자 후원 목록 불러오기 오류:", err);
-                if (err.response && err.response.status === 403) {
-                    // Unauthorized: User is not an admin
-                    setError("접근 권한이 없습니다. 관리자 계정으로 로그인해주세요.");
-                } else if (err.response && err.response.status === 401) {
-                    // Not authenticated: No token or invalid token
-                    setError("로그인이 필요합니다. 로그인 페이지로 이동합니다.");
-                    // Optional: Navigate to login after a delay
-                    setTimeout(() => navigate('/login'), 3000); 
-                } else {
-                    setError("후원 목록을 불러오는 데 실패했습니다.");
-                }
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchAdminFunds();
-    }, [navigate]); // Added `Maps` to dependency array to satisfy ESLint
 
-    // Add a navigation handler for row clicks
-    const handleRowClick = (fundId) => {
-        navigate(`/admin/funds/detail/${fundId}`);
-    };
 
-    if (loading) {
-        return (
-            <div className="fund-list-container">
-                <p>후원 목록을 불러오는 중입니다...</p>
-            </div>
-        );
-    }
 
-    if (error) {
-        return (
-            <div className="fund-list-container">
-                <p className="error-message">{error}</p>
-                {/* Optional: Add a button to navigate to the login page */}
-                {error.includes("로그인") && (
-                    <button onClick={() => navigate('/login')} className="form-button-primary mt-4">
-                        로그인 페이지로 이동
-                    </button>
-                )}
-            </div>
-        );
-    }
+const AdminFundDetail = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
+  const [fundDetail, setFundDetail] = useState(null);
+  const [message, setMessage] = useState("로딩 중...");
 
-    return (
-        <div className="fund-list-page">
-            <div className="fund-list-container">
-                <h2 className="fund-list-title">후원 정보 관리</h2>
-                <table className="fund-table">
-                    <thead>
-                        <tr>
-                            <th>후원금/물품</th>
-                            <th>신청자</th>
-                            <th>후원일</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {funds.length > 0 ? (
-                            funds.map((fund) => (
-                                <tr 
-                                    key={fund.fundId} 
-                                    onClick={() => handleRowClick(fund.fundId)}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    <td>{fund.fundMoney ? `${fund.fundMoney.toLocaleString()} 원` : fund.fundItem}</td>
-                                    <td>{fund.fundSponsor}</td>
-                                    <td>{fund.fundTime}</td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr><td colSpan="3">등록된 후원 내역이 없습니다.</td></tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    );
-};const AdminFundDetail = () => {
-    const { id } = useParams();
-    const navigate = useNavigate();
-    const [fundDetail, setFundDetail] = useState(null);
-    const [message, setMessage] = useState("로딩 중...");
-
-    useEffect(() => {
-        const fetchFundDetail = async () => {
-            try {
-                const res = await api.get(`/funds/${id}`);
-                setFundDetail(res.data);
-            } catch (err) {
-                console.error(err);
-                if (err.response && err.response.status === 404) {
-                    setMessage("해당 후원 내역을 찾을 수 없습니다.");
-                } else if (err.response && err.response.status === 403) {
-                    setMessage("접근 권한이 없습니다. 관리자 계정으로 로그인해주세요.");
-                } else {
-                    setMessage("상세 정보 불러오기 실패");
-                }
-            }
-        };
-        fetchFundDetail();
-    }, [id]);
-
-    const handleUpdate = () => {
-        // TODO: 수정 페이지로 이동 로직 구현
-        // navigate(`/admin/funds/update/${id}`);
-        alert("수정 기능은 아직 구현되지 않았습니다.");
-    };
-
-    const handleDelete = async () => {
-        if (window.confirm("정말로 이 후원 내역을 삭제하시겠습니까?")) {
-            try {
-                await api.delete(`/funds/${id}`);
-                alert("후원 내역이 성공적으로 삭제되었습니다.");
-                // 삭제 후 목록 페이지로 이동
-                navigate('/admin/funds/list'); 
-            } catch (err) {
-                console.error("후원 내역 삭제 실패:", err);
-                alert("후원 내역 삭제에 실패했습니다.");
-            }
+  useEffect(() => {
+    const fetchFundDetail = async () => {
+      try {
+        const res = await api.get(`/funds/${id}`);
+        setFundDetail(res.data);
+      } catch (err) {
+        console.error(err);
+        if (err.response && err.response.status === 404) {
+          setMessage("해당 후원 내역을 찾을 수 없습니다.");
+        } else if (err.response && err.response.status === 403) {
+          setMessage("접근 권한이 없습니다. 관리자 계정으로 로그인해주세요.");
+        } else {
+          setMessage("상세 정보 불러오기 실패");
         }
+      }
     };
+    fetchFundDetail();
+  }, [id]);
 
-    if (!fundDetail) return <div>{message}</div>;
+  const handleUpdate = () => {
+    // TODO: 수정 페이지로 이동 로직 구현
+    // navigate(`/admin/funds/update/${id}`);
+    alert("수정 기능은 아직 구현되지 않았습니다.");
+  };
 
-    return (
-        <div className="fund-detail-page">
-            <h2>후원 상세 정보 (관리자)</h2>
-            <div className="detail-info">
-                <div><strong>후원금/물품:</strong> {fundDetail.fundMoney ? `${fundDetail.fundMoney.toLocaleString()} 원` : fundDetail.fundItem}</div>
-                <div><strong>신청자:</strong> {fundDetail.fundSponsor}</div>
-                <div><strong>연락처:</strong> {fundDetail.fundPhone}</div>
-                <div><strong>생년월일:</strong> {fundDetail.fundBirth}</div>
-                <div><strong>후원일:</strong> {fundDetail.fundTime}</div>
-                <div><strong>입금 정보:</strong> {fundDetail.fundBank} / {fundDetail.fundAccountNum} ({fundDetail.fundDepositor})</div>
-                <div><strong>인출 예정일:</strong> {fundDetail.fundDrawlDate}</div>
-                <div><strong>확인 여부:</strong> {fundDetail.fundCheck ? '확인됨' : '미확인'}</div>
-                <div><strong>비고:</strong> {fundDetail.fundNote}</div>
-            </div>
-            <div className="button-group">
-                <button onClick={handleUpdate} className="btn-update">수정</button>
-                <button onClick={handleDelete} className="btn-delete">삭제</button>
-                <button onClick={() => navigate(-1)} className="btn-back">목록으로 돌아가기</button>
-            </div>
+  const handleDelete = async () => {
+    if (window.confirm("정말로 이 후원 내역을 삭제하시겠습니까?")) {
+      try {
+        await api.delete(`/funds/${id}`);
+        alert("후원 내역이 성공적으로 삭제되었습니다.");
+        // 삭제 후 목록 페이지로 이동
+        navigate('/admin/funds/list');
+      } catch (err) {
+        console.error("후원 내역 삭제 실패:", err);
+        alert("후원 내역 삭제에 실패했습니다.");
+      }
+    }
+  };
+
+  if (!fundDetail) return <div>{message}</div>;
+
+  return (
+    <div className="fund-detail-page">
+      <h3>후원 상세 정보 (관리자)</h3>
+      <div className="form_wrap">
+        <table className="table type2 responsive border">
+          <colgroup>
+            <col className="w20p" />
+            <col />
+          </colgroup>
+          <tbody>
+            <tr>
+              <th>후원금/물품</th>
+              <td>{fundDetail.fundMoney ? `${fundDetail.fundMoney.toLocaleString()} 원` : fundDetail.fundItem}</td>
+            </tr>
+            <tr>
+              <th>신청자</th>
+              <td>{fundDetail.fundSponsor}</td>
+            </tr>
+            <tr>
+              <th>연락처</th>
+              <td>{fundDetail.fundPhone}</td>
+            </tr>
+            <tr>
+              <th>생년월일</th>
+              <td>{fundDetail.fundBirth}</td>
+            </tr>
+            <tr>
+              <th>후원일</th>
+              <td>{fundDetail.fundTime}</td>
+            </tr>
+            <tr>
+              <th>입금 정보</th>
+              <td>{fundDetail.fundBank} / {fundDetail.fundAccountNum} ({fundDetail.fundDepositor})</td>
+            </tr>
+            <tr>
+              <th>인출 예정일</th>
+              <td>{fundDetail.fundDrawlDate}</td>
+            </tr>
+            <tr>
+              <th>확인 여부</th>
+              <td>{fundDetail.fundCheck ? '확인됨' : '미확인'}</td>
+            </tr>
+            <tr>
+              <th>비고</th>
+              <td>{fundDetail.fundNote}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div className="form_center_box">
+        <div className="temp_btn md">
+          <button type="button" className="btn" onClick={handleUpdate}>
+            수정
+          </button>
         </div>
-    );
+        <div className="temp_btn md">
+          <button type="button" className="btn" onClick={handleDelete}>
+            삭제
+          </button>
+        </div>
+        <div className="temp_btn white md">
+          <button type="button" className="btn" onClick={() => navigate(-1)}>
+            목록보기
+          </button>
+        </div>
+      </div>
+    </div>
+  );
 };
-
-
 
 
 // 명명된 내보내기를 사용하여 각 컴포넌트를 내보냄
-export { FundApplicationDetails, FundApplicationForm, FundMainPage, GoodsApplicationDetails, GoodsApplicationForm, RegularApplicationDetails, RegularApplicationForm, MemberFundList, MemberFundDetail, AdminFundList, AdminFundDetail};
+export { FundApplicationDetails, FundApplicationForm, FundMainPage, GoodsApplicationDetails, GoodsApplicationForm, RegularApplicationDetails, RegularApplicationForm, MemberFundList, MemberFundDetail, AdminFundList, AdminFundDetail };

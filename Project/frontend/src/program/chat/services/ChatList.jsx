@@ -11,7 +11,7 @@ const ChatList = () => {
     const [message, setMessage] = useState("");
 
     const authAxios = api.create({
-        baseURL: 'http://localhost:8090/',
+        baseURL: 'http://192.168.0.115:8090/',
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
     });
 
@@ -38,41 +38,40 @@ const ChatList = () => {
     if (message) return <div>{message}</div>;
 
     return (
-        <div className="chat-list-page">
-            <div className="chat-list-container">
-                <h2 className="chat-list-title">채팅방 관리</h2>
-                <table className="table type2 responsive border">
-                    <thead>
-                        <tr>
-                            <th>채팅방 번호</th>
-                            <th>입양자명</th>
-                            <th>마지막 메시지</th>
-                            <th>마지막 메시지 시간</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {chatRooms.length > 0 ? (
-                            chatRooms.map((room) => (
-                                <tr 
-                                    key={room.chatRoomNum} 
-                                    onClick={() => navigate(`/admin/chat/detail/${room.chatRoomNum}`)}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    <td>{room.chatRoomNum}</td>
-                                    <td>{room.memberName}</td>
-                                    <td>{room.lastMessage}</td>
-                                    <td>{new Date(room.lastMessageTime).toLocaleString()}</td>
-                                </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan="4" className="text-center">채팅방이 없습니다.</td>
+        <div>
+            <h3>채팅방 관리</h3>
+            <table className="table type2 responsive border">
+                <thead>
+                    <tr>
+                        <th>채팅방 번호</th>
+                        <th>입양자명</th>
+                        <th>마지막 메시지</th>
+                        <th>마지막 메시지 시간</th>
+                    </tr>
+                </thead>
+                <tbody className="text_center">
+                    {chatRooms.length > 0 ? (
+                        chatRooms.map((room) => (
+                            <tr
+                                key={room.chatRoomNum}
+                                onClick={() => navigate(`/admin/chat/detail/${room.chatRoomNum}`)}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                <td>{room.chatRoomNum}</td>
+                                <td>{room.memberName}</td>
+                                <td>{room.lastMessage}</td>
+                                <td>{new Date(room.lastMessageTime).toLocaleString()}</td>
                             </tr>
-                        )}
-                    </tbody>
-                </table>
-            </div>
+                        ))
+                    ) : (
+                        <tr>
+                            <td colSpan="4" className="text-center">채팅방이 없습니다.</td>
+                        </tr>
+                    )}
+                </tbody>
+            </table>
         </div>
+
     );
 };
 
