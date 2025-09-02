@@ -330,6 +330,9 @@
     color: black;
 }
 
+.adminbbs-btn{
+  margin-top: 20px;
+}
 
 /* 페이지네이션 마크업 */
 .pagination_box{display:flex;position:relative;margin-top:50px;gap:30px;justify-content:center}

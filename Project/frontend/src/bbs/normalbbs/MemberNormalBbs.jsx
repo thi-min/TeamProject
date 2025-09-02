@@ -63,34 +63,44 @@ function MemberNormalBbs() {
 
   return (
     <div className="bbs-container">
-      <h2>📢 공지사항 게시판</h2>
+      <div className="form_top_box">
+        <div className="form_top_item">
+          <div className="form_icon bbs"></div>
+          <div className="form_title">공지사항</div>
+        </div>
+      </div>
 
       {/* 검색창 */}
-      <div className="search-bar">
-        <div className="temp_form_box lg">
-          <select value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+      <div className="search_bar_box">
+        <div className="temp_form_box md">
+          <select className="temp_select" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
             <option value="all">전체</option>
             <option value="title">제목</option>
             <option value="content">내용</option>
             
           </select>
         </div>
+        <div className="temp_form md w30p">
         <input
           type="text"
+          className="temp_input"
           value={searchKeyword}
           onChange={(e) => setSearchKeyword(e.target.value)}
           placeholder="검색어를 입력하세요"
         />
-        <button onClick={handleSearch}>조회</button>
+        </div>
+        <div className="temp_btn md">
+        <button  className="btn" onClick={handleSearch}>조회</button>
+        </div>
       </div>
 
       {/* 게시글 테이블 */}
-      <table className="bbs-table">
+      <table className="table responsive border">
         <colgroup>
           <col style={{ width: "10%" }} />
-          <col style={{ width: "70%" }} />
+          <col style={{ width: "65%" }} />
           <col style={{ width: "10%" }} />
-          <col style={{ width: "10%" }} />
+          <col style={{ width: "15%" }} />
         </colgroup>
         <thead>
           <tr>
@@ -100,7 +110,7 @@ function MemberNormalBbs() {
             <th>작성일</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody className="text_center">
           {posts.length > 0 ? (
             posts.map((post) => (
               <tr

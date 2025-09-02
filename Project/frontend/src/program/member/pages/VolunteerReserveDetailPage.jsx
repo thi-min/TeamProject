@@ -69,7 +69,7 @@ const VolunteerReserveDetailPage = () => {
 
       <div className="form_center_box">
           <div className="temp_btn white md">
-            <button type="button" className="btn" onClick={() => navigate(-1)}>이전</button>
+            <button type="button" className="btn" onClick={() => navigate("/member/mypage/reserves")}>이전</button>
           </div>
 
           

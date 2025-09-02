@@ -261,7 +261,7 @@ const AdminBannerDetailPage = () => {
       {/* 버튼 영역 */}
       <div className="form_center_box">
         <div className="temp_btn white md">
-          <button type="button" className="btn" onClick={() => navigate(-1)}>
+          <button type="button" className="btn" onClick={() => navigate("/admin/banner")}>
             목록보기
           </button>
         </div>

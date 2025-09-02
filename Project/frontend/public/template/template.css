@@ -4260,3 +4260,6 @@ span.temp_form{display:inline-block;width:auto;}
 .update_box{margin-top:50px;}
 
 .all_day{display:flex;gap:20px;}
+
+.line_td.table.type2 tbody tr td{text-align:left;}
+.img_td > div > span{display:block;margin-bottom:20px;}

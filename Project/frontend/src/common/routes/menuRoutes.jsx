@@ -18,7 +18,6 @@ const menuRoutes = [
     children: [
       { title: "센터 아이들", path: "/about/list", access: "ALL" },
       { title: "입양 절차 안내", path: "/about/process", access: "ALL" },
-      { title: "입양 후기", path: "/about/review", access: "ALL" },
     ],
   },
   {
@@ -47,7 +46,7 @@ const menuRoutes = [
     children: [
       { title: "공지사항", path: "/bbs/normal", access: "ALL" },
       { title: "질문 게시판", path: "/bbs/qna", access: "ALL" },
-      { title: "포토 게시판", path: "/bbs/image", access: "ALL" },
+      { title: "입양 후기 게시판", path: "/bbs/image", access: "ALL" },
     ],
   },
   {
