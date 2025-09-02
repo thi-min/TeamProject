@@ -164,7 +164,7 @@ const AdminBannerDetailPage = () => {
                 <tr>
                   <th>노출 기간</th>
                   <td className="all_day">
-                    <div class="temp_form md w30p">
+                    <div class="temp_form md w20p">
                     <input
                       type="date"
                       class="temp_input"
@@ -175,7 +175,7 @@ const AdminBannerDetailPage = () => {
                     />
                     </div>
                     <span> ~ </span>
-                    <div class="temp_form md w30p">
+                    <div class="temp_form md w20p">
                     <input
                       type="date"
                       class="temp_input"

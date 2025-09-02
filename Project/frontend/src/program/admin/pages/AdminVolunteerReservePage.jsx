@@ -84,27 +84,38 @@ const AdminVolunteerReservePage = () => {
       <h3>봉사 예약 목록</h3>
 
       {/* 검색 영역 */}
-      <div className="search-bar">
+      <div className="reserve-search-bar">
+        <div class="temp_form md w15p">
         <input
           type="date"
+          class="temp_input"
           value={filters.startDate}
           onChange={(e) => setFilters({ ...filters, startDate: e.target.value })}
         />
+        </div>
+        <div class="temp_form md w15p">
         <input
           type="date"
+          class="temp_input"
           value={filters.endDate}
           onChange={(e) => setFilters({ ...filters, endDate: e.target.value })}
         />
+        </div>
+        <div class="temp_form md w10p">
         <input
           type="text"
+          class="temp_input"
           placeholder="회원 이름"
           value={filters.memberName}
           onChange={(e) =>
             setFilters({ ...filters, memberName: e.target.value })
           }
         />
+        </div>
+        <div class="temp_form_box md">
         <select
           value={filters.reserveState}
+          class="temp_select"
           onChange={(e) =>
             setFilters({ ...filters, reserveState: e.target.value })
           }
@@ -115,6 +126,7 @@ const AdminVolunteerReservePage = () => {
           <option value="DONE">승인</option>
           <option value="CANCEL">취소</option>
         </select>
+        </div>
         <button onClick={handleSearch}>검색</button>
         <button onClick={handleReset} className="reset-btn">초기화</button>
       </div>

@@ -18,10 +18,11 @@
 }
 
 /* 🔎 검색 영역 */
-.search-bar {
+.reserve-search-bar {
+  
   display: flex;
   gap: 15px;
-  align-items: center;
+  justify-content: center;
   margin-bottom: 25px;
   padding: 15px;
   border: 1px solid #ddd;
@@ -29,15 +30,8 @@
   background: #fafafa;
 }
 
-.search-bar input,
-.search-bar select {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  font-size: 14px;
-}
 
-.search-bar button {
+.reserve-search-bar button {
   padding: 8px 16px;
   background: #007bff;
   color: white;
@@ -47,7 +41,7 @@
   transition: 0.2s;
 }
 
-.search-bar button:hover {
+.reserve-search-bar button:hover {
   background: #0056b3;
 }
 

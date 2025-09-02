@@ -9,7 +9,7 @@
   font-family: sans-serif;
 }
 
-button {
+/* button {
   margin: 4px;
   padding: 6px 12px;
   border: 1px solid #aaa;
@@ -20,7 +20,7 @@ button {
 button.active {
   background: #007bff;
   color: white;
-}
+} */
 
 /* 목록 */
 .gallery-grid {
@@ -211,17 +211,16 @@ button.active {
   justify-content: space-between;
 }
 
-/* 검색바 */
+검색바
 .search-bar {
-  display: flex;
-  justify-content: center; /* 🔹 가운데 정렬 */
+  /* display: flex;
+  justify-content: center; 
   gap: 8px;
-  margin-bottom: 15px;
+  margin-bottom: 15px; */
 }
-
 .search-bar select,
 .search-bar input,
 .search-bar button {
-  padding: 6px;
-  font-size: 14px;
-}
+  /* padding: 6px;
+  font-size: 14px; */
+} 

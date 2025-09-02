@@ -86,25 +86,31 @@ const BannerCreatePage = () => {
                 배너 제목 <span className="required">*</span>
               </th>
               <td>
+                <div class="temp_form md w30p">
                 <input
                   type="text"
                   name="title"
+                  class="temp_input"
                   value={formData.title}
                   onChange={handleChange}
                   required
                 />
+                </div>
               </td>
             </tr>
 
             <tr>
               <th>배너 부제목</th>
               <td>
+                <div class="temp_form md w30p">
                 <input
                   type="text"
                   name="subTitle"
+                  class="temp_input"
                   value={formData.subTitle}
                   onChange={handleChange}
                 />
+                </div>
               </td>
             </tr>
 
@@ -112,22 +118,26 @@ const BannerCreatePage = () => {
               <th>
                 노출 기간 <span className="required">*</span>
               </th>
-              <td>
+              <td className="all_day">
+                <div class="temp_form md w20p">
                 <input
                   type="date"
                   name="startDate"
-                  className="input-date"
+                  className="temp_input"
                   value={formData.startDate}
                   onChange={handleChange}
                 />
+                </div>
                 <span> ~ </span>
+                <div class="temp_form md w20p">
                 <input
                   type="date"
                   name="endDate"
-                  className="input-date"
+                  className="temp_input"
                   value={formData.endDate}
                   onChange={handleChange}
                 />
+                </div>
               </td>
             </tr>
 
@@ -136,36 +146,45 @@ const BannerCreatePage = () => {
                 이미지 업로드 <span className="required">*</span>
               </th>
               <td>
+                <div class="temp_form md w30p">
                 <input
                   type="file"
                   accept="image/*"
+                  class="temp_input"
                   onChange={handleFileChange}
                   required
                 />
+                </div>
               </td>
             </tr>
 
             <tr>
               <th>이미지 설명(alt)</th>
               <td>
+                <div class="temp_form md w30p">
                 <input
                   type="text"
                   name="altText"
+                  class="temp_input"
                   value={formData.altText}
                   onChange={handleChange}
                 />
+                </div>
               </td>
             </tr>
 
             <tr>
               <th>링크 URL</th>
               <td>
+                <div class="temp_form md w30p">
                 <input
                   type="text"
                   name="linkUrl"
+                  class="temp_input"
                   value={formData.linkUrl}
                   onChange={handleChange}
                 />
+                </div>
               </td>
             </tr>
 
@@ -174,9 +193,10 @@ const BannerCreatePage = () => {
                 노출 여부 <span className="required">*</span>
               </th>
               <td>
+                <div class="temp_form_box md">
                 <select
                   name="visible"
-                  className="isvisible"
+                  class="temp_select"
                   value={formData.visible}
                   onChange={(e) =>
                     setFormData({
@@ -188,6 +208,7 @@ const BannerCreatePage = () => {
                   <option value="true">활성</option>
                   <option value="false">비활성</option>
                 </select>
+                </div>
               </td>
             </tr>
           </tbody>
