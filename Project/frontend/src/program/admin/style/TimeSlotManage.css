@@ -115,8 +115,10 @@
 }
 
 .ts-table td input[type="checkbox"] {
-  display: block;
+  display: inline-block;
   margin: 0 auto;         /* 가로 중앙 */
+  width: 18px;
+  height: 18px;
 }
 
 .ts-table thead th {
@@ -173,11 +175,10 @@
 
 .ts-table {
   width: 100%;
-  table-layout: auto;
+  table-layout: fixed;
 }
 
 .ts-table th {
-  min-width: 80px; /* 각 열 최소 크기만 제한 */
   text-align: center;
 }
 .ts-table td:nth-child(3) .ts-edit-input {
@@ -186,19 +187,19 @@
 
 /* 놀이터 탭 (7열) */
 .ts-table.land th:nth-child(1),
-.ts-table.land td:nth-child(1) { width: 10%; }
+.ts-table.land td:nth-child(1) { width: 8%; }
 .ts-table.land th:nth-child(2),
 .ts-table.land td:nth-child(2) { width: 30%; }
 .ts-table.land th:nth-child(3),
-.ts-table.land td:nth-child(3) { width: 15%; }
+.ts-table.land td:nth-child(3) { width: 10%; }
 .ts-table.land th:nth-child(4),
 .ts-table.land td:nth-child(4) { width: 10%; }
 .ts-table.land th:nth-child(5),
-.ts-table.land td:nth-child(5) { width: 10%; }
+.ts-table.land td:nth-child(5) { width: 10%; min-width: 40px; text-align: center;}
 .ts-table.land th:nth-child(6),
-.ts-table.land td:nth-child(6) { width: 10%; }
+.ts-table.land td:nth-child(6) { width: 10%; min-width: 40px; text-align: center;}
 .ts-table.land th:nth-child(7),
-.ts-table.land td:nth-child(7) { width: 20%; }
+.ts-table.land td:nth-child(7) { width: 22%; }
 
 /* 봉사 탭 (5열) */
 .ts-table.vol th:nth-child(1),

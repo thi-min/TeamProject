@@ -35,7 +35,7 @@ const Header = () => {
           />
           {/* 날짜 */}
           <div className="today_box">
-            <span className="today">2025년 7월 9일</span>
+            <span className="today">2025년 9월 9일</span>
           </div>
           <div className="weather_inner">
             <span className="icon"></span>
@@ -78,8 +78,12 @@ const Header = () => {
             {/* 로그인 했을 때만 노출 */}
             {isLogin && (
               <div className="link_item">
+              {role === "ADMIN" ? (
+                <Link to="/admin">관리자페이지</Link>
+              ) : (
                 <Link to="/member/mypage">마이페이지</Link>
-              </div>
+              )}
+            </div>
             )}
           </div>
         </div>

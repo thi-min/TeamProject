@@ -19,14 +19,12 @@ import BannerCreatePage from "../../program/admin/pages/BannerCreatePage";
 import BannerDetailPage from "../../program/admin/pages/BannerDetailPage";
 
 // ✅ Land 관련 페이지
-import LandInfoPage from "../../program/land/pages/LandInfoPage";
 import LandReserveDatePage from "../../program/reserve/land/pages/LandReserveDatePage";
 import LandReserveFormPage from "../../program/reserve/land/pages/LandReserveFormPage";
 import LandReserveConfirmPage from "../../program/reserve/land/pages/LandReserveConfirmPage";
 import LandReserveSuccessPage from "../../program/reserve/land/pages/LandReserveSuccessPage";
 
 // ✅ Volunteer 관련 페이지
-import VolunteerInfoPage from "../../program/volunteer/pages/VolunteerInfoPage";
 import VolunteerReserveDatePage from "../../program/reserve/volunteer/pages/VolunteerReserveDatePage";
 import VolunteerReserveFormPage from "../../program/reserve/volunteer/pages/VolunteerReserveFormPage";
 import VolunteerReserveConfirmPage from "../../program/reserve/volunteer/pages/VolunteerReserveConfirmPage";
@@ -156,11 +154,6 @@ const layoutRoutes = [
 
   // 🔹 Land 관련 페이지
   <Route
-    key="land-info"
-    path={routes.land.info.path}
-    element={<LandInfoPage />}
-  />,
-  <Route
     key="reserve-land-date"
     path={routes.reserve.land.date.path}
     element={
@@ -198,11 +191,6 @@ const layoutRoutes = [
   />,
 
   // 🔹 Volunteer 관련 페이지
-  <Route
-    key="volunteer-info"
-    path={routes.volunteer.info.path}
-    element={<VolunteerInfoPage />}
-  />,
   <Route
     key="reserve-volunteer-date"
     path={routes.reserve.volunteer.date.path}

@@ -33,7 +33,7 @@ export default function AdminPage() {
           <li className="link_item type6">
             <Link to="/admin/timeslots">예약 시간대 관리</Link>
           </li>
-           <li className="link_item type7">
+          <li className="link_item type7">
             <Link to="/admin/closedday">휴무일 관리</Link>
           </li>
           <li className="link_item type8">
