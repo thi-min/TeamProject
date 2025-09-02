@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { api } from "../../../common/api/axios.js";
 import '../style/Adopt.css';
@@ -20,19 +20,23 @@ const AdoptApplicationForm = () => {
     const [members, setMembers] = useState([]);
     const [animals, setAnimals] = useState([]);
 
-    const getRoleFromToken = () => {
+    // JWT 토큰에서 역할 및 회원 번호 정보 추출
+    const getInfoFromToken = () => {
         const token = localStorage.getItem('accessToken');
         if (!token) return null;
         try {
             const payload = JSON.parse(atob(token.split('.')[1]));
-            return payload.role;
+            return {
+                role: payload.role,
+                memberNum: payload.memberNum
+            };
         } catch (e) {
             console.error("JWT 토큰 파싱 실패:", e);
             return null;
         }
     };
-    const userRole = getRoleFromToken();
-    const isAdmin = userRole === 'ADMIN';
+    const userInfo = getInfoFromToken();
+    const isAdmin = userInfo?.role === 'ADMIN';
 
     const isListView = location.pathname.includes('/adopt/list');
     const isDetailView = location.pathname.includes('/adopt/detail/');
@@ -63,9 +67,10 @@ const AdoptApplicationForm = () => {
     };
 
     const fetchMembers = async () => {
+        // 관리자일 때만 회원 목록을 불러옵니다.
         if (!isAdmin) return;
         try {
-            const response = await authAxios.get('/admin/membersList?page=0&size=100'); 
+            const response = await authAxios.get('/admin/membersList?page=0&size=100');
             setMembers(response.data.content || []);
         } catch (error) {
             console.error("회원 목록 불러오기 실패:", error);
@@ -108,11 +113,14 @@ const AdoptApplicationForm = () => {
     };
 
     useEffect(() => {
-        if (isCreateView) {
+        if (isCreateView || isUpdateView) {
             fetchAnimals();
-            fetchMembers();
+            // 관리자일 때만 회원 목록을 가져옵니다.
+            if (isAdmin) {
+                fetchMembers();
+            }
         }
-    }, [isCreateView]);
+    }, [isCreateView, isUpdateView, isAdmin]);
 
     useEffect(() => {
         if (isListView) fetchAdopts(currentPage);
@@ -126,21 +134,30 @@ const AdoptApplicationForm = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+
         if (isCreateView && !userInput.animalId) {
             alert("입양 신청할 동물을 선택해주세요.");
             return;
         }
-        if (isAdmin && !selectedMemberNum) {
-            alert("입양자를 선택해주세요.");
-            return;
+
+        let memberNumber;
+        if (isAdmin) {
+            if (!selectedMemberNum && isCreateView) {
+                alert("입양자를 선택해주세요.");
+                return;
+            }
+            memberNumber = selectedMemberNum;
+        } else {
+            memberNumber = userInfo?.memberNum;
         }
 
         try {
             const requestData = {
                 ...userInput,
                 animalId: parseInt(userInput.animalId, 10),
-                memberNum: isAdmin ? parseInt(selectedMemberNum, 10) : undefined,
+                memberNum: parseInt(memberNumber, 10),
             };
+
             if (requestData.vistDt === "") requestData.vistDt = null;
             if (requestData.consultDt === "") requestData.consultDt = null;
 
@@ -175,149 +192,224 @@ const AdoptApplicationForm = () => {
     const handlePageChange = (page) => setCurrentPage(page);
 
     // ------------------ JSX ------------------
+    if (message) {
+        return <div className="loading-message">{message}</div>;
+    }
+
     if (isListView) {
         return (
-            <div className="adopt-list-page">
-                 <div className="adopt-list-container">
-                    <h3 className="adopt-list-title">{isAdmin ? "입양 신청서 관리" : "나의 입양 신청서"}</h3>
-                    
-                    
-                    <table className="table type2 responsive border">
-                        <thead>
-                            <tr>
-                                <th>제목</th>
-                                <th>입양자명</th>
-                                <th>입양 동물명</th>
-                                <th>상담 날짜</th>
-                                <th>상태</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {adopts.map((adopt) => (
-                                <tr key={adopt.adoptNum} 
-                                    onClick={() => navigate(isAdmin ? `/admin/adopt/detail/${adopt.adoptNum}` : `/member/adopt/detail/${adopt.adoptNum}`)}
-                                    style={{ cursor: 'pointer' }}
-                                >
-                                    <td>{adopt.adoptTitle}</td>
-                                    <td>{adopt.memberName}</td>
-                                    <td>{adopt.animalName}</td>
-                                    <td>{adopt.consultDt ? new Date(adopt.consultDt).toLocaleDateString() : 'N/A'}</td>
-                                    <td>{adopt.adoptState}</td>
+            <div>
+                <div>
+                    <h3 className="adopt-list-title">{"입양 신청서 관리"}</h3>
+
+                    <div className="form_wrap">
+                        <table className="table type2 responsive border">
+                            <thead>
+                                <tr>
+                                    <th>제목</th>
+                                    <th>입양자명</th>
+                                    <th>입양 동물명</th>
+                                    <th>상담 날짜</th>
+                                    <th>상태</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="text_center">
+                                {adopts.length > 0 ? (
+                                    adopts.map((adopt) => (
+                                        <tr key={adopt.adoptNum}
+                                            onClick={() => navigate(isAdmin ? `/admin/adopt/detail/${adopt.adoptNum}` : `/member/adopt/detail/${adopt.adoptNum}`)}
+                                            style={{ cursor: 'pointer' }}
+                                        >
+                                            <td>{adopt.adoptTitle}</td>
+                                            <td>{adopt.memberName}</td>
+                                            <td>{adopt.animalName}</td>
+                                            <td>{adopt.consultDt ? new Date(adopt.consultDt).toLocaleString() : 'N/A'}</td>
+                                            <td>{adopt.adoptState}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="5">등록된 신청서가 없습니다.</td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+
                     {isAdmin && (
-                        <div className="button-container">
-                            <button onClick={() => navigate('/admin/adopt/regist')} className="btn-create-adopt search-bar button">
-                                입양 신청서 작성
-                            </button>
+                        <div className="form_center_box">
+                            <div className="temp_btn md">
+                                <button onClick={() => navigate('/admin/adopt/regist')} className="btn">
+                                    입양 신청서 작성
+                                </button>
+                            </div>
                         </div>
                     )}
-                    {isAdmin && (
-                        <div className="pagination">
+
+                    {totalPages > 1 && (
+                        <div className="pagination_box">
                             {[...Array(totalPages).keys()].map(page => (
                                 <button
                                     key={page}
                                     onClick={() => handlePageChange(page)}
-                                    className={currentPage === page ? 'active' : ''}
+                                    className={`page ${currentPage === page ? 'active' : ''}`}
                                 >
                                     {page + 1}
                                 </button>
                             ))}
                         </div>
                     )}
-                    
                 </div>
             </div>
         );
     } else if (isCreateView || isUpdateView) {
         return (
-            <div className="adopt-form-page">
-                <h3>{isCreateView ? "입양 신청서 작성" : "입양 신청서 수정"}</h3>
-                <form onSubmit={handleSubmit}>
-                    <input
-                        type="text"
-                        name="adoptTitle"
-                        value={userInput.adoptTitle}
-                        onChange={handleChange}
-                        placeholder="제목"
-                        required
-                    />
-                    <textarea
-                        name="adoptContent"
-                        value={userInput.adoptContent}
-                        onChange={handleChange}
-                        placeholder="상담 내용"
-                        required
-                    />
+            <div>
+                
+                    <h3>{isCreateView ? "입양 신청서 작성" : "입양 신청서 수정"}</h3>
+                
+                <div className="form_wrap">
+                    <form onSubmit={handleSubmit}>
+                        <table className="table type2 responsive border">
+                            <colgroup>
+                                <col className="w30p" />
+                                <col />
+                            </colgroup>
+                            <tbody>
+                                <tr>
+                                    <th>제목</th>
+                                    <td>
+                                        <div className="temp_form md w100p">
+                                        <input
+                                            type="text"
+                                            className="temp_input"
+                                            name="adoptTitle"
+                                            value={userInput.adoptTitle}
+                                            onChange={handleChange}
+                                            placeholder="제목을 입력하세요"
+                                            required
+                                        />
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>내용</th>
+                                    <td>
+                                        <div className="temp_form md w100p">
+                                        <textarea
+                                            className="temp_input"
+                                            name="adoptContent"
+                                            value={userInput.adoptContent}
+                                            onChange={handleChange}
+                                            placeholder="상담 내용을 입력하세요"
+                                            required
+                                        />
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>입양할 동물</th>
+                                    <td>
+                                        
+                                        <Select
+                                            options={animals.map(a => ({ value: a.animalId, label: a.animalName }))}
+                                            value={userInput.animalId ? {
+                                                value: parseInt(userInput.animalId),
+                                                label: animals.find(a => a.animalId === parseInt(userInput.animalId))?.animalName
+                                            } : null}
+                                            onChange={option => setUserInput(prev => ({ ...prev, animalId: option.value }))}
+                                            placeholder="입양할 동물을 선택하세요"
+                                            isSearchable={true}
+                                        />
+                                    </td>
+                                </tr>
 
-                    <label>방문 예정일:</label>
-                    <input
-                        type="date"
-                        name="vistDt"
-                        value={userInput.vistDt}
-                        onChange={handleChange}
-                    />
+                                
+                                {isAdmin && (
+                                    <>
+                                        <tr>
+                                            <th>입양자</th>
+                                            <td>
+                                                <Select
+                                                    options={members.map(m => ({
+                                                        value: m.memberNum,
+                                                        label: `${m.memberName} (${m.memberId})`
+                                                    }))}
+                                                    value={selectedMemberNum ? {
+                                                        value: parseInt(selectedMemberNum),
+                                                        label: `${members.find(m => m.memberNum === parseInt(selectedMemberNum))?.memberName} (${members.find(m => m.memberNum === parseInt(selectedMemberNum))?.memberId})`
+                                                    } : null}
+                                                    onChange={option => setSelectedMemberNum(option.value)}
+                                                    placeholder="회원 검색 및 선택"
+                                                    isSearchable={true}
+                                                    filterOption={(option, input) =>
+                                                        option.label.toLowerCase().includes(input.toLowerCase())
+                                                    }
 
-                    {/* 동물 선택 */}
-                    <label>입양할 동물 선택:</label>
-                    <Select
-                        options={animals.map(a => ({ value: a.animalId, label: a.animalName }))}
-                        value={userInput.animalId ? {
-                            value: parseInt(userInput.animalId),
-                            label: animals.find(a => a.animalId === parseInt(userInput.animalId))?.animalName
-                        } : null}
-                        onChange={option => setUserInput(prev => ({ ...prev, animalId: option.value }))}
-                        placeholder="입양할 동물을 선택하세요"
-                        isSearchable={true}
-                    />
-
-                    {/* 관리자만 입양자 선택 및 상담/상태 */}
-                    {isAdmin && (
-                        <>
-                            <label>입양자 선택:</label>
-                            <Select
-                                options={members.map(m => ({
-                                    value: m.memberNum,
-                                    label: `${m.memberName} (${m.memberId})`
-                                }))}
-                                value={selectedMemberNum ? {
-                                    value: parseInt(selectedMemberNum),
-                                    label: `${members.find(m => m.memberNum === parseInt(selectedMemberNum))?.memberName} (${members.find(m => m.memberNum === parseInt(selectedMemberNum))?.memberId})`
-                                } : null}
-                                onChange={option => setSelectedMemberNum(option.value)}
-                                placeholder="회원 검색 및 선택"
-                                isSearchable={true}
-                                filterOption={(option, input) => 
-                                    option.label.toLowerCase().includes(input.toLowerCase())
-                                }
-                            />
-
-                            <label>상담 날짜/시간:</label>
-                            <input
-                                type="datetime-local"
-                                name="consultDt"
-                                value={userInput.consultDt}
-                                onChange={handleChange}
-                            />
-
-                            <label>입양 상태:</label>
-                            <select
-                                name="adoptState"
-                                value={userInput.adoptState}
-                                onChange={handleChange}
-                            >
-                                <option value="ING">진행 중</option>
-                                <option value="DONE">완료</option>
-                                <option value="REJ">거절</option>
-                            </select>
-                        </>
-                    )}
-
-                    <button type="submit">{isCreateView ? "제출" : "수정"}</button>
-                    <button type="button" onClick={() => navigate(-1)}>이전</button>
-                </form>
+                                                />
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>상담 날짜/시간</th>
+                                            <td>
+                                                <div className="temp_form md w40p">
+                                                <input
+                                                    type="datetime-local"
+                                                     className="temp_input"
+                                                    name="consultDt"
+                                                    value={userInput.consultDt}
+                                                    onChange={handleChange}
+                                                />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>상태</th>
+                                            <td>
+                                                <div className="temp_form md w20p">
+                                                <select
+                                                    className="temp_input"
+                                                    name="adoptState"
+                                                    value={userInput.adoptState}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="ING">진행 중</option>
+                                                    <option value="DONE">완료</option>
+                                                    <option value="REJ">거절</option>
+                                                </select>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>방문 예정일</th>
+                                            <td>
+                                                <div className="temp_form md w30p">
+                                                <input
+                                                    type="date"
+                                                   className="temp_input"
+                                                    name="vistDt"
+                                                    value={userInput.vistDt}
+                                                    onChange={handleChange}
+                                                /></div>
+                                            </td>
+                                        </tr>
+                                    </>
+                                )}
+                            </tbody>
+                        </table>
+                        <div className="form_center_box">
+                            <div className="temp_btn white md">
+                                <button type="button" className="btn" onClick={() => navigate(-1)}>
+                                    이전
+                                </button>
+                            </div>
+                            <div className="temp_btn md">
+                                <button type="submit" className="btn">{isCreateView ? "제출" : "수정"}</button>
+                            </div>
+                            
+                        </div>
+                    </form>
+                </div>
             </div>
         );
     } else if (isDetailView) {
@@ -325,24 +417,72 @@ const AdoptApplicationForm = () => {
         return (
             <div className="adopt-detail-page">
                 <h3>입양 신청서 상세 조회</h3>
-                <div><strong>입양자명:</strong> {adoptDetail.memberName}</div>
-                <div><strong>입양 동물명:</strong> {adoptDetail.animalName}</div>
-                <div><strong>상담 날짜:</strong> {adoptDetail.consultDt ? new Date(adoptDetail.consultDt).toLocaleDateString() : 'N/A'}</div>
-                <div><strong>내용:</strong> {adoptDetail.adoptContent}</div>
-                <div><strong>상태:</strong> {adoptDetail.adoptState}</div>
-                {isAdmin && (
-                    <div className="button-group">
-                        <button onClick={() => navigate(`/admin/adopt/update/${adoptDetail.adoptNum}`)}>수정</button>
-                        <button onClick={handleDelete}>삭제</button>
+                <div className="form_wrap">
+                    <table className="table type2 responsive border">
+                        <colgroup>
+                            <col className="w20p" />
+                            <col />
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <th>제목</th>
+                                <td>{adoptDetail.adoptTitle}</td>
+                            </tr>
+                            <tr>
+                                <th>입양자명</th>
+                                <td>{adoptDetail.memberName}</td>
+                            </tr>
+                            <tr>
+                                <th>입양 동물명</th>
+                                <td>{adoptDetail.animalName}</td>
+                            </tr>
+                            <tr>
+                                <th>내용</th>
+                                <td>{adoptDetail.adoptContent}</td>
+                            </tr>
+                            <tr>
+                                <th>상태</th>
+                                <td>{adoptDetail.adoptState}</td>
+                            </tr>
+                            <tr>
+                                <th>상담 날짜</th>
+                                <td>{adoptDetail.consultDt ? new Date(adoptDetail.consultDt).toLocaleString() : 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <th>방문 예정일</th>
+                                <td>{adoptDetail.vistDt ? new Date(adoptDetail.vistDt).toLocaleDateString() : 'N/A'}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div className="form_center_box">
+                    <div className="temp_btn white md">
+                        <button type="button" className="btn" onClick={() => navigate(-1)}>
+                            목록보기
+                        </button>
                     </div>
-                )}
-                <button onClick={() => navigate(-1)}>이전</button>
+                    {isAdmin && (
+                        <>
+                            
+                            <div className="temp_btn md">
+                                <button type="button" className="btn" onClick={handleDelete}>
+                                    삭제
+                                </button>
+                            </div>
+                            <div className="temp_btn md">
+                                <button type="button" className="btn" onClick={() => navigate(`/admin/adopt/update/${adoptDetail.adoptNum}`)}>
+                                    수정
+                                </button>
+                            </div>
+                        </>
+                    )}
+                    
+                </div>
             </div>
         );
     }
 
     return null;
-
 };
 
 export default AdoptApplicationForm;

@@ -15,7 +15,7 @@ const decodeJwt = (token) => {
     }
 };
 
-// 낙관적 업데이트 로직이 제거된 ChatInput 컴포넌트
+// 수정된 ChatInput 컴포넌트 (클래스명 적용)
 const ChatInput = ({ chatRoomNum }) => {
     const [message, setMessage] = useState("");
     const [isSending, setIsSending] = useState(false);
@@ -53,15 +53,17 @@ const ChatInput = ({ chatRoomNum }) => {
         <form className="chat-input-form" onSubmit={handleSendMessage}>
             <input
                 type="text"
-                className="chat-input-field"
+                className="ui-input" // 클래스명 통일
                 placeholder="메시지를 입력하세요..."
                 value={message}
                 onChange={handleMessageChange}
                 disabled={isSending}
             />
-            <button type="submit" className="chat-send-btn" disabled={isSending || !message.trim()}>
-                {isSending ? "전송 중..." : "전송"}
-            </button>
+            <div className="temp_btn md">
+                <button type="submit" className="btn" disabled={isSending || !message.trim()}>
+                    {isSending ? "전송 중..." : "전송"}
+                </button>
+            </div>
         </form>
     );
 };
@@ -77,7 +79,7 @@ const ChatDetail = () => {
     const [userRole, setUserRole] = useState(null);
 
     const authAxios = api.create({
-        baseURL: 'http://localhost:8090/',
+        baseURL: 'http://192.168.0.115:8090/',
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
     });
 
@@ -163,9 +165,9 @@ const ChatDetail = () => {
     if (error) return <div>{error}</div>;
 
     return (
-        <div className="chat-detail-container">
-            <h1>채팅방 {chatRoomNum} 대화 내역</h1>
-            <div className="message-list" ref={chatMessagesRef}>
+        <div>
+            <h3>채팅방 {chatRoomNum} 대화 내역</h3>
+            <div className="box" style={{ height: "400px", overflowY: "auto" }}> {/* 메시지 목록 영역 */}
                 {messages.length > 0 ? (
                     messages.map((msg, index) => (
                         <div key={index} className={`message-item ${msg.senderRole === userRole ? "my-message" : "other-message"}`}>
@@ -179,10 +181,16 @@ const ChatDetail = () => {
                     <div>대화 기록이 없습니다.</div>
                 )}
             </div>
-            <div className="chat-input-container">
+            <div className="temp_input"> {/* 입력 필드 및 버튼 영역 */}
                 <ChatInput chatRoomNum={chatRoomNum} />
             </div>
-            <button onClick={() => navigate(-1)}>이전으로</button>
+            
+                <div className="temp_btn white md">
+                    <button type="button" className="btn" onClick={() => navigate(-1)}>
+                        목록보기
+                    </button>
+                </div>
+            
         </div>
     );
 };

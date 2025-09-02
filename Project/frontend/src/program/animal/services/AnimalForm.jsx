@@ -1,6 +1,6 @@
-import { api } from "../../../common/api/axios.js";
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { api } from "../../../common/api/axios.js";
 import '../style/Animal.css';
 
 const AnimalForm = () => {
@@ -50,9 +50,8 @@ const AnimalForm = () => {
     // 데이터 로딩 함수
     const fetchAnimals = async () => {
         try {
-            // ✅ Correct URL
             const response = await api.get('/animals/list');
-            setAnimals(response.data.content); // Use .content because the backend returns a Page object
+            setAnimals(response.data.content);
         } catch (error) {
             console.error("목록 조회 실패:", error);
             setMessage("목록을 불러올 수 없습니다.");
@@ -62,7 +61,6 @@ const AnimalForm = () => {
     const fetchAnimalDetail = async () => {
         if (!id) return;
         try {
-            // ✅ Correct URL
             const response = await api.get(`/animals/detail/${id}`);
             const data = response.data;
             setAnimalDetail(data);
@@ -94,7 +92,6 @@ const AnimalForm = () => {
         }
 
         try {
-            // ✅ Correct URL
             const response = await api.post(
                 '/chat/start-adoption-chat',
                 null,
@@ -133,13 +130,11 @@ const AnimalForm = () => {
         }
         try {
             if (isCreateView) {
-                // ✅ Correct URL
                 await api.post('/animals/regist', userInput, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
                 });
                 alert("동물 정보가 성공적으로 등록되었습니다.");
             } else if (isUpdateView) {
-                // ✅ Correct URL
                 await api.put(`/animals/detail/${id}`, userInput, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
                 });
@@ -160,7 +155,6 @@ const AnimalForm = () => {
         }
         if (window.confirm("정말 삭제하시겠습니까?")) {
             try {
-                // ✅ Correct URL
                 await api.delete(`/animals/detail/${id}`, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
                 });
@@ -182,21 +176,22 @@ const AnimalForm = () => {
         }
     }, [location.pathname, id]);
 
-    // ------------------ JSX 렌더링 부분 ------------------
-    if (isListView) {
-        return (
-            <div className="animal-list-page">
-                <div className="animal-list-container">
-                    <h2 className="animal-list-title">{isAdmin ? "동물 정보 관리" : "입양 가능한 동물"}</h2>
-                    {isAdmin && (
-                        <div className="button-container">
-                            <button onClick={() => navigate('/admin/animal/regist')} className="btn-create-animal">
-                                동물 정보 등록
-                            </button>
-                        </div>
-                    )}
+    if (message) {
+        return <div className="loading-message">{message}</div>;
+    }
 
-                    <table className="animal-table">
+    // ------------------ JSX 렌더링 부분 (레이아웃 변경) ------------------
+    return (
+        <div>
+            <div>
+
+                <h3>{isAdmin ? "동물 정보 관리" : "입양 가능한 동물"}</h3>
+            </div>
+
+            {isListView && (
+                <div className="form_wrap">
+
+                    <table className="table type2 responsive border">
                         <thead>
                             <tr>
                                 <th>이름</th>
@@ -205,7 +200,7 @@ const AnimalForm = () => {
                                 <th>상태</th>
                             </tr>
                         </thead>
-                        <tbody>
+                        <tbody className="text_center">
                             {animals.length > 0 ? (
                                 animals.map((animal) => (
                                     <tr key={animal.animalId}
@@ -225,65 +220,173 @@ const AnimalForm = () => {
                             )}
                         </tbody>
                     </table>
-                </div>
-            </div>
-        );
-    } else if (isCreateView || isUpdateView) {
-        if (!isAdmin) {
-            return <div>권한이 없습니다.</div>;
-        }
-        return (
-            <div className="animal-form-page">
-                <h2>{isCreateView ? "동물 정보 등록" : "동물 정보 수정"}</h2>
-                <form onSubmit={handleSubmit}>
-                    <input type="text" name="animalName" value={userInput.animalName} onChange={handleChange} placeholder="이름" required />
-                    <input type="text" name="animalBreed" value={userInput.animalBreed} onChange={handleChange} placeholder="견종" required />
-                    <select name="animalSex" value={userInput.animalSex} onChange={handleChange} required>
-                        <option value="">성별 선택</option>
-                        <option value="MALE">수컷</option>
-                        <option value="FEMALE">암컷</option>
-                    </select>
-                    <input type="date" name="animalDate" value={userInput.animalDate} onChange={handleChange} placeholder="입소일" required />
-                    <textarea name="animalContent" value={userInput.animalContent} onChange={handleChange} placeholder="특이사항" required />
-                    <select name="animalState" value={userInput.animalState} onChange={handleChange} required>
-                    <option value="">상태 선택</option>
-                    <option value="WAIT">보호 중</option>
-                    <option value="DONE">입양 완료</option>
-                </select>
-                    <button type="submit">{isCreateView ? "등록" : "수정"}</button>
-                    <button type="button" onClick={() => navigate(-1)}>이전</button>
-                </form>
-            </div>
-        );
-    } else if (isDetailView) {
-        if (!animalDetail) return <div>{message || "로딩 중..."}</div>;
-        return (
-            <div className="animal-detail-page">
-                <h2>동물 상세 정보</h2>
-                <div><strong>이름:</strong> {animalDetail.animalName}</div>
-                <div><strong>견종:</strong> {animalDetail.animalBreed}</div>
-                <div><strong>성별:</strong> {animalDetail.animalSex}</div>
-                <div><strong>입소일:</strong> {animalDetail.animalDate}</div>
-                <div><strong>특이사항:</strong> {animalDetail.animalContent}</div>
-                <div><strong>상태:</strong> {animalDetail.animalState}</div>
-                <div className="button-group">
-                    {/* 일반 사용자에게만 보임 */}
-                    {!isAdmin && (
-                        <button onClick={handleStartChat} className="btn-chat-consult">동물 입양 상담</button>
+                    {isAdmin && (
+                        <div className="form_center_box">
+                            <div className="temp_btn md">
+                                <button onClick={() => navigate('/admin/animal/regist')} className="btn">
+                                    동물 정보 등록
+                                </button>
+                            </div>
+                        </div>
                     )}
                 </div>
-                {isAdmin && (
-                    <div className="button-group">
-                        <button onClick={() => navigate(`/admin/animal/update/${animalDetail.animalId}`)}>수정</button>
-                        <button onClick={handleDelete}>삭제</button>
-                    </div>
-                )}
-                <button onClick={() => navigate(-1)}>이전</button>
-            </div>
-        );
-    }
+            )}
 
-    return null; // 경로에 해당하지 않을 경우
+            {(isCreateView || isUpdateView) && (
+
+                <div>
+                    <h3>{isCreateView ? "동물 정보 등록" : "동물 정보 수정"}</h3>
+
+                    <form onSubmit={handleSubmit}>
+                        <div className="form_wrap">
+                            <table className="table type2 responsive border">
+                                <colgroup>
+                                    <col className="w20p" />
+                                    <col />
+                                </colgroup>
+                                <tbody>
+                                    <tr>
+                                        <th scope="row">이름</th>
+                                        <td>
+                                            <div className="temp_form md w40p">
+                                                <input type="text" className="temp_input" name="animalName" value={userInput.animalName} onChange={handleChange} required />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">견종</th>
+                                        <td>
+                                            <div className="temp_form md w40p">
+                                                <input type="text" className="temp_input" name="animalBreed" value={userInput.animalBreed} onChange={handleChange} required />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th scope="row">성별</th>
+                                        <td>
+                                            <div className="temp_form_box">
+                                                <select className="temp_select" name="animalSex" value={userInput.animalSex} onChange={handleChange} required>
+                                                    <option value="">성별 선택</option>
+                                                    <option value="MALE">수컷</option>
+                                                    <option value="FEMALE">암컷</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+
+                                        <th scope="row">입소일</th>
+                                        <td>
+                                            <div className="temp_form md w40p">
+                                                <input type="date" className="temp_input" name="animalDate" value={userInput.animalDate} onChange={handleChange} required />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+
+                                        <th scope="row">특이사항</th>
+                                        <td>
+                                            <div className="temp_form md w40p">
+                                                <textarea className="temp_input" name="animalContent" value={userInput.animalContent} onChange={handleChange} required />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+
+                                        <th scope="row">상태</th>
+                                        <td>
+                                            <div className="temp_form_box">
+                                                <select className="temp_select" name="animalState" value={userInput.animalState} onChange={handleChange} required>
+                                                    <option value="">상태 선택</option>
+                                                    <option value="WAIT">보호 중</option>
+                                                    <option value="DONE">입양 완료</option>
+                                                </select>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="form_center_box">
+                            <div className="temp_btn white md">
+                                <button type="button" className="btn" onClick={() => navigate(-1)}>
+                                    이전
+                                </button>
+                            </div>
+                            <div className="temp_btn md">
+                                <button type="submit" className="btn">{isCreateView ? "등록" : "수정"}</button>
+                            </div>
+
+                        </div>
+                    </form>
+                </div>
+            )}
+
+            {isDetailView && animalDetail && (
+                <div className="form_wrap">
+
+                    <h3>동물 상세 정보</h3>
+
+                    <table className="table type2 responsive border">
+                        <colgroup>
+                            <col className="w20p" />
+                            <col />
+                        </colgroup>
+                        <tbody>
+                            <tr>
+                                <th scope="row">이름</th>
+                                <div className="form_desc">{animalDetail.animalName}</div>
+                            </tr>
+                            <tr>
+                                <th scope="row">견종</th>
+                                <div className="form_desc">{animalDetail.animalBreed}</div>
+                            </tr>
+                            <tr>
+                                <th scope="row">성별</th>
+                                <div className="form_desc">{animalDetail.animalSex}</div>
+                            </tr>
+                            <tr>
+                                <th scope="row">입소일</th>
+                                <div className="form_desc">{animalDetail.animalDate}</div>
+                            </tr>
+                            <tr>
+                                <th scope="row">특이사항</th>
+                                <div className="form_desc">{animalDetail.animalContent}</div>
+                            </tr>
+                            <tr>
+                                <th scope="row">상태</th>
+                                <div className="form_desc">{animalDetail.animalState}</div>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div className="form_center_box">
+                        {/* 일반 사용자에게만 보임 */}
+                        {!isAdmin && (
+                            <div className="temp_btn md">
+                                <button onClick={handleStartChat} className="btn">동물 입양 상담</button>
+                            </div>
+                        )}
+                        <div className="temp_btn white md">
+                            <button onClick={() => navigate(-1)} className="btn">이전</button>
+                        </div>
+                        {isAdmin && (
+                            <>
+                                <div className="temp_btn md">
+                                    <button onClick={() => navigate(`/admin/animal/update/${animalDetail.animalId}`)} className="btn">수정</button>
+                                </div>
+                                <div className="temp_btn md">
+                                    <button onClick={handleDelete} className="btn">삭제</button>
+                                </div>
+                            </>
+                        )}
+
+                    </div>
+                </div>
+            )}
+
+        </div>
+
+    );
 };
 
 export default AnimalForm;
