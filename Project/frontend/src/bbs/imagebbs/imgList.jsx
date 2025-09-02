@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../common/api/axios";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faChevronLeft,
@@ -91,7 +91,7 @@ export default function ImgBoard() {
   };
 
   return (
-    <div className="img-board-container">
+    <div className="img_bbs_wrap">
       <div className="form_top_box">
         <div className="form_top_item">
           <div className="form_icon bbs"></div>
@@ -100,51 +100,57 @@ export default function ImgBoard() {
       </div>
       <div className="search_bar_box">
         <div className="temp_form_box md">
-        <select className="temp_select" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
-          <option value="all">전체</option>
-          <option value="title">제목</option>
-          <option value="content">내용</option>
-        </select>
+          <select
+            className="temp_select"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
+            <option value="all">전체</option>
+            <option value="title">제목</option>
+            <option value="content">내용</option>
+          </select>
         </div>
         <div className="temp_form md w30p">
-        <input
-          type="text"
-          className="temp_input"
-          value={searchKeyword}
-          onChange={(e) => setSearchKeyword(e.target.value)}
-          placeholder="검색어를 입력하세요"
-        />
+          <input
+            type="text"
+            className="temp_input"
+            value={searchKeyword}
+            onChange={(e) => setSearchKeyword(e.target.value)}
+            placeholder="검색어를 입력하세요"
+          />
         </div>
         <div className="temp_btn md">
-        <button className="btn" onClick={handleSearch}>조회</button>
+          <button className="btn" onClick={handleSearch}>
+            조회
+          </button>
         </div>
       </div>
 
       {posts.length > 0 ? (
-        <div className="img-board-grid">
+        <div className="img_bbs_list">
           {posts.map((post) => {
             const repImage = repImages[post.bulletinNum.toString()];
             return (
-              <div
-                className="img-board-item"
+              <Link
+                className="img_bbs_item"
                 key={post.bulletinNum}
-                onClick={() => navigate(`/bbs/image/${post.bulletinNum}`)}
+                to={`/bbs/image/${post.bulletinNum}`}
               >
-                <div className="img-thumb">
+                <div className="ima_box">
                   {repImage && repImage.imagePath ? (
-                    <img src={repImage.imagePath} alt={post.bbstitle} />
+                    <img src={repImage.imagePath} alt={post.title} />
                   ) : (
                     <div className="no-image">🖼️</div>
                   )}
                 </div>
-                <div className="img-info">
-                  <div className="title">{post.bbstitle}</div>
-                  <div className="meta">
-                    <span>{post.regdate?.substring(0, 10)}</span>
-                    <span>조회 {post.readcount}</span>
+                <div className="img_info">
+                  <div className="title">{post.bbsTitle}</div>
+                  <div className="text">
+                    {post.bbsContent}
+                    {/* <span className="count_text">조회 {post.readcount}</span> */}
                   </div>
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>
@@ -153,7 +159,10 @@ export default function ImgBoard() {
       )}
 
       <div className="pagination">
-        <button disabled={currentPage === 0} onClick={() => handlePageChange(currentPage - 1)}>
+        <button
+          disabled={currentPage === 0}
+          onClick={() => handlePageChange(currentPage - 1)}
+        >
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
         {Array.from({ length: Math.max(totalPages, 1) }, (_, idx) => (

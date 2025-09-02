@@ -1,7 +1,11 @@
 package com.project.board.service;
 
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -13,6 +17,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import javax.imageio.ImageIO;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -194,96 +200,99 @@ public class BbsServiceImpl implements BbsService {
                 .orElseThrow(() -> new BbsException("해당 파일이 존재하지 않습니다. ID: " + fileId));
     }
 
-	// ---------------- POTO 게시판 처리 ----------------
-	@Override
-	@Transactional
-	public BbsDto createPotoBbs(BbsDto dto, Long requesterMemberNum,
-	                            List<MultipartFile> files, List<String> isRepresentativeList) {
-	
-	    if (files == null || files.isEmpty()) {
-	        throw new BbsException("이미지 게시판은 최소 1장 이상의 사진을 등록해야 합니다.");
-	    }
-	
-	    MemberEntity member = memberRepository.findById(requesterMemberNum)
-	            .orElseThrow(() -> new BbsException("회원 정보가 존재하지 않습니다."));
-	
-	    // 게시글 저장
-	    BbsEntity savedEntity = BbsEntity.builder()
-	            .bbstitle(dto.getBbsTitle())
-	            .bbscontent(dto.getBbsContent())
-	            .bulletinType(dto.getBulletinType())
-	            .memberNum(member)
-	            .registdate(LocalDateTime.now())
-	            .viewers(0)
-	            .build();
-	    savedEntity = bbsRepository.save(savedEntity);
-	
-	    if (isRepresentativeList == null || isRepresentativeList.size() != files.size()) {
-	        throw new BbsException("대표 이미지 정보가 올바르지 않습니다.");
-	    }
-	
-	    ImageBbsEntity representativeImage = null;
-	    List<String> allowedExtensions = List.of("jpg", "jpeg");
-	    List<String> allowedMimeTypes = List.of("image/jpeg");
-	    long maxSize = 5 * 1024 * 1024;
-	
-	    for (int i = 0; i < files.size(); i++) {
-	        MultipartFile file = files.get(i);
-	        if (file == null || file.isEmpty()) continue;
-	
-	        String ext = getExtension(file.getOriginalFilename());
-	        String contentType = file.getContentType();
-	
-	        if (ext == null || !allowedExtensions.contains(ext.toLowerCase())
-	                || contentType == null || !allowedMimeTypes.contains(contentType.toLowerCase())
-	                || file.getSize() > maxSize) {
-	            throw new BbsException("첨부파일은 jpg 또는 jpeg 이미지만 가능합니다. (" + file.getOriginalFilename() + ")");
-	        }
-	
-	        String savedName = UUID.randomUUID() + "." + ext;
-	
-	        // 원본 이미지 저장
-	        Path imgDir = resolveAndEnsureDir(getUploadDir(BoardType.POTO));
-	        Path imgTarget = imgDir.resolve(savedName);
-	        try {
-	            file.transferTo(imgTarget.toFile());
-	        } catch (IOException e) {
-	            throw new BbsException("이미지 저장 실패: " + file.getOriginalFilename(), e);
-	        }
-	
-	        // 파일 메타(첨부) 저장 — DB엔 /DATA/... 만
-	        FileUpLoadEntity fileEntity = FileUpLoadEntity.builder()
-	                .bbs(savedEntity)
-	                .originalName(file.getOriginalFilename())
-	                .savedName(savedName)
-	                .path(getWebPath(BoardType.POTO, savedName)) // ✅ /DATA/bbs/imgBbs/...
-	                .size(file.getSize())
-	                .extension(ext)
-	                .build();
-	        fileUploadRepository.save(fileEntity);
-	
-	        // ✅ 대표 이미지일 경우: 썸네일 생성 + ImageBbsEntity 저장
-	        if ("Y".equalsIgnoreCase(isRepresentativeList.get(i)) && representativeImage == null) {
-	            Path thumbDir = resolveAndEnsureDir(thumbnailUploadDir);
-	            Path thumbTarget = thumbDir.resolve(savedName);
-	            createJpegThumbnail(imgTarget, thumbTarget, 480); // 썸네일 생성 (가로 480px 기준)
-	
-	            ImageBbsEntity repImg = ImageBbsEntity.builder()
-	                    .bbs(savedEntity)
-	                    .thumbnailPath(getThumbnailWebPath(savedName)) // ✅ /DATA/bbs/thumbnail/...
-	                    .imagePath(getWebPath(BoardType.POTO, savedName)) // ✅ /DATA/bbs/imgBbs/...
-	                    .build();
-	            representativeImage = imageBbsRepository.save(repImg);
-	        }
-	    }
-	
-	    if (representativeImage == null) {
-	        throw new BbsException("대표 이미지를 반드시 선택해야 합니다.");
-	    }
-	
-	    dto.setBulletinNum(savedEntity.getBulletinNum());
-	    return dto;
-	}
+    // ---------------- POTO 게시판 처리 ----------------
+    @Override
+    @Transactional
+    public BbsDto createPotoBbs(BbsDto dto, Long requesterMemberNum,
+                                List<MultipartFile> files, List<String> isRepresentativeList) {
+
+        if (files == null || files.isEmpty()) {
+            throw new BbsException("이미지 게시판은 최소 1장 이상의 사진을 등록해야 합니다.");
+        }
+
+        MemberEntity member = memberRepository.findById(requesterMemberNum)
+                .orElseThrow(() -> new BbsException("회원 정보가 존재하지 않습니다."));
+
+        // 게시글 저장
+        BbsEntity savedEntity = BbsEntity.builder()
+                .bbstitle(dto.getBbsTitle())
+                .bbscontent(dto.getBbsContent())
+                .bulletinType(dto.getBulletinType())
+                .memberNum(member)
+                .registdate(LocalDateTime.now())
+                .viewers(0)
+                .build();
+        savedEntity = bbsRepository.save(savedEntity);
+
+        if (isRepresentativeList == null || isRepresentativeList.size() != files.size()) {
+            throw new BbsException("대표 이미지 정보가 올바르지 않습니다.");
+        }
+
+        ImageBbsEntity representativeImage = null;
+        List<String> allowedExtensions = List.of("jpg", "jpeg");
+        List<String> allowedMimeTypes = List.of("image/jpeg");
+        long maxSize = 5 * 1024 * 1024;
+
+        for (int i = 0; i < files.size(); i++) {
+            MultipartFile file = files.get(i);
+            if (file == null || file.isEmpty()) continue;
+
+            String ext = getExtension(file.getOriginalFilename());
+            String contentType = file.getContentType();
+
+            if (ext == null || !allowedExtensions.contains(ext.toLowerCase())
+                    || contentType == null || !allowedMimeTypes.contains(contentType.toLowerCase())
+                    || file.getSize() > maxSize) {
+                throw new BbsException("첨부파일은 jpg 또는 jpeg 이미지만 가능합니다. (" + file.getOriginalFilename() + ")");
+            }
+
+            String savedName = UUID.randomUUID() + "." + ext;
+
+            // 원본 이미지 저장
+            Path imgDir = resolveAndEnsureDir(getUploadDir(BoardType.POTO));
+            Path imgTarget = imgDir.resolve(savedName);
+            try {
+                file.transferTo(imgTarget.toFile());
+            } catch (IOException e) {
+                throw new BbsException("이미지 저장 실패: " + file.getOriginalFilename(), e);
+            }
+
+            // 파일 메타(첨부) 저장 — DB엔 /DATA/... 만
+            FileUpLoadEntity fileEntity = FileUpLoadEntity.builder()
+                    .bbs(savedEntity)
+                    .originalName(file.getOriginalFilename())
+                    .savedName(savedName)
+                    .path(getWebPath(BoardType.POTO, savedName)) // ✅ /DATA/bbs/imgBbs/...
+                    .size(file.getSize())
+                    .extension(ext)
+                    .build();
+            fileUploadRepository.save(fileEntity);
+
+            // ✅ 대표 이미지일 경우: 썸네일 생성 + ImageBbsEntity 저장
+            if ("Y".equalsIgnoreCase(isRepresentativeList.get(i)) && representativeImage == null) {
+                Path thumbDir = resolveAndEnsureDir(thumbnailUploadDir);
+                Path thumbTarget = thumbDir.resolve(savedName);
+
+                // 300x300 리사이즈 썸네일 생성
+                createJpegThumbnail(imgTarget, thumbTarget, 300, 300);
+
+                ImageBbsEntity repImg = ImageBbsEntity.builder()
+                        .bbs(savedEntity)
+                        .thumbnailPath(getThumbnailWebPath(savedName)) // ✅ /DATA/bbs/thumbnail/...
+                        .imagePath(getWebPath(BoardType.POTO, savedName)) // ✅ /DATA/bbs/imgBbs/...
+                        .build();
+                representativeImage = imageBbsRepository.save(repImg);
+            }
+        }
+
+        if (representativeImage == null) {
+            throw new BbsException("대표 이미지를 반드시 선택해야 합니다.");
+        }
+
+        dto.setBulletinNum(savedEntity.getBulletinNum());
+        return dto;
+    }
+
 
 
     // ---------------- 일반 게시판 파일 처리 ----------------
@@ -1066,37 +1075,39 @@ public class BbsServiceImpl implements BbsService {
         return base;
     }
     
-    // ★ JPEG 썸네일 생성 (가로 기준 maxWidth, 실패 시 원본 복사)
-    private void createJpegThumbnail(Path src, Path dest, int maxWidth) {
+    /**
+     * JPEG 썸네일 생성 (지정 크기로 리사이즈)
+     * @param source 원본 이미지 경로
+     * @param target 썸네일 저장 경로
+     * @param width  썸네일 가로 크기
+     * @param height 썸네일 세로 크기
+     */
+    private void createJpegThumbnail(Path source, Path target, int width, int height) {
         try {
-            java.awt.image.BufferedImage in = javax.imageio.ImageIO.read(src.toFile());
-            if (in == null) {
-                // 이미지가 아니면 그냥 복사
-                Files.copy(src, dest);
-                return;
+            BufferedImage originalImage = ImageIO.read(source.toFile());
+            if (originalImage == null) {
+                throw new IOException("이미지를 읽을 수 없습니다: " + source);
             }
-            int w = in.getWidth();
-            int h = in.getHeight();
-            if (w <= maxWidth) {
-                // 이미 충분히 작으면 그대로 복사
-                Files.copy(src, dest);
-                return;
+
+            // 리사이즈
+            BufferedImage resizedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+            Graphics2D g2d = resizedImage.createGraphics();
+            g2d.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g2d.drawImage(originalImage, 0, 0, width, height, null);
+            g2d.dispose();
+
+            // 디렉토리 생성 보장
+            Files.createDirectories(target.getParent());
+
+            // JPEG로 저장
+            try (OutputStream os = Files.newOutputStream(target)) {
+                ImageIO.write(resizedImage, "jpg", os);
             }
-            int newW = maxWidth;
-            int newH = (int) Math.round((double) h * newW / w);
 
-            java.awt.image.BufferedImage out = new java.awt.image.BufferedImage(newW, newH, java.awt.image.BufferedImage.TYPE_INT_RGB);
-            java.awt.Graphics2D g2 = out.createGraphics();
-            g2.setRenderingHint(java.awt.RenderingHints.KEY_INTERPOLATION, java.awt.RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g2.drawImage(in, 0, 0, newW, newH, null);
-            g2.dispose();
-
-            javax.imageio.ImageIO.write(out, "jpg", dest.toFile());
-        } catch (Exception ex) {
-            try {
-                // 썸네일 변환 실패 시라도 경로에 파일은 존재하도록 복사
-                Files.copy(src, dest);
-            } catch (IOException ignored) {}
+        } catch (IOException e) {
+            throw new BbsException("썸네일 생성 실패: " + source, e);
         }
     }
+
+
 }

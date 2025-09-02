@@ -56,124 +56,84 @@ export default function ImgDetail() {
   if (!post) return <div>로딩 중...</div>;
 
   return (
-  <div className="bbs-container">
-    <table className="table type2 responsive border line_td" >
-      <colgroup>
-        <col style={{ width: "20%" }} />
-        <col />
-      </colgroup>
-      <tbody>
-        {/* 대표 이미지 */}
-        {repImage && repImage.imagePath && (
-          <tr>
-            <th scope="row">대표 이미지</th>
-            <td>
-              {repImage.fileNum ? (
-                <a
-                  href={`${backendUrl}/bbs/files/${repImage.fileNum}/download`}
-                  download={repImage.originalName || "대표이미지"}
-                >
-                  <img
-                    src={
-                      repImage.imagePath.startsWith("http")
-                        ? repImage.imagePath
-                        : `${backendUrl}${repImage.imagePath}`
-                    }
-                    alt={post.bbsTitle}
-                    style={{ maxWidth: "500px", marginBottom: "20px" }}
-                  />
-                </a>
-              ) : (
-                <img
-                  src={
-                    repImage.imagePath.startsWith("http")
-                      ? repImage.imagePath
-                      : `${backendUrl}${repImage.imagePath}`
-                  }
-                  alt={post.bbsTitle}
-                  style={{ maxWidth: "500px", marginBottom: "20px" }}
-                />
-              )}
-            </td>
-          </tr>
-        )}
-
-        {/* 제목 */}
-        <tr>
-          <th scope="row">제목</th>
-          <td>{post.bbsTitle}</td>
-        </tr>
-
-        {/* 작성일 및 조회수 */}
-        <tr>
-          <th scope="row">작성일 / 조회수</th>
-          <td>
-            {post.registDate ? post.registDate.substring(0, 10) : ""} &nbsp; | &nbsp;
-            조회 {post.readCount ?? 0}
-          </td>
-        </tr>
-
-        {/* 내용 */}
-        <tr>
-          <th scope="row">내용</th>
-          <td>
-            <div
-              className="bbs-detail-content"
-              dangerouslySetInnerHTML={{ __html: post.bbsContent }}
-            />
-          </td>
-        </tr>
-
-        {/* 첨부파일 */}
-        {files.length > 0 ? (
-          files.map((f, idx) => (
-            <tr key={f.fileNum}>
-              {idx === 0 && <th rowSpan={files.length}>첨부파일</th>}
-              <td>
-                <a
-                  href={`${backendUrl}/bbs/files/${f.fileNum}/download`}
-                  download={f.originalName}
-                >
-                  {f.extension?.toLowerCase().match(/(jpeg|jpg|png|gif)$/) ? (
-                    <img
-                      src={
-                        f.fileUrl.startsWith("http")
-                          ? f.fileUrl
-                          : `${backendUrl}${f.fileUrl}`
-                      }
-                      alt={f.originalName}
-                      style={{ maxWidth: "300px" }}
-                    />
-                  ) : (
-                    f.originalName
-                  )}
-                </a>
-              </td>
-            </tr>
-          ))
-        ) : (
-          <tr>
-            <th scope="row">첨부파일</th>
-            <td>첨부파일이 없습니다.</td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-
-    {/* 버튼 영역 */}
-    <div className="form_center_box ">
-          <div className="temp_btn white md">
-            <button className="btn" onClick={() => navigate("/bbs/image")}>목록보기</button>
-          </div>
-          <div className="right_btn_box">
-            <div className="temp_btn white md">
-              <button className="btn" onClick={handleEdit}>수정</button>
-            </div>
-            <div className="temp_btn md">
-              <button className="btn" onClick={handleDelete}>삭제</button>
-            </div>
+    <div className="form_item type2 bbs_form">
+      <div className="img_bbs_wrap">
+        <div className="img_slide_box">
+          <div className="slide_list">
+            <div className="slide_item">슬라이드 아이템</div>
           </div>
         </div>
-  </div>
-);
+        <div className="text_box">
+          <div className="text_item">
+            <span className="t1">제목</span>
+            <span className="t2">{post.bbsTitle}</span>
+          </div>
+          <div className="text_item">
+            <span className="t1">내용</span>
+            <span
+              className="t2"
+              dangerouslySetInnerHTML={{ __html: post.bbsContent }}
+            />
+          </div>
+          <div className="text_item">
+            <span className="t1">작성일</span>
+            <span className="t2">
+              {post.registDate ? post.registDate.substring(0, 10) : ""}
+            </span>
+          </div>
+        </div>
+      </div>
+      <div className="form_center_box ">
+        <div className="temp_btn white md">
+          <button className="btn" onClick={() => navigate("/bbs/image")}>
+            목록보기
+          </button>
+        </div>
+        <div className="right_btn_box">
+          <div className="temp_btn white md">
+            <button className="btn" onClick={handleEdit}>
+              수정
+            </button>
+          </div>
+          <div className="temp_btn md">
+            <button className="btn" onClick={handleDelete}>
+              삭제
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    // {files.length > 0 ? (
+    //   files.map((f, idx) => (
+    //     <tr key={f.fileNum}>
+    //       {idx === 0 && <th rowSpan={files.length}>첨부파일</th>}
+    //       <td>
+    //         <a
+    //           href={`${backendUrl}/bbs/files/${f.fileNum}/download`}
+    //           download={f.originalName}
+    //         >
+    //           {f.extension?.toLowerCase().match(/(jpeg|jpg|png|gif)$/) ? (
+    //             <img
+    //               src={
+    //                 f.fileUrl.startsWith("http")
+    //                   ? f.fileUrl
+    //                   : `${backendUrl}${f.fileUrl}`
+    //               }
+    //               alt={f.originalName}
+    //               style={{ maxWidth: "300px" }}
+    //             />
+    //           ) : (
+    //             f.originalName
+    //           )}
+    //         </a>
+    //       </td>
+    //     </tr>
+    //   ))
+    // ) : (
+    //   <tr>
+    //     <th scope="row">첨부파일</th>
+    //     <td>첨부파일이 없습니다.</td>
+    //   </tr>
+    // )}
+  );
 }
