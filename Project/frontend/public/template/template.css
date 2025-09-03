@@ -4267,3 +4267,4 @@ span.temp_form{display:inline-block;width:auto;}
 
 .phone_form .temp_form input[type="text"]{text-align:center;}
 
+.temp_form .temp_input.text_area_form{height:auto;min-height:260px;}

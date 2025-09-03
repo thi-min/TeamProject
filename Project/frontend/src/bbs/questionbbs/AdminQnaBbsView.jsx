@@ -9,9 +9,9 @@ export default function AdminQnaBbsView() {
   const navigate = useNavigate();
   const token = localStorage.getItem("accessToken");
 
-  const [post, setPost] = useState(null);       // { bbs: {}, answer: "" }
+  const [post, setPost] = useState(null); // { bbs: {}, answer: "" }
   const [answerText, setAnswerText] = useState("");
-  const [files, setFiles] = useState([]);       // 첨부파일 리스트
+  const [files, setFiles] = useState([]); // 첨부파일 리스트
 
   const BASE_URL = "http://127.0.0.1:8090/admin/bbs";
 
@@ -101,112 +101,115 @@ export default function AdminQnaBbsView() {
   const bbs = post.bbs || {}; // bbs 정보가 들어있는 객체
 
   return (
-  <div className="bbs-container">
-    <div className="form_top_box">
+    <div className="bbs-container">
+      <div className="form_top_box">
         <div className="form_top_item">
           <div className="form_icon bbs"></div>
           <div className="form_title">게시판 관리</div>
         </div>
       </div>
-    <table className="table type2 responsive border line_td">
-      <colgroup>
-        <col style={{ width: "20%" }} />
-        <col />
-      </colgroup>
-      <tbody>
-        {/* 제목 */}
-        <tr>
-          <th scope="row">제목</th>
-          <td>{bbs.bbsTitle}</td>
-        </tr>
-
-        {/* 본문 (이미지 포함 가능) */}
-        <tr>
-          <th scope="row">내용</th>
-          <td>
-            <div
-              className="bbs-content"
-              dangerouslySetInnerHTML={{ __html: bbs.bbsContent }}
-            />
-          </td>
-        </tr>
-
-        {/* 작성자 */}
-        <tr>
-          <th scope="row">작성자</th>
-          <td>{bbs.memberName || "익명"}</td>
-        </tr>
-
-        {/* 작성일 */}
-        <tr>
-          <th scope="row">작성일</th>
-          <td>{new Date(bbs.registDate).toLocaleDateString()}</td>
-        </tr>
-
-        {/* 첨부파일 */}
-        {files.length > 0 ? (
-          files.map((file, idx) => (
-            <tr key={file.fileNum}>
-              {idx === 0 && (
-                <th scope="row" rowSpan={files.length}>
-                  첨부파일
-                </th>
-              )}
-              <td>
-                <a
-                  href={file.fileUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {file.originalName}
-                </a>
-              </td>
-            </tr>
-          ))
-        ) : (
+      <table className="table type2 responsive border line_td">
+        <colgroup>
+          <col style={{ width: "20%" }} />
+          <col />
+        </colgroup>
+        <tbody>
+          {/* 제목 */}
           <tr>
-            <th scope="row">첨부파일</th>
-            <td>첨부파일이 없습니다.</td>
+            <th scope="row">제목</th>
+            <td>{bbs.bbsTitle}</td>
           </tr>
-        )}
 
-        {/* 관리자 답변 */}
-        <tr>
-          <th scope="row">답변</th>
-          <td>
-            {post.answer ? (
-              <div className="existing-answer">
-                <strong>현재 답변:</strong>
-                <p>{post.answer}</p>
+          {/* 본문 (이미지 포함 가능) */}
+          <tr>
+            <th scope="row">내용</th>
+            <td>
+              <div
+                className="bbs-content"
+                dangerouslySetInnerHTML={{ __html: bbs.bbsContent }}
+              />
+            </td>
+          </tr>
+
+          {/* 작성자 */}
+          <tr>
+            <th scope="row">작성자</th>
+            <td>{bbs.memberName || "익명"}</td>
+          </tr>
+
+          {/* 작성일 */}
+          <tr>
+            <th scope="row">작성일</th>
+            <td>{new Date(bbs.registDate).toLocaleDateString()}</td>
+          </tr>
+
+          {/* 첨부파일 */}
+          {files.length > 0 ? (
+            files.map((file, idx) => (
+              <tr key={file.fileNum}>
+                {idx === 0 && (
+                  <th scope="row" rowSpan={files.length}>
+                    첨부파일
+                  </th>
+                )}
+                <td>
+                  <a
+                    href={file.fileUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {file.originalName}
+                  </a>
+                </td>
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <th scope="row">첨부파일</th>
+              <td>첨부파일이 없습니다.</td>
+            </tr>
+          )}
+
+          {/* 관리자 답변 */}
+          <tr>
+            <th scope="row">답변</th>
+            <td>
+              {/* 답변 작성 textarea */}
+              <div className="temp_form">
+                <textarea
+                  value={answerText}
+                  className="temp_input text_area_form"
+                  onChange={(e) => setAnswerText(e.target.value)}
+                  placeholder="답변을 입력하세요"
+                  rows={5}
+                  style={{ width: "100%", marginTop: "10px" }}
+                />
               </div>
-            ) : (
-              <span>등록된 답변이 없습니다.</span>
-            )}
-            {/* 답변 작성 textarea */}
-            <textarea
-              value={answerText}
-              onChange={(e) => setAnswerText(e.target.value)}
-              placeholder="답변을 입력하세요"
-              rows={5}
-              style={{ width: "100%", marginTop: "10px" }}
-            />
-            <div className="temp_btn md">
-              <button className="btn" onClick={handleSaveAnswer}>등록</button>
-            </div>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            </td>
+          </tr>
+        </tbody>
+      </table>
 
-    {/* 버튼 영역 (테이블 밖) */}
-    <div className="form_center_box">
-      <div className="temp_btn white md">
-      <button className="btn" onClick={() => navigate("/admin/bbs/qna")}>목록으로</button>
-      </div>
-      <div className="temp_btn md">
-      <button className="btn" onClick={handleDeletePost}>삭제</button>
+      {/* 버튼 영역 (테이블 밖) */}
+      <div className="form_center_box">
+        <div className="temp_btn white md">
+          <button className="btn" onClick={() => navigate("/admin/bbs/qna")}>
+            목록으로
+          </button>
+        </div>
+        <div className="right_btn_box">
+          <div className="temp_btn md">
+            <button className="btn" onClick={handleDeletePost}>
+              삭제
+            </button>
+          </div>
+          <div className="temp_btn md">
+            <button className="btn" onClick={handleSaveAnswer}>
+              등록
+            </button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
-);
+  );
 }

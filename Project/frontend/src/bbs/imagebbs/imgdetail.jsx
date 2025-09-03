@@ -104,16 +104,7 @@ export default function ImgDetail() {
             return (
               <SwiperSlide key={f.fileNum}>
                 <div className="slide_item">
-                  {f.extension?.toLowerCase().match(/(jpeg|jpg|png|gif)$/) ? (
-                    <img src={imgUrl} alt={f.originalName} />
-                  ) : (
-                    <a
-                      href={`${backendUrl}/bbs/files/${f.fileNum}/download`}
-                      download={f.originalName}
-                    >
-                      {f.originalName}
-                    </a>
-                  )}
+                  <img src={imgUrl} alt={f.originalName} />
                 </div>
               </SwiperSlide>
             );

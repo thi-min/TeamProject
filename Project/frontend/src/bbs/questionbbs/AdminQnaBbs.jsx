@@ -4,7 +4,10 @@ import { useNavigate } from "react-router-dom";
 import api from "../../common/api/axios";
 import "./qnabbs.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faChevronLeft,
+  faChevronRight,
+} from "@fortawesome/free-solid-svg-icons";
 
 function AdminQnaBbs() {
   const [posts, setPosts] = useState([]);
@@ -24,8 +27,10 @@ function AdminQnaBbs() {
 
       if (searchType !== "all" && searchKeyword.trim() !== "") {
         if (searchType === "title") params.bbstitle = searchKeyword.trim();
-        else if (searchType === "writer") params.memberName = searchKeyword.trim();
-        else if (searchType === "content") params.bbscontent = searchKeyword.trim();
+        else if (searchType === "writer")
+          params.memberName = searchKeyword.trim();
+        else if (searchType === "content")
+          params.bbscontent = searchKeyword.trim();
       }
 
       const response = await api.get(`${BASE_URL}/bbslist`, { params });
@@ -74,18 +79,20 @@ function AdminQnaBbs() {
     try {
       await api.delete(`${BASE_URL}/delete-multiple`, {
         params: { ids: selectedPosts, adminId: 1 }, // 실제 adminId 동적으로 연결 가능
-        paramsSerializer: params => {
+        paramsSerializer: (params) => {
           // 배열 직렬화: ids=35&ids=32
           const queryString = Object.keys(params)
-            .map(key => {
+            .map((key) => {
               if (Array.isArray(params[key])) {
-                return params[key].map(val => `${key}=${encodeURIComponent(val)}`).join("&");
+                return params[key]
+                  .map((val) => `${key}=${encodeURIComponent(val)}`)
+                  .join("&");
               }
               return `${key}=${encodeURIComponent(params[key])}`;
             })
             .join("&");
           return queryString;
-        }
+        },
       });
 
       alert("선택한 게시글이 삭제되었습니다.");
@@ -118,7 +125,11 @@ function AdminQnaBbs() {
       {/* 검색창 */}
       <div className="search_bar_box">
         <div className="temp_form_box md">
-          <select className="temp_select" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+          <select
+            className="temp_select"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
             <option value="all">전체</option>
             <option value="title">제목</option>
             <option value="writer">작성자</option>
@@ -135,7 +146,9 @@ function AdminQnaBbs() {
           />
         </div>
         <div className="temp_btn md">
-        <button className="btn" onClick={handleSearch}>조회</button>
+          <button className="btn" onClick={handleSearch}>
+            조회
+          </button>
         </div>
       </div>
 
@@ -145,10 +158,10 @@ function AdminQnaBbs() {
           <tr>
             <th style={{ width: "3%" }}>선택</th>
             <th style={{ width: "5%" }}>번호</th>
-            <th style={{ width: "60%" }}>제목</th>
+            <th style={{ width: "50%" }}>제목</th>
             <th style={{ width: "15%" }}>작성자</th>
-            <th style={{ width: "10%" }}>작성일</th>
-            <th style={{ width: "7%" }}>답변</th>
+            <th style={{ width: "15%" }}>작성일</th>
+            <th style={{ width: "12%" }}>답변</th>
           </tr>
         </thead>
         <tbody className="text_center">
@@ -166,12 +179,18 @@ function AdminQnaBbs() {
                   <td>{post.bulletinNum}</td>
                   <td
                     style={{ cursor: "pointer", color: "blue" }}
-                    onClick={() => navigate(`/admin/qna/view/${post.bulletinNum}`)}
+                    onClick={() =>
+                      navigate(`/admin/qna/view/${post.bulletinNum}`)
+                    }
                   >
                     {post.bbsTitle}
                   </td>
                   <td>{post.memberName || "익명"}</td>
-                  <td>{post.registdate ? new Date(post.registdate).toLocaleDateString() : "-"}</td>
+                  <td>
+                    {post.registDate
+                      ? new Date(post.registDate).toLocaleDateString()
+                      : "-"}
+                  </td>
                   <td>
                     {post.answerContent && (
                       <button onClick={() => toggleRow(post.bulletinNum)}>
@@ -194,7 +213,10 @@ function AdminQnaBbs() {
             ))
           ) : (
             <tr>
-              <td colSpan="6" style={{ textAlign: "center", padding: "50px 0" }}>
+              <td
+                colSpan="6"
+                style={{ textAlign: "center", padding: "50px 0" }}
+              >
                 등록된 질문이 없습니다.
               </td>
             </tr>
@@ -233,7 +255,9 @@ function AdminQnaBbs() {
       {/* 다중 삭제 버튼 */}
       <div className="form_center_box solo">
         <div className="temp_btn md">
-          <button className="btn" onClick={handleDeleteSelected}>삭제</button>
+          <button className="btn" onClick={handleDeleteSelected}>
+            삭제
+          </button>
         </div>
       </div>
     </div>
