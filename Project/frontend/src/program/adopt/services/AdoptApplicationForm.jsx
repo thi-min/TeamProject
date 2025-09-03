@@ -44,7 +44,7 @@ const AdoptApplicationForm = () => {
     const isUpdateView = location.pathname.includes('/adopt/update/');
 
     const authAxios = api.create({
-        baseURL: 'http://localhost:8090/',
+        baseURL: 'http://127.0.0.1:8090/',
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
     });
 
