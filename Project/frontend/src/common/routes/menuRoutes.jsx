@@ -17,7 +17,7 @@ const menuRoutes = [
     access: "ALL",
     children: [
       { title: "센터 아이들", path: "/about/list", access: "ALL" },
-      { title: "입양 절차 안내", path: "/about/process", access: "ALL" },
+      { title: "입양 절차 안내", path: "/adoption/process", access: "ALL" },
     ],
   },
   {
