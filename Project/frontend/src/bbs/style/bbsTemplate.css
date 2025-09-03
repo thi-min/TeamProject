@@ -369,3 +369,6 @@
 .img_dtl_wrap .text_box .text_item .t1{width:100%;display:block;position:relative;box-sizing:border-box;}
 .img_dtl_wrap .text_box .text_item .t1:before{display:block;position:absolute;top:calc(50% - 4px);left:-20px;width:8px;height:8px;background-color:#333;border-radius:100%;content:'';}
 .img_dtl_wrap .text_box .text_item .t2{color:#7c7979;font-size:18px;margin-top:12px;display:block;position:relative;width:100%;}
+
+.img_dtl_wrap .text_box .chat_btn_box{display:block;position:relative;margin-top:30px;}
+.img_dtl_wrap .text_box .chat_btn_box .chat_btn{display:inline-block;position:relative;padding:8px 10px;border:1px solid #246beb;border-radius:8px;background-color:#246beb;color:#fff;}

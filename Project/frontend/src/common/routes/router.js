@@ -19,7 +19,6 @@ const routes = {
   // ==============================
   adoption: {
     list: { path: "/adoption/list", label: "센터 아이들" },
-    process: { path: "/adoption/process", label: "입양 절차 안내" },
     review: { path: "/adoption/review", label: "입양 후기" },
   },
 

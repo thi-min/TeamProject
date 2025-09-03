@@ -16,8 +16,8 @@ const menuRoutes = [
     title: "입양 소식",
     access: "ALL",
     children: [
-      { title: "센터 아이들", path: "/about/list", access: "ALL" },
-      { title: "입양 절차 안내", path: "/adoption/process", access: "ALL" },
+      { title: "센터 아이들", path: "/bbs/image", access: "ALL" },
+      { title: "입양 절차 안내", path: "/contents/7", access: "ALL" },
     ],
   },
   {
@@ -46,15 +46,12 @@ const menuRoutes = [
     children: [
       { title: "공지사항", path: "/bbs/normal", access: "ALL" },
       { title: "질문 게시판", path: "/bbs/qna", access: "ALL" },
-      { title: "입양 후기 게시판", path: "/bbs/image", access: "ALL" },
     ],
   },
   {
     title: "후원하기",
     access: "ALL",
-    children: [
-      { title: "후원안내", path: "/funds", access: "ALL" },
-    ],
+    children: [{ title: "후원안내", path: "/funds", access: "ALL" }],
   },
   {
     title: "관리자 메뉴",

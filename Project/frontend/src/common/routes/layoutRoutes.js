@@ -71,7 +71,6 @@ import NormalBbsEdit from "../../bbs/normalbbs/NormalBbsEdit";
 import MemberNormalBbs from "../../bbs/normalbbs/MemberNormalBbs";
 import MemberNormalBbsView from "../../bbs/normalbbs/MemberNormalBbsView";
 
-
 //QNA 게시판
 import QnaBbs from "../../bbs/questionbbs/QnaBbs";
 import QnaBbsWrite from "../../bbs/questionbbs/QnaBbsWrite";
@@ -80,7 +79,6 @@ import QnaBbsEdit from "../../bbs/questionbbs/QnaBbsEdit";
 import AdminQnaBbs from "../../bbs/questionbbs/AdminQnaBbs";
 import AdminQnaBbsView from "../../bbs/questionbbs/AdminQnaBbsView";
 
-
 //이미지게시판
 import ImgList from "../../bbs/imagebbs/imgList";
 import ImgDetail from "../../bbs/imagebbs/imgdetail";
@@ -88,7 +86,6 @@ import ImgEdit from "../../bbs/imagebbs/imgedit";
 import ImgWrite from "../../bbs/imagebbs/imgwrite";
 import AdminImgBoard from "../../bbs/imagebbs/AdminImgBoard";
 import AdminImgDetail from "../../bbs/imagebbs/AdminImgDetail";
-
 
 import {
   FundApplicationDetails,
@@ -108,7 +105,7 @@ import {
 // 입양 신청서 관련 페이지
 // ==============================
 import AdoptApplicationForm from "../../program/adopt/services/AdoptApplicationForm";
-import AdoptInfo from "../../program/adopt/services/AdoptInfo";
+
 // ==============================
 // 동물 정보 페이지 (Animal)
 // ==============================
@@ -353,7 +350,6 @@ const layoutRoutes = [
     path="/bbs/normal/view/:id"
     element={<MemberNormalBbsView />}
   />,
-
 
   // QnA 게시판
   <Route key="qna-bbs" path="/bbs/qna" element={<QnaBbs />} />,
@@ -634,12 +630,6 @@ const layoutRoutes = [
         <AdoptApplicationForm />
       </RequireAdmin>
     }
-  />,
-
-  <Route
-    key="adoptProcess"
-    path={routes.adoption.process.path}
-    element={<AdoptInfo />}
   />,
 
   // ------------------------------
