@@ -141,6 +141,11 @@ export default function ImgDetail() {
               {post.registDate ? post.registDate.substring(0, 10) : ""}
             </span>
           </div>
+          <div className="chat_btn_box">
+            <button type="button" className="chat_btn">
+              입양 상담
+            </button>
+          </div>
         </div>
       </div>
       <div className="img_slide_controls">
