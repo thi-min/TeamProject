@@ -108,7 +108,7 @@ import {
 // 입양 신청서 관련 페이지
 // ==============================
 import AdoptApplicationForm from "../../program/adopt/services/AdoptApplicationForm";
-
+import AdoptInfo from "../../program/adopt/services/AdoptInfo";
 // ==============================
 // 동물 정보 페이지 (Animal)
 // ==============================
@@ -353,7 +353,7 @@ const layoutRoutes = [
     path="/bbs/normal/view/:id"
     element={<MemberNormalBbsView />}
   />,
-  
+
 
   // QnA 게시판
   <Route key="qna-bbs" path="/bbs/qna" element={<QnaBbs />} />,
@@ -634,6 +634,12 @@ const layoutRoutes = [
         <AdoptApplicationForm />
       </RequireAdmin>
     }
+  />,
+
+  <Route
+    key="adoptProcess"
+    path={routes.adoption.process.path}
+    element={<AdoptInfo />}
   />,
 
   // ------------------------------
