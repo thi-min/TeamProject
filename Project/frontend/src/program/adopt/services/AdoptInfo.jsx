@@ -1,6 +1,6 @@
 import React from 'react';
 
-const App = () => {
+const AdoptInfo = () => {
   return (
     <>
       <style>
@@ -183,4 +183,4 @@ const App = () => {
   );
 };
 
-export default App;
+export default AdoptInfo;
