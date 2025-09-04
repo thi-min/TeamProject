@@ -25,6 +25,16 @@ const Header = () => {
       {/* 헤더 상단 로그인/회원가입 링크 */}
       <div className="header_top_box">
         <div className="info_box">
+          {/* 로그인 했을 때만 노출 */}
+          {isLogin && (
+            <div className="link_item">
+              {role === "ADMIN" ? (
+                <Link to="/admin">관리자페이지</Link>
+              ) : (
+                <Link to="/member/mypage">마이페이지</Link>
+              )}
+            </div>
+          )}
           {/* 알람 버튼 추가 */}
           <button className="alarm-button" onClick={handleAlarmToggle}>
             🔔
@@ -67,24 +77,13 @@ const Header = () => {
           <div className="top_link_list">
             <div className="link_item">
               {isLogin ? (
-                <LogoutLink className="user_item logout" />
+                <LogoutLink className="user_item logout">로그아웃</LogoutLink>
               ) : (
                 <Link to="/login" className="user_item login">
                   로그인
                 </Link>
               )}
             </div>
-
-            {/* 로그인 했을 때만 노출 */}
-            {isLogin && (
-              <div className="link_item">
-              {role === "ADMIN" ? (
-                <Link to="/admin">관리자페이지</Link>
-              ) : (
-                <Link to="/member/mypage">마이페이지</Link>
-              )}
-            </div>
-            )}
           </div>
         </div>
       </div>

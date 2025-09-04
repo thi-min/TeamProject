@@ -109,56 +109,121 @@ export default function MainPage() {
     </Swiper>
   );
 
-  // 재생/정지 상태
-  const [isPlaying2, setIsPlaying2] = useState(true);
+  // ref 분리: 동물 사진용
+  // [추가/수정] 동물 사진용 스와이퍼 ref + 버튼 핸들러
+  // - onSwiper로 실제 인스턴스를 안전하게 받음(권장)
+  // - null 방어 + 이동 속도 지정
+  const animalSwiperRef = useRef(null);
 
-  // 외부 버튼 핸들러
-  const handlePrev2 = () => swiperRef.current?.slidePrev();
-  const handleNext2 = () => swiperRef.current?.slideNext();
-
-  const handleTogglePlay2 = () => {
-    if (!swiperRef.current) return;
-    if (isPlaying2) {
-      // 재생 중이면 정지
-      swiperRef.current.autoplay?.stop();
-      setIsPlaying2(false);
-    } else {
-      // 정지 상태면 재생
-      swiperRef.current.autoplay?.start();
-      setIsPlaying2(true);
-    }
+  const handlePrev2 = () => {
+    if (!animalSwiperRef.current) return;
+    animalSwiperRef.current.slidePrev(300); // 300ms로 이전
   };
 
-  const animalimages = [
-    { src: animal1, alt: "동물 이미지1" },
-    { src: animal2, alt: "동물 이미지2" },
-    { src: animal3, alt: "동물 이미지3" },
-    { src: animal4, alt: "동물 이미지4" },
-    { src: animal5, alt: "동물 이미지5" },
-    { src: animal6, alt: "동물 이미지6" },
-  ];
+  const handleNext2 = () => {
+    if (!animalSwiperRef.current) return;
+    animalSwiperRef.current.slideNext(300); // 300ms로 다음
+  };
+
+  /**
+   * 이미지 게시판 대표 썸네일 목록
+   * - ImgBoard에서 쓰던 응답 구조를 그대로 사용
+   * - representativeImages에서 thumbnailPath > imagePath 우선 사용
+   */
+  const [animalThumbs, setAnimalThumbs] = useState([]);
+
+  // 백엔드 목록/이미지 경로
+  const BBS_LIST_URL = "http://127.0.0.1:8090/bbs/bbslist";
+  const BACKEND_URL = "http://127.0.0.1:8090";
+
+  /**
+   * 백엔드가 내려주는 이미지 경로를 화면용으로 정규화
+   * - "/DATA" 또는 "http"로 시작하면 그대로 사용
+   * - 그 외엔 백엔드 호스트 prefix를 붙임
+   */
+  const resolveSrc = (raw) => {
+    if (!raw) return null;
+    const s = String(raw);
+    if (s.startsWith("/DATA") || s.startsWith("http")) return s;
+    return `${BACKEND_URL}${s}`;
+  };
+
+  useEffect(() => {
+    const fetchAnimalThumbs = async () => {
+      try {
+        // 최신순으로 12개 정도만 (필요 시 size 조절)
+        const params = { type: "POTO", page: 0, size: 12 };
+
+        const res = await api.get(BBS_LIST_URL, { params });
+
+        const list = res.data?.bbsList?.content ?? [];
+        const repMap = res.data?.representativeImages ?? {};
+
+        // 게시글과 대표 이미지 매칭 → 화면에 필요한 최소 필드만 구성
+        const thumbs = list
+          .map((post) => {
+            const key = String(post.bulletinNum);
+            const rep = repMap[key];
+            const raw = rep?.thumbnailPath || rep?.imagePath || null;
+            return {
+              bulletinNum: post.bulletinNum,
+              title: post.bbsTitle || post.title || "",
+              src: resolveSrc(raw), // 경로 정규화
+            };
+          })
+          .filter((x) => !!x.src); // 이미지가 있는 것만
+
+        setAnimalThumbs(thumbs);
+      } catch (error) {
+        console.error("이미지 썸네일 불러오기 실패:", error);
+        // 메인에서는 경고창 대신 콘솔만 — 필요 시 UI 처리
+      }
+    };
+
+    fetchAnimalThumbs();
+  }, []);
+
+  // - 슬라이드 개수에 맞춰 slidesPerView/loop 동적 설정
+  // - observer/observeParents로 부모/리사이즈 변화 대응
+  const animalSlidesPerView = Math.min(5, Math.max(1, animalThumbs.length));
+  const animalLoop = animalThumbs.length > 1;
 
   const animalSlideList = (
     <Swiper
       modules={[Navigation, Autoplay, A11y]}
-      loop
+      loop={animalLoop} // 슬라이드가 2장 이상일 때만 loop
       speed={400}
-      // autoplay={{
-      //   delay: 3000,
-      //   disableOnInteraction: false,
-      // }}
-      onBeforeInit={(swiper) => {
-        swiperRef.current = swiper;
+      slidesPerView={animalSlidesPerView}
+      spaceBetween={34}
+      observer // 부모 DOM 변화 감지
+      observeParents // 상위 엘리먼트 변화 감지
+      onSwiper={(swiper) => {
+        // ✅ 인스턴스 안전 획득
+        animalSwiperRef.current = swiper;
       }}
-      slidesPerView={5}
-      spaceBetween={40}
       className="main_swiper"
+      breakpoints={{
+        // 반응형(선택)
+        0: {
+          slidesPerView: Math.min(2, animalSlidesPerView),
+          spaceBetween: 12,
+        },
+        768: {
+          slidesPerView: Math.min(3, animalSlidesPerView),
+          spaceBetween: 16,
+        },
+        1024: {
+          slidesPerView: Math.min(4, animalSlidesPerView),
+          spaceBetween: 24,
+        },
+        1280: { slidesPerView: animalSlidesPerView, spaceBetween: 24 },
+      }}
     >
-      {animalimages.map((s, idx) => (
-        <SwiperSlide key={idx}>
+      {animalThumbs.map((item) => (
+        <SwiperSlide key={item.bulletinNum}>
           <div className="animal_item">
-            <Link>
-              <img src={s.src} alt={s.alt} />
+            <Link to={`/bbs/image/${item.bulletinNum}`}>
+              <img src={item.src} alt={item.title || "아이들 사진"} />
             </Link>
           </div>
         </SwiperSlide>

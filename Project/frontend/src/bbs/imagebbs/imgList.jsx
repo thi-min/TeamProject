@@ -94,8 +94,8 @@ export default function ImgBoard() {
     <div className="img_bbs_wrap">
       <div className="form_top_box">
         <div className="form_top_item">
-          <div className="form_icon bbs"></div>
-          <div className="form_title">입양 후기 게시판</div>
+          <div className="form_icon adopt_icon"></div>
+          <div className="form_title">센터 아이들</div>
         </div>
       </div>
       <div className="search_bar_box">
@@ -181,13 +181,13 @@ export default function ImgBoard() {
           <FontAwesomeIcon icon={faChevronRight} />
         </button>
       </div>
-      <div className="form_center_box solo">
+      {/* <div className="form_center_box solo">
         <div className="temp_btn md">
           <button className="btn" onClick={() => navigate("/bbs/image/write")}>
             글쓰기
           </button>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

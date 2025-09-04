@@ -13,14 +13,12 @@ export default function AdminBbs() {
           <div className="form_title">게시판 관리</div>
         </div>
       </div>
-       {/* 안내 메시지 */}
-        <div className="bbs_content">
-          게시판을 선택해주세요.
-        </div>
+      {/* 안내 메시지 */}
+      <div className="bbs_content">게시판을 선택해주세요.</div>
       <div className="admin_area">
         <ul className="my_menu">
           <li className="link_item type1">
-            <Link to="/admin/bbs/image">이미지 게시판</Link>
+            <Link to="/admin/bbs/image">센터 아이들</Link>
           </li>
           <li className="link_item type2">
             <Link to="/admin/bbs/qna">QnA 게시판</Link>
@@ -31,10 +29,10 @@ export default function AdminBbs() {
         </ul>
 
         {/* 뒤로가기 */}
-        <div className ="adminbbs-btn">
+        <div className="adminbbs-btn">
           <div className="temp_btn white md">
             <button type="button" className="btn" onClick={() => navigate(-1)}>
-            뒤로
+              뒤로
             </button>
           </div>
         </div>
