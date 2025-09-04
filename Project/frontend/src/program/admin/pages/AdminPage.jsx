@@ -48,6 +48,9 @@ export default function AdminPage() {
           <li className="link_item type11">
             <Link to="/admin/adopt/list">입양 관리</Link>
           </li>
+          <li className="link_item type11">
+            <Link to="/admin/animal/list">동물 관리</Link>
+          </li>
           
         </ul>
       </div>
