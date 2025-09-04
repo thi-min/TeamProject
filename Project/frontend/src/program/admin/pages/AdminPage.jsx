@@ -39,6 +39,16 @@ export default function AdminPage() {
           <li className="link_item type8">
             <Link to="/admin/banner">배너 관리</Link>
           </li>
+          <li className="link_item type9">
+            <Link to="/admin/chat/list">채팅 관리</Link>
+          </li>
+          <li className="link_item type10">
+            <Link to="/admin/funds/list">후원 관리</Link>
+          </li>
+          <li className="link_item type11">
+            <Link to="/admin/adopt/list">입양 관리</Link>
+          </li>
+          
         </ul>
       </div>
     </div>
