@@ -137,12 +137,19 @@ export default function Mypage() {
             <Link to="/member/mypage/reserves">예약 내역 조회</Link>
           </li>
           <li className="link_item type4">
+            <Link to="/member/adopt/list">입양 내역 조회</Link>
+          </li>
+          <li className="link_item type5">
+            <Link to="/member/funds/list">후원 내역 조회</Link>
+          </li>
+          <li className="link_item type6">
             <MemberDeleteButton
               memberNum={myInfo?.memberNum}
               className="form_flex"
             />
           </li>
         </ul>
+
       </div>
     </div>
   );
