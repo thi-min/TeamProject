@@ -1,6 +1,8 @@
+// ImgDetail.jsx - 수정된 코드
 import React, { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import api from "../../common/api/axios";
+import ChatPopup from "../../program/chat/services/ChatPopup";
 
 // Swiper import
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -15,6 +17,7 @@ export default function ImgDetail() {
   const [post, setPost] = useState(null);
   const [files, setFiles] = useState([]);
   const [repImage, setRepImage] = useState(null);
+  const [isChatOpen, setIsChatOpen] = useState(false); // 채팅 팝업 상태 추가
   const backendUrl = "http://127.0.0.1:8090";
 
   // Swiper 인스턴스 레퍼런스
@@ -22,6 +25,11 @@ export default function ImgDetail() {
 
   // 재생/정지 상태
   const [isPlaying, setIsPlaying] = useState(true);
+
+  // 채팅 팝업 토글 함수 추가
+  const toggleChat = () => {
+    setIsChatOpen(!isChatOpen);
+  };
 
   // 게시글 상세 조회
   const fetchPost = async () => {
@@ -78,6 +86,17 @@ export default function ImgDetail() {
       swiperRef.current.autoplay?.start();
       setIsPlaying(true);
     }
+  };
+
+  // 입양 상담 버튼 클릭 핸들러 추가
+  const handleAdoptConsult = () => {
+    const token = localStorage.getItem("accessToken");
+    if (!token) {
+      alert("로그인이 필요한 서비스입니다.");
+      navigate("/member/login");
+      return;
+    }
+    toggleChat();
   };
 
   // ✅ return 밖으로 뺀 슬라이드 JSX
@@ -142,7 +161,7 @@ export default function ImgDetail() {
             </span>
           </div>
           <div className="chat_btn_box">
-            <button type="button" className="chat_btn">
+            <button type="button" className="chat_btn" onClick={handleAdoptConsult}>
               입양 상담
             </button>
           </div>
@@ -183,6 +202,9 @@ export default function ImgDetail() {
           </div>
         </div>
       </div>
+
+      {/* 채팅 팝업 추가 */}
+      {isChatOpen && <ChatPopup onClose={toggleChat} />}
     </div>
   );
 }
