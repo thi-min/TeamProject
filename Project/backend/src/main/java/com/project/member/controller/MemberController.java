@@ -246,13 +246,6 @@ public class MemberController {
         return ResponseEntity.ok().build();
     }
     
-//	//비밀번호 변경
-//	@PutMapping("/member/update-password")
-//	public ResponseEntity<String> updatePassword(@RequestBody ResetPasswordUpdateRequestDto dto){
-//		memberService.updatePassword(dto);
-//		return ResponseEntity.ok("비밀번호가 변경되었습니다.");
-//	}
-	
 	//휴대폰 번호 변경
 	@PutMapping(value = "/member/mypage/memberdata/phone", consumes = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<MemberMyPageResponseDto> updateMyPhone(@RequestBody PhoneUpdateRequestDto dto) {

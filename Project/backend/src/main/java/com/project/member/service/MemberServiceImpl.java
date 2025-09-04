@@ -144,43 +144,6 @@ public class MemberServiceImpl implements MemberService {
 	    );
 	}
 
-//	public MemberSignUpResponseDto sigup(MemberSignUpRequestDto dto) {
-//
-//		//아이디 중복체크 2차 방어코드
-//		if (memberRepository.existsByMemberId(dto.getMemberId())) {
-//		    throw new IllegalArgumentException("이미 존재하는 아이디입니다.");
-//		}
-//		
-//		//비밀번호 암호화
-//		String encodedPw = passwordEncoder.encode(dto.getMemberPw());
-//		
-//		//핸드폰번호 암호화
-//		String encryptedPhone = JasyptUtil.encrypt(dto.getMemberPhone());
-//        
-//		//Entity 변환
-//		MemberEntity newMember = MemberEntity.builder()
-//				.memberId(dto.getMemberId())
-//				.memberPw(encodedPw)
-////				.memberPw(dto.getMemberPw())
-//				.memberName(dto.getMemberName())
-//				.memberBirth(dto.getMemberBirth())
-////				.memberPhone(dto.getMemberPhone())
-//				.memberPhone(encryptedPhone)
-//				.memberAddress(dto.getMemberAddress())
-//				.memberDay(LocalDate.now()) 
-//				.memberSex(dto.getMemberSex())
-//		        .memberState(MemberState.ACTIVE) // 기본 상태
-//		        .memberLock(false)
-//		        .smsAgree(dto.isSmsAgree())
-//		        .kakaoId(dto.getKakaoId())
-//		        .build();
-//		//DB저장
-//		MemberEntity saved = memberRepository.save(newMember);
-//		
-//		//응답 DTO 반환
-//		return new MemberSignUpResponseDto(null, saved.getMemberId(), "회원가입 완료");
-//	}
-	
 	//아이디 중복체크
 	@Override
 	public MemberIdCheckResponseDto checkDuplicateMemberId(String memberId) {
@@ -195,48 +158,7 @@ public class MemberServiceImpl implements MemberService {
         if (memberId == null || memberId.isBlank()) return false;
         return memberRepository.existsByMemberId(memberId);
     }
-//	@Override
-//    public MemberIdCheckResponseDto checkDuplicateMemberId(String memberId) {
-//        log.info("[svc] existsByMemberId({}) 호출", memberId);
-//        boolean exists = memberRepository.existsByMemberId(memberId); // 🔥 여기서 예외가 나면 500
-//        String message = exists ? "사용할 수 없는 아이디입니다." : "사용 가능한 아이디입니다.";
-//        return new MemberIdCheckResponseDto(exists, message);
-//    }
-//	//로그인
-//	 @Override
-//    public MemberLoginResponseDto login(MemberLoginRequestDto dto) {
-//        // 1) ID로 회원 조회
-//        MemberEntity member = memberRepository.findByMemberId(dto.getMemberId())
-//                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 계정입니다."));
-//
-//        // 2) 탈퇴/잠금 차단
-//        if (member.getMemberState() == MemberState.OUT || Boolean.TRUE.equals(member.getMemberLock())) {
-//            // 403으로 보낼 수 있도록 IllegalStateException 사용(ControllerAdvice에서 매핑)
-//            throw new IllegalStateException("탈퇴(또는 잠금) 처리된 계정입니다. 관리자에게 문의하세요.");
-//        }
-//
-//        // 3) 비밀번호 검증
-//        if (!passwordEncoder.matches(dto.getPassword(), member.getMemberPw())) {
-//            throw new IllegalArgumentException("아이디 또는 비밀번호가 일치하지 않습니다.");
-//        }
-//
-//        // 4) 토큰 발급
-//        String access = jwtTokenProvider.generateAccessToken(member.getMemberId());
-//        String refresh = jwtTokenProvider.generateRefreshToken(member.getMemberId());
-//
-//        // (DB에 refresh 저장/회전 정책이 있으면 갱신)
-//        member.setRefreshToken(refresh);
-//        member.setAccessToken(access); // 선택
-//        memberRepository.save(member);
-//
-//        return MemberLoginResponseDto.builder()
-//                .memberId(member.getMemberId())
-//                .memberName(member.getMemberName())
-//                .message("로그인 성공")
-//                .accessToken(access)
-//                .refreshToken(refresh)
-//                .build();
-//    }
+
 	//로그인
 	@Override
     public MemberAuthResult authenticate(MemberLoginRequestDto dto) {
@@ -484,48 +406,7 @@ public class MemberServiceImpl implements MemberService {
 		return "본인 확인이 완료되었습니다. 비밀번호를 재설정 해주세요";
 	}
 	
-//	@Transactional //하나의 트랜잭션으로 처리함(중간에 오류나면 전체 롤백)
-//	@Override
-//	//비밀번호 변경
-//	public void updatePassword(ResetPasswordUpdateRequestDto dto) {
-//	    String memberId = dto.getMemberId(); // 여기서 꺼냄
-//	    MemberEntity member = memberRepository.findByMemberId(memberId)
-//	        .orElseThrow(() -> new IllegalArgumentException("회원 없음"));
-//	    
-//	    //비밀번호 단뱡향 복호화
-//		//현재 비밀번호 검증
-//	    //만료요청이 아닐 경우에만 현재 비밀번호 체크
-//	    if(!dto.isExpiredChange()) {
-//	    	if(!passwordEncoder.matches(dto.getCurrentPassword(), member.getMemberPw())) {
-//				throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
-//			}
-//	    }
-//		//새 비밀번호와 비밀번호 확인 일치 여부
-//		if(!dto.getNewPassword().equals(dto.getNewPasswordCheck())) {
-//			throw new IllegalArgumentException("변경할 비밀번호가 일치하지 않습니다.");
-//		}
-//		//이전 비밀번호와 같은지 확인
-//		if(passwordEncoder.matches(dto.getNewPassword(), member.getMemberPw())) {
-//			throw new IllegalArgumentException("이전과 동일한 비밀번호는 사용할 수 없습니다.");
-//		}
-//		//새 비밀번호 암호화 및 저장
-//		String newEncodePw = passwordEncoder.encode(dto.getNewPassword());
-//		
-//		member.setMemberPw(newEncodePw);
-//		member.setPwUpdated(LocalDateTime.now()); //비밀번호 변경 시각 갱신
-//		
-//		memberRepository.save(member); //저장
-//	}
-//	
-//	
-//	//비밀번호 만료 로직
-//	public boolean isPasswordExpired(MemberEntity member) {
-//		LocalDateTime updatedAt = member.getPwUpdated();
-//		
-//		if(updatedAt == null) return true;	//비밀번호 변경일이 없으면 무조건 만료시키기
-//		
-//		return updatedAt.isBefore(LocalDateTime.now().minusDays(30));	//기준일 경과 30일
-//	}
+
 	
 	//휴대폰 번호로 회원 존재 여부 확인
 	public String checkPhoneNumber(String phoneNum) {
