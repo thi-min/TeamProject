@@ -66,25 +66,25 @@ const MapForm = () => {
 
   const fetchPlacesByRadius = (targetMap, center, keyword, radius) => {
     if (!targetMap) return;
-    
+
     // 기존 마커들 모두 제거
     markers.forEach(marker => marker.setMap(null));
     const newMarkers = [];
-    
+
     // currentLocation이 유효한 경우에만 마커를 추가
     if (currentLocation) {
-        const currentMarker = new window.kakao.maps.Marker({
-            position: currentLocation,
-            map: targetMap
-        });
-        newMarkers.push(currentMarker);
+      const currentMarker = new window.kakao.maps.Marker({
+        position: currentLocation,
+        map: targetMap
+      });
+      newMarkers.push(currentMarker);
     }
 
     const ps = new window.kakao.maps.services.Places();
     const searchOptions = {
-        location: center,
-        radius: radius,
-        sort: window.kakao.maps.services.SortBy.DISTANCE
+      location: center,
+      radius: radius,
+      sort: window.kakao.maps.services.SortBy.DISTANCE
     };
 
     ps.keywordSearch(keyword, (data, status) => {
@@ -97,11 +97,11 @@ const MapForm = () => {
           longitude: item.x
         }));
         setPlaces(searchResults);
-        
+
         const bounds = new window.kakao.maps.LatLngBounds();
-        
+
         if (currentLocation) {
-            bounds.extend(currentLocation);
+          bounds.extend(currentLocation);
         }
 
         searchResults.forEach(place => {
@@ -113,13 +113,13 @@ const MapForm = () => {
           newMarkers.push(marker);
           bounds.extend(markerPosition);
         });
-        
+
         setMarkers(newMarkers);
 
         if (searchResults.length > 0) {
-            targetMap.setBounds(bounds);
+          targetMap.setBounds(bounds);
         }
-        
+
       } else {
         console.log("반경 내 검색 결과가 없습니다.");
         setPlaces([]);
@@ -130,9 +130,9 @@ const MapForm = () => {
   const handleTabClick = (tabName) => {
     setActiveTab(tabName);
     setPlaces([]);
-    
+
     if (!map || !currentLocation) return;
-    
+
     if (tabName === 'hospital') {
       fetchPlacesByRadius(map, currentLocation, '동물병원', 3000);
     } else if (tabName === 'playground') {
@@ -145,7 +145,7 @@ const MapForm = () => {
       alert('검색어를 입력해주세요.');
       return;
     }
-    
+
     if (!map) {
       alert('지도가 로드되지 않았습니다.');
       return;
@@ -153,18 +153,18 @@ const MapForm = () => {
 
     markers.forEach(marker => marker.setMap(null));
     const newMarkers = [];
-    
+
     // 검색 시 현재 위치 마커를 유지하고 싶다면 이 부분을 추가
     if (currentLocation) {
-        const currentMarker = new window.kakao.maps.Marker({
-            position: currentLocation,
-            map: map,
-        });
-        newMarkers.push(currentMarker);
+      const currentMarker = new window.kakao.maps.Marker({
+        position: currentLocation,
+        map: map,
+      });
+      newMarkers.push(currentMarker);
     }
-    
+
     const ps = new window.kakao.maps.services.Places();
-    
+
     ps.keywordSearch(searchQuery, (data, status) => {
       if (status === window.kakao.maps.services.Status.OK) {
         const searchResults = data.map(item => ({
@@ -175,9 +175,9 @@ const MapForm = () => {
           longitude: item.x
         }));
         setPlaces(searchResults);
-        
+
         const bounds = new window.kakao.maps.LatLngBounds();
-        
+
         // 검색 결과 마커 추가
         searchResults.forEach(place => {
           const markerPosition = new window.kakao.maps.LatLng(place.latitude, place.longitude);
@@ -188,13 +188,13 @@ const MapForm = () => {
           newMarkers.push(marker);
           bounds.extend(markerPosition);
         });
-        
+
         setMarkers(newMarkers);
 
         if (searchResults.length > 0) {
-            map.setBounds(bounds);
+          map.setBounds(bounds);
         }
-        
+
       } else if (status === window.kakao.maps.services.Status.ZERO_RESULT) {
         alert('검색 결과가 없습니다.');
         setPlaces([]);
@@ -229,18 +229,26 @@ const MapForm = () => {
       </div>
       <div className="list-wrapper">
         <div className="list-header">
-          <div className="tab-menu">
-            <button className={`tab-button ${activeTab === 'hospital' ? 'active' : ''}`} onClick={() => handleTabClick('hospital')}>동물병원</button>
-            <button className={`tab-button ${activeTab === 'playground' ? 'active' : ''}`} onClick={() => handleTabClick('playground')}>애견놀이터</button>
-          </div>
-          <div className="search-box">
+          <div className="temp_form md w60p">
             <input
+              className="temp_input"
               type="text"
               placeholder="장소명 검색"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
-            <button onClick={handleSearch}>검색</button>
+          </div>
+          <button className="form-button-primary " onClick={handleSearch}>검색</button>
+        </div>
+        <div className="list-header">
+          <div className="tab-form_btn_box">
+            <button className={`tab-item ${activeTab === 'hospital' ? 'active' : ''}`} onClick={() => handleTabClick('hospital')}>동물병원</button>
+          </div>
+          <div className="tab-form_btn_box">
+            <button className={`tab-item ${activeTab === 'playground' ? 'active' : ''}`} onClick={() => handleTabClick('playground')}>애견놀이터</button>
+          </div>
+
+          <div className="search-box">
           </div>
         </div>
         <ul className="place-list">
@@ -249,8 +257,8 @@ const MapForm = () => {
               <li key={place.mapdataNum} onClick={() => handlePlaceClick(place.latitude, place.longitude)}>
                 <h4>{place.placeName}</h4>
                 <p>{place.address}</p>
-                <button 
-                  className="direction-button"
+                <button
+                  className="form-button-primary "
                   onClick={(e) => {
                     e.stopPropagation();
                     handleGetDirections(place.placeName);
