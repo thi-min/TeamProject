@@ -456,13 +456,11 @@ export default function MyPage() {
                       placeholder="예: 01012345678"
                     />
                   </div>
-                  <div className="temp_btn md">
+                  {/* <div className="temp_btn md">
                     <button type="button" className="btn">
-                      {/* onClick={onSavePhone}
-                    disabled={savingPhone} */}
                       휴대폰 인증
                     </button>
-                  </div>
+                  </div> */}
                 </div>
               </div>
 
