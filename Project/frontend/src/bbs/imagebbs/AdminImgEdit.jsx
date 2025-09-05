@@ -219,7 +219,7 @@ export default function AdminImgEdit() {
     <div className="bbs-write-container">
       <form className="bbs-write-form" onSubmit={handleSubmit}>
         <div className="bbs-row">
-          <div className="bbs-label">제목</div>
+          <div className="bbs-label">이름</div>
           <input
             type="text"
             className="bbs-title-input"
@@ -230,7 +230,7 @@ export default function AdminImgEdit() {
         </div>
 
         <div className="bbs-row">
-          <div className="bbs-label">내용</div>
+          <div className="bbs-label">설명</div>
           <div
             ref={editorRef}
             contentEditable

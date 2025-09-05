@@ -655,4 +655,34 @@ public class BbsAdminController {
         }
         return ids;
     }
+    
+    //안형주 추가
+    @PostMapping(value = "/imgadd", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<Map<String, Object>> createAdminPotoBbs(
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestPart("bbsDto") BbsDto dto,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files,
+            @RequestParam(value = "isRepresentative", required = false) List<String> isRepresentativeList
+    ) {
+        String token = authorizationHeader.replace("Bearer ", "");
+        if (!jwtTokenProvider.validateToken(token)) return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        String role = jwtTokenProvider.getRoleFromToken(token);
+        String adminId = jwtTokenProvider.getMemberIdFromToken(token);
+        if (!"ADMIN".equals(role)) return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
+        dto.setBulletinType(BoardType.POTO);
+        if (files == null || files.isEmpty()) throw new BbsException("이미지 게시판은 최소 1장 이상의 사진을 등록해야 합니다.");
+        if (isRepresentativeList == null || isRepresentativeList.size() != files.size())
+            throw new BbsException("대표 이미지 정보가 올바르지 않습니다.");
+
+        // ⚠️ 서비스 인터페이스/구현에 아래 메서드가 구현돼 있어야 합니다.
+        // BbsDto createPotoBbsByAdmin(BbsDto dto, String requesterAdminId, List<MultipartFile> files, List<String> isRepresentativeList)
+        BbsDto created = bbsService.createPotoBbsByAdmin(dto, adminId, files, isRepresentativeList);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("bulletinNum", created.getBulletinNum());
+        body.put("bbs", created);
+        return ResponseEntity.ok(body);
+    }
+
 }

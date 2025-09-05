@@ -87,6 +87,7 @@ import ImgWrite from "../../bbs/imagebbs/imgwrite";
 import AdminImgBoard from "../../bbs/imagebbs/AdminImgBoard";
 import AdminImgDetail from "../../bbs/imagebbs/AdminImgDetail";
 import AdminImgEdit from "../../bbs/imagebbs/AdminImgEdit.jsx";
+import AdminImgWrite from "../../bbs/imagebbs/AdminImgWrite.jsx";
 
 import {
   FundApplicationDetails,
@@ -400,6 +401,11 @@ const layoutRoutes = [
     path="/admin/bbs/image/edit/:id"
     element={<AdminImgEdit />}
   />,
+  <Route
+    key="admin-img-edit"
+    path="/admin/bbs/image/Write"
+    element={<AdminImgWrite />}
+  />,
 
   //사용자
   <Route key="login" path={routes.member.login.path} element={<LoginPage />} />, //로그인
@@ -527,17 +533,29 @@ const layoutRoutes = [
   <Route
     key="fundMainPage"
     path={routes.fund.root.path}
-    element={<RequireMember><FundMainPage /></RequireMember>}
+    element={
+      <RequireMember>
+        <FundMainPage />
+      </RequireMember>
+    }
   />,
   <Route
     key="fundForm"
     path={routes.fund.fundForm.path}
-    element={<RequireMember><FundApplicationForm /></RequireMember>}
+    element={
+      <RequireMember>
+        <FundApplicationForm />
+      </RequireMember>
+    }
   />,
   <Route
     key="goodsForm"
     path={routes.fund.goodsForm.path}
-    element={<RequireMember><GoodsApplicationForm /></RequireMember>}
+    element={
+      <RequireMember>
+        <GoodsApplicationForm />
+      </RequireMember>
+    }
   />,
   <Route
     key="regularForm"

@@ -219,19 +219,19 @@ export default function AdminImgDetail() {
 
         <div className="text_box">
           <div className="text_item">
-            <span className="t1">제목</span>
+            <span className="t1">이름</span>
             <span className="t2">
               {post.bbsTitle ?? post.bbstitle ?? post.title ?? "(제목 없음)"}
             </span>
           </div>
 
-          <div className="text_item">
+          {/* <div className="text_item">
             <span className="t1">작성자</span>
             <span className="t2">{writer}</span>
-          </div>
+          </div> */}
 
           <div className="text_item">
-            <span className="t1">내용</span>
+            <span className="t1">소개</span>
             <span
               className="t2"
               dangerouslySetInnerHTML={{

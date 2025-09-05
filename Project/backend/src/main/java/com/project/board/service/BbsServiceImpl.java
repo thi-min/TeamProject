@@ -1138,5 +1138,107 @@ public class BbsServiceImpl implements BbsService {
         }
     }
 
+    //안형주 추가
+    @Override
+    @Transactional
+    public BbsDto createPotoBbsByAdmin(BbsDto dto,
+                                       String requesterAdminId,
+                                       List<MultipartFile> files,
+                                       List<String> isRepresentativeList) {
+
+        // 0) 사전 검증
+        if (requesterAdminId == null || requesterAdminId.isBlank()) {
+            throw new BbsException("관리자 인증 정보가 필요합니다.");
+        }
+        if (files == null || files.isEmpty()) {
+            throw new BbsException("이미지 게시판은 최소 1장 이상의 사진을 등록해야 합니다.");
+        }
+        if (isRepresentativeList == null || isRepresentativeList.size() != files.size()) {
+            throw new BbsException("대표 이미지 정보가 올바르지 않습니다.");
+        }
+
+        // 1) 관리자 엔티티 조회
+        AdminEntity admin = adminRepository.findFirstByAdminId(requesterAdminId)
+                .orElseThrow(() -> new BbsException("관리자 정보가 존재하지 않습니다."));
+
+        // 2) 게시글(BbsEntity) 저장 — 관리자 작성자로 설정
+        BbsEntity savedEntity = BbsEntity.builder()
+                .bbstitle(dto.getBbsTitle())
+                .bbscontent(dto.getBbsContent())
+                .bulletinType(dto.getBulletinType() != null ? dto.getBulletinType() : BoardType.POTO)
+                .adminId(admin)              // ✅ 관리자 작성자 세팅 (memberNum 세팅 없음)
+                .registdate(LocalDateTime.now())
+                .viewers(0)
+                .build();
+        savedEntity = bbsRepository.save(savedEntity);
+
+        // 3) 파일 저장 + 대표 이미지 처리
+        ImageBbsEntity representativeImage = null;
+        List<String> allowedExtensions = List.of("jpg", "jpeg");
+        List<String> allowedMimeTypes = List.of("image/jpeg");
+        long maxSize = 5 * 1024 * 1024; // 5MB
+
+        for (int i = 0; i < files.size(); i++) {
+            MultipartFile file = files.get(i);
+            if (file == null || file.isEmpty()) continue;
+
+            String ext = getExtension(file.getOriginalFilename());
+            String contentType = file.getContentType();
+
+            if (ext == null || !allowedExtensions.contains(ext.toLowerCase())
+                    || contentType == null || !allowedMimeTypes.contains(contentType.toLowerCase())
+                    || file.getSize() > maxSize) {
+                throw new BbsException("첨부파일은 jpg 또는 jpeg 이미지만 가능합니다. (" + file.getOriginalFilename() + ")");
+            }
+
+            String savedName = UUID.randomUUID() + "." + ext;
+
+            // 3-1) 원본 저장(물리)
+            Path imgDir = resolveAndEnsureDir(getUploadDir(BoardType.POTO));
+            Path imgTarget = imgDir.resolve(savedName);
+            try {
+                file.transferTo(imgTarget.toFile());
+            } catch (IOException e) {
+                throw new BbsException("이미지 저장 실패: " + file.getOriginalFilename(), e);
+            }
+
+            // 3-2) 파일 메타 저장(DB에는 /DATA/... 경로만)
+            FileUpLoadEntity fileEntity = FileUpLoadEntity.builder()
+                    .bbs(savedEntity)
+                    .originalName(file.getOriginalFilename())
+                    .savedName(savedName)
+                    .path(getWebPath(BoardType.POTO, savedName)) // /DATA/bbs/imgBbs/...
+                    .size(file.getSize())
+                    .extension(ext)
+                    .build();
+            fileUploadRepository.save(fileEntity);
+
+            // 3-3) 대표 이미지: 썸네일 300x300 생성 + ImageBbsEntity 저장
+            if ("Y".equalsIgnoreCase(isRepresentativeList.get(i)) && representativeImage == null) {
+                Path thumbDir = resolveAndEnsureDir(thumbnailUploadDir);
+                Path thumbTarget = thumbDir.resolve(savedName);
+
+                createJpegThumbnail(imgTarget, thumbTarget, 300, 300);
+
+                ImageBbsEntity repImg = ImageBbsEntity.builder()
+                        .bbs(savedEntity)
+                        .thumbnailPath(getThumbnailWebPath(savedName))   // /DATA/bbs/thumbnail/...
+                        .imagePath(getWebPath(BoardType.POTO, savedName))// /DATA/bbs/imgBbs/...
+                        .build();
+                representativeImage = imageBbsRepository.save(repImg);
+            }
+        }
+
+        if (representativeImage == null) {
+            throw new BbsException("대표 이미지를 반드시 선택해야 합니다.");
+        }
+
+        // 4) 반환 DTO 보정
+        dto.setBulletinNum(savedEntity.getBulletinNum());
+        dto.setBulletinType(savedEntity.getBulletinType());
+        dto.setMemberNum(null); // 관리자 작성이므로 명시적 null
+        dto.setAdminId(admin.getAdminId());
+        return dto;
+    }
 
 }

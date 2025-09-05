@@ -65,7 +65,7 @@ public interface BbsService {
 
 	List<BbsSimpleResponseDto> getLatestNormalPosts();
 
-	
+	BbsDto createPotoBbsByAdmin(BbsDto dto, String requesterAdminId, List<MultipartFile> files, List<String> isRepresentativeList);
 
 }
 

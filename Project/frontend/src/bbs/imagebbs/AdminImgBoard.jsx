@@ -345,11 +345,16 @@ export default function AdminImgBoard() {
       </div>
 
       {/* 하단 버튼 (선택 삭제) */}
-      <div className="form_center_box solo">
-        <div className="temp_btn md">
+      <div className="form_center_box">
+        <div className="temp_btn md white">
           <button className="btn" onClick={handleDeleteSelected}>
             삭제
           </button>
+        </div>
+        <div className="temp_btn md">
+          <Link to="/admin/bbs/image/Write" className="btn">
+            게시글 작성
+          </Link>
         </div>
       </div>
     </div>
