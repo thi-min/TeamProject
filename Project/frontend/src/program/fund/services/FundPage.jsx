@@ -1497,8 +1497,10 @@ const MemberFundDetail = () => {
   const [message, setMessage] = useState(null);
 
   const authAxios = api.create({
-    baseURL: "http://127.0.0.1:8090/",
-    headers: { Authorization: `Bearer ${localStorage.getItem("accessToken")}` },
+
+    baseURL: 'http://127.0.0.1:8090',
+    headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
+
   });
 
   const fetchFundDetail = async () => {
