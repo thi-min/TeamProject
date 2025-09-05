@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,15 +53,23 @@ public class BannerServiceImpl implements BannerService {
         String fileName = saveFile(file);
 
         AdminEntity admin = AdminEntity.builder().adminNum(5L).build();
+        
+        LocalDate startDate = (dto.getStartDate() != null)
+                ? dto.getStartDate()
+                : LocalDate.now();
 
+        LocalDate endDate = (dto.getEndDate() != null)
+                ? dto.getEndDate()
+                : null;
+        
         BannerEntity banner = BannerEntity.builder()
                 .title(dto.getTitle())
                 .subTitle(dto.getSubTitle())
                 .altText(dto.getAltText())
                 .linkUrl(dto.getLinkUrl())
                 .imageUrl(fileName)
-                .startDate(dto.getStartDate())
-                .endDate(dto.getEndDate())
+                .startDate(startDate)
+                .endDate(endDate)
                 .visible(dto.getVisible())
                 .createdAt(LocalDateTime.now())
                 .admin(admin)
@@ -82,6 +91,12 @@ public class BannerServiceImpl implements BannerService {
     public BannerResponseDto getDetail(Long id) {
         BannerEntity banner = bannerRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("배너 없음"));
+        
+        LocalDate today = LocalDate.now();
+        if (banner.getEndDate() != null && banner.getEndDate().isBefore(today)) {
+            banner.setVisible(false); // 조회 시점에서만 변경 (DB 반영X)
+        }
+
         return BannerResponseDto.fromEntity(banner);
     }
 
@@ -95,7 +110,7 @@ public class BannerServiceImpl implements BannerService {
         banner.setSubTitle(dto.getSubTitle());
         banner.setAltText(dto.getAltText());
         banner.setLinkUrl(dto.getLinkUrl());
-        banner.setStartDate(dto.getStartDate());
+        banner.setStartDate(dto.getStartDate() != null ? dto.getStartDate() : LocalDate.now());
         banner.setEndDate(dto.getEndDate());
         banner.setVisible(dto.getVisible());
         banner.setUpdatedAt(LocalDateTime.now());
@@ -175,7 +190,8 @@ public class BannerServiceImpl implements BannerService {
     //활성상태 베너 조회
     @Override
     public List<BannerResponseDto> getActiveBanners() {
-        return bannerRepository.findByVisibleTrue().stream()
+    	LocalDate today = LocalDate.now();
+    	return bannerRepository.findActiveBanners(today).stream()
                 .map(BannerResponseDto::fromEntity)
                 .collect(Collectors.toList());
     }

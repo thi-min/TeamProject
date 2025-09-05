@@ -39,7 +39,8 @@ function isMemberRoot(pathname) {
 
   return (
     pathname.startsWith("/member") ||
-    pathname.startsWith("/reserve") 
+    pathname.startsWith("/reserve") ||
+    pathname.startsWith("/funds") 
   );
 
 }

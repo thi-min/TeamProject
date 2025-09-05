@@ -527,17 +527,17 @@ const layoutRoutes = [
   <Route
     key="fundMainPage"
     path={routes.fund.root.path}
-    element={<FundMainPage />}
+    element={<RequireMember><FundMainPage /></RequireMember>}
   />,
   <Route
     key="fundForm"
     path={routes.fund.fundForm.path}
-    element={<FundApplicationForm />}
+    element={<RequireMember><FundApplicationForm /></RequireMember>}
   />,
   <Route
     key="goodsForm"
     path={routes.fund.goodsForm.path}
-    element={<GoodsApplicationForm />}
+    element={<RequireMember><GoodsApplicationForm /></RequireMember>}
   />,
   <Route
     key="regularForm"

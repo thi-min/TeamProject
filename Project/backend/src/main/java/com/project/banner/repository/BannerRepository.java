@@ -18,7 +18,7 @@ public interface BannerRepository extends JpaRepository<BannerEntity, Long> {
     void deleteByBannerIdIn(List<Long> ids);
     
     // 사용자 노출용 (메인페이지)
-    List<BannerEntity> findByVisibleTrueAndStartDateBeforeAndEndDateAfter(LocalDate today1, LocalDate today2);
+    // List<BannerEntity> findByVisibleTrueAndStartDateBeforeAndEndDateAfter(LocalDate today1, LocalDate today2);
     
     // 관리자용 전체배너 조회
     Page<BannerEntity> findAll(Pageable pageable);
@@ -26,4 +26,11 @@ public interface BannerRepository extends JpaRepository<BannerEntity, Long> {
     //25.09.01 안형주 추가
     //활성상태 베너 조회
     List<BannerEntity> findByVisibleTrue();
+    
+    // 사용자 노출용 (메인페이지)
+    @Query("SELECT b FROM BannerEntity b " +
+    	       "WHERE b.visible = true " +
+    	       "AND b.startDate <= :today " +
+    	       "AND (b.endDate IS NULL OR b.endDate >= :today)")
+    	List<BannerEntity> findActiveBanners(@Param("today") LocalDate today);
 }
