@@ -112,7 +112,7 @@ export default function FindPasswordPage() {
       <div className="form_top_box">
         <div className="form_top_item">
           <i className="form_icon type1"></i>
-          <div className="form_title">아이디 찾기</div>
+          <div className="form_title">비밀번호 찾기</div>
           <div className="form_desc">
             <p>이름과, 핸드폰번호를 입력해주세요.</p>
           </div>
