@@ -9,7 +9,7 @@ export default function AdminBbs() {
     <div className="admin_page">
       <div className="form_top_box">
         <div className="form_top_item">
-          <div className="form_icon bbs"></div>
+          <div className="form_icon type8"></div>
           <div className="form_title">게시판 관리</div>
         </div>
       </div>
@@ -17,13 +17,13 @@ export default function AdminBbs() {
       <div className="bbs_content">게시판을 선택해주세요.</div>
       <div className="admin_area">
         <ul className="my_menu">
-          <li className="link_item type1">
+          <li className="link_item type11">
             <Link to="/admin/bbs/image">센터 아이들</Link>
           </li>
           <li className="link_item type2">
             <Link to="/admin/bbs/qna">QnA 게시판</Link>
           </li>
-          <li className="link_item type3">
+          <li className="link_item type9">
             <Link to="/admin/bbs/normal">공지사항 게시판</Link>
           </li>
         </ul>

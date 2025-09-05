@@ -189,8 +189,8 @@ export default function AdminImgBoard() {
       {/* 사용자 페이지와 동일한 상단 타이틀 마크업/클래스 */}
       <div className="form_top_box">
         <div className="form_top_item">
-          <div className="form_icon bbs"></div>
-          <div className="form_title">이미지 게시판 관리</div>
+          <div className="form_icon adopt_icon"></div>
+          <div className="form_title">센터 아이들 관리</div>
         </div>
       </div>
 

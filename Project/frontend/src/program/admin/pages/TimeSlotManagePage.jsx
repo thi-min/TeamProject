@@ -76,24 +76,26 @@ const TimeSlotManagePage = () => {
 
   // 규칙 관련
   const toggleRule = (type, slotId, checked) => {
-  setRules((prev) => {
-    const updated = { ...prev };
+    setRules((prev) => {
+      const updated = { ...prev };
 
-    if (checked) {
-      // 1. 현재 type에 slotId 추가
-      updated[type] = [...(updated[type] || []), slotId];
+      if (checked) {
+        // 1. 현재 type에 slotId 추가
+        updated[type] = [...(updated[type] || []), slotId];
 
-      // 2. 반대 type에서 slotId 제거 (중복 방지)
-      const otherType = type === "SMALL" ? "LARGE" : "SMALL";
-      updated[otherType] = (updated[otherType] || []).filter((id) => id !== slotId);
-    } else {
-      // 체크 해제 → 해당 type 배열에서 제거
-      updated[type] = (updated[type] || []).filter((id) => id !== slotId);
-    }
+        // 2. 반대 type에서 slotId 제거 (중복 방지)
+        const otherType = type === "SMALL" ? "LARGE" : "SMALL";
+        updated[otherType] = (updated[otherType] || []).filter(
+          (id) => id !== slotId
+        );
+      } else {
+        // 체크 해제 → 해당 type 배열에서 제거
+        updated[type] = (updated[type] || []).filter((id) => id !== slotId);
+      }
 
-    return updated;
-  });
-};
+      return updated;
+    });
+  };
 
   const clearAll = (type) => setRules((p) => ({ ...p, [type]: [] }));
 
@@ -121,7 +123,10 @@ const TimeSlotManagePage = () => {
       return alert("시작/종료 시간을 입력하세요.");
     }
 
-    if (!isValidStep(newForm.startTime, 3600) || !isValidStep(newForm.endTime, 3600)) {
+    if (
+      !isValidStep(newForm.startTime, 3600) ||
+      !isValidStep(newForm.endTime, 3600)
+    ) {
       return alert("시간은 1시간 단위로만 설정 가능합니다.");
     }
 
@@ -146,8 +151,8 @@ const TimeSlotManagePage = () => {
   const startEdit = (slot) => {
     setEditSlotId(slot.timeSlotId);
     setEditForm({
-      startTime: slot.startTime.slice(0,5), // "09:00"
-      endTime: slot.endTime.slice(0,5),
+      startTime: slot.startTime.slice(0, 5), // "09:00"
+      endTime: slot.endTime.slice(0, 5),
       capacity: slot.capacity,
       enabled: !!slot.enabled,
     });
@@ -160,14 +165,20 @@ const TimeSlotManagePage = () => {
 
   const handleEditChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setEditForm((p) => ({ ...p, [name]: type === "checkbox" ? checked : value }));
+    setEditForm((p) => ({
+      ...p,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const saveEdit = async (id) => {
     try {
       const original = slots.find((s) => s.timeSlotId === id);
 
-      if (!isValidStep(editForm.startTime, 3600) || !isValidStep(editForm.endTime, 3600)) {
+      if (
+        !isValidStep(editForm.startTime, 3600) ||
+        !isValidStep(editForm.endTime, 3600)
+      ) {
         return alert("시간은 1시간 단위로만 설정 가능합니다.");
       }
 
@@ -208,7 +219,7 @@ const TimeSlotManagePage = () => {
     <div className="tspage">
       <div className="form_top_box">
         <div className="form_top_item">
-          <div className="form_icon timeslot"></div>
+          <div className="form_icon type11"></div>
           <div className="form_title">시간대 운영 관리</div>
         </div>
       </div>
@@ -216,7 +227,9 @@ const TimeSlotManagePage = () => {
       {/* 탭 */}
       <div className="ts-tabs" style={{ marginBottom: "1rem" }}>
         <button
-          className={`ts-btn ${selectedType === "LAND" ? "ts-btn primary" : ""}`}
+          className={`ts-btn ${
+            selectedType === "LAND" ? "ts-btn primary" : ""
+          }`}
           onClick={() => setSelectedType("LAND")}
         >
           놀이터
@@ -233,63 +246,76 @@ const TimeSlotManagePage = () => {
       {/* 새 시간대 추가 */}
       <div className="ts-card" style={{ marginBottom: "1rem" }}>
         <strong>새 시간대 추가</strong>
-        <form onSubmit={submitNew} className="ts-form" style={{ marginTop: "0.5rem" }}>
-          
+        <form
+          onSubmit={submitNew}
+          className="ts-form"
+          style={{ marginTop: "0.5rem" }}
+        >
           <div className="form-group">
             <label>시작</label>
-            <input 
-              type="time" 
-              name="startTime" 
-              value={newForm.startTime} 
-              onChange={handleNewChange} 
-              required 
-              step="3600" 
+            <input
+              type="time"
+              name="startTime"
+              value={newForm.startTime}
+              onChange={handleNewChange}
+              required
+              step="3600"
             />
           </div>
 
           <div className="form-group">
             <label>종료</label>
-            <input 
-              type="time" 
-              name="endTime" 
-              value={newForm.endTime} 
-              onChange={handleNewChange} 
-              required 
-              step="3600" 
+            <input
+              type="time"
+              name="endTime"
+              value={newForm.endTime}
+              onChange={handleNewChange}
+              required
+              step="3600"
             />
           </div>
 
           <div className="form-group">
             <label>정원</label>
-            <input 
-              type="number" 
-              name="capacity" 
-              value={newForm.capacity} 
-              min={1} 
-              onChange={handleNewChange} 
+            <input
+              type="number"
+              name="capacity"
+              value={newForm.capacity}
+              min={1}
+              onChange={handleNewChange}
             />
           </div>
 
           <div className="form-group">
             <label>활성</label>
-            <input 
-              type="checkbox" 
-              name="enabled" 
-              checked={newForm.enabled} 
-              onChange={handleNewChange} 
+            <input
+              type="checkbox"
+              name="enabled"
+              checked={newForm.enabled}
+              onChange={handleNewChange}
             />
           </div>
 
-          <button type="submit" className="ts-btn primary">추가</button>
+          <button type="submit" className="ts-btn primary">
+            추가
+          </button>
         </form>
       </div>
 
       {/* 규칙 버튼 */}
       {selectedType === "LAND" && (
         <div className="ts-actions">
-          <button className="ts-btn" onClick={() => clearAll("SMALL")}>소형견 전체 해제</button>
-          <button className="ts-btn" onClick={() => clearAll("LARGE")}>대형견 전체 해제</button>
-          <button className="ts-btn ts-btn primary" onClick={saveRules} disabled={savingRules}>
+          <button className="ts-btn" onClick={() => clearAll("SMALL")}>
+            소형견 전체 해제
+          </button>
+          <button className="ts-btn" onClick={() => clearAll("LARGE")}>
+            대형견 전체 해제
+          </button>
+          <button
+            className="ts-btn ts-btn primary"
+            onClick={saveRules}
+            disabled={savingRules}
+          >
             {savingRules ? "저장 중…" : "규칙 저장"}
           </button>
         </div>
@@ -297,7 +323,9 @@ const TimeSlotManagePage = () => {
 
       {/* 테이블 */}
       <div className="table type2 responsive border">
-        <table className={`ts-table ${selectedType === "LAND" ? "land" : "vol"}`}>
+        <table
+          className={`ts-table ${selectedType === "LAND" ? "land" : "vol"}`}
+        >
           <thead>
             <tr>
               <th>ID</th>
@@ -321,7 +349,7 @@ const TimeSlotManagePage = () => {
                         name="startTime"
                         value={editForm.startTime}
                         onChange={handleEditChange}
-                        step="3600" 
+                        step="3600"
                       />
                       ~
                       <input
@@ -329,7 +357,7 @@ const TimeSlotManagePage = () => {
                         name="endTime"
                         value={editForm.endTime}
                         onChange={handleEditChange}
-                        step="3600" 
+                        step="3600"
                       />
                     </>
                   ) : (
@@ -358,18 +386,22 @@ const TimeSlotManagePage = () => {
                       checked={editForm.enabled}
                       onChange={handleEditChange}
                     />
+                  ) : s.enabled ? (
+                    <span className="badge-yes">Y</span>
                   ) : (
-                    s.enabled ? <span className="badge-yes">Y</span> : <span className="badge-no">N</span>
+                    <span className="badge-no">N</span>
                   )}
                 </td>
-                
+
                 {selectedType === "LAND" && (
                   <td>
                     <input
                       type="checkbox"
                       checked={(rules.SMALL || []).includes(s.timeSlotId)}
-                      disabled={editSlotId === s.timeSlotId} 
-                      onChange={(e) => toggleRule("SMALL", s.timeSlotId, e.target.checked)}
+                      disabled={editSlotId === s.timeSlotId}
+                      onChange={(e) =>
+                        toggleRule("SMALL", s.timeSlotId, e.target.checked)
+                      }
                     />
                   </td>
                 )}
@@ -379,49 +411,64 @@ const TimeSlotManagePage = () => {
                     <input
                       type="checkbox"
                       checked={(rules.LARGE || []).includes(s.timeSlotId)}
-                      disabled={editSlotId === s.timeSlotId} 
-                      onChange={(e) => toggleRule("LARGE", s.timeSlotId, e.target.checked)}
+                      disabled={editSlotId === s.timeSlotId}
+                      onChange={(e) =>
+                        toggleRule("LARGE", s.timeSlotId, e.target.checked)
+                      }
                     />
                   </td>
                 )}
 
                 <td>
                   {editSlotId === s.timeSlotId ? (
-                    <><div className="button-group">
-                      <button className="ts-btn ts-btn primary" onClick={() => saveEdit(s.timeSlotId)}>저장</button>
-                      <button className="ts-btn" onClick={cancelEdit}>취소</button>
-                    </div>
+                    <>
+                      <div className="button-group">
+                        <button
+                          className="ts-btn ts-btn primary"
+                          onClick={() => saveEdit(s.timeSlotId)}
+                        >
+                          저장
+                        </button>
+                        <button className="ts-btn" onClick={cancelEdit}>
+                          취소
+                        </button>
+                      </div>
                     </>
                   ) : (
-                    <><div className="button-group">
-                       <button 
-                      className="ts-btn" 
-                      style={{ opacity: s.hasFutureReserve ? 0.5 : 1 }} // 회색 느낌만 주기
-                      onClick={() => {
-                        if (s.hasFutureReserve) {
-                          alert("이 시간대에는 이미 예약이 있어 수정할 수 없습니다.");
-                        } else {
-                          startEdit(s);
-                        }
-                      }}
-                    >
-                      수정
-                    </button>
+                    <>
+                      <div className="button-group">
+                        <button
+                          className="ts-btn"
+                          style={{ opacity: s.hasFutureReserve ? 0.5 : 1 }} // 회색 느낌만 주기
+                          onClick={() => {
+                            if (s.hasFutureReserve) {
+                              alert(
+                                "이 시간대에는 이미 예약이 있어 수정할 수 없습니다."
+                              );
+                            } else {
+                              startEdit(s);
+                            }
+                          }}
+                        >
+                          수정
+                        </button>
 
-                    <button 
-                      className="ts-btn danger" 
-                      style={{ opacity: s.hasFutureReserve ? 0.5 : 1 }}
-                      onClick={() => {
-                        if (s.hasFutureReserve) {
-                          alert("이 시간대에는 이미 예약이 있어 삭제할 수 없습니다.");
-                        } else {
-                          remove(s.timeSlotId);
-                        }
-                      }}
-                    >
-                      삭제
-                    </button>
-                    </div>
+                        <button
+                          className="ts-btn danger"
+                          style={{ opacity: s.hasFutureReserve ? 0.5 : 1 }}
+                          onClick={() => {
+                            if (s.hasFutureReserve) {
+                              alert(
+                                "이 시간대에는 이미 예약이 있어 삭제할 수 없습니다."
+                              );
+                            } else {
+                              remove(s.timeSlotId);
+                            }
+                          }}
+                        >
+                          삭제
+                        </button>
+                      </div>
                     </>
                   )}
                 </td>
@@ -430,7 +477,10 @@ const TimeSlotManagePage = () => {
 
             {slots.length === 0 && (
               <tr>
-                <td colSpan={selectedType === "LAND" ? 7 : 5} style={{ textAlign: "center", padding: "12px" }}>
+                <td
+                  colSpan={selectedType === "LAND" ? 7 : 5}
+                  style={{ textAlign: "center", padding: "12px" }}
+                >
                   표시할 시간대가 없습니다.
                 </td>
               </tr>

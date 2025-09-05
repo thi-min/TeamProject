@@ -75,12 +75,10 @@ function NoticeBbs() {
     <div className="bbs-container">
       <div className="form_top_box">
         <div className="form_top_item">
-          <div className="form_icon bbs"></div>
-          <div className="form_title">게시판 관리</div>
+          <div className="form_icon type8"></div>
+          <div className="form_title">공지사항 게시판</div>
         </div>
       </div>
-      <h3>공지사항</h3>
-
       {/* 🔍 검색창 */}
       <div className="search_bar_box">
         <div className="temp_form_box md">
