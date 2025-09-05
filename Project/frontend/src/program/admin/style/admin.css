@@ -24,6 +24,18 @@
 .my_menu .link_item.type5 button:before{background-image:url('../images/board_management.png');}
 .my_menu .link_item.type6 a:before,
 .my_menu .link_item.type6 button:before{background-image:url('../images/reservation_schedule.png');}
+.my_menu .link_item.type7 a:before,
+.my_menu .link_item.type7 button:before{background-image:url('../images/xday_icon.png');}
+.my_menu .link_item.type8 a:before,
+.my_menu .link_item.type8 button:before{background-image:url('../images/baneer_icon.png');}
+.my_menu .link_item.type9 a:before,
+.my_menu .link_item.type9 button:before{background-image:url('../images/chat_icon.png');}
+.my_menu .link_item.type10 a:before,
+.my_menu .link_item.type10 button:before{background-image:url('../images/fund_icon.png');}
+.my_menu .link_item.type11 a:before,
+.my_menu .link_item.type11 button:before{background-image:url('../images/ami_icon.png');}
+.my_menu .link_item.type12 a:before,
+.my_menu .link_item.type12 button:before{background-image:url('../images/memout_icon.png');}
 
 .form_item .form_login_wrap input[type="text"],
 .form_item .form_login_wrap input[type="tel"],

@@ -84,7 +84,11 @@ function NoticeBbs() {
       {/* 🔍 검색창 */}
       <div className="search_bar_box">
         <div className="temp_form_box md">
-          <select className="temp_select"  value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+          <select
+            className="temp_select"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
             <option value="all">전체</option>
             <option value="title">제목</option>
             <option value="content">내용</option>
@@ -101,7 +105,9 @@ function NoticeBbs() {
           />
         </div>
         <div className="temp_btn md">
-        <button className="btn" onClick={handleSearch}>조회</button>
+          <button className="btn" onClick={handleSearch}>
+            조회
+          </button>
         </div>
       </div>
 
@@ -129,7 +135,9 @@ function NoticeBbs() {
                 {/* 제목 클릭 시 상세 페이지로 이동 */}
                 <td
                   style={{ cursor: "pointer", color: "#007bff" }}
-                  onClick={() => navigate(`/admin/bbs/normal/${post.bulletinNum}`)}
+                  onClick={() =>
+                    navigate(`/admin/bbs/normal/${post.bulletinNum}`)
+                  }
                 >
                   {post.bbsTitle}
                 </td>
@@ -139,7 +147,10 @@ function NoticeBbs() {
             ))
           ) : (
             <tr>
-              <td colSpan={4} style={{ textAlign: "center", padding: "90px 0" }}>
+              <td
+                colSpan={4}
+                style={{ textAlign: "center", padding: "90px 0" }}
+              >
                 등록된 공지가 없습니다.
               </td>
             </tr>
@@ -149,7 +160,10 @@ function NoticeBbs() {
 
       {/* 📌 페이지네이션 */}
       <div className="pagination">
-        <button disabled={page === 0} onClick={() => handlePageChange(page - 1)}>
+        <button
+          disabled={page === 0}
+          onClick={() => handlePageChange(page - 1)}
+        >
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
 
@@ -163,19 +177,22 @@ function NoticeBbs() {
           </button>
         ))}
 
-        <button disabled={page === Math.max(totalPages, 1) - 1} onClick={() => handlePageChange(page + 1)}>
+        <button
+          disabled={page === Math.max(totalPages, 1) - 1}
+          onClick={() => handlePageChange(page + 1)}
+        >
           <FontAwesomeIcon icon={faChevronRight} />
         </button>
       </div>
       {/* ✍ 글쓰기 버튼 */}
       {isAdmin && (
         <div className="form_center_box solo">
-        <div className="temp_btn md">
-          <button className="btn" onClick={handleWrite}>
-            글쓰기
-          </button>
+          <div className="temp_btn md">
+            <button className="btn" onClick={handleWrite}>
+              글쓰기
+            </button>
+          </div>
         </div>
-      </div>
       )}
     </div>
   );

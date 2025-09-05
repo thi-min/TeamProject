@@ -68,7 +68,7 @@ function QnaBbs() {
     <div className="bbs-container">
       <div className="form_top_box">
         <div className="form_top_item">
-          <div className="form_icon bbs"></div>
+          <div className="form_icon type9"></div>
           <div className="form_title">Q&A 게시판</div>
         </div>
       </div>
@@ -76,7 +76,11 @@ function QnaBbs() {
       {/* 검색창 */}
       <div className="search_bar_box">
         <div className="temp_form_box md">
-          <select className="temp_select" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+          <select
+            className="temp_select"
+            value={searchType}
+            onChange={(e) => setSearchType(e.target.value)}
+          >
             <option value="all">전체</option>
             <option value="title">제목</option>
             <option value="content">내용</option>
@@ -92,7 +96,9 @@ function QnaBbs() {
           />
         </div>
         <div className="temp_btn md">
-          <button className="btn" onClick={handleSearch}>조회</button>
+          <button className="btn" onClick={handleSearch}>
+            조회
+          </button>
         </div>
       </div>
 
@@ -118,15 +124,27 @@ function QnaBbs() {
               <tr key={post.bulletinNum}>
                 <td>{post.bulletinNum}</td>
                 <td>
-                  <Link style={{ width: "100%", height: "100%" }} to={`/bbs/qna/${post.bulletinNum}`}>{post.bbsTitle}</Link>
+                  <Link
+                    style={{ width: "100%", height: "100%" }}
+                    to={`/bbs/qna/${post.bulletinNum}`}
+                  >
+                    {post.bbsTitle}
+                  </Link>
                 </td>
                 <td>{post.memberName || "익명"}</td>
-                <td>{post.registDate ? new Date(post.registDate).toLocaleDateString() : ""}</td>
+                <td>
+                  {post.registDate
+                    ? new Date(post.registDate).toLocaleDateString()
+                    : ""}
+                </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={4} style={{ textAlign: "center", padding: "90px 0" }}>
+              <td
+                colSpan={4}
+                style={{ textAlign: "center", padding: "90px 0" }}
+              >
                 등록된 질문이 없습니다.
               </td>
             </tr>
@@ -134,10 +152,12 @@ function QnaBbs() {
         </tbody>
       </table>
 
-
       {/* 페이지네이션 */}
       <div className="pagination">
-        <button disabled={page === 0} onClick={() => handlePageChange(page - 1)}>
+        <button
+          disabled={page === 0}
+          onClick={() => handlePageChange(page - 1)}
+        >
           <FontAwesomeIcon icon={faChevronLeft} />
         </button>
 
