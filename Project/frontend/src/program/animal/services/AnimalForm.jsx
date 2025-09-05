@@ -237,6 +237,11 @@ const AnimalForm = () => {
                 <div>
                     <h3>{isCreateView ? "동물 정보 등록" : "동물 정보 수정"}</h3>
 
+
+
+
+
+
                     <form onSubmit={handleSubmit}>
                         <div className="form_wrap">
                             <table className="table type2 responsive border">
@@ -334,28 +339,28 @@ const AnimalForm = () => {
                         </colgroup>
                         <tbody>
                             <tr>
-                                <th scope="row">이름</th>
-                                <div className="form_desc">{animalDetail.animalName}</div>
+                                <th>이름</th>
+                                <td>{animalDetail.animalName}</td>
                             </tr>
                             <tr>
-                                <th scope="row">견종</th>
-                                <div className="form_desc">{animalDetail.animalBreed}</div>
+                                <th>견종</th>
+                                <td>{animalDetail.animalBreed}</td>
                             </tr>
                             <tr>
-                                <th scope="row">성별</th>
-                                <div className="form_desc">{animalDetail.animalSex}</div>
+                                <th>성별</th>
+                                <td>{animalDetail.animalSex}</td>
                             </tr>
                             <tr>
                                 <th scope="row">입소일</th>
-                                <div className="form_desc">{animalDetail.animalDate}</div>
+                                <td>{animalDetail.animalDate}</td>
                             </tr>
                             <tr>
-                                <th scope="row">특이사항</th>
-                                <div className="form_desc">{animalDetail.animalContent}</div>
+                                <th>특이사항</th>
+                                <td>{animalDetail.animalContent}</td>
                             </tr>
                             <tr>
-                                <th scope="row">상태</th>
-                                <div className="form_desc">{animalDetail.animalState}</div>
+                                <th>상태</th>
+                                <td>{animalDetail.animalState}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -371,11 +376,13 @@ const AnimalForm = () => {
                         </div>
                         {isAdmin && (
                             <>
+                            <div className="right_btn_box">
                                 <div className="temp_btn md">
                                     <button onClick={() => navigate(`/admin/animal/update/${animalDetail.animalId}`)} className="btn">수정</button>
                                 </div>
                                 <div className="temp_btn md">
                                     <button onClick={handleDelete} className="btn">삭제</button>
+                                </div>
                                 </div>
                             </>
                         )}

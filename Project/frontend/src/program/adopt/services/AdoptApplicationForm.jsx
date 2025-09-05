@@ -44,7 +44,7 @@ const AdoptApplicationForm = () => {
     const isUpdateView = location.pathname.includes('/adopt/update/');
 
     const authAxios = api.create({
-        baseURL: 'http://localhost:8090/',
+        baseURL: 'http://127.0.0.1:8090/',
         headers: { Authorization: `Bearer ${localStorage.getItem('accessToken')}` }
     });
 
@@ -463,7 +463,7 @@ const AdoptApplicationForm = () => {
                     </div>
                     {isAdmin && (
                         <>
-                            
+                            <div className="right_btn_box">
                             <div className="temp_btn md">
                                 <button type="button" className="btn" onClick={handleDelete}>
                                     삭제
@@ -473,6 +473,7 @@ const AdoptApplicationForm = () => {
                                 <button type="button" className="btn" onClick={() => navigate(`/admin/adopt/update/${adoptDetail.adoptNum}`)}>
                                     수정
                                 </button>
+                            </div>
                             </div>
                         </>
                     )}

@@ -6,7 +6,7 @@
 }
 
 .map-wrapper {
-  flex: 2; /* 지도가 더 넓게 차지 */
+  flex: 1.5; /* 지도가 더 넓게 차지 */
 }
 
 #map {
@@ -118,4 +118,33 @@
 
 .direction-button:hover {
   background-color: #3b6ed3;
+}
+.tab-menu {
+  display: flex;
+  justify-content: space-around;
+  margin-bottom: 10px;
+  border-bottom: 2px solid #ddd;
+}
+
+.tab-item {
+  flex: 1;
+  padding: 10px 0;
+  text-align: center;
+  cursor: pointer;
+  background: none;
+  border: none;
+  font-size: 16px;
+  color: #666;
+  transition: all 0.3s ease;
+  margin: 5px;
+}
+
+.tab-item:hover {
+  color: #333;
+}
+
+.tab-item.active {
+  font-weight: bold;
+  color: #2196f3;
+  border-bottom: 3px solid #2196f3;
 }
