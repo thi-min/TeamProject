@@ -28,13 +28,13 @@ function NoticeBbs() {
     try {
       const response = await axios.get("/admin/bbs/bbslist", {
         params: {
-          type: "NORMAL",         // 공지사항 게시판
+          type: "NORMAL", // 공지사항 게시판
           searchType: null,
           bbstitle: null,
           bbscontent: null,
           page: pageNumber,
-          size: 10
-        }
+          size: 10,
+        },
       });
 
       setPosts(response.data.content);
@@ -57,7 +57,7 @@ function NoticeBbs() {
 
   return (
     <div className="notice-container">
-      <h2>📢 공지사항 게시판</h2>
+      <h2>📢 </h2>
 
       {isAdmin && (
         <div className="notice-top-btns">
@@ -78,7 +78,9 @@ function NoticeBbs() {
             posts.map((post) => (
               <tr
                 key={post.bulletinNum}
-                onClick={() => window.location.href = `/admin/notice/view/${post.bulletinNum}`}
+                onClick={() =>
+                  (window.location.href = `/admin/notice/view/${post.bulletinNum}`)
+                }
                 style={{ cursor: "pointer" }}
               >
                 <td>{post.bulletinNum}</td>

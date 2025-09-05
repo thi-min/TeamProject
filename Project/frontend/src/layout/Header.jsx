@@ -69,7 +69,7 @@ const Header = () => {
               alt="로고"
               className="logo_image"
             />
-            <span className="logo_text">함께마당</span>
+            <span className="logo_text">함개마당</span>
           </Link>
         </h1>
         <div className="nav_box">
