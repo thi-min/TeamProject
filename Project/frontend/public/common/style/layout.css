@@ -27,8 +27,9 @@ body{font-size:16px;line-height:28px;letter-spacing:0;font-weight:400;font-famil
 
 .admin_box .admin_link{line-height:30px;color:#333;}
 
-.info_box{display:inline-block;position:relative;vertical-align:top;box-sizing:border-box;}
-.info_box .today_box{display:inline-block;margin-right:12px;vertical-align:top;box-sizing:border-box;}
+.info_box{display:flex;justify-content:flex-end;align-items:center;position:relative;vertical-align:top;box-sizing:border-box;}
+.info_box .link_item{margin-right:12px;}
+.info_box .today_box{display:inline-block;margin-right:12px;margin-left:6px;vertical-align:top;box-sizing:border-box;}
 .info_box .today_box .today{font-size:16px;line-height:30px;font-weight:400;color:#333;}
 .info_box .weather_inner{position:relative;display:inline-flex;gap:8px;box-sizing:border-box;vertical-align:top;}
 .info_box .weather_inner span{display:inline-block;position:relative;vertical-align:top;font-weight:400;font-size:16px;line-height:30px;}

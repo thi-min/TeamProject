@@ -22,10 +22,10 @@ export default function AdminPage() {
             <Link to="/admin/membersList">회원 관리</Link>
           </li>
           <li className="link_item type3">
-            <Link to="/admin/reserve/land">놀이터 관리</Link>
+            <Link to="/admin/reserve/land">놀이터 예약 관리</Link>
           </li>
           <li className="link_item type4">
-            <Link to="/admin/reserve/volunteer">봉사 관리</Link>
+            <Link to="/admin/reserve/volunteer">봉사 예약 관리</Link>
           </li>
           <li className="link_item type5">
             <Link to="/admin/bbs">게시판 관리</Link>
