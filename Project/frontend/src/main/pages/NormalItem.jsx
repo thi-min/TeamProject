@@ -24,7 +24,7 @@ export default function LatestNotice() {
     <div className="bbs_box">
       <div className="bbs_title_box">
         <span>공지사항</span>
-        <Link to="" className="bbs_move_btn">
+        <Link to="/bbs/normal" className="bbs_move_btn">
           더보기
         </Link>
       </div>

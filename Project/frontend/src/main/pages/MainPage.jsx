@@ -304,7 +304,7 @@ export default function MainPage() {
               </div>
               <div className="quick_menu_list">
                 <div className="quick_menu_item quick1">
-                  <Link to="" className="quick_item_link">
+                  <Link to="/reserve/land/date" className="quick_item_link">
                     <div className="item_box">
                       <i className="menu_icon"></i>
                       <div className="item_text">
@@ -318,7 +318,10 @@ export default function MainPage() {
                   </Link>
                 </div>
                 <div className="quick_menu_item quick2">
-                  <Link to="" className="quick_item_link">
+                  <Link
+                    to="/reserve/volunteer/date"
+                    className="quick_item_link"
+                  >
                     <div className="item_box">
                       <i className="menu_icon"></i>
                       <div className="item_text">
@@ -332,7 +335,7 @@ export default function MainPage() {
                   </Link>
                 </div>
                 <div className="quick_menu_item quick3">
-                  <Link to="" className="quick_item_link">
+                  <Link to="/bbs/image" className="quick_item_link">
                     <div className="item_box">
                       <i className="menu_icon"></i>
                       <div className="item_text">
@@ -346,7 +349,7 @@ export default function MainPage() {
                   </Link>
                 </div>
                 <div className="quick_menu_item quick4">
-                  <Link to="" className="quick_item_link">
+                  <Link to="/funds" className="quick_item_link">
                     <div className="item_box">
                       <i className="menu_icon"></i>
                       <div className="item_text">
@@ -372,7 +375,11 @@ export default function MainPage() {
               <div className="map_wrap">
                 <div className="bbs_title_box">
                   <span>오시는길</span>
-                  <a className="bbs_move_btn" href="/" data-discover="true">
+                  <a
+                    className="bbs_move_btn"
+                    href="/contents/3"
+                    data-discover="true"
+                  >
                     더보기
                   </a>
                 </div>

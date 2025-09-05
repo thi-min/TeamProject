@@ -279,12 +279,14 @@ export default function AdminImgDetail() {
           </button>
         </div>
         <div className="right_btn_box">
-          {/* 필요 시 수정 라우트 연결
           <div className="temp_btn white md">
-            <button className="btn" onClick={() => navigate(`/admin/bbs/image/edit/${id}`)}>
+            <button
+              className="btn"
+              onClick={() => navigate(`/admin/bbs/image/edit/${id}`)}
+            >
               수정
             </button>
-          </div> */}
+          </div>
           <div className="temp_btn md">
             <button className="btn" onClick={handleDelete}>
               삭제

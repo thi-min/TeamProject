@@ -86,6 +86,7 @@ import ImgEdit from "../../bbs/imagebbs/imgedit";
 import ImgWrite from "../../bbs/imagebbs/imgwrite";
 import AdminImgBoard from "../../bbs/imagebbs/AdminImgBoard";
 import AdminImgDetail from "../../bbs/imagebbs/AdminImgDetail";
+import AdminImgEdit from "../../bbs/imagebbs/AdminImgEdit.jsx";
 
 import {
   FundApplicationDetails,
@@ -393,6 +394,11 @@ const layoutRoutes = [
     key="img-Admin-ImgDetail"
     path="/admin/bbs/image/Detail/:id"
     element={<AdminImgDetail />}
+  />,
+  <Route
+    key="admin-img-edit"
+    path="/admin/bbs/image/edit/:id"
+    element={<AdminImgEdit />}
   />,
 
   //사용자

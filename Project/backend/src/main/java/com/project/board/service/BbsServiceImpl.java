@@ -659,7 +659,7 @@ public class BbsServiceImpl implements BbsService {
     }
 
     @Override
-    @Transactional
+    @Transactional(noRollbackFor = BbsException.class)
     public BbsDto updatePotoBbs(Long bulletinNum,
                                 BbsDto dto,
                                 List<MultipartFile> newFiles,
@@ -671,16 +671,20 @@ public class BbsServiceImpl implements BbsService {
         // 1) 게시글 조회
         BbsEntity bbs = bbsRepository.findById(bulletinNum)
                 .orElseThrow(() -> new BbsException("게시글이 존재하지 않습니다."));
-        MemberEntity member = memberRepository.findById(requesterMemberNum)
-                .orElseThrow(() -> new BbsException("회원 정보가 존재하지 않습니다."));
+
+        // ✅ 관리자 호출이면 memberNum 업데이트 안 함
+        if (requesterMemberNum != null) {
+            MemberEntity member = memberRepository.findById(requesterMemberNum)
+                    .orElseThrow(() -> new BbsException("회원 정보가 존재하지 않습니다."));
+            bbs.setMemberNum(member);
+        }
 
         // 2) 제목/내용 수정
         bbs.setBbstitle(dto.getBbsTitle());
         bbs.setBbscontent(dto.getBbsContent());
         bbs.setRegistdate(LocalDateTime.now());
-        bbs.setMemberNum(member);
         bbsRepository.save(bbs);
-
+        
         // 3) 삭제 처리
         if (deletedFileIds != null && !deletedFileIds.isEmpty()) {
             for (Long fileId : deletedFileIds) {
@@ -769,32 +773,57 @@ public class BbsServiceImpl implements BbsService {
         }
 
 
-        // 6) 대표 이미지 처리
+     // 6) 대표 이미지 처리
         if (representativeFileIds == null || representativeFileIds.isEmpty()) {
+            // 기존 대표 이미지가 있으면 그대로 유지
+            ImageBbsEntity existingRep = imageBbsRepository.findByBbsBulletinNum(bbs.getBulletinNum())
+                    .stream()
+                    .findFirst()
+                    .orElse(null);
+
+            if (existingRep != null) {
+                dto.setBulletinNum(bbs.getBulletinNum());
+                return dto; // ✅ 대표 이미지 변경 없음, 그대로 리턴
+            }
+
             throw new BbsException("대표 이미지는 반드시 1장 선택해야 합니다.");
         }
 
         Long repId = representativeFileIds.get(0);
 
+        // 기존 파일 또는 새 파일에서 찾기
         FileUpLoadEntity repFile = combinedFiles.stream()
-                .filter(f -> f.getFilenum().equals(repId))
+                .filter(f -> f.getFilenum() != null && f.getFilenum().equals(repId))
                 .findFirst()
                 .orElseGet(() -> newFileEntities.stream()
-                        .filter(f -> f.getSavedName().hashCode() == repId.intValue())
+                        .filter(f -> f.getFilenum() != null && f.getFilenum().equals(repId))
                         .findFirst()
                         .orElseThrow(() -> new BbsException("대표 이미지 파일이 존재하지 않습니다."))
                 );
 
-        // 기존 대표 이미지 엔티티 제거
+        // 기존 대표 이미지 삭제 후 교체
         imageBbsRepository.findByBbsBulletinNum(bbs.getBulletinNum())
                 .forEach(imageBbsRepository::delete);
 
-        // 새 대표 이미지 등록 — /DATA/...
+        // 1) 썸네일 300x300 보장 생성
+        Path imgDir = resolveAndEnsureDir(getUploadDir(BoardType.POTO));
+        Path imgSrc = imgDir.resolve(repFile.getSavedName());
+
+        Path thumbDir = resolveAndEnsureDir(thumbnailUploadDir);
+        Path thumbTarget = thumbDir.resolve(repFile.getSavedName());
+
+        // 썸네일이 없으면 생성 (있어도 재생성 원하면 Files.exists 체크없이 생성)
+        if (Files.notExists(thumbTarget)) {
+            createJpegThumbnail(imgSrc, thumbTarget, 300, 300);
+        }
+
+        // 2) 올바른 경로로 저장 (thumbnailPath → /DATA/bbs/thumbnail/..., imagePath → /DATA/bbs/imgBbs/...)
         ImageBbsEntity repImg = ImageBbsEntity.builder()
                 .bbs(bbs)
-                .thumbnailPath(getWebPath(BoardType.POTO, repFile.getSavedName()))
-                .imagePath(getWebPath(BoardType.POTO, repFile.getSavedName()))
+                .thumbnailPath(getThumbnailWebPath(repFile.getSavedName()))   // ✅ /DATA/bbs/thumbnail/...
+                .imagePath(getWebPath(BoardType.POTO, repFile.getSavedName()))// ✅ /DATA/bbs/imgBbs/...
                 .build();
+
         imageBbsRepository.save(repImg);
 
         dto.setBulletinNum(bbs.getBulletinNum());

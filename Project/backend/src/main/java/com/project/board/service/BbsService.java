@@ -65,6 +65,7 @@ public interface BbsService {
 
 	List<BbsSimpleResponseDto> getLatestNormalPosts();
 
+	
 
 }
 

@@ -249,7 +249,9 @@ public class BbsAdminController {
         bbsService.deleteBbs(id, null, adminId);
         return ResponseEntity.noContent().build();
     }
+   
 
+    
     // ---------------- 다중 삭제 ----------------
     @DeleteMapping("/delete-multiple")
     public ResponseEntity<Void> deleteMultipleBbs(
@@ -322,6 +324,118 @@ public class BbsAdminController {
                     fileMap.put("size", f.getSize());
                     fileMapList.add(fileMap);
                 }
+            }
+            response.put("files", fileMapList);
+
+            return ResponseEntity.ok(response);
+
+        } catch (BbsException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "서버 오류: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
+        }
+    }
+ // ---------------- 관리자 이미지 게시글 수정 ----------------
+    @PutMapping(value = "/poto/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Transactional
+    public ResponseEntity<Map<String, Object>> updateAdminPotoBbs(
+            @PathVariable Long id,
+            @RequestHeader("Authorization") String authorizationHeader,
+            @RequestParam("bbsTitle") String bbsTitle,
+            @RequestParam("bbsContent") String bbsContent,
+            @RequestParam(value = "files", required = false) List<MultipartFile> files,
+            @RequestParam(value = "deletedFileIds", required = false) String deletedFileIds,
+            @RequestParam(value = "overwriteFileIds", required = false) String overwriteFileIds,
+            @RequestParam(value = "insertOptions", required = false) String insertOptionsCsv,
+            @RequestParam(value = "isRepresentativeList", required = false) String isRepresentativeList
+    ) {
+        try {
+            String token = authorizationHeader.replace("Bearer ", "");
+            if (!jwtTokenProvider.validateToken(token))
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            if (!"ADMIN".equals(jwtTokenProvider.getRoleFromToken(token)))
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+
+            Map<String, Object> response = new HashMap<>();
+
+            // 삭제/덮어쓰기 파일 ID 파싱
+            List<Long> deleteIds = (deletedFileIds != null && !deletedFileIds.isBlank())
+                    ? parseDeleteIds(deletedFileIds)
+                    : new ArrayList<>();
+
+            List<Long> overwriteIds = (overwriteFileIds != null && !overwriteFileIds.isBlank())
+                    ? parseDeleteIds(overwriteFileIds)
+                    : new ArrayList<>();
+
+            if (!overwriteIds.isEmpty()) {
+                deleteIds.addAll(overwriteIds);
+            }
+
+            // insertOptions
+            List<String> insertOptions = (insertOptionsCsv != null && !insertOptionsCsv.isBlank())
+                    ? Arrays.asList(insertOptionsCsv.split(","))
+                    : new ArrayList<>();
+
+            // 대표 이미지 ID
+            List<Long> representativeIds = new ArrayList<>();
+            if (isRepresentativeList != null && !isRepresentativeList.isBlank()) {
+                try {
+                    representativeIds.add(Long.valueOf(isRepresentativeList));
+                } catch (NumberFormatException e) {
+                    throw new BbsException("대표 이미지 ID가 유효하지 않습니다: " + isRepresentativeList);
+                }
+            }
+            if (representativeIds.isEmpty()) {
+                throw new BbsException("대표 이미지는 반드시 1장 선택해야 합니다.");
+            }
+
+            // DTO 준비
+            BbsDto dto = new BbsDto();
+            dto.setBbsTitle(bbsTitle);
+            dto.setBbsContent(bbsContent);
+            dto.setBulletinType(BoardType.POTO);
+
+            // 서비스 호출 (관리자 전용)
+            BbsDto updated = bbsService.updatePotoBbs(
+                    id,
+                    dto,
+                    files,
+                    representativeIds,
+                    deleteIds,
+                    overwriteIds,
+                    null // 관리자 수정이므로 memberNum 없음
+            );
+
+            response.put("bbs", updated);
+
+            // 대표 이미지 정보
+            ImageBbsDto repImg = bbsService.getRepresentativeImage(updated.getBulletinNum());
+            Map<String, Object> repImgMap = null;
+            if (repImg != null) {
+                repImgMap = new HashMap<>();
+                repImgMap.put("bulletinNum", repImg.getBulletinNum());
+                repImgMap.put("thumbnailPath", repImg.getThumbnailPath());
+                repImgMap.put("imagePath", repImg.getImagePath());
+            }
+            response.put("representativeImage", repImgMap);
+
+            // 첨부파일 리스트
+            List<FileUpLoadDto> filesList = bbsService.getFilesByBbs(updated.getBulletinNum());
+            List<Map<String, Object>> fileMapList = new ArrayList<>();
+            for (FileUpLoadDto f : filesList) {
+                Map<String, Object> fileMap = new HashMap<>();
+                fileMap.put("fileNum", f.getFileNum());
+                fileMap.put("originalName", f.getOriginalName());
+                fileMap.put("savedName", f.getSavedName());
+                fileMap.put("path", f.getPath());
+                fileMap.put("size", f.getSize());
+                fileMap.put("extension", f.getExtension());
+                fileMap.put("fileUrl", BACKEND_URL + "/bbs/files/" + f.getFileNum() + "/download");
+                fileMapList.add(fileMap);
             }
             response.put("files", fileMapList);
 

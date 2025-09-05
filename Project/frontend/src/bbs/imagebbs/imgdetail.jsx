@@ -69,10 +69,10 @@ export default function ImgDetail() {
     }
   };
 
-  // 게시글 수정 페이지 이동
-  const handleEdit = () => {
-    navigate(`/bbs/image/edit/${id}`);
-  };
+  // // 게시글 수정 페이지 이동
+  // const handleEdit = () => {
+  //   navigate(`/bbs/image/edit/${id}`);
+  // };
 
   // 외부 버튼 핸들러
   const handlePrev = () => swiperRef.current?.slidePrev();
@@ -161,7 +161,11 @@ export default function ImgDetail() {
             </span>
           </div>
           <div className="chat_btn_box">
-            <button type="button" className="chat_btn" onClick={handleAdoptConsult}>
+            <button
+              type="button"
+              className="chat_btn"
+              onClick={handleAdoptConsult}
+            >
               입양 상담
             </button>
           </div>
@@ -189,7 +193,7 @@ export default function ImgDetail() {
             목록보기
           </button>
         </div>
-        <div className="right_btn_box">
+        {/* <div className="right_btn_box">
           <div className="temp_btn white md">
             <button className="btn" onClick={handleEdit}>
               수정
@@ -200,7 +204,7 @@ export default function ImgDetail() {
               삭제
             </button>
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* 채팅 팝업 추가 */}
