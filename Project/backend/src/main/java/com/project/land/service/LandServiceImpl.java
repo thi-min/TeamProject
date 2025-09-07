@@ -120,7 +120,7 @@ public class LandServiceImpl implements LandService {
         landRepository.save(land);
     }
     
-    // 관리자용 - 단일 시간대에 대해 정원 및 현재 예약 수 조회, 시간대별 예약현황 조회
+    // 사용자용 - 단일 시간대에 대해 정원 및 현재 놀이터예약 인원 조회
     @Override
     public LandCountDto getLandCountForSlot(LocalDate landDate, Long timeSlotId, LandType landType) {
         TimeSlot timeSlot = timeSlotRepository.findById(timeSlotId)

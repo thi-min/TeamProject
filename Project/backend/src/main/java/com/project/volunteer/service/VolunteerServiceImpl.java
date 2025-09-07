@@ -84,7 +84,7 @@ public class VolunteerServiceImpl implements VolunteerService {
         volunteerRepository.save(volunteer);
     }
     
-    // 관리자용 - 단일 시간대에 봉사 인원 체크
+    // 사용자용 - 단일 시간대에 봉사 인원 체크
     @Override
     @Transactional(readOnly = true)
     public VolunteerCountDto getVolunteerCountInfo(LocalDate volDate, Long timeSlotId) {

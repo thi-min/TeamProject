@@ -124,7 +124,7 @@ const LandReserveFormPage = () => {
               formData.memberNum,
               formData.landType
             );
-            console.log("1️⃣ 예약 현황 API 응답:", res.data);
+    
             slotsData = normalizeCountDto(res.data);
             
           } catch (err) {
@@ -136,14 +136,14 @@ const LandReserveFormPage = () => {
         if (!slotsData) {
         const res2 = await LandReserveService.fetchTimeSlots();
         slotsData = normalizeSlotDto(res2.data);
-        console.log("2️⃣기본 전체 슬롯:", slotsData);
+    
       }
 
       //3 localStorage 규칙 적용
       const saved = localStorage.getItem("landRules");
       if (saved) {
         const rules = JSON.parse(saved);
-        console.log("3️⃣ 규칙 적용 전 slotsData:", slotsData);
+ 
         slotsData = slotsData.map(s => ({
           ...s,
           allowSmall: rules.SMALL?.includes(s.timeSlotId) ?? true,
@@ -154,9 +154,9 @@ const LandReserveFormPage = () => {
           (formData.landType === "SMALL" && !rules.SMALL?.includes(s.timeSlotId)) ||
           (formData.landType === "LARGE" && !rules.LARGE?.includes(s.timeSlotId)),
         }));
-        console.log("4️⃣ 규칙 적용 후 slotsData:", slotsData);
+      
       }
-      console.log("5️⃣ 최종 setDisplaySlots:", slotsData);
+
       if (mounted) setDisplaySlots(slotsData);
 
     } catch (err) {

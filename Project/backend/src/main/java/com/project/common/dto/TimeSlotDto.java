@@ -15,14 +15,14 @@ import java.time.format.DateTimeFormatter;
 @Builder
 public class TimeSlotDto {
 
-    private Long timeSlotId;
+    private Long timeSlotId;	//시간대id
     private String label; // 예: "09:00 ~ 11:00" — 출력용
     private LocalTime startTime;
     private LocalTime endTime;
-    private int capacity;
-    private boolean enabled;
-    private boolean hasFutureReserve; 
-    private TimeType timeType;
+    private int capacity;	//정원
+    private boolean enabled;	//활성여부
+    private boolean hasFutureReserve; 	//예약존재여부
+    private TimeType timeType;	//놀이터예약/봉사예약 구분
 
     // 출력용 시간 범위 포맷
     public String getDisplayTimeRange() {
