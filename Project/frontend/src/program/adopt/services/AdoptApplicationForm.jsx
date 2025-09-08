@@ -61,7 +61,7 @@ const AdoptApplicationForm = () => {
 
   const fetchAnimals = async () => {
     try {
-      const response = await authAxios.get("/animals/list");
+      const response = await authAxios.get("/animal/list");
       setAnimals(response.data.content || []);
     } catch (error) {
       console.error("동물 목록 불러오기 실패:", error);
@@ -330,7 +330,7 @@ const AdoptApplicationForm = () => {
                 <tr>
                   <th>입양할 동물</th>
                   <td>
-                    <div className="temp_form md">
+                    
                       <Select
                         options={animals.map((a) => ({
                           value: a.animalId,
@@ -356,7 +356,7 @@ const AdoptApplicationForm = () => {
                         placeholder="입양할 동물을 선택하세요"
                         isSearchable={true}
                       />
-                    </div>
+                    
                   </td>
                 </tr>
 
@@ -530,7 +530,7 @@ const AdoptApplicationForm = () => {
             </button>
           </div>
           {isAdmin && (
-            <>
+            <><div className="right_btn_box">
               <div className="temp_btn md">
                 <button type="button" className="btn" onClick={handleDelete}>
                   삭제
@@ -547,7 +547,9 @@ const AdoptApplicationForm = () => {
                   수정
                 </button>
               </div>
+              </div>
             </>
+            
           )}
         </div>
       </div>
