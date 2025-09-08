@@ -10,6 +10,7 @@ const menuRoutes = [
       { title: "연혁", path: "/contents/6", access: "ALL" },
       { title: "시설 소개", path: "/contents/2", access: "ALL" },
       { title: "오시는 길", path: "/contents/3", access: "ALL" },
+      { title: "주변시설", path: "/map", access: "ALL" },
     ],
   },
   {

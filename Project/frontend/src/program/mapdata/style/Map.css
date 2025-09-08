@@ -2,11 +2,11 @@
   display: flex;
   width: 100%;
   height: 80vh;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 .map-wrapper {
   flex: 1.5; /* 지도가 더 넓게 차지 */
+  border-radius:12px;overflow:hidden;
 }
 
 #map {
@@ -20,10 +20,14 @@
   overflow-y: auto; /* 목록이 길어지면 스크롤바 */
   background-color: #f8f9fa;
   border-left: 1px solid #ddd;
+  border-top:1px solid #ddd;
+  border-bottom:1px solid #ddd;
+  border-radius:12px;
 }
 
 .list-header {
   display: flex;
+  gap:10px;
   align-items: center;
   margin-bottom: 1rem;
 }
@@ -67,27 +71,19 @@
 
 .place-list li {
   padding: 1rem;
-  border-bottom: 1px solid #eee;
+  border-radius:12px;;
+  position:relative;
   cursor: pointer;
   transition: background-color 0.2s;
 }
+.place-list li:before{display:block;position:absolute;bottom:0;left:0;width:100%;height:1px;background-color:#eee;content:'';}
 
 .place-list li:hover {
   background-color: #e9ecef;
 }
-@media (max-width: 768px) {
-  .map-container {
-    flex-direction: column; /* 가로 배열 -> 세로 배열로 변경 */
-    height: auto; /* 높이를 자동 조정 */
-  }
-  .map-wrapper {
-    height: 50vh; /* 모바일에서 지도가 보이는 최소 높이 설정 */
-  }
-  .list-wrapper {
-    flex: none; /* flex 속성 제거 */
-    width: 100%;
-  }
-}
+.place-list li h4{margin-top:0;margin-bottom:6px;}
+.place-list li h4 + p{margin-bottom:6px;}
+
 :root {
   --primary-color: #007bff;
   --border-color: #ddd;
@@ -96,7 +92,7 @@
 }
 
 .map-container {
-  box-shadow: var(--box-shadow);
+  gap:30px;
 }
 
 .list-wrapper {

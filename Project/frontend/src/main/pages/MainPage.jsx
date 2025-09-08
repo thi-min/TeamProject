@@ -261,10 +261,10 @@ export default function MainPage() {
                 <div className="slide_item_wrap">{slideMarkup}</div>
                 <div className="item_text_box">
                   <span className="text_item item1">
-                    <span className="text">반려견과 함께하는</span>
+                    <span className="text">반려견과 함개하는</span>
                   </span>
                   <span className="text_item item2">
-                    <em className="text">함께마당 입니다.</em>
+                    <em className="text">함개마당 입니다.</em>
                   </span>
                 </div>
               </div>
